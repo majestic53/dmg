@@ -18,11 +18,7 @@
 
 #include "./runtime_type.h"
 
-static dmg_error_t g_error = {};
-
 static dmg_runtime_t g_runtime = {};
-
-static dmg_version_t g_version = { VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH };
 
 #ifdef __cplusplus
 extern "C" {
@@ -38,14 +34,14 @@ dmg_runtime_load(
 	TRACE(LEVEL_INFORMATION, "Runtime loading");
 
 	if(!configuration) {
-		result = SET_ERROR(ERROR_INVALID, "Configuration is NULL");
+		result = ERROR_SET(ERROR_INVALID, "Configuration is NULL");
 		goto exit;
 	}
 
 	g_runtime.configuration = configuration;
 
 	if(SDL_Init(SDL_INIT_VIDEO)) {
-		result = SET_ERROR_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 	}
 
 	// TODO: LOAD SUBSYSTEMS
@@ -91,59 +87,14 @@ dmg_runtime(
 {
 	int result;
 
-	CLEAR_ERROR();
+	TRACE_ENABLE(&g_runtime.cycle);
+	ERROR_CLEAR();
 
 	if((result = dmg_runtime_load(configuration)) == ERROR_SUCCESS) {
 		result = dmg_runtime_loop();
 	}
 
 	dmg_runtime_unload();
-
-	return result;
-}
-
-const char *
-dmg_runtime_error(void)
-{
-	return g_error.str;
-}
-
-int
-dmg_runtime_error_set(
-	__in int error,
-	__in const char *file,
-	__in const char *function,
-	__in size_t line,
-	__in const char *format,
-	...
-	)
-{
-	int result = error;
-
-	memset(&g_error, 0, sizeof(g_error));
-
-	if(error != ERROR_SUCCESS) {
-		char message[ERROR_LENGTH_MAX / 2] = {};
-
-		if(format) {
-			va_list arguments;
-
-			va_start(arguments, format);
-
-			if(vsnprintf(message, ERROR_LENGTH_MAX / 2, format, arguments) < 0) {
-				memcpy(message, ERROR_MALFORMED, strlen(ERROR_MALFORMED));
-			}
-
-			va_end(arguments);
-		}
-
-#ifndef NDEBUG
-		snprintf(g_error.str, ERROR_LENGTH_MAX, "%s (%s:%s@%zu)", message, function, file, line);
-#else
-		snprintf(g_error.str, ERROR_LENGTH_MAX, "%s", message);
-#endif /* NDEBUG */
-		TRACE_ERROR(message, file, function, line);
-	}
 
 	return result;
 }
@@ -174,72 +125,6 @@ dmg_runtime_read(
 	}
 
 	return result;
-}
-
-#ifndef NDEBUG
-
-void
-dmg_runtime_trace(
-	__in FILE *stream,
-	__in int level,
-	__in const char *file,
-	__in const char *function,
-	__in size_t line,
-	__in const char *format,
-	...
-	)
-{
-	time_t current = time(NULL);
-	char message[TRACE_LENGTH_MAX] = {}, timestamp[TIMESTAMP_LENGTH_MAX] = {};
-
-	if(!stream) {
-
-		switch(level) {
-			case LEVEL_ERROR:
-			case LEVEL_WARNING:
-				stream = stderr;
-				break;
-			default:
-				stream = stdout;
-				break;
-		}
-	}
-
-	if(!strftime(timestamp, TIMESTAMP_LENGTH_MAX, TIMESTAMP_FORMAT, localtime(&current))) {
-		memcpy(timestamp, TIMESTAMP_MALFORMED, strlen(TIMESTAMP_MALFORMED));
-	}
-
-	// TODO: CALCULATE ELAPSED
-
-	if(format) {
-		va_list arguments;
-
-		va_start(arguments, format);
-
-		if(vsnprintf(message, TRACE_LENGTH_MAX, format, arguments) < 0) {
-			memcpy(message, TRACE_MALFORMED, strlen(TRACE_MALFORMED));
-		}
-
-		va_end(arguments);
-	}
-
-#ifdef COLOR
-	fprintf(stream, "%s", LEVEL_STR[level]);
-#endif /* COLOR */
-	fprintf(stream, "[%s] {%u (%0.2f ms)} %s (%s:%s@%zu)", timestamp, g_runtime.cycle, g_runtime.cycle * MS_PER_CYCLE,
-		message, function, file, line);
-#ifdef COLOR
-	fprintf(stream, "%s", LEVEL_STR[LEVEL_NONE]);
-#endif /* COLOR */
-	fprintf(stream, "\n");
-}
-
-#endif /* NDEBUG */
-
-const dmg_version_t *
-dmg_runtime_version(void)
-{
-	return &g_version;
 }
 
 void

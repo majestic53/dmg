@@ -16,32 +16,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./dmg_type.h"
+#ifndef DMG_COMMON_ERROR_TYPE_H_
+#define DMG_COMMON_ERROR_TYPE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "../../include/common.h"
 
-int
-dmg(
-	__in const dmg_t *configuration
-	)
-{
-	return (dmg_runtime(configuration) == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#define ERROR_MALFORMED "Malformed error"
+#define ERROR_LENGTH_MAX 256
 
-const char *
-dmg_error(void)
-{
-	return dmg_error_get();
-}
+typedef struct {
+	int error;
+	char str[ERROR_LENGTH_MAX];
+} dmg_error_t;
 
-const dmg_version_t *
-dmg_version(void)
-{
-	return dmg_version_get();
-}
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+#endif /* DMG_COMMON_ERROR_TYPE_H_ */

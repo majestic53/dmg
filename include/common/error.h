@@ -16,32 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./dmg_type.h"
+#ifndef DMG_COMMON_ERROR_H_
+#define DMG_COMMON_ERROR_H_
+
+#include "./define.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int
-dmg(
-	__in const dmg_t *configuration
-	)
-{
-	return (dmg_runtime(configuration) == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+const char *dmg_error_get(void);
 
-const char *
-dmg_error(void)
-{
-	return dmg_error_get();
-}
-
-const dmg_version_t *
-dmg_version(void)
-{
-	return dmg_version_get();
-}
+int dmg_error_set(
+	__in int error,
+	__in const char *file,
+	__in const char *function,
+	__in size_t line,
+	__in const char *format,
+	...
+	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DMG_COMMON_ERROR_H_ */

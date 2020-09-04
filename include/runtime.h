@@ -29,17 +29,6 @@ int dmg_runtime(
 	__in const dmg_t *configuration
 	);
 
-const char *dmg_runtime_error(void);
-
-int dmg_runtime_error_set(
-	__in int error,
-	__in const char *file,
-	__in const char *function,
-	__in size_t line,
-	__in const char *format,
-	...
-	);
-
 void dmg_runtime_interrupt(
 	__in int type
 	);
@@ -47,22 +36,6 @@ void dmg_runtime_interrupt(
 uint8_t dmg_runtime_read(
 	__in uint16_t address
 	);
-
-#ifndef NDEBUG
-
-void dmg_runtime_trace(
-	__in FILE *stream,
-	__in int level,
-	__in const char *file,
-	__in const char *function,
-	__in size_t line,
-	__in const char *format,
-	...
-	);
-
-#endif /* NDEBUG */
-
-const dmg_version_t *dmg_runtime_version(void);
 
 void dmg_runtime_write(
 	__in uint16_t address,

@@ -16,32 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./dmg_type.h"
+#ifndef DMG_COMMON_VERSION_TYPE_H_
+#define DMG_COMMON_VERSION_TYPE_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+#include "../../include/common.h"
 
-int
-dmg(
-	__in const dmg_t *configuration
-	)
-{
-	return (dmg_runtime(configuration) == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#define VERSION_MAJOR 0
+#define VERSION_MINOR 1
+#define VERSION_PATCH 2
 
-const char *
-dmg_error(void)
-{
-	return dmg_error_get();
-}
-
-const dmg_version_t *
-dmg_version(void)
-{
-	return dmg_version_get();
-}
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+#endif /* DMG_COMMON_VERSION_TYPE_H_ */

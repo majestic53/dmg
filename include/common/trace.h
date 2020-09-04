@@ -16,32 +16,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./dmg_type.h"
+#ifndef DMG_COMMON_TRACE_H_
+#define DMG_COMMON_TRACE_H_
+
+#include "./define.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int
-dmg(
-	__in const dmg_t *configuration
-	)
-{
-	return (dmg_runtime(configuration) == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#ifndef NDEBUG
 
-const char *
-dmg_error(void)
-{
-	return dmg_error_get();
-}
+void dmg_trace(
+	__in FILE *stream,
+	__in int level,
+	__in const char *file,
+	__in const char *function,
+	__in size_t line,
+	__in const char *format,
+	...
+	);
 
-const dmg_version_t *
-dmg_version(void)
-{
-	return dmg_version_get();
-}
+void dmg_trace_enable(
+	__in bool enable,
+	__in dmg_cycle_t *cycle
+	);
+
+#endif /* NDEBUG */
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DMG_COMMON_TRACE_H_ */

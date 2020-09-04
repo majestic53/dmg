@@ -18,13 +18,15 @@ DIR_BIN_INCLUDE=../bin/include/
 DIR_BIN_LIB=../bin/lib/
 DIR_BUILD=../build/
 DIR_INCLUDE=../include/
+DIR_INCLUDE_COMMON=../include/common/
 DIR_SRC=./
+DIR_SRC_COMMON=./common/
 
 FLAGS=-march=native -std=c11 -Wall -Werror
 
 LIB=libdmg.a
 
-build: build_base
+build: build_base build_common
 
 build_base: base_dmg.o base_runtime.o
 
@@ -34,10 +36,22 @@ base_dmg.o: $(DIR_SRC)dmg.c $(DIR_INCLUDE)dmg.h
 base_runtime.o: $(DIR_SRC)runtime.c $(DIR_INCLUDE)runtime.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)runtime.c -o $(DIR_BUILD)base_runtime.o
 
+build_common: common_error.o common_trace.o common_version.o
+
+common_error.o: $(DIR_SRC_COMMON)error.c $(DIR_INCLUDE_COMMON)error.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)error.c -o $(DIR_BUILD)common_error.o
+
+common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)trace.c -o $(DIR_BUILD)common_trace.o
+
+common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
+
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
-	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o
+	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
+		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

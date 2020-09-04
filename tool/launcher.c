@@ -22,23 +22,6 @@
 extern "C" {
 #endif /* __cplusplus */
 
-static void
-dmg_launcher_cleanup(
-	__inout dmg_launcher_t *launcher
-	)
-{
-
-	if(launcher->configuration.rom.data) {
-		free(launcher->configuration.rom.data);
-	}
-
-	if(launcher->configuration.bootrom.data) {
-		free(launcher->configuration.bootrom.data);
-	}
-
-	memset(launcher, 0, sizeof(*launcher));
-}
-
 static int
 dmg_launcher_load(
 	__inout dmg_buffer_t *buffer,
@@ -136,6 +119,23 @@ dmg_launcher_setup(
 }
 
 static void
+dmg_launcher_unload(
+	__inout dmg_launcher_t *launcher
+	)
+{
+
+	if(launcher->configuration.rom.data) {
+		free(launcher->configuration.rom.data);
+	}
+
+	if(launcher->configuration.bootrom.data) {
+		free(launcher->configuration.bootrom.data);
+	}
+
+	memset(launcher, 0, sizeof(*launcher));
+}
+
+static void
 dmg_launcher_version(
 	__in FILE *stream,
 	__in bool verbose
@@ -227,7 +227,7 @@ main(
 	}
 
 exit:
-	dmg_launcher_cleanup(&launcher);
+	dmg_launcher_unload(&launcher);
 
 	return result;
 }
