@@ -19,7 +19,7 @@
 #include "./trace_type.h"
 
 #ifndef NDEBUG
-dmg_trace_t g_trace = {};
+static dmg_trace_t g_trace = {};
 #endif /* NDEBUG */
 
 #ifdef __cplusplus
@@ -89,7 +89,7 @@ dmg_trace(
 void
 dmg_trace_enable(
 	__in bool enable,
-	__in uint32_t *cycle
+	__in dmg_cycle_t *cycle
 	)
 {
 	g_trace.enable = enable;

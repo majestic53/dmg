@@ -29,9 +29,11 @@ dmg_runtime_load(
 	__in const dmg_t *configuration
 	)
 {
+	SDL_version version = {};
 	int result = ERROR_SUCCESS;
 
-	TRACE(LEVEL_INFORMATION, "Runtime loading");
+	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime loading ver.%u.%u.%u",
+		dmg_version_get()->major, dmg_version_get()->minor, dmg_version_get()->patch);
 
 	if(!configuration) {
 		result = ERROR_SET(ERROR_INVALID, "Configuration is NULL");
@@ -40,9 +42,16 @@ dmg_runtime_load(
 
 	g_runtime.configuration = configuration;
 
+	SDL_GetVersion(&version);
+	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u",
+		version.major, version.minor, version.patch);
+
 	if(SDL_Init(SDL_INIT_VIDEO)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
 	}
+
+	TRACE(LEVEL_INFORMATION, "SDL loaded");
 
 	// TODO: LOAD SUBSYSTEMS
 
@@ -73,8 +82,11 @@ dmg_runtime_unload(void)
 
 	// TODO: UNLOAD SUBSYSTEMS
 
+	TRACE(LEVEL_INFORMATION, "SDL unloading");
+
 	SDL_Quit();
 
+	TRACE(LEVEL_INFORMATION, "SDL unloaded");
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
 
 	memset(&g_runtime, 0, sizeof(g_runtime));

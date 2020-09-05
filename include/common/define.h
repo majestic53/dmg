@@ -31,6 +31,12 @@
 #define __out
 #endif /* __out */
 
+#define ADDRESS_WIDTH(_BEGIN_, _END_) \
+	(((_END_) + 1) - (_BEGIN_))
+
+#define ADDRESS_BOOTROM_BEGIN 0x0000
+#define ADDRESS_BOOTROM_END 0x00ff
+
 enum {
 	ERROR_SUCCESS = 0,
 	ERROR_FAILURE,

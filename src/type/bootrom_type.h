@@ -16,13 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_BOOTROM_TYPE_H_
+#define DMG_TYPE_BOOTROM_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../include/type/bootrom.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 3
+#define BOOTROM_CHECKSUM 0x626e
+#define BOOTROM_WIDTH ADDRESS_WIDTH(ADDRESS_BOOTROM_BEGIN, ADDRESS_BOOTROM_END)
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_TYPE_BOOTROM_TYPE_H_ */

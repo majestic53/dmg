@@ -16,13 +16,41 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_BOOTROM_H_
+#define DMG_TYPE_BOOTROM_H_
 
-#include "../../include/common.h"
+#include "../common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 3
+typedef struct {
+	const dmg_buffer_t *buffer;
+} dmg_bootrom_t;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+int dmg_bootrom_load(
+	__inout dmg_bootrom_t *bootrom,
+	__in const dmg_buffer_t *buffer
+	);
+
+uint8_t dmg_bootrom_read(
+	__inout dmg_bootrom_t *bootrom,
+	__in uint16_t address
+	);
+
+void dmg_bootrom_unload(
+	__inout dmg_bootrom_t *bootrom
+	);
+
+void dmg_bootrom_write(
+	__inout dmg_bootrom_t *bootrom,
+	__in uint16_t address,
+	__in uint8_t value
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TYPE_BOOTROM_H_ */
