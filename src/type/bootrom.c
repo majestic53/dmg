@@ -27,8 +27,9 @@ dmg_bootrom_validate(
 	__in const dmg_buffer_t *buffer
 	)
 {
-	uint16_t checksum = 0;
-	int index = 0, result = ERROR_SUCCESS;
+	uint32_t address;
+	uint16_t checksum;
+	int result = ERROR_SUCCESS;
 
 	if(!buffer) {
 		result = ERROR_SET(ERROR_INVALID, "Bootrom is NULL");
@@ -46,8 +47,9 @@ dmg_bootrom_validate(
 		goto exit;
 	}
 
-	for(; index < BOOTROM_WIDTH; ++index) {
-		checksum += buffer->data[index];
+	checksum = 0;
+	for(address = 0; address < BOOTROM_WIDTH; ++address) {
+		checksum += buffer->data[address];
 	}
 
 	if(checksum != BOOTROM_CHECKSUM) {
@@ -87,7 +89,7 @@ exit:
 
 uint8_t
 dmg_bootrom_read(
-	__inout dmg_bootrom_t *bootrom,
+	__in const dmg_bootrom_t *bootrom,
 	__in uint16_t address
 	)
 {
@@ -99,7 +101,8 @@ dmg_bootrom_read(
 			break;
 		default:
 			result = UINT8_MAX;
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported read [%04x]->%02x", address, result);
+
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported bootrom read [%04x]->%02x", address, result);
 			break;
 	}
 
@@ -116,16 +119,6 @@ dmg_bootrom_unload(
 	memset(bootrom, 0, sizeof(*bootrom));
 
 	TRACE(LEVEL_INFORMATION, "Bootrom unloaded");
-}
-
-void
-dmg_bootrom_write(
-	__inout dmg_bootrom_t *bootrom,
-	__in uint16_t address,
-	__in uint8_t value
-	)
-{
-	TRACE_FORMAT(LEVEL_WARNING, "Unsupported write [%04x]<-%02x", address, value);
 }
 
 #ifdef __cplusplus

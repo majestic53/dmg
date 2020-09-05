@@ -16,35 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_BOOTROM_H_
-#define DMG_TYPE_BOOTROM_H_
+#ifndef DMG_TYPE_BUFFER_TYPE_H_
+#define DMG_TYPE_BUFFER_TYPE_H_
 
-#include "../common.h"
+#include "../../include/type/buffer.h"
 
-typedef struct {
-	const dmg_buffer_t *buffer;
-} dmg_bootrom_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-int dmg_bootrom_load(
-	__inout dmg_bootrom_t *bootrom,
-	__in const dmg_buffer_t *buffer
-	);
-
-uint8_t dmg_bootrom_read(
-	__in const dmg_bootrom_t *bootrom,
-	__in uint16_t address
-	);
-
-void dmg_bootrom_unload(
-	__inout dmg_bootrom_t *bootrom
-	);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* DMG_TYPE_BOOTROM_H_ */
+#endif /* DMG_TYPE_BUFFER_TYPE_H_ */

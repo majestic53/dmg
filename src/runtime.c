@@ -132,6 +132,7 @@ dmg_runtime_read(
 
 		default:
 			result = UINT8_MAX;
+
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported read [%04x]->%02x", address, result);
 			break;
 	}

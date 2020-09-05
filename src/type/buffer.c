@@ -16,35 +16,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_BOOTROM_H_
-#define DMG_TYPE_BOOTROM_H_
-
-#include "../common.h"
-
-typedef struct {
-	const dmg_buffer_t *buffer;
-} dmg_bootrom_t;
+#include "./buffer_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_bootrom_load(
-	__inout dmg_bootrom_t *bootrom,
-	__in const dmg_buffer_t *buffer
-	);
+int
+dmg_buffer_load(
+	__inout dmg_buffer_t *buffer,
+	__in uint32_t length,
+	__in uint8_t value
+	)
+{
+	int result = ERROR_SUCCESS;
 
-uint8_t dmg_bootrom_read(
-	__in const dmg_bootrom_t *bootrom,
-	__in uint16_t address
-	);
+	buffer->data = malloc(length);
+	if(!buffer->data) {
+		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate buffer");
+		goto exit;
+	}
 
-void dmg_bootrom_unload(
-	__inout dmg_bootrom_t *bootrom
-	);
+	memset(buffer->data, value, length);
+	buffer->length = length;
+
+exit:
+	return result;
+}
+
+void
+dmg_buffer_unload(
+	__inout dmg_buffer_t *buffer
+	)
+{
+
+	if(buffer->data) {
+		free(buffer->data);
+	}
+
+	memset(buffer, 0, sizeof(*buffer));
+}
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* DMG_TYPE_BOOTROM_H_ */
