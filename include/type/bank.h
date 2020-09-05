@@ -30,12 +30,12 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_bank_load(
+int dmg_bank_allocate(
 	__inout dmg_bank_t *bank,
 	__in uint32_t count
 	);
 
-void dmg_bank_unload(
+void dmg_bank_free(
 	__inout dmg_bank_t *bank
 	);
 

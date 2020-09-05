@@ -25,13 +25,13 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_buffer_load(
+int dmg_buffer_allocate(
 	__inout dmg_buffer_t *buffer,
 	__in uint32_t length,
 	__in uint8_t value
 	);
 
-void dmg_buffer_unload(
+void dmg_buffer_free(
 	__inout dmg_buffer_t *buffer
 	);
 

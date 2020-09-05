@@ -23,7 +23,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 int
-dmg_bank_load(
+dmg_bank_allocate(
 	__inout dmg_bank_t *bank,
 	__in uint32_t count
 	)
@@ -44,7 +44,7 @@ exit:
 }
 
 void
-dmg_bank_unload(
+dmg_bank_free(
 	__inout dmg_bank_t *bank
 	)
 {

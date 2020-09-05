@@ -104,7 +104,7 @@ dmg_cartridge_load(
 	)
 {
 	int result;
-	uint32_t index, ram, rom;
+	uint32_t index, ram = RAM_MAX, rom = ROM_MAX;
 
 	TRACE(LEVEL_INFORMATION, "Cartridge loading");
 
@@ -112,7 +112,7 @@ dmg_cartridge_load(
 		goto exit;
 	}
 
-	if((result = dmg_bank_load(&cartridge->rom, rom)) != ERROR_SUCCESS) {
+	if((result = dmg_bank_allocate(&cartridge->rom, rom)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -124,14 +124,13 @@ dmg_cartridge_load(
 			cartridge->rom.buffer[index].data);
 	}
 
-	if((result = dmg_bank_load(&cartridge->ram, ram)) != ERROR_SUCCESS) {
+	if((result = dmg_bank_allocate(&cartridge->ram, ram)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
 	for(index = 0; index < cartridge->ram.count; ++index) {
 
-		if((result = dmg_buffer_load(&cartridge->ram.buffer[index], RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to allocate ram bank %u", index);
+		if((result = dmg_buffer_allocate(&cartridge->ram.buffer[index], RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
 			goto exit;
 		}
 
@@ -215,11 +214,11 @@ dmg_cartridge_unload(
 	TRACE(LEVEL_INFORMATION, "Cartridge unloading");
 
 	for(uint32_t index = 0; index < cartridge->ram.count; ++index) {
-		dmg_buffer_unload(&cartridge->ram.buffer[index]);
+		dmg_buffer_free(&cartridge->ram.buffer[index]);
 	}
 
-	dmg_bank_unload(&cartridge->ram);
-	dmg_bank_unload(&cartridge->rom);
+	dmg_bank_free(&cartridge->ram);
+	dmg_bank_free(&cartridge->rom);
 
 	memset(cartridge, 0, sizeof(*cartridge));
 
