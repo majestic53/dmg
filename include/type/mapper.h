@@ -16,46 +16,56 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./buffer_type.h"
+#ifndef DMG_TYPE_MAPPER_H_
+#define DMG_TYPE_MAPPER_H_
+
+#include "./cartridge.h"
+
+typedef struct {
+	dmg_cartridge_t cartridge;
+	uint32_t ram;
+	bool ram_enable;
+	uint32_t rom;
+	uint32_t rom_swap;
+} dmg_mapper_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int
-dmg_buffer_load(
-	__inout dmg_buffer_t *buffer,
-	__in uint32_t length,
+int dmg_mapper_load(
+	__inout dmg_mapper_t *mapper,
+	__in const dmg_buffer_t *buffer
+	);
+
+uint8_t dmg_mapper_read_ram(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	);
+
+uint8_t dmg_mapper_read_rom(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	);
+
+void dmg_mapper_unload(
+	__inout dmg_mapper_t *mapper
+	);
+
+void dmg_mapper_write_ram(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
 	__in uint8_t value
-	)
-{
-	int result = ERROR_SUCCESS;
+	);
 
-	if(!(buffer->data = (uint8_t *)malloc(length))) {
-		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate buffer");
-		goto exit;
-	}
-
-	memset(buffer->data, value, length);
-	buffer->length = length;
-
-exit:
-	return result;
-}
-
-void
-dmg_buffer_unload(
-	__inout dmg_buffer_t *buffer
-	)
-{
-
-	if(buffer->data) {
-		free(buffer->data);
-	}
-
-	memset(buffer, 0, sizeof(*buffer));
-}
+void dmg_mapper_write_rom(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DMG_TYPE_MAPPER_H_ */

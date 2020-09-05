@@ -49,7 +49,10 @@ common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
 common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
 
-build_type: type_bootrom.o type_buffer.o type_cartridge.o
+build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o
+
+type_bank.o: $(DIR_SRC_TYPE)bank.c $(DIR_INCLUDE_TYPE)bank.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)bank.c -o $(DIR_BUILD)type_bank.o
 
 type_bootrom.o: $(DIR_SRC_TYPE)bootrom.c $(DIR_INCLUDE_TYPE)bootrom.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)bootrom.c -o $(DIR_BUILD)type_bootrom.o
@@ -60,12 +63,16 @@ type_buffer.o: $(DIR_SRC_TYPE)buffer.c $(DIR_INCLUDE_TYPE)buffer.h
 type_cartridge.o: $(DIR_SRC_TYPE)cartridge.c $(DIR_INCLUDE_TYPE)cartridge.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)cartridge.c -o $(DIR_BUILD)type_cartridge.o
 
+type_mapper.o: $(DIR_SRC_TYPE)mapper.c $(DIR_INCLUDE_TYPE)mapper.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)mapper.c -o $(DIR_BUILD)type_mapper.o
+
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
 	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
-		$(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o
+		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
+			$(DIR_BUILD)type_mapper.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

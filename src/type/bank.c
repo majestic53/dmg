@@ -16,44 +16,44 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./buffer_type.h"
+#include "./bank_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 int
-dmg_buffer_load(
-	__inout dmg_buffer_t *buffer,
-	__in uint32_t length,
-	__in uint8_t value
+dmg_bank_load(
+	__inout dmg_bank_t *bank,
+	__in uint32_t count
 	)
 {
 	int result = ERROR_SUCCESS;
+	uint32_t length = (count * sizeof(dmg_buffer_t));
 
-	if(!(buffer->data = (uint8_t *)malloc(length))) {
-		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate buffer");
+	if(!(bank->buffer = (dmg_buffer_t *)malloc(length))) {
+		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate bank");
 		goto exit;
 	}
 
-	memset(buffer->data, value, length);
-	buffer->length = length;
+	memset(bank->buffer, 0, length);
+	bank->count = count;
 
 exit:
 	return result;
 }
 
 void
-dmg_buffer_unload(
-	__inout dmg_buffer_t *buffer
+dmg_bank_unload(
+	__inout dmg_bank_t *bank
 	)
 {
 
-	if(buffer->data) {
-		free(buffer->data);
+	if(bank->buffer) {
+		free(bank->buffer);
 	}
 
-	memset(buffer, 0, sizeof(*buffer));
+	memset(bank, 0, sizeof(*bank));
 }
 
 #ifdef __cplusplus

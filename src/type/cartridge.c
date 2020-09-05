@@ -26,8 +26,8 @@ int
 dmg_cartridge_validate(
 	__in const dmg_buffer_t *buffer,
 	__out const dmg_header_t **header,
-	__out uint32_t *rom_banks,
-	__out uint32_t *ram_banks
+	__out uint32_t *rom,
+	__out uint32_t *ram
 	)
 {
 	uint16_t checksum;
@@ -52,19 +52,20 @@ dmg_cartridge_validate(
 
 	*header = (const dmg_header_t *)&buffer->data[HEADER_BEGIN];
 
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title: %s", (*header)->title);
+
 	checksum = 0;
 	for(address = HEADER_CHECKSUM_BEGIN; address <= HEADER_CHECKSUM_END; ++address) {
 		checksum = (checksum - buffer->data[address] - 1);
 	}
 
-	checksum &= UINT8_MAX;
-	if(checksum != (*header)->checksum) {
+	if((checksum &= UINT8_MAX) != (*header)->checksum) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge checksum mismatch: %02x (expecting %02x)",
 				checksum, (*header)->checksum);
 		goto exit;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum=%02x", checksum);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum: %02x", checksum);
 
 	if((*header)->rom >= ROM_MAX) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge rom type unsupported: %u (expecting < %u)",
@@ -72,12 +73,11 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	*rom_banks = ROM_BANK[(*header)->rom];
+	*rom = ROM_BANK[(*header)->rom];
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks=%u", *rom_banks);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks: %u", *rom);
 
-	length = (ROM_WIDTH * *rom_banks);
-	if(buffer->length != length) {
+	if((length = (ROM_WIDTH * *rom)) != buffer->length) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge length mismatch: %u (expecting %u)",
 				buffer->length, length);
 		goto exit;
@@ -89,9 +89,9 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	*ram_banks = RAM_BANK[(*header)->ram];
+	*ram = RAM_BANK[(*header)->ram];
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks=%u", *ram_banks);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks: %u", *ram);
 
 exit:
 	return result;
@@ -104,47 +104,41 @@ dmg_cartridge_load(
 	)
 {
 	int result;
-	uint32_t index;
+	uint32_t index, ram, rom;
 
 	TRACE(LEVEL_INFORMATION, "Cartridge loading");
 
-	if((result = dmg_cartridge_validate(buffer, &cartridge->header, &cartridge->rom_banks, &cartridge->ram_banks))
-			!= ERROR_SUCCESS) {
+	if((result = dmg_cartridge_validate(buffer, &cartridge->header, &rom, &ram)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	cartridge->rom = (dmg_buffer_t *)malloc(cartridge->rom_banks * sizeof(dmg_buffer_t));
-	if(!cartridge->rom) {
-		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate rom banks");
+	if((result = dmg_bank_load(&cartridge->rom, rom)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	for(index = 0; index < cartridge->rom_banks; ++index) {
-		cartridge->rom[index].data = (buffer->data + (ROM_WIDTH * index));
-		cartridge->rom[index].length = ROM_WIDTH;
+	for(index = 0; index < cartridge->rom.count; ++index) {
+		cartridge->rom.buffer[index].data = (buffer->data + (ROM_WIDTH * index));
+		cartridge->rom.buffer[index].length = ROM_WIDTH;
 
-		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom[%u][%u]=%p", index, cartridge->rom[index].length,
-			cartridge->rom[index].data);
+		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom[%u][%u]=%p", index, cartridge->rom.buffer[index].length,
+			cartridge->rom.buffer[index].data);
 	}
 
-	cartridge->ram = (dmg_buffer_t *)malloc(cartridge->ram_banks * sizeof(dmg_buffer_t));
-	if(!cartridge->ram) {
-		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate ram banks");
+	if((result = dmg_bank_load(&cartridge->ram, ram)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	for(index = 0; index < cartridge->ram_banks; ++index) {
+	for(index = 0; index < cartridge->ram.count; ++index) {
 
-		if((result = dmg_buffer_load(&cartridge->ram[index], RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
+		if((result = dmg_buffer_load(&cartridge->ram.buffer[index], RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to allocate ram bank %u", index);
 			goto exit;
 		}
 
-		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u][%u]=%p", index, cartridge->ram[index].length,
-			cartridge->ram[index].data);
+		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u][%u]=%p", index, cartridge->ram.buffer[index].length,
+			cartridge->ram.buffer[index].data);
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", cartridge->header->title);
 	TRACE(LEVEL_INFORMATION, "Cartridge loaded");
 
 exit:
@@ -160,7 +154,7 @@ dmg_cartridge_read_ram(
 {
 	uint8_t result = 0;
 
-	if(bank >= cartridge->ram_banks) {
+	if(bank >= cartridge->ram.count) {
 		result = UINT8_MAX;
 
 		TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram bank [%u][%04x]->%02x", bank, address, result);
@@ -169,7 +163,7 @@ dmg_cartridge_read_ram(
 
 	switch(address) {
 		case 0 ... (RAM_WIDTH - 1):
-			result = cartridge->ram[bank].data[address];
+			result = cartridge->ram.buffer[bank].data[address];
 			break;
 		default:
 			result = UINT8_MAX;
@@ -191,7 +185,7 @@ dmg_cartridge_read_rom(
 {
 	uint8_t result = 0;
 
-	if(bank >= cartridge->rom_banks) {
+	if(bank >= cartridge->rom.count) {
 		result = UINT8_MAX;
 
 		TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge rom bank [%u][%04x]->%02x", bank, address, result);
@@ -200,7 +194,7 @@ dmg_cartridge_read_rom(
 
 	switch(address) {
 		case 0 ... (ROM_WIDTH - 1):
-			result = cartridge->rom[bank].data[address];
+			result = cartridge->rom.buffer[bank].data[address];
 			break;
 		default:
 			result = UINT8_MAX;
@@ -220,18 +214,12 @@ dmg_cartridge_unload(
 {
 	TRACE(LEVEL_INFORMATION, "Cartridge unloading");
 
-	if(cartridge->ram) {
-
-		for(uint32_t index = 0; index < cartridge->ram_banks; ++index) {
-			dmg_buffer_unload(&cartridge->ram[index]);
-		}
-
-		free(cartridge->ram);
+	for(uint32_t index = 0; index < cartridge->ram.count; ++index) {
+		dmg_buffer_unload(&cartridge->ram.buffer[index]);
 	}
 
-	if(cartridge->rom) {
-		free(cartridge->rom);
-	}
+	dmg_bank_unload(&cartridge->ram);
+	dmg_bank_unload(&cartridge->rom);
 
 	memset(cartridge, 0, sizeof(*cartridge));
 
@@ -247,11 +235,11 @@ dmg_cartridge_write_ram(
 	)
 {
 
-	if(bank < cartridge->ram_banks) {
+	if(bank < cartridge->ram.count) {
 
 		switch(address) {
 			case 0 ... (RAM_WIDTH - 1):
-				cartridge->ram[bank].data[address] = value;
+				cartridge->ram.buffer[bank].data[address] = value;
 				break;
 			default:
 				TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram write [%u][%04x]<-%02x", bank, address, value);

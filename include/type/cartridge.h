@@ -19,7 +19,7 @@
 #ifndef DMG_TYPE_CARTRIDGE_H_
 #define DMG_TYPE_CARTRIDGE_H_
 
-#include "./buffer.h"
+#include "./bank.h"
 
 typedef struct {
 	uint8_t magic[4];
@@ -41,10 +41,8 @@ typedef struct {
 
 typedef struct {
 	const dmg_header_t *header;
-	dmg_buffer_t *ram;
-	uint32_t ram_banks;
-	dmg_buffer_t *rom;
-	uint32_t rom_banks;
+	dmg_bank_t ram;
+	dmg_bank_t rom;
 } dmg_cartridge_t;
 
 #ifdef __cplusplus
