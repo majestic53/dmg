@@ -40,8 +40,6 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	g_runtime.configuration = configuration;
-
 	SDL_GetVersion(&version);
 	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u",
 		version.major, version.minor, version.patch);
@@ -52,6 +50,11 @@ dmg_runtime_load(
 	}
 
 	TRACE(LEVEL_INFORMATION, "SDL loaded");
+
+	if((result = dmg_memory_load(&g_runtime.memory, &configuration->bootrom, &configuration->rom))
+			!= ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	// TODO: LOAD SUBSYSTEMS
 
@@ -81,6 +84,8 @@ dmg_runtime_unload(void)
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
 
 	// TODO: UNLOAD SUBSYSTEMS
+
+	dmg_memory_unload(&g_runtime.memory);
 
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
 
@@ -127,6 +132,15 @@ dmg_runtime_read(
 	uint8_t result = 0;
 
 	switch(address) {
+		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
+		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
+		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
+		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
+		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
+		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
+		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
+			result = dmg_memory_read(&g_runtime.memory, address);
+			break;
 
 		// TODO: READ BYTE FROM SUBSYSTEM
 
@@ -148,6 +162,16 @@ dmg_runtime_write(
 {
 
 	switch(address) {
+		case ADDRESS_BOOTROM_DISABLE:
+		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
+		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
+		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
+		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
+		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
+		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
+		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
+			dmg_memory_write(&g_runtime.memory, address, value);
+			break;
 
 		// TODO: WRITE BYTE TO SUBSYSTEM
 

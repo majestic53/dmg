@@ -16,13 +16,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_SYSTEM_MEMORY_TYPE_H_
+#define DMG_SYSTEM_MEMORY_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../include/system/memory.h"
+#include "../../include/runtime.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 6
+#define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_BEGIN, ADDRESS_RAM_END)
+#define RAM_HIGH_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_HIGH_BEGIN, ADDRESS_RAM_HIGH_END)
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_SYSTEM_MEMORY_TYPE_H_ */
