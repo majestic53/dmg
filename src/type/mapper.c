@@ -49,17 +49,6 @@ dmg_mapper_mbc1_write(
 			break;
 	}
 
-	switch(mapper->mbc1.lower) {
-		case MBC1_BANK_00:
-		case MBC1_BANK_20:
-		case MBC1_BANK_40:
-		case MBC1_BANK_60:
-			++mapper->mbc1.lower;
-			break;
-		default:
-			break;
-	}
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode: %i", mapper->mbc1.mode);
 	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks: {%02x, %02x}, %02x", mapper->mbc1.lower, mapper->mbc1.upper, mapper->mbc1.raw);
 
@@ -74,6 +63,17 @@ dmg_mapper_mbc1_write(
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mbc1 mode %u", mapper->mbc1.mode);
+			break;
+	}
+
+	switch(mapper->rom_swap) {
+		case MBC1_BANK_00:
+		case MBC1_BANK_20:
+		case MBC1_BANK_40:
+		case MBC1_BANK_60:
+			++mapper->rom_swap;
+			break;
+		default:
 			break;
 	}
 
