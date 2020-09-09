@@ -22,6 +22,67 @@
 extern "C" {
 #endif /* __cplusplus */
 
+static void
+dmg_mapper_mbc1_write(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+
+	switch(address) {
+		case ADDRESS_MBC1_MODE_BEGIN ... ADDRESS_MBC1_MODE_END:
+			mapper->mbc1.mode = value;
+			break;
+		case ADDRESS_MBC1_RAM_ENABLE_BEGIN ... ADDRESS_MBC1_RAM_ENABLE_END:
+			mapper->ram_enable = ((value & NIBBLE_MAX) == MBC1_RAM_ENABLE);
+			break;
+		case ADDRESS_MBC1_ROM_LOWER_BEGIN ... ADDRESS_MBC1_ROM_LOWER_END:
+			mapper->mbc1.lower = value;
+			break;
+		case ADDRESS_MBC1_ROM_UPPER_BEGIN ... ADDRESS_MBC1_ROM_UPPER_END:
+			mapper->mbc1.upper = value;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC1 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+				address, value);
+			break;
+	}
+
+	switch(mapper->mbc1.lower) {
+		case MBC1_BANK_00:
+		case MBC1_BANK_20:
+		case MBC1_BANK_40:
+		case MBC1_BANK_60:
+			++mapper->mbc1.lower;
+			break;
+		default:
+			break;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode: %i", mapper->mbc1.mode);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks: {%02x, %02x}, %02x", mapper->mbc1.lower, mapper->mbc1.upper, mapper->mbc1.raw);
+
+	switch(mapper->mbc1.mode) {
+		case MBC1_MODE_RAM:
+			mapper->ram = mapper->mbc1.upper;
+			mapper->rom_swap = mapper->mbc1.lower;
+			break;
+		case MBC1_MODE_ROM:
+			mapper->ram = 0;
+			mapper->rom_swap = mapper->mbc1.raw;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mbc1 mode %u", mapper->mbc1.mode);
+			break;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram-enable: %x", mapper->ram_enable);
+}
+
 int
 dmg_mapper_load(
 	__inout dmg_mapper_t *mapper,
@@ -38,6 +99,9 @@ dmg_mapper_load(
 
 	switch((type = mapper->cartridge.header->mapper)) {
 		case MAPPER_ROM_ONLY:
+		case MAPPER_MBC1:
+		case MAPPER_MBC1_RAM:
+		case MAPPER_MBC1_RAM_BATTERY:
 			mapper->ram = 0;
 			mapper->ram_enable = true;
 			mapper->rom = 0;
@@ -163,6 +227,11 @@ dmg_mapper_write_rom(
 		case MAPPER_ROM_ONLY:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper rom write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
 				address, value);
+			break;
+		case MAPPER_MBC1:
+		case MAPPER_MBC1_RAM:
+		case MAPPER_MBC1_RAM_BATTERY:
+			dmg_mapper_mbc1_write(mapper, address, value);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper type: %u", type);

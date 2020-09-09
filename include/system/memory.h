@@ -24,7 +24,6 @@
 
 typedef struct {
 	dmg_bootrom_t bootrom;
-	bool bootrom_enable;
 	dmg_mapper_t mapper;
 	dmg_buffer_t ram;
 	dmg_buffer_t ram_high;

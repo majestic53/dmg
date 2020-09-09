@@ -38,8 +38,6 @@ dmg_memory_load(
 		if((result = dmg_bootrom_load(&memory->bootrom, bootrom)) != ERROR_SUCCESS) {
 			goto exit;
 		}
-
-		memory->bootrom_enable = true;
 	}
 
 	if((result = dmg_mapper_load(&memory->mapper, rom)) != ERROR_SUCCESS) {
@@ -87,13 +85,15 @@ dmg_memory_read(
 			TRACE_FORMAT(LEVEL_WARNING, "Unused memory read [%04x]->%02x", address, result);
 			break;
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
-		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 
-			if(memory->bootrom_enable && (address <= ADDRESS_BOOTROM_END)) {
+			if(memory->bootrom.enable && (address <= ADDRESS_BOOTROM_END)) {
 				result = dmg_bootrom_read(&memory->bootrom, address);
 			} else {
 				result = dmg_mapper_read_rom(&memory->mapper, address);
 			}
+			break;
+		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
+			result = dmg_mapper_read_rom(&memory->mapper, address);
 			break;
 		default:
 			result = UINT8_MAX;
@@ -131,12 +131,7 @@ dmg_memory_write(
 
 	switch(address) {
 		case ADDRESS_BOOTROM_DISABLE:
-
-			if(memory->bootrom_enable) {
-				memory->bootrom_enable = false;
-
-				TRACE_FORMAT(LEVEL_INFORMATION, "Bootrom disabled [%04x]<-%02x", address, value);
-			}
+			dmg_bootrom_write(&memory->bootrom, address, value);
 			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
 			memory->ram.data[address - ADDRESS_RAM_BEGIN] = value;

@@ -22,7 +22,24 @@
 #include "./cartridge.h"
 
 typedef struct {
+
+	union {
+
+		struct {
+			uint8_t lower : 5;
+			uint8_t upper : 2;
+			uint8_t unused : 1;
+		};
+
+		uint8_t raw;
+	};
+
+	int mode;
+} dmg_mbc1_t;
+
+typedef struct {
 	dmg_cartridge_t cartridge;
+	dmg_mbc1_t mbc1;
 	uint32_t ram;
 	bool ram_enable;
 	uint32_t rom;

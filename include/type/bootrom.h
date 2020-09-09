@@ -23,6 +23,7 @@
 
 typedef struct {
 	const dmg_buffer_t *buffer;
+	bool enable;
 } dmg_bootrom_t;
 
 #ifdef __cplusplus
@@ -41,6 +42,12 @@ uint8_t dmg_bootrom_read(
 
 void dmg_bootrom_unload(
 	__inout dmg_bootrom_t *bootrom
+	);
+
+void dmg_bootrom_write(
+	__inout dmg_bootrom_t *bootrom,
+	__in uint16_t address,
+	__in uint8_t value
 	);
 
 #ifdef __cplusplus

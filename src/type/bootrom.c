@@ -79,6 +79,7 @@ dmg_bootrom_load(
 	}
 
 	bootrom->buffer = buffer;
+	bootrom->enable = true;
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom[%04x]=%p", bootrom->buffer->length, bootrom->buffer->data);
 	TRACE(LEVEL_INFORMATION, "Bootrom loaded");
@@ -119,6 +120,29 @@ dmg_bootrom_unload(
 	memset(bootrom, 0, sizeof(*bootrom));
 
 	TRACE(LEVEL_INFORMATION, "Bootrom unloaded");
+}
+
+void
+dmg_bootrom_write(
+	__inout dmg_bootrom_t *bootrom,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+
+	switch(address) {
+		case ADDRESS_BOOTROM_DISABLE:
+
+			if(bootrom->enable) {
+				bootrom->enable = false;
+
+				TRACE_FORMAT(LEVEL_INFORMATION, "Bootrom disabled [%04x]<-%02x", address, value);
+			}
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported bootrom write [%04x]<-%02x", address, value);
+			break;
+	}
 }
 
 #ifdef __cplusplus
