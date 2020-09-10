@@ -51,10 +51,13 @@ common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
 common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
 
-build_system: system_memory.o
+build_system: system_memory.o system_processor.o
 
 system_memory.o: $(DIR_SRC_SYSTEM)memory.c $(DIR_INCLUDE_SYSTEM)memory.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)memory.c -o $(DIR_BUILD)system_memory.o
+
+system_processor.o: $(DIR_SRC_SYSTEM)processor.c $(DIR_INCLUDE_SYSTEM)processor.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)processor.c -o $(DIR_BUILD)system_processor.o
 
 build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o
 
@@ -78,7 +81,7 @@ archive:
 	@echo '--- BUILDING LIBRARY -----------------------'
 	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
-		$(DIR_BUILD)system_memory.o \
+		$(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
 			$(DIR_BUILD)type_mapper.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)

@@ -35,7 +35,7 @@ dmg_mapper_mbc1_write(
 			mapper->mbc1.mode = value;
 			break;
 		case ADDRESS_MBC1_RAM_ENABLE_BEGIN ... ADDRESS_MBC1_RAM_ENABLE_END:
-			mapper->ram_enable = ((value & NIBBLE_MAX) == MBC1_RAM_ENABLE);
+			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == MBC1_RAM_ENABLE);
 			break;
 		case ADDRESS_MBC1_ROM_LOWER_BEGIN ... ADDRESS_MBC1_ROM_LOWER_END:
 			mapper->mbc1.lower = value;
@@ -76,11 +76,6 @@ dmg_mapper_mbc1_write(
 		default:
 			break;
 	}
-
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram-enable: %x", mapper->ram_enable);
 }
 
 int
@@ -103,7 +98,6 @@ dmg_mapper_load(
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
 			mapper->ram = 0;
-			mapper->ram_enable = true;
 			mapper->rom = 0;
 			mapper->rom_swap = (mapper->rom + 1);
 			break;
@@ -116,7 +110,6 @@ dmg_mapper_load(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram-enable: %x", mapper->ram_enable);
 	TRACE(LEVEL_INFORMATION, "Mapper loaded");
 
 exit:
@@ -131,22 +124,15 @@ dmg_mapper_read_ram(
 {
 	uint8_t result = 0;
 
-	if(mapper->ram_enable) {
+	switch(address) {
+		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
+			result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN);
+			break;
+		default:
+			result = UINT8_MAX;
 
-		switch(address) {
-			case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
-				result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN);
-				break;
-			default:
-				result = UINT8_MAX;
-
-				TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram read [%u][%04x]->%02x", mapper->ram, address, result);
-				break;
-		}
-	} else {
-		result = UINT8_MAX;
-
-		TRACE_FORMAT(LEVEL_WARNING, "Mapper ram disabled [%u][%04x]->%02x", mapper->ram, address, result);
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram read [%u][%04x]->%02x", mapper->ram, address, result);
+			break;
 	}
 
 	return result;
@@ -199,18 +185,13 @@ dmg_mapper_write_ram(
 	)
 {
 
-	if(mapper->ram_enable) {
-
-		switch(address) {
-			case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
-				dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN, value);
-				break;
-			default:
-				TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram write [%u][%04x]->%02x", mapper->ram, address, value);
-				break;
-		}
-	} else {
-		TRACE_FORMAT(LEVEL_WARNING, "Mapper ram disabled [%u][%04x]<-%02x", mapper->ram, address, value);
+	switch(address) {
+		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
+			dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN, value);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram write [%u][%04x]->%02x", mapper->ram, address, value);
+			break;
 	}
 }
 
@@ -237,6 +218,10 @@ dmg_mapper_write_rom(
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper type: %u", type);
 			break;
 	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
 }
 
 #ifdef __cplusplus

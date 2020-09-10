@@ -138,10 +138,24 @@ dmg_cartridge_load(
 			cartridge->ram.buffer[index].data);
 	}
 
+	cartridge->enable = true;
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable: %x", cartridge->enable);
 	TRACE(LEVEL_INFORMATION, "Cartridge loaded");
 
 exit:
 	return result;
+}
+
+void
+dmg_cartridge_ram_enable(
+	__inout dmg_cartridge_t *cartridge,
+	__in bool enable
+	)
+{
+	cartridge->enable = enable;
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable: %x", cartridge->enable);
 }
 
 uint8_t
@@ -160,15 +174,22 @@ dmg_cartridge_read_ram(
 		goto exit;
 	}
 
-	switch(address) {
-		case 0 ... (RAM_WIDTH - 1):
-			result = cartridge->ram.buffer[bank].data[address];
-			break;
-		default:
-			result = UINT8_MAX;
+	if(cartridge->enable) {
 
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram read [%u][%04x]->%02x", bank, address, result);
-			break;
+		switch(address) {
+			case 0 ... (RAM_WIDTH - 1):
+				result = cartridge->ram.buffer[bank].data[address];
+				break;
+			default:
+				result = UINT8_MAX;
+
+				TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram read [%u][%04x]->%02x", bank, address, result);
+				break;
+		}
+	} else {
+		result = UINT8_MAX;
+
+		TRACE_FORMAT(LEVEL_WARNING, "Cartridge ram disabled [%u][%04x]->%02x", bank, address, result);
 	}
 
 exit:
@@ -227,7 +248,7 @@ dmg_cartridge_unload(
 
 void
 dmg_cartridge_write_ram(
-	__in dmg_cartridge_t *cartridge,
+	__inout dmg_cartridge_t *cartridge,
 	__in uint32_t bank,
 	__in uint16_t address,
 	__in uint8_t value
@@ -236,13 +257,18 @@ dmg_cartridge_write_ram(
 
 	if(bank < cartridge->ram.count) {
 
-		switch(address) {
-			case 0 ... (RAM_WIDTH - 1):
-				cartridge->ram.buffer[bank].data[address] = value;
-				break;
-			default:
-				TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram write [%u][%04x]<-%02x", bank, address, value);
-				break;
+		if(cartridge->enable) {
+
+			switch(address) {
+				case 0 ... (RAM_WIDTH - 1):
+					cartridge->ram.buffer[bank].data[address] = value;
+					break;
+				default:
+					TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram write [%u][%04x]<-%02x", bank, address, value);
+					break;
+			}
+		} else {
+			TRACE_FORMAT(LEVEL_WARNING, "Cartridge ram disabled [%u][%04x]<-%02x", bank, address, value);
 		}
 	} else {
 		TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram bank [%u][%04x]<-%02x", bank, address, value);

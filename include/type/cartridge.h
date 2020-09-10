@@ -41,6 +41,7 @@ typedef struct {
 
 typedef struct {
 	const dmg_header_t *header;
+	bool enable;
 	dmg_bank_t ram;
 	dmg_bank_t rom;
 } dmg_cartridge_t;
@@ -52,6 +53,11 @@ extern "C" {
 int dmg_cartridge_load(
 	__inout dmg_cartridge_t *cartridge,
 	__in const dmg_buffer_t *buffer
+	);
+
+void dmg_cartridge_ram_enable(
+	__inout dmg_cartridge_t *cartridge,
+	__in bool enable
 	);
 
 uint8_t dmg_cartridge_read_ram(
@@ -71,7 +77,7 @@ void dmg_cartridge_unload(
 	);
 
 void dmg_cartridge_write_ram(
-	__in dmg_cartridge_t *cartridge,
+	__inout dmg_cartridge_t *cartridge,
 	__in uint32_t bank,
 	__in uint16_t address,
 	__in uint8_t value

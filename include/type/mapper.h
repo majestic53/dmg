@@ -38,10 +38,13 @@ typedef struct {
 } dmg_mbc1_t;
 
 typedef struct {
+
+	union {
+		dmg_mbc1_t mbc1;
+	};
+
 	dmg_cartridge_t cartridge;
-	dmg_mbc1_t mbc1;
 	uint32_t ram;
-	bool ram_enable;
 	uint32_t rom;
 	uint32_t rom_swap;
 } dmg_mapper_t;
