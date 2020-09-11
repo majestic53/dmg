@@ -138,9 +138,8 @@ dmg_cartridge_load(
 			cartridge->ram.buffer[index].data);
 	}
 
-	cartridge->enable = true;
+	dmg_cartridge_ram_enable(cartridge, true);
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable: %x", cartridge->enable);
 	TRACE(LEVEL_INFORMATION, "Cartridge loaded");
 
 exit:

@@ -37,7 +37,7 @@ typedef struct {
 	uint8_t version;
 	uint8_t checksum;
 	uint16_t checksum_global;
-} dmg_header_t;
+} __attribute__((packed)) dmg_header_t;
 
 typedef struct {
 	const dmg_header_t *header;
