@@ -75,6 +75,8 @@ typedef struct {
 	bool interrupts_enable;
 	dmg_interrupt_t interrupt_enable;
 	dmg_interrupt_t interrupt_flag;
+	bool stop;
+	bool wait;
 } dmg_processor_t;
 
 #ifdef __cplusplus
@@ -87,8 +89,12 @@ int dmg_processor_load(
 	);
 
 uint8_t dmg_processor_read(
-	__inout dmg_processor_t *processor,
+	__in const dmg_processor_t *processor,
 	__in uint16_t address
+	);
+
+uint32_t dmg_processor_step(
+	__inout dmg_processor_t *processor
 	);
 
 void dmg_processor_unload(

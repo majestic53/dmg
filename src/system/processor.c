@@ -22,7 +22,171 @@
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+/*static inline uint8_t
+dmg_processor_fetch(
+	__inout dmg_processor_t *processor
+	)
+{
+	return dmg_runtime_read(processor->pc.word++);
+}
+
+static inline uint16_t
+dmg_processor_fetch_word(
+	__inout dmg_processor_t *processor
+	)
+{
+	return (dmg_processor_fetch(processor) | (dmg_processor_fetch(processor) << CHAR_BIT));
+}
+
+static inline uint8_t
+dmg_processor_pop(
+	__inout dmg_processor_t *processor
+	)
+{
+	return dmg_runtime_read(processor->sp.word++);
+}
+
+static inline uint16_t
+dmg_processor_pop_word(
+	__inout dmg_processor_t *processor
+	)
+{
+	return ((dmg_processor_pop(processor) << CHAR_BIT) | dmg_processor_pop(processor));
+}
+
+static inline void
+dmg_processor_push(
+	__inout dmg_processor_t *processor,
+	__in uint8_t value
+	)
+{
+	dmg_runtime_write(--processor->sp.word, value);
+}
+
+static inline void
+dmg_processor_push_word(
+	__inout dmg_processor_t *processor,
+	__in uint16_t value
+	)
+{
+	dmg_processor_push(processor, value);
+	dmg_processor_push(processor, value >> CHAR_BIT);
+}*/
+
+static uint32_t
+dmg_processor_execute(
+	__inout dmg_processor_t *processor
+	)
+{
+	// TODO
+	return 0;
+	// ---
+}
+
+static uint32_t
+dmg_processor_service(
+	__inout dmg_processor_t *processor
+	)
+{
+	// TODO
+	return 0;
+	// ---
+}
+
+int
+dmg_processor_load(
+	__inout dmg_processor_t *processor,
+	__in const dmg_buffer_t *bootrom
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Processor loading");
+
+	if(!bootrom->data) {
+		processor->af.word = POST_AF;
+		processor->bc.word = POST_BC;
+		processor->de.word = POST_DE;
+		processor->hl.word = POST_HL;
+		processor->pc.word = POST_PC;
+		processor->sp.word = POST_SP;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor AF=%04x", processor->af.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor BC=%04x", processor->bc.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor DE=%04x", processor->de.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor HL=%04x", processor->hl.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor PC=%04x", processor->pc.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor SP=%04x", processor->sp.word);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IME=%x", processor->interrupts_enable);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IE=%02x", processor->interrupt_enable.raw);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IF=%02x", processor->interrupt_flag.raw);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Stop=%x", processor->stop);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Wait=%x", processor->wait);
+	TRACE(LEVEL_INFORMATION, "Processor loaded");
+
+	return result;
+}
+
+uint8_t
+dmg_processor_read(
+	__in const dmg_processor_t *processor,
+	__in uint16_t address
+	)
+{
+	uint8_t result = 0;
+
+	switch(address) {
+		case ADDRESS_INTERRUPT_ENABLE:
+			result = processor->interrupt_enable.raw;
+			break;
+		default:
+			result = UINT8_MAX;
+
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor read [%04x]->%02x", address, result);
+			break;
+	}
+
+	return result;
+}
+
+uint32_t
+dmg_processor_step(
+	__inout dmg_processor_t *processor
+	)
+{
+	return (dmg_processor_service(processor) + dmg_processor_execute(processor));
+}
+
+void
+dmg_processor_unload(
+	__inout dmg_processor_t *processor
+	)
+{
+	TRACE(LEVEL_INFORMATION, "Processor unloading");
+
+	memset(processor, 0, sizeof(*processor));
+
+	TRACE(LEVEL_INFORMATION, "Processor unloaded");
+}
+
+void
+dmg_processor_write(
+	__inout dmg_processor_t *processor,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+
+	switch(address) {
+		case ADDRESS_INTERRUPT_ENABLE:
+			processor->interrupt_enable.raw = value;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor write [%04x]<-%02x", address, value);
+			break;
+	}
+}
 
 #ifdef __cplusplus
 }

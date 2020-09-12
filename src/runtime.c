@@ -51,8 +51,11 @@ dmg_runtime_load(
 
 	TRACE(LEVEL_INFORMATION, "SDL loaded");
 
-	if((result = dmg_memory_load(&g_runtime.memory, &configuration->bootrom, &configuration->rom))
-			!= ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, &configuration->bootrom, &configuration->rom)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_processor_load(&g_runtime.processor, &configuration->bootrom)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -85,6 +88,7 @@ dmg_runtime_unload(void)
 
 	// TODO: UNLOAD SUBSYSTEMS
 
+	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
 
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
@@ -121,7 +125,7 @@ dmg_runtime_interrupt(
 	__in int type
 	)
 {
-	// TODO: SEND INTERRUPT TO PROCESSOR SUBSYSTEM
+	dmg_runtime_write(ADDRESS_INTERRUPT_ENABLE, dmg_runtime_read(ADDRESS_INTERRUPT_ENABLE) | (1 << type));
 }
 
 uint8_t
@@ -132,6 +136,9 @@ dmg_runtime_read(
 	uint8_t result = 0;
 
 	switch(address) {
+		case ADDRESS_INTERRUPT_ENABLE:
+			result = dmg_processor_read(&g_runtime.processor, address);
+			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
@@ -162,6 +169,9 @@ dmg_runtime_write(
 {
 
 	switch(address) {
+		case ADDRESS_INTERRUPT_ENABLE:
+			dmg_processor_write(&g_runtime.processor, address, value);
+			break;
 		case ADDRESS_BOOTROM_DISABLE:
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:

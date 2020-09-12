@@ -20,11 +20,13 @@
 #define DMG_RUNTIME_TYPE_H_
 
 #include "../include/system/memory.h"
+#include "../include/system/processor.h"
 #include "../include/runtime.h"
 
 typedef struct {
 	dmg_cycle_t cycle;
 	dmg_memory_t memory;
+	dmg_processor_t processor;
 
 	// TODO: ADD SUBSYSTEMS
 

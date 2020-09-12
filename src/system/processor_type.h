@@ -22,4 +22,11 @@
 #include "../../include/system/processor.h"
 #include "../../include/runtime.h"
 
+#define POST_AF 0x01b0
+#define POST_BC 0x0013
+#define POST_DE 0x00d8
+#define POST_HL 0x014d
+#define POST_PC 0x0100
+#define POST_SP 0xfffe
+
 #endif /* DMG_SYSTEM_PROCESSOR_TYPE_H_ */
