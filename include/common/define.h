@@ -48,6 +48,7 @@
 #define ADDRESS_MBC1_ROM_UPPER_END 0x5fff
 
 #define ADDRESS_INTERRUPT_ENABLE 0xffff
+#define ADDRESS_INTERRUPT_FLAG 0xff0f
 
 #define ADDRESS_RAM_BEGIN 0xc000
 #define ADDRESS_RAM_END 0xdfff
@@ -64,6 +65,8 @@
 #define ADDRESS_ROM_END 0x3fff
 #define ADDRESS_ROM_SWAP_BEGIN 0x4000
 #define ADDRESS_ROM_SWAP_END 0x7fff
+
+#define CYCLE 4
 
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f

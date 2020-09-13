@@ -52,7 +52,7 @@ dmg_processor_pop_word(
 	)
 {
 	return ((dmg_processor_pop(processor) << CHAR_BIT) | dmg_processor_pop(processor));
-}
+}*/
 
 static inline void
 dmg_processor_push(
@@ -71,16 +71,28 @@ dmg_processor_push_word(
 {
 	dmg_processor_push(processor, value);
 	dmg_processor_push(processor, value >> CHAR_BIT);
-}*/
+}
 
 static uint32_t
 dmg_processor_execute(
 	__inout dmg_processor_t *processor
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	uint32_t result = 0;
+
+	if(!processor->halt && !processor->stop) {
+
+		// TOOD: FETCH OPCODE
+			// TODO: IF OPCODE=0xcb
+				// TODO: FETCH EXTENDED OPCODE
+		// TODO: FETCH OPERAND
+		// TODO: EXECUTE INSTRUCTION
+
+	} else {
+		result += CYCLE_IDLE;
+	}
+
+	return result;
 }
 
 static uint32_t
@@ -88,9 +100,31 @@ dmg_processor_service(
 	__inout dmg_processor_t *processor
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	uint32_t result = 0;
+
+	for(int type = 0; type < INTERRUPT_MAX; ++type) {
+
+		if(processor->interrupt_enable.raw & processor->interrupt_flag.raw & (1 << type)) {
+
+			if(processor->interrupts_enable) {
+				processor->interrupt_flag.raw &= ~(1 << type);
+				processor->interrupts_enable = false;
+				dmg_processor_push_word(processor, processor->pc.word);
+				processor->pc.word = INTERRUPT_ADDR[type];
+				result += CYCLE_INTERRUPT;
+			}
+
+			if(processor->halt) {
+				processor->halt = false;
+
+				TRACE_FORMAT(LEVEL_VERBOSE, "Processor exiting halt state [%04x]", processor->pc.word);
+
+				result += CYCLE_INTERRUPT_HALT;
+			}
+		}
+	}
+
+	return result;
 }
 
 int
@@ -112,6 +146,8 @@ dmg_processor_load(
 		processor->sp.word = POST_SP;
 	}
 
+	processor->interrupt_flag.raw = POST_IF;
+
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor AF=%04x", processor->af.word);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor BC=%04x", processor->bc.word);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor DE=%04x", processor->de.word);
@@ -121,8 +157,8 @@ dmg_processor_load(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IME=%x", processor->interrupts_enable);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IE=%02x", processor->interrupt_enable.raw);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IF=%02x", processor->interrupt_flag.raw);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Halt=%x", processor->halt);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Stop=%x", processor->stop);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Wait=%x", processor->wait);
 	TRACE(LEVEL_INFORMATION, "Processor loaded");
 
 	return result;
@@ -139,6 +175,9 @@ dmg_processor_read(
 	switch(address) {
 		case ADDRESS_INTERRUPT_ENABLE:
 			result = processor->interrupt_enable.raw;
+			break;
+		case ADDRESS_INTERRUPT_FLAG:
+			result = processor->interrupt_flag.raw;
 			break;
 		default:
 			result = UINT8_MAX;
@@ -181,6 +220,15 @@ dmg_processor_write(
 	switch(address) {
 		case ADDRESS_INTERRUPT_ENABLE:
 			processor->interrupt_enable.raw = value;
+			break;
+		case ADDRESS_INTERRUPT_FLAG:
+			processor->interrupt_flag.raw |= (value & INTERRUPT_FLAG_MASK);
+
+			if(processor->stop && processor->interrupt_flag.joypad) {
+				processor->stop = false;
+
+				TRACE_FORMAT(LEVEL_VERBOSE, "Processor exiting stop state [%04x]", processor->pc.word);
+			}
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor write [%04x]<-%02x", address, value);

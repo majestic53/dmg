@@ -75,8 +75,8 @@ typedef struct {
 	bool interrupts_enable;
 	dmg_interrupt_t interrupt_enable;
 	dmg_interrupt_t interrupt_flag;
+	bool halt;
 	bool stop;
-	bool wait;
 } dmg_processor_t;
 
 #ifdef __cplusplus

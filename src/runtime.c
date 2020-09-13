@@ -125,7 +125,7 @@ dmg_runtime_interrupt(
 	__in int type
 	)
 {
-	dmg_runtime_write(ADDRESS_INTERRUPT_ENABLE, dmg_runtime_read(ADDRESS_INTERRUPT_ENABLE) | (1 << type));
+	dmg_runtime_write(ADDRESS_INTERRUPT_FLAG, dmg_runtime_read(ADDRESS_INTERRUPT_FLAG) | (1 << type));
 }
 
 uint8_t
@@ -137,6 +137,7 @@ dmg_runtime_read(
 
 	switch(address) {
 		case ADDRESS_INTERRUPT_ENABLE:
+		case ADDRESS_INTERRUPT_FLAG:
 			result = dmg_processor_read(&g_runtime.processor, address);
 			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
@@ -170,6 +171,7 @@ dmg_runtime_write(
 
 	switch(address) {
 		case ADDRESS_INTERRUPT_ENABLE:
+		case ADDRESS_INTERRUPT_FLAG:
 			dmg_processor_write(&g_runtime.processor, address, value);
 			break;
 		case ADDRESS_BOOTROM_DISABLE:

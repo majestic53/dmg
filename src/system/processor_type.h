@@ -22,10 +22,26 @@
 #include "../../include/system/processor.h"
 #include "../../include/runtime.h"
 
+#define CYCLE_IDLE CYCLE
+#define CYCLE_INTERRUPT (5 * CYCLE)
+#define CYCLE_INTERRUPT_HALT CYCLE
+
+#define INTERRUPT_FLAG_MASK 0x1f
+
+static uint16_t INTERRUPT_ADDR[] = {
+	0x0040, /* INTERRUPT_VBLANK */
+	0x0048, /* INTERRUPT_LCDC */
+	0x0050, /* INTERRUPT_TIMER */
+	0x0058, /* INTERRUPT_SERIAL */
+	0x0060, /* INTERRUPT_JOYPAD */
+	0x0000, /* INTERRUPT_MAX */
+	};
+
 #define POST_AF 0x01b0
 #define POST_BC 0x0013
 #define POST_DE 0x00d8
 #define POST_HL 0x014d
+#define POST_IF 0xe0
 #define POST_PC 0x0100
 #define POST_SP 0xfffe
 
