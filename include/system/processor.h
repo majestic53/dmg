@@ -55,11 +55,27 @@ typedef union {
 	struct {
 
 		union {
+
+			struct {
+				uint8_t low_lsb : 1;
+				uint8_t low_unused : 6;
+				uint8_t low_msb : 1;
+			};
+
 			dmg_flag_t flag;
 			uint8_t low;
 		};
 
-		uint8_t high;
+		union {
+
+			struct {
+				uint8_t high_lsb : 1;
+				uint8_t high_unused : 6;
+				uint8_t high_msb : 1;
+			};
+
+			uint8_t high;
+		};
 	};
 
 	uint16_t word;

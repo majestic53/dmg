@@ -22,7 +22,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/*static inline uint8_t
+static inline uint8_t
 dmg_processor_fetch(
 	__inout dmg_processor_t *processor
 	)
@@ -38,7 +38,7 @@ dmg_processor_fetch_word(
 	return (dmg_processor_fetch(processor) | (dmg_processor_fetch(processor) << CHAR_BIT));
 }
 
-static inline uint8_t
+/*static inline uint8_t
 dmg_processor_pop(
 	__inout dmg_processor_t *processor
 	)
@@ -51,7 +51,7 @@ dmg_processor_pop_word(
 	__inout dmg_processor_t *processor
 	)
 {
-	return ((dmg_processor_pop(processor) << CHAR_BIT) | dmg_processor_pop(processor));
+	return (dmg_processor_pop(processor) | (dmg_processor_pop(processor) << CHAR_BIT));
 }*/
 
 static inline void
@@ -69,9 +69,81 @@ dmg_processor_push_word(
 	__in uint16_t value
 	)
 {
-	dmg_processor_push(processor, value);
 	dmg_processor_push(processor, value >> CHAR_BIT);
+	dmg_processor_push(processor, value);
 }
+
+static uint32_t
+dmg_processor_instruction_nop(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	return instruction->cycle;
+}
+
+static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
+	dmg_processor_instruction_nop, /* INSTRUCTION_NOP */
+
+	// TODO: ADD ADDITIONAL INSTRUCTIONS
+
+	};
+
+static uint32_t
+dmg_processor_instruction_extended_rlc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, value = {};
+
+	switch(instruction->opcode) {
+
+		// TODO: IMPLEMENT RLC INSTRUCTION
+
+		case INSTRUCTION_EXTENDED_RLC_B:
+			value.low = processor->bc.high;
+			break;
+
+		// TODO: IMPLEMENT RLC INSTRUCTION
+
+		default:
+			break;
+	}
+
+	carry.flag.carry = processor->af.flag.carry;
+	processor->af.flag.carry = value.low_msb;
+	value.low <<= 1;
+	value.low |= carry.flag.carry;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+
+		// TODO: IMPLEMENT RLC INSTRUCTION
+
+		case INSTRUCTION_EXTENDED_RLC_B:
+			processor->bc.high = value.low;
+			break;
+
+		// TODO: IMPLEMENT RLC INSTRUCTION
+
+		default:
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static const dmg_instruction_cb INSTRUCTION_EXTENDED_HANDLER[] = {
+	dmg_processor_instruction_extended_rlc, /* INSTRUCTION_EXTENDED_RLC_B */
+
+	// TODO: ADD ADDITIONAL EXTENDED INSTRUCTIONS
+
+	};
 
 static uint32_t
 dmg_processor_execute(
@@ -81,13 +153,32 @@ dmg_processor_execute(
 	uint32_t result = 0;
 
 	if(!processor->halt && !processor->stop) {
+		uint8_t opcode;
+		dmg_register_t operand = {};
+		const dmg_instruction_cb *handler;
+		const dmg_instruction_t *instruction;
 
-		// TOOD: FETCH OPCODE
-			// TODO: IF OPCODE=0xcb
-				// TODO: FETCH EXTENDED OPCODE
-		// TODO: FETCH OPERAND
-		// TODO: EXECUTE INSTRUCTION
+		if((opcode = dmg_processor_fetch(processor)) == INSTRUCTION_EXTENDED_PREFIX) {
+			opcode = dmg_processor_fetch(processor);
+			instruction = &INSTRUCTION_EXTENDED[opcode];
+			handler = &INSTRUCTION_EXTENDED_HANDLER[opcode];
+		} else {
+			instruction = &INSTRUCTION[opcode];
+			handler = &INSTRUCTION_HANDLER[opcode];
+		}
 
+		switch(instruction->operand) {
+			case OPERAND_BYTE:
+				operand.low = dmg_processor_fetch(processor);
+				break;
+			case OPERAND_WORD:
+				operand.word = dmg_processor_fetch_word(processor);
+				break;
+			default:
+				break;
+		}
+
+		result += (*handler)(processor, instruction, &operand);
 	} else {
 		result += CYCLE_IDLE;
 	}
@@ -116,10 +207,9 @@ dmg_processor_service(
 
 			if(processor->halt) {
 				processor->halt = false;
+				result += CYCLE_INTERRUPT_HALT;
 
 				TRACE_FORMAT(LEVEL_VERBOSE, "Processor exiting halt state [%04x]", processor->pc.word);
-
-				result += CYCLE_INTERRUPT_HALT;
 			}
 		}
 	}
