@@ -113,10 +113,10 @@ dmg_processor_instruction_extended_rlc(
 			break;
 	}
 
-	carry.flag.carry = processor->af.flag.carry;
+	carry.low_lsb = processor->af.flag.carry;
 	processor->af.flag.carry = value.low_msb;
 	value.low <<= 1;
-	value.low |= carry.flag.carry;
+	value.low |= carry.low_lsb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !value.low;
