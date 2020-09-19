@@ -84,14 +84,220 @@ dmg_processor_instruction_nop(
 }
 
 static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
-	dmg_processor_instruction_nop, /* INSTRUCTION_NOP */
+	dmg_processor_instruction_nop, /* 0x00 */
 
 	// TODO: ADD ADDITIONAL INSTRUCTIONS
 
 	};
 
 static uint32_t
-dmg_processor_instruction_extended_rlc(
+dmg_processor_instruction_extended_bit(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_BIT_0_A:
+		case INSTRUCTION_EXTENDED_BIT_1_A:
+		case INSTRUCTION_EXTENDED_BIT_2_A:
+		case INSTRUCTION_EXTENDED_BIT_3_A:
+		case INSTRUCTION_EXTENDED_BIT_4_A:
+		case INSTRUCTION_EXTENDED_BIT_5_A:
+		case INSTRUCTION_EXTENDED_BIT_6_A:
+		case INSTRUCTION_EXTENDED_BIT_7_A:
+			processor->af.flag.zero = !(processor->af.high
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_A) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_B:
+		case INSTRUCTION_EXTENDED_BIT_1_B:
+		case INSTRUCTION_EXTENDED_BIT_2_B:
+		case INSTRUCTION_EXTENDED_BIT_3_B:
+		case INSTRUCTION_EXTENDED_BIT_4_B:
+		case INSTRUCTION_EXTENDED_BIT_5_B:
+		case INSTRUCTION_EXTENDED_BIT_6_B:
+		case INSTRUCTION_EXTENDED_BIT_7_B:
+			processor->af.flag.zero = !(processor->bc.high
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_B) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_C:
+		case INSTRUCTION_EXTENDED_BIT_1_C:
+		case INSTRUCTION_EXTENDED_BIT_2_C:
+		case INSTRUCTION_EXTENDED_BIT_3_C:
+		case INSTRUCTION_EXTENDED_BIT_4_C:
+		case INSTRUCTION_EXTENDED_BIT_5_C:
+		case INSTRUCTION_EXTENDED_BIT_6_C:
+		case INSTRUCTION_EXTENDED_BIT_7_C:
+			processor->af.flag.zero = !(processor->bc.low
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_C) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_D:
+		case INSTRUCTION_EXTENDED_BIT_1_D:
+		case INSTRUCTION_EXTENDED_BIT_2_D:
+		case INSTRUCTION_EXTENDED_BIT_3_D:
+		case INSTRUCTION_EXTENDED_BIT_4_D:
+		case INSTRUCTION_EXTENDED_BIT_5_D:
+		case INSTRUCTION_EXTENDED_BIT_6_D:
+		case INSTRUCTION_EXTENDED_BIT_7_D:
+			processor->af.flag.zero = !(processor->de.high
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_D) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_E:
+		case INSTRUCTION_EXTENDED_BIT_1_E:
+		case INSTRUCTION_EXTENDED_BIT_2_E:
+		case INSTRUCTION_EXTENDED_BIT_3_E:
+		case INSTRUCTION_EXTENDED_BIT_4_E:
+		case INSTRUCTION_EXTENDED_BIT_5_E:
+		case INSTRUCTION_EXTENDED_BIT_6_E:
+		case INSTRUCTION_EXTENDED_BIT_7_E:
+			processor->af.flag.zero = !(processor->de.low
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_E) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_H:
+		case INSTRUCTION_EXTENDED_BIT_1_H:
+		case INSTRUCTION_EXTENDED_BIT_2_H:
+		case INSTRUCTION_EXTENDED_BIT_3_H:
+		case INSTRUCTION_EXTENDED_BIT_4_H:
+		case INSTRUCTION_EXTENDED_BIT_5_H:
+		case INSTRUCTION_EXTENDED_BIT_6_H:
+		case INSTRUCTION_EXTENDED_BIT_7_H:
+			processor->af.flag.zero = !(processor->hl.high
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_H) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_1_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_2_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_3_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_4_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_5_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_6_HL_IND:
+		case INSTRUCTION_EXTENDED_BIT_7_HL_IND:
+			processor->af.flag.zero = !(dmg_runtime_read(processor->hl.word)
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_HL_IND) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_BIT_0_L:
+		case INSTRUCTION_EXTENDED_BIT_1_L:
+		case INSTRUCTION_EXTENDED_BIT_2_L:
+		case INSTRUCTION_EXTENDED_BIT_3_L:
+		case INSTRUCTION_EXTENDED_BIT_4_L:
+		case INSTRUCTION_EXTENDED_BIT_5_L:
+		case INSTRUCTION_EXTENDED_BIT_6_L:
+		case INSTRUCTION_EXTENDED_BIT_7_L:
+			processor->af.flag.zero = !(processor->hl.low
+							& (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_BIT_0_L) / CHAR_BIT)));
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.flag.carry_half = true;
+	processor->af.flag.subtract = false;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_res(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RES_0_A:
+		case INSTRUCTION_EXTENDED_RES_1_A:
+		case INSTRUCTION_EXTENDED_RES_2_A:
+		case INSTRUCTION_EXTENDED_RES_3_A:
+		case INSTRUCTION_EXTENDED_RES_4_A:
+		case INSTRUCTION_EXTENDED_RES_5_A:
+		case INSTRUCTION_EXTENDED_RES_6_A:
+		case INSTRUCTION_EXTENDED_RES_7_A:
+			processor->af.high &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_A) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_B:
+		case INSTRUCTION_EXTENDED_RES_1_B:
+		case INSTRUCTION_EXTENDED_RES_2_B:
+		case INSTRUCTION_EXTENDED_RES_3_B:
+		case INSTRUCTION_EXTENDED_RES_4_B:
+		case INSTRUCTION_EXTENDED_RES_5_B:
+		case INSTRUCTION_EXTENDED_RES_6_B:
+		case INSTRUCTION_EXTENDED_RES_7_B:
+			processor->bc.high &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_B) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_C:
+		case INSTRUCTION_EXTENDED_RES_1_C:
+		case INSTRUCTION_EXTENDED_RES_2_C:
+		case INSTRUCTION_EXTENDED_RES_3_C:
+		case INSTRUCTION_EXTENDED_RES_4_C:
+		case INSTRUCTION_EXTENDED_RES_5_C:
+		case INSTRUCTION_EXTENDED_RES_6_C:
+		case INSTRUCTION_EXTENDED_RES_7_C:
+			processor->bc.low &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_C) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_D:
+		case INSTRUCTION_EXTENDED_RES_1_D:
+		case INSTRUCTION_EXTENDED_RES_2_D:
+		case INSTRUCTION_EXTENDED_RES_3_D:
+		case INSTRUCTION_EXTENDED_RES_4_D:
+		case INSTRUCTION_EXTENDED_RES_5_D:
+		case INSTRUCTION_EXTENDED_RES_6_D:
+		case INSTRUCTION_EXTENDED_RES_7_D:
+			processor->de.high &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_D) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_E:
+		case INSTRUCTION_EXTENDED_RES_1_E:
+		case INSTRUCTION_EXTENDED_RES_2_E:
+		case INSTRUCTION_EXTENDED_RES_3_E:
+		case INSTRUCTION_EXTENDED_RES_4_E:
+		case INSTRUCTION_EXTENDED_RES_5_E:
+		case INSTRUCTION_EXTENDED_RES_6_E:
+		case INSTRUCTION_EXTENDED_RES_7_E:
+			processor->de.low &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_E) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_H:
+		case INSTRUCTION_EXTENDED_RES_1_H:
+		case INSTRUCTION_EXTENDED_RES_2_H:
+		case INSTRUCTION_EXTENDED_RES_3_H:
+		case INSTRUCTION_EXTENDED_RES_4_H:
+		case INSTRUCTION_EXTENDED_RES_5_H:
+		case INSTRUCTION_EXTENDED_RES_6_H:
+		case INSTRUCTION_EXTENDED_RES_7_H:
+			processor->hl.high &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_H) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_1_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_2_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_3_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_4_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_5_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_6_HL_IND:
+		case INSTRUCTION_EXTENDED_RES_7_HL_IND:
+			dmg_runtime_write(processor->hl.word, dmg_runtime_read(processor->hl.word)
+								& ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_HL_IND) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_RES_0_L:
+		case INSTRUCTION_EXTENDED_RES_1_L:
+		case INSTRUCTION_EXTENDED_RES_2_L:
+		case INSTRUCTION_EXTENDED_RES_3_L:
+		case INSTRUCTION_EXTENDED_RES_4_L:
+		case INSTRUCTION_EXTENDED_RES_5_L:
+		case INSTRUCTION_EXTENDED_RES_6_L:
+		case INSTRUCTION_EXTENDED_RES_7_L:
+			processor->hl.low &= ~(1 << ((instruction->opcode - INSTRUCTION_EXTENDED_RES_0_L) / CHAR_BIT));
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_rl(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
 	__in const dmg_register_t *operand
@@ -100,16 +306,32 @@ dmg_processor_instruction_extended_rlc(
 	dmg_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
-
-		// TODO: IMPLEMENT RLC INSTRUCTION
-
-		case INSTRUCTION_EXTENDED_RLC_B:
+		case INSTRUCTION_EXTENDED_RL_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_RL_B:
 			value.low = processor->bc.high;
 			break;
-
-		// TODO: IMPLEMENT RLC INSTRUCTION
-
+		case INSTRUCTION_EXTENDED_RL_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_RL_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_RL_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_RL_L:
+			value.low = processor->hl.low;
+			break;
 		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -122,16 +344,684 @@ dmg_processor_instruction_extended_rlc(
 	processor->af.flag.zero = !value.low;
 
 	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RL_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RL_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_RL_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
 
-		// TODO: IMPLEMENT RLC INSTRUCTION
+	return instruction->cycle;
+}
 
+static uint32_t
+dmg_processor_instruction_extended_rlc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RLC_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_RLC_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_lsb = value.low_msb;
+	processor->af.flag.carry = carry.low_lsb;
+	value.low <<= 1;
+	value.low |= carry.low_lsb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RLC_A:
+			processor->af.high = value.low;
+			break;
 		case INSTRUCTION_EXTENDED_RLC_B:
 			processor->bc.high = value.low;
 			break;
-
-		// TODO: IMPLEMENT RLC INSTRUCTION
-
+		case INSTRUCTION_EXTENDED_RLC_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RLC_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_RLC_L:
+			processor->hl.low = value.low;
+			break;
 		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_rr(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RR_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_RR_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_RR_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_RR_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_RR_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_RR_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_msb = processor->af.flag.carry;
+	processor->af.flag.carry = value.low_lsb;
+	value.low >>= 1;
+	value.low |= carry.low_msb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RR_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RR_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_RR_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_rrc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RRC_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_RRC_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_msb = value.low_lsb;
+	processor->af.flag.carry = carry.low_msb;
+	value.low >>= 1;
+	value.low |= carry.low_msb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_RRC_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_RRC_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_RRC_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_set(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SET_0_A:
+		case INSTRUCTION_EXTENDED_SET_1_A:
+		case INSTRUCTION_EXTENDED_SET_2_A:
+		case INSTRUCTION_EXTENDED_SET_3_A:
+		case INSTRUCTION_EXTENDED_SET_4_A:
+		case INSTRUCTION_EXTENDED_SET_5_A:
+		case INSTRUCTION_EXTENDED_SET_6_A:
+		case INSTRUCTION_EXTENDED_SET_7_A:
+			processor->af.high |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_A) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_B:
+		case INSTRUCTION_EXTENDED_SET_1_B:
+		case INSTRUCTION_EXTENDED_SET_2_B:
+		case INSTRUCTION_EXTENDED_SET_3_B:
+		case INSTRUCTION_EXTENDED_SET_4_B:
+		case INSTRUCTION_EXTENDED_SET_5_B:
+		case INSTRUCTION_EXTENDED_SET_6_B:
+		case INSTRUCTION_EXTENDED_SET_7_B:
+			processor->bc.high |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_B) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_C:
+		case INSTRUCTION_EXTENDED_SET_1_C:
+		case INSTRUCTION_EXTENDED_SET_2_C:
+		case INSTRUCTION_EXTENDED_SET_3_C:
+		case INSTRUCTION_EXTENDED_SET_4_C:
+		case INSTRUCTION_EXTENDED_SET_5_C:
+		case INSTRUCTION_EXTENDED_SET_6_C:
+		case INSTRUCTION_EXTENDED_SET_7_C:
+			processor->bc.low |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_C) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_D:
+		case INSTRUCTION_EXTENDED_SET_1_D:
+		case INSTRUCTION_EXTENDED_SET_2_D:
+		case INSTRUCTION_EXTENDED_SET_3_D:
+		case INSTRUCTION_EXTENDED_SET_4_D:
+		case INSTRUCTION_EXTENDED_SET_5_D:
+		case INSTRUCTION_EXTENDED_SET_6_D:
+		case INSTRUCTION_EXTENDED_SET_7_D:
+			processor->de.high |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_D) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_E:
+		case INSTRUCTION_EXTENDED_SET_1_E:
+		case INSTRUCTION_EXTENDED_SET_2_E:
+		case INSTRUCTION_EXTENDED_SET_3_E:
+		case INSTRUCTION_EXTENDED_SET_4_E:
+		case INSTRUCTION_EXTENDED_SET_5_E:
+		case INSTRUCTION_EXTENDED_SET_6_E:
+		case INSTRUCTION_EXTENDED_SET_7_E:
+			processor->de.low |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_E) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_H:
+		case INSTRUCTION_EXTENDED_SET_1_H:
+		case INSTRUCTION_EXTENDED_SET_2_H:
+		case INSTRUCTION_EXTENDED_SET_3_H:
+		case INSTRUCTION_EXTENDED_SET_4_H:
+		case INSTRUCTION_EXTENDED_SET_5_H:
+		case INSTRUCTION_EXTENDED_SET_6_H:
+		case INSTRUCTION_EXTENDED_SET_7_H:
+			processor->hl.high |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_H) / CHAR_BIT));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_1_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_2_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_3_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_4_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_5_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_6_HL_IND:
+		case INSTRUCTION_EXTENDED_SET_7_HL_IND:
+			dmg_runtime_write(processor->hl.word, dmg_runtime_read(processor->hl.word)
+								| (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_HL_IND) / CHAR_BIT)));
+			break;
+		case INSTRUCTION_EXTENDED_SET_0_L:
+		case INSTRUCTION_EXTENDED_SET_1_L:
+		case INSTRUCTION_EXTENDED_SET_2_L:
+		case INSTRUCTION_EXTENDED_SET_3_L:
+		case INSTRUCTION_EXTENDED_SET_4_L:
+		case INSTRUCTION_EXTENDED_SET_5_L:
+		case INSTRUCTION_EXTENDED_SET_6_L:
+		case INSTRUCTION_EXTENDED_SET_7_L:
+			processor->hl.low |= (1 << ((instruction->opcode - INSTRUCTION_EXTENDED_SET_0_L) / CHAR_BIT));
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_sla(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SLA_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_SLA_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.flag.carry = value.low_msb;
+	value.low <<= 1;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SLA_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SLA_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_SLA_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_sra(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SRA_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_SRA_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_msb = value.low_msb;
+	processor->af.flag.carry = value.low_lsb;
+	value.low >>= 1;
+	value.low_msb = carry.low_msb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SRA_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRA_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_SRA_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_srl(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SRL_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_SRL_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.flag.carry = value.low_lsb;
+	value.low >>= 1;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SRL_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SRL_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_SRL_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_extended_swap(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SWAP_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_L:
+			value.low = processor->hl.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	value.low = ((value.low << NIBBLE_BIT) | (value.low >> NIBBLE_BIT));
+	processor->af.flag.carry = false;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !value.low;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_SWAP_A:
+			processor->af.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_B:
+			processor->bc.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_C:
+			processor->bc.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_D:
+			processor->de.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_E:
+			processor->de.low = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_H:
+			processor->hl.high = value.low;
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_HL_IND:
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_EXTENDED_SWAP_L:
+			processor->hl.low = value.low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -139,10 +1029,262 @@ dmg_processor_instruction_extended_rlc(
 }
 
 static const dmg_instruction_cb INSTRUCTION_EXTENDED_HANDLER[] = {
-	dmg_processor_instruction_extended_rlc, /* INSTRUCTION_EXTENDED_RLC_B */
-
-	// TODO: ADD ADDITIONAL EXTENDED INSTRUCTIONS
-
+	dmg_processor_instruction_extended_rlc, /* 0x00 */
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rlc,
+	dmg_processor_instruction_extended_rrc, /* 0x08 */
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rrc,
+	dmg_processor_instruction_extended_rl, /* 0x10 */
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rl,
+	dmg_processor_instruction_extended_rr, /* 0x18 */
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_rr,
+	dmg_processor_instruction_extended_sla, /* 0x20 */
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sla,
+	dmg_processor_instruction_extended_sra, /* 0x28 */
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_sra,
+	dmg_processor_instruction_extended_swap, /* 0x30 */
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_swap,
+	dmg_processor_instruction_extended_srl, /* 0x38 */
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_srl,
+	dmg_processor_instruction_extended_bit, /* 0x40 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x48 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x50 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x58 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x60 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x68 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x70 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit, /* 0x78 */
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_bit,
+	dmg_processor_instruction_extended_res, /* 0x80 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0x88 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0x90 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0x98 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0xa0 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0xa8 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0xb0 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res, /* 0xb8 */
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_res,
+	dmg_processor_instruction_extended_set, /* 0xc0 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xc8 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xd0 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xd8 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xe0 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xe8 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xf0 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set, /* 0xf8 */
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
+	dmg_processor_instruction_extended_set,
 	};
 
 static uint32_t
