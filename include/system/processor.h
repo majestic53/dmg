@@ -89,6 +89,7 @@ typedef struct {
 	dmg_register_t pc;
 	dmg_register_t sp;
 	bool interrupts_enable;
+	int interrupts_enable_state;
 	dmg_interrupt_t interrupt_enable;
 	dmg_interrupt_t interrupt_flag;
 	bool halt;

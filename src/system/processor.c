@@ -38,7 +38,7 @@ dmg_processor_fetch_word(
 	return (dmg_processor_fetch(processor) | (dmg_processor_fetch(processor) << CHAR_BIT));
 }
 
-/*static inline uint8_t
+static inline uint8_t
 dmg_processor_pop(
 	__inout dmg_processor_t *processor
 	)
@@ -52,7 +52,7 @@ dmg_processor_pop_word(
 	)
 {
 	return (dmg_processor_pop(processor) | (dmg_processor_pop(processor) << CHAR_BIT));
-}*/
+}
 
 static inline void
 dmg_processor_push(
@@ -74,6 +74,306 @@ dmg_processor_push_word(
 }
 
 static uint32_t
+dmg_processor_instruction_and(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_AND_A_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_AND_A_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_AND_A_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_AND_A_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_AND_A_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_AND_A_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_AND_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_AND_A_L:
+			value.low = processor->hl.low;
+			break;
+		case INSTRUCTION_AND_A_U8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.high &= value.low;
+	processor->af.flag.carry = false;
+	processor->af.flag.carry_half = true;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_call(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	bool taken = false;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_CALL_C_U16:
+			taken = processor->af.flag.carry;
+			break;
+		case INSTRUCTION_CALL_NC_U16:
+			taken = !processor->af.flag.carry;
+			break;
+		case INSTRUCTION_CALL_NZ_U16:
+			taken = !processor->af.flag.zero;
+			break;
+		case INSTRUCTION_CALL_U16:
+			taken = true;
+			break;
+		case INSTRUCTION_CALL_Z_U16:
+			taken = processor->af.flag.zero;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	if(taken) {
+		dmg_processor_push_word(processor, processor->pc.word);
+		processor->pc.word = operand->word;
+	}
+
+	return (taken ? instruction->cycle_taken : instruction->cycle);
+}
+
+static uint32_t
+dmg_processor_instruction_ccf(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->af.flag.carry = !processor->af.flag.carry;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_cpl(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->af.high = ~processor->af.high;
+	processor->af.flag.carry_half = true;
+	processor->af.flag.subtract = true;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_dec_u16(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_DEC_BC:
+			--processor->bc.word;
+			break;
+		case INSTRUCTION_DEC_DE:
+			--processor->de.word;
+			break;
+		case INSTRUCTION_DEC_HL:
+			--processor->hl.word;
+			break;
+		case INSTRUCTION_DEC_SP:
+			--processor->sp.word;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_di(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	if(processor->interrupts_enable) {
+		processor->interrupts_enable_state = INTERRUPTS_STATE_PENDING;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_ei(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	if(!processor->interrupts_enable) {
+		processor->interrupts_enable_state = INTERRUPTS_STATE_PENDING;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_halt(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->halt = true;
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor entering halt state [%04x]", processor->pc.word);
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_inc_u16(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_INC_BC:
+			++processor->bc.word;
+			break;
+		case INSTRUCTION_INC_DE:
+			++processor->de.word;
+			break;
+		case INSTRUCTION_INC_HL:
+			++processor->hl.word;
+			break;
+		case INSTRUCTION_INC_SP:
+			++processor->sp.word;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_jp(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	bool taken = false;
+	dmg_register_t value;
+
+	value.word = operand->word;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_JP_C_U16:
+			taken = processor->af.flag.carry;
+			break;
+		case INSTRUCTION_JP_HL:
+			taken = true;
+			value.word = processor->hl.word;
+			break;
+		case INSTRUCTION_JP_NC_U16:
+			taken = !processor->af.flag.carry;
+			break;
+		case INSTRUCTION_JP_NZ_U16:
+			taken = !processor->af.flag.zero;
+			break;
+		case INSTRUCTION_JP_U16:
+			taken = true;
+			break;
+		case INSTRUCTION_JP_Z_U16:
+			taken = processor->af.flag.zero;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	if(taken) {
+		processor->pc.word = value.word;
+	}
+
+	return (taken ? instruction->cycle_taken : instruction->cycle);
+}
+
+static uint32_t
+dmg_processor_instruction_jr(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	bool taken = false;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_JR_C_I8:
+			taken = processor->af.flag.carry;
+			break;
+		case INSTRUCTION_JR_NC_I8:
+			taken = !processor->af.flag.carry;
+			break;
+		case INSTRUCTION_JR_NZ_I8:
+			taken = !processor->af.flag.zero;
+			break;
+		case INSTRUCTION_JR_I8:
+			taken = true;
+			break;
+		case INSTRUCTION_JR_Z_I8:
+			taken = processor->af.flag.zero;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	if(taken) {
+		processor->pc.word += (int8_t)operand->low;
+	}
+
+	return (taken ? instruction->cycle_taken : instruction->cycle);
+}
+
+static uint32_t
 dmg_processor_instruction_nop(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -83,11 +383,531 @@ dmg_processor_instruction_nop(
 	return instruction->cycle;
 }
 
+static uint32_t
+dmg_processor_instruction_or(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_OR_A_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_OR_A_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_OR_A_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_OR_A_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_OR_A_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_OR_A_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_OR_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_OR_A_L:
+			value.low = processor->hl.low;
+			break;
+		case INSTRUCTION_OR_A_U8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.high |= value.low;
+	processor->af.flag.carry = false;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_pop(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_POP_AF:
+			processor->af.word = dmg_processor_pop_word(processor);
+			processor->af.low &= FLAG_MASK;
+			break;
+		case INSTRUCTION_POP_BC:
+			processor->bc.word = dmg_processor_pop_word(processor);
+			break;
+		case INSTRUCTION_POP_DE:
+			processor->de.word = dmg_processor_pop_word(processor);
+			break;
+		case INSTRUCTION_POP_HL:
+			processor->hl.word = dmg_processor_pop_word(processor);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_push(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_PUSH_AF:
+			dmg_processor_push_word(processor, processor->af.word);
+			break;
+		case INSTRUCTION_PUSH_BC:
+			dmg_processor_push_word(processor, processor->bc.word);
+			break;
+		case INSTRUCTION_PUSH_DE:
+			dmg_processor_push_word(processor, processor->de.word);
+			break;
+		case INSTRUCTION_PUSH_HL:
+			dmg_processor_push_word(processor, processor->hl.word);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_ret(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	bool taken = false;
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_RET:
+			taken = true;
+			break;
+		case INSTRUCTION_RET_C:
+			taken = processor->af.flag.carry;
+			break;
+		case INSTRUCTION_RET_NC:
+			taken = !processor->af.flag.carry;
+			break;
+		case INSTRUCTION_RET_NZ:
+			taken = !processor->af.flag.zero;
+			break;
+		case INSTRUCTION_RET_Z:
+			taken = processor->af.flag.zero;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	if(taken) {
+		processor->pc.word = dmg_processor_pop_word(processor);
+	}
+
+	return (taken ? instruction->cycle_taken : instruction->cycle);
+}
+
+static uint32_t
+dmg_processor_instruction_reti(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->pc.word = dmg_processor_pop_word(processor);
+	processor->interrupts_enable = true;
+	processor->interrupts_enable_state = INTERRUPTS_STATE_NONE;
+
+	return instruction->cycle_taken;
+}
+
+static uint32_t
+dmg_processor_instruction_rst(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_RST_00:
+		case INSTRUCTION_RST_08:
+		case INSTRUCTION_RST_10:
+		case INSTRUCTION_RST_18:
+		case INSTRUCTION_RST_20:
+		case INSTRUCTION_RST_28:
+		case INSTRUCTION_RST_30:
+		case INSTRUCTION_RST_38:
+			dmg_processor_push_word(processor, processor->pc.word);
+			processor->pc.word = (instruction->opcode - INSTRUCTION_RST_00);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_scf(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->af.flag.carry = true;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_stop(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	processor->stop = true;
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Processor entering stop state [%04x], %02x", processor->pc.word, operand->low);
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_xor(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_XOR_A_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_XOR_A_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_XOR_A_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_XOR_A_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_XOR_A_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_XOR_A_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_XOR_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_XOR_A_L:
+			value.low = processor->hl.low;
+			break;
+		case INSTRUCTION_XOR_A_U8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	processor->af.high ^= value.low;
+	processor->af.flag.carry = false;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
 static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_nop, /* 0x00 */
-
-	// TODO: ADD ADDITIONAL INSTRUCTIONS
-
+	NULL,
+	NULL,
+	dmg_processor_instruction_inc_u16,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x08 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_dec_u16,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_stop, /* 0x10 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_inc_u16,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_jr, /* 0x18 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_dec_u16,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_jr, /* 0x20 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_inc_u16,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_jr, /* 0x28 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_dec_u16,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_cpl,
+	dmg_processor_instruction_jr, /* 0x30 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_inc_u16,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_scf,
+	dmg_processor_instruction_jr, /* 0x38 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_dec_u16,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_ccf,
+	NULL, /* 0x40 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x48 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x50 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x58 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x60 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x68 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x70 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_halt,
+	NULL,
+	NULL, /* 0x78 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x80 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x88 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x90 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL, /* 0x98 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_and, /* 0xa0 */
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_xor, /* 0xa8 */
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_or, /* 0xb0 */
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_or,
+	NULL, /* 0xb8 */
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_ret, /* 0xc0 */
+	dmg_processor_instruction_pop,
+	dmg_processor_instruction_jp,
+	dmg_processor_instruction_jp,
+	dmg_processor_instruction_call,
+	dmg_processor_instruction_push,
+	NULL,
+	dmg_processor_instruction_rst,
+	dmg_processor_instruction_ret, /* 0xc8 */
+	dmg_processor_instruction_ret,
+	dmg_processor_instruction_jp,
+	NULL,
+	dmg_processor_instruction_call,
+	dmg_processor_instruction_call,
+	NULL,
+	dmg_processor_instruction_rst,
+	dmg_processor_instruction_ret, /* 0xd0 */
+	dmg_processor_instruction_pop,
+	dmg_processor_instruction_jp,
+	NULL,
+	dmg_processor_instruction_call,
+	dmg_processor_instruction_push,
+	NULL,
+	dmg_processor_instruction_rst,
+	dmg_processor_instruction_ret, /* 0xd8 */
+	dmg_processor_instruction_reti,
+	dmg_processor_instruction_jp,
+	NULL,
+	dmg_processor_instruction_call,
+	NULL,
+	NULL,
+	dmg_processor_instruction_rst,
+	NULL, /* 0xe0 */
+	dmg_processor_instruction_pop,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_push,
+	dmg_processor_instruction_and,
+	dmg_processor_instruction_rst,
+	NULL, /* 0xe8 */
+	dmg_processor_instruction_jp,
+	NULL,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_xor,
+	dmg_processor_instruction_rst,
+	NULL, /* 0xf0 */
+	dmg_processor_instruction_pop,
+	NULL,
+	dmg_processor_instruction_di,
+	NULL,
+	dmg_processor_instruction_push,
+	dmg_processor_instruction_or,
+	dmg_processor_instruction_rst,
+	NULL, /* 0xf8 */
+	NULL,
+	NULL,
+	dmg_processor_instruction_ei,
+	NULL,
+	NULL,
+	NULL,
+	dmg_processor_instruction_rst,
 	};
 
 static uint32_t
@@ -1321,6 +2141,24 @@ dmg_processor_execute(
 		}
 
 		result += (*handler)(processor, instruction, &operand);
+
+		switch(processor->interrupts_enable_state) {
+			case INTERRUPTS_STATE_SET:
+				processor->interrupts_enable_state = INTERRUPTS_STATE_NONE;
+				processor->interrupts_enable = !processor->interrupts_enable;
+
+				TRACE_FORMAT(LEVEL_VERBOSE, "Interrupts %s [%04x]", processor->interrupts_enable ? "enabled" : "disabled",
+						processor->pc.word);
+				break;
+			case INTERRUPTS_STATE_PENDING:
+				processor->interrupts_enable_state = INTERRUPTS_STATE_SET;
+
+				TRACE_FORMAT(LEVEL_VERBOSE, "Interrupts %s pending [%04x]", processor->interrupts_enable ? "disable" : "enable",
+						processor->pc.word);
+				break;
+			default:
+				break;
+		}
 	} else {
 		result += CYCLE_IDLE;
 	}
