@@ -220,6 +220,41 @@ dmg_processor_instruction_dec_u16(
 }
 
 static uint32_t
+dmg_processor_instruction_daa(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	if(!processor->af.flag.subtract) {
+
+		if(processor->af.flag.carry || (processor->af.high > DAA_MAX_HIGH)) {
+			processor->af.high += DAA_OFFSET_HIGH;
+			processor->af.flag.carry = true;
+		}
+
+		if(processor->af.flag.carry_half || ((processor->af.high & NIBBLE_MAX) > DAA_MAX_LOW)) {
+			processor->af.high += DAA_OFFSET_LOW;
+		}
+	} else {
+
+		if(processor->af.flag.carry) {
+			processor->af.high -= DAA_OFFSET_HIGH;
+		}
+
+		if(processor->af.flag.carry_half) {
+			processor->af.high -= DAA_OFFSET_LOW;
+		}
+	}
+
+	processor->af.flag.carry_half = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
 dmg_processor_instruction_di(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -545,6 +580,86 @@ dmg_processor_instruction_reti(
 }
 
 static uint32_t
+dmg_processor_instruction_rla(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {};
+
+	carry.low_lsb = processor->af.flag.carry;
+	processor->af.flag.carry = processor->af.high_msb;
+	processor->af.high <<= 1;
+	processor->af.high_lsb = carry.low_lsb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_rlca(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {};
+
+	carry.low_lsb = processor->af.high_msb;
+	processor->af.flag.carry = carry.low_lsb;
+	processor->af.high <<= 1;
+	processor->af.high_lsb = carry.low_lsb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_rra(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {};
+
+	carry.low_msb = processor->af.flag.carry;
+	processor->af.flag.carry = processor->af.high_lsb;
+	processor->af.high >>= 1;
+	processor->af.high_msb = carry.low_msb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_rrca(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {};
+
+	carry.low_msb = processor->af.high_lsb;
+	processor->af.flag.carry = carry.low_msb;
+	processor->af.high >>= 1;
+	processor->af.high_msb = carry.low_msb;
+	processor->af.flag.carry_half = false;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
 dmg_processor_instruction_rst(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -659,7 +774,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_rlca,
 	NULL, /* 0x08 */
 	NULL,
 	NULL,
@@ -667,7 +782,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_rrca,
 	dmg_processor_instruction_stop, /* 0x10 */
 	NULL,
 	NULL,
@@ -675,7 +790,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_rla,
 	dmg_processor_instruction_jr, /* 0x18 */
 	NULL,
 	NULL,
@@ -683,7 +798,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_rra,
 	dmg_processor_instruction_jr, /* 0x20 */
 	NULL,
 	NULL,
@@ -691,7 +806,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_daa,
 	dmg_processor_instruction_jr, /* 0x28 */
 	NULL,
 	NULL,
