@@ -74,6 +74,30 @@ dmg_processor_push_word(
 }
 
 static uint32_t
+dmg_processor_instruction_adc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
+}
+
+static uint32_t
+dmg_processor_instruction_add(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
+}
+
+static uint32_t
 dmg_processor_instruction_and(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -177,6 +201,18 @@ dmg_processor_instruction_ccf(
 }
 
 static uint32_t
+dmg_processor_instruction_cp(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
+}
+
+static uint32_t
 dmg_processor_instruction_cpl(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -188,6 +224,18 @@ dmg_processor_instruction_cpl(
 	processor->af.flag.subtract = true;
 
 	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_dec(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
 }
 
 static uint32_t
@@ -296,6 +344,18 @@ dmg_processor_instruction_halt(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor entering halt state [%04x]", processor->pc.word);
 
 	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_inc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
 }
 
 static uint32_t
@@ -688,6 +748,18 @@ dmg_processor_instruction_rst(
 }
 
 static uint32_t
+dmg_processor_instruction_sbc(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
+}
+
+static uint32_t
 dmg_processor_instruction_scf(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -713,6 +785,18 @@ dmg_processor_instruction_stop(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Processor entering stop state [%04x], %02x", processor->pc.word, operand->low);
 
 	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_sub(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	// TODO
+	return instruction->cycle;
+	// ---
 }
 
 static uint32_t
@@ -771,64 +855,64 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	dmg_processor_instruction_inc_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_rlca,
 	NULL, /* 0x08 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_dec_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_rrca,
 	dmg_processor_instruction_stop, /* 0x10 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_inc_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_rla,
 	dmg_processor_instruction_jr, /* 0x18 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_dec_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_rra,
 	dmg_processor_instruction_jr, /* 0x20 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_inc_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_daa,
 	dmg_processor_instruction_jr, /* 0x28 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_dec_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_cpl,
 	dmg_processor_instruction_jr, /* 0x30 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_inc_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_scf,
 	dmg_processor_instruction_jr, /* 0x38 */
 	NULL,
 	NULL,
 	dmg_processor_instruction_dec_u16,
-	NULL,
-	NULL,
+	dmg_processor_instruction_inc,
+	dmg_processor_instruction_dec,
 	NULL,
 	dmg_processor_instruction_ccf,
 	NULL, /* 0x40 */
@@ -895,38 +979,38 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	NULL,
 	NULL,
-	NULL, /* 0x80 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x88 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x90 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x98 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_add, /* 0x80 */
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_adc, /* 0x88 */
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_adc,
+	dmg_processor_instruction_sub, /* 0x90 */
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sub,
+	dmg_processor_instruction_sbc, /* 0x98 */
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
+	dmg_processor_instruction_sbc,
 	dmg_processor_instruction_and, /* 0xa0 */
 	dmg_processor_instruction_and,
 	dmg_processor_instruction_and,
@@ -951,21 +1035,21 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_or,
 	dmg_processor_instruction_or,
 	dmg_processor_instruction_or,
-	NULL, /* 0xb8 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_cp, /* 0xb8 */
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
+	dmg_processor_instruction_cp,
 	dmg_processor_instruction_ret, /* 0xc0 */
 	dmg_processor_instruction_pop,
 	dmg_processor_instruction_jp,
 	dmg_processor_instruction_jp,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_push,
-	NULL,
+	dmg_processor_instruction_add,
 	dmg_processor_instruction_rst,
 	dmg_processor_instruction_ret, /* 0xc8 */
 	dmg_processor_instruction_ret,
@@ -973,7 +1057,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_call,
-	NULL,
+	dmg_processor_instruction_adc,
 	dmg_processor_instruction_rst,
 	dmg_processor_instruction_ret, /* 0xd0 */
 	dmg_processor_instruction_pop,
@@ -981,14 +1065,14 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_push,
-	NULL,
+	dmg_processor_instruction_sub,
 	dmg_processor_instruction_rst,
 	dmg_processor_instruction_ret, /* 0xd8 */
 	dmg_processor_instruction_reti,
 	dmg_processor_instruction_jp,
 	NULL,
 	dmg_processor_instruction_call,
-	NULL,
+	dmg_processor_instruction_sbc,
 	NULL,
 	dmg_processor_instruction_rst,
 	NULL, /* 0xe0 */
@@ -1021,7 +1105,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_ei,
 	NULL,
 	NULL,
-	NULL,
+	dmg_processor_instruction_cp,
 	dmg_processor_instruction_rst,
 	};
 
