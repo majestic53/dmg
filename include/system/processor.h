@@ -54,31 +54,36 @@ typedef union {
 
 	struct {
 
-		union {
+		struct {
 
-			struct {
-				uint8_t low_lsb : 1;
-				uint8_t low_unused : 6;
-				uint8_t low_msb : 1;
+			union {
+
+				struct {
+					uint8_t low_lsb : 1;
+					uint8_t low_unused : 6;
+					uint8_t low_msb : 1;
+				};
+
+				dmg_flag_t flag;
+				uint8_t low;
 			};
 
-			dmg_flag_t flag;
-			uint8_t low;
-		};
+			union {
 
-		union {
+				struct {
+					uint8_t high_lsb : 1;
+					uint8_t high_unused : 6;
+					uint8_t high_msb : 1;
+				};
 
-			struct {
-				uint8_t high_lsb : 1;
-				uint8_t high_unused : 6;
-				uint8_t high_msb : 1;
+				uint8_t high;
 			};
-
-			uint8_t high;
 		};
+
+		uint16_t word;
 	};
 
-	uint16_t word;
+	uint32_t dword;
 } __attribute__((packed)) dmg_register_t;
 
 typedef struct {

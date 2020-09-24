@@ -80,9 +80,50 @@ dmg_processor_instruction_adc(
 	__in const dmg_register_t *operand
 	)
 {
-	// TODO
+	dmg_register_t carry = {}, sum = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_ADC_A_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_ADC_A_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_ADC_A_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_ADC_A_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_ADC_A_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_ADC_A_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_ADC_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_ADC_A_L:
+			value.low = processor->hl.low;
+			break;
+		case INSTRUCTION_ADC_A_U8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_lsb = processor->af.flag.carry;
+	sum.word = (processor->af.high + value.low + carry.low_lsb);
+	processor->af.flag.carry = (sum.word > UINT8_MAX);
+	processor->af.flag.carry_half = (((processor->af.high & NIBBLE_MAX) + (value.low & NIBBLE_MAX) + carry.low_lsb) > NIBBLE_MAX);
+	processor->af.high = sum.low;
+	processor->af.flag.subtract = false;
+	processor->af.flag.zero = !processor->af.high;
+
 	return instruction->cycle;
-	// ---
 }
 
 static uint32_t
@@ -134,6 +175,65 @@ dmg_processor_instruction_add(
 	processor->af.flag.carry_half = ((carry.word & (1 << NIBBLE_BIT)) == (1 << NIBBLE_BIT));
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
+dmg_processor_instruction_add_u16(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+	dmg_register_t carry = {}, sum = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_ADD_HL_BC:
+			value.word = processor->bc.word;
+			break;
+		case INSTRUCTION_ADD_HL_DE:
+			value.word = processor->de.word;
+			break;
+		case INSTRUCTION_ADD_HL_HL:
+			value.word = processor->hl.word;
+			break;
+		case INSTRUCTION_ADD_HL_SP:
+			value.word = processor->sp.word;
+			break;
+		case INSTRUCTION_ADD_SP_I8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_ADD_HL_BC:
+		case INSTRUCTION_ADD_HL_DE:
+		case INSTRUCTION_ADD_HL_HL:
+		case INSTRUCTION_ADD_HL_SP:
+			sum.dword = (processor->hl.word + value.word);
+			carry.dword = (processor->hl.word ^ sum.dword ^ value.word);
+			processor->hl.word = sum.word;
+			processor->af.flag.carry = ((carry.dword & (1 << (CHAR_BIT * 2))) == (1 << (CHAR_BIT * 2)));
+			processor->af.flag.carry_half = ((carry.dword & (1 << (NIBBLE_BIT * 3))) == (1 << (NIBBLE_BIT * 3)));
+			processor->af.flag.subtract = false;
+			break;
+		case INSTRUCTION_ADD_SP_I8:
+			sum.dword = (processor->sp.word + (int8_t)value.low);
+			carry.dword = (processor->sp.word ^ sum.dword ^ (int8_t)value.low);
+			processor->sp.word = sum.word;
+			processor->af.flag.carry = ((carry.word & (1 << CHAR_BIT)) == (1 << CHAR_BIT));
+			processor->af.flag.carry_half = ((carry.word & (1 << NIBBLE_BIT)) == (1 << NIBBLE_BIT));
+			processor->af.flag.subtract = false;
+			processor->af.flag.zero = false;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
 
 	return instruction->cycle;
 }
@@ -963,9 +1063,50 @@ dmg_processor_instruction_sbc(
 	__in const dmg_register_t *operand
 	)
 {
-	// TODO
+	dmg_register_t carry = {}, sum = {}, value = {};
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_SBC_A_A:
+			value.low = processor->af.high;
+			break;
+		case INSTRUCTION_SBC_A_B:
+			value.low = processor->bc.high;
+			break;
+		case INSTRUCTION_SBC_A_C:
+			value.low = processor->bc.low;
+			break;
+		case INSTRUCTION_SBC_A_D:
+			value.low = processor->de.high;
+			break;
+		case INSTRUCTION_SBC_A_E:
+			value.low = processor->de.low;
+			break;
+		case INSTRUCTION_SBC_A_H:
+			value.low = processor->hl.high;
+			break;
+		case INSTRUCTION_SBC_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_SBC_A_L:
+			value.low = processor->hl.low;
+			break;
+		case INSTRUCTION_SBC_A_U8:
+			value.low = operand->low;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	carry.low_lsb = processor->af.flag.carry;
+	sum.word = (processor->af.high - value.low - carry.low_lsb);
+	processor->af.flag.carry = (((int16_t)sum.word) < 0);
+	processor->af.flag.carry_half = ((int16_t)((processor->af.high & NIBBLE_MAX) - (value.low & NIBBLE_MAX) - carry.low_lsb) < 0);
+	processor->af.high = sum.low;
+	processor->af.flag.subtract = true;
+	processor->af.flag.zero = !processor->af.high;
+
 	return instruction->cycle;
-	// ---
 }
 
 static uint32_t
@@ -1110,7 +1251,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_rlca,
 	NULL, /* 0x08 */
-	NULL,
+	dmg_processor_instruction_add_u16,
 	NULL,
 	dmg_processor_instruction_dec_u16,
 	dmg_processor_instruction_inc,
@@ -1126,7 +1267,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_rla,
 	dmg_processor_instruction_jr, /* 0x18 */
-	NULL,
+	dmg_processor_instruction_add_u16,
 	NULL,
 	dmg_processor_instruction_dec_u16,
 	dmg_processor_instruction_inc,
@@ -1142,7 +1283,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_daa,
 	dmg_processor_instruction_jr, /* 0x28 */
-	NULL,
+	dmg_processor_instruction_add_u16,
 	NULL,
 	dmg_processor_instruction_dec_u16,
 	dmg_processor_instruction_inc,
@@ -1158,7 +1299,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	NULL,
 	dmg_processor_instruction_scf,
 	dmg_processor_instruction_jr, /* 0x38 */
-	NULL,
+	dmg_processor_instruction_add_u16,
 	NULL,
 	dmg_processor_instruction_dec_u16,
 	dmg_processor_instruction_inc,
@@ -1333,7 +1474,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_push,
 	dmg_processor_instruction_and,
 	dmg_processor_instruction_rst,
-	NULL, /* 0xe8 */
+	dmg_processor_instruction_add_u16, /* 0xe8 */
 	dmg_processor_instruction_jp,
 	NULL,
 	NULL,
