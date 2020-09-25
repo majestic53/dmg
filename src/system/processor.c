@@ -154,41 +154,12 @@ dmg_processor_instruction_add(
 		case INSTRUCTION_ADD_A_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_ADD_A_HL_IND:
-			value.low = dmg_runtime_read(processor->hl.word);
-			break;
 		case INSTRUCTION_ADD_A_L:
 			value.low = processor->hl.low;
 			break;
 		case INSTRUCTION_ADD_A_U8:
 			value.low = operand->low;
 			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
-			break;
-	}
-
-	sum.word = (processor->af.high + value.low);
-	carry.word = (processor->af.high ^ sum.word ^ value.low);
-	processor->af.high = sum.low;
-	processor->af.flag.carry = ((carry.word & (1 << CHAR_BIT)) == (1 << CHAR_BIT));
-	processor->af.flag.carry_half = ((carry.word & (1 << NIBBLE_BIT)) == (1 << NIBBLE_BIT));
-	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !processor->af.high;
-
-	return instruction->cycle;
-}
-
-static uint32_t
-dmg_processor_instruction_add_u16(
-	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
-	)
-{
-	dmg_register_t carry = {}, sum = {}, value = {};
-
-	switch(instruction->opcode) {
 		case INSTRUCTION_ADD_HL_BC:
 			value.word = processor->bc.word;
 			break;
@@ -197,6 +168,9 @@ dmg_processor_instruction_add_u16(
 			break;
 		case INSTRUCTION_ADD_HL_HL:
 			value.word = processor->hl.word;
+			break;
+		case INSTRUCTION_ADD_A_HL_IND:
+			value.low = dmg_runtime_read(processor->hl.word);
 			break;
 		case INSTRUCTION_ADD_HL_SP:
 			value.word = processor->sp.word;
@@ -210,6 +184,23 @@ dmg_processor_instruction_add_u16(
 	}
 
 	switch(instruction->opcode) {
+		case INSTRUCTION_ADD_A_A:
+		case INSTRUCTION_ADD_A_B:
+		case INSTRUCTION_ADD_A_C:
+		case INSTRUCTION_ADD_A_D:
+		case INSTRUCTION_ADD_A_E:
+		case INSTRUCTION_ADD_A_H:
+		case INSTRUCTION_ADD_A_HL_IND:
+		case INSTRUCTION_ADD_A_L:
+		case INSTRUCTION_ADD_A_U8:
+			sum.word = (processor->af.high + value.low);
+			carry.word = (processor->af.high ^ sum.word ^ value.low);
+			processor->af.high = sum.low;
+			processor->af.flag.carry = ((carry.word & (1 << CHAR_BIT)) == (1 << CHAR_BIT));
+			processor->af.flag.carry_half = ((carry.word & (1 << NIBBLE_BIT)) == (1 << NIBBLE_BIT));
+			processor->af.flag.subtract = false;
+			processor->af.flag.zero = !processor->af.high;
+			break;
 		case INSTRUCTION_ADD_HL_BC:
 		case INSTRUCTION_ADD_HL_DE:
 		case INSTRUCTION_ADD_HL_HL:
@@ -416,92 +407,64 @@ dmg_processor_instruction_dec(
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_DEC_A:
-			value.low = processor->af.high;
+			value.low = --processor->af.high;
 			break;
 		case INSTRUCTION_DEC_B:
-			value.low = processor->bc.high;
+			value.low = --processor->bc.high;
 			break;
-		case INSTRUCTION_DEC_C:
-			value.low = processor->bc.low;
-			break;
-		case INSTRUCTION_DEC_D:
-			value.low = processor->de.high;
-			break;
-		case INSTRUCTION_DEC_E:
-			value.low = processor->de.low;
-			break;
-		case INSTRUCTION_DEC_H:
-			value.low = processor->hl.high;
-			break;
-		case INSTRUCTION_DEC_HL_IND:
-			value.low = dmg_runtime_read(processor->hl.word);
-			break;
-		case INSTRUCTION_DEC_L:
-			value.low = processor->hl.low;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
-			break;
-	}
-
-	--value.low;
-	processor->af.flag.carry_half = ((value.low & NIBBLE_MAX) == NIBBLE_MAX);
-	processor->af.flag.subtract = true;
-	processor->af.flag.zero = !value.low;
-
-	switch(instruction->opcode) {
-		case INSTRUCTION_DEC_A:
-			processor->af.high = value.low;
-			break;
-		case INSTRUCTION_DEC_B:
-			processor->bc.high = value.low;
-			break;
-		case INSTRUCTION_DEC_C:
-			processor->bc.low = value.low;
-			break;
-		case INSTRUCTION_DEC_D:
-			processor->de.high = value.low;
-			break;
-		case INSTRUCTION_DEC_E:
-			processor->de.low = value.low;
-			break;
-		case INSTRUCTION_DEC_H:
-			processor->hl.high = value.low;
-			break;
-		case INSTRUCTION_DEC_HL_IND:
-			dmg_runtime_write(processor->hl.word, value.low);
-			break;
-		case INSTRUCTION_DEC_L:
-			processor->hl.low = value.low;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
-			break;
-	}
-
-	return instruction->cycle;
-}
-
-static uint32_t
-dmg_processor_instruction_dec_u16(
-	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
-	)
-{
-
-	switch(instruction->opcode) {
 		case INSTRUCTION_DEC_BC:
 			--processor->bc.word;
+			break;
+		case INSTRUCTION_DEC_C:
+			value.low = --processor->bc.low;
+			break;
+		case INSTRUCTION_DEC_D:
+			value.low = --processor->de.high;
 			break;
 		case INSTRUCTION_DEC_DE:
 			--processor->de.word;
 			break;
+		case INSTRUCTION_DEC_E:
+			value.low = --processor->de.low;
+			break;
+		case INSTRUCTION_DEC_H:
+			value.low = --processor->hl.high;
+			break;
 		case INSTRUCTION_DEC_HL:
 			--processor->hl.word;
 			break;
+		case INSTRUCTION_DEC_HL_IND:
+			value.low = (dmg_runtime_read(processor->hl.word) - 1);
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_DEC_L:
+			value.low = --processor->hl.low;
+			break;
 		case INSTRUCTION_DEC_SP:
 			--processor->sp.word;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_DEC_A:
+		case INSTRUCTION_DEC_B:
+		case INSTRUCTION_DEC_C:
+		case INSTRUCTION_DEC_D:
+		case INSTRUCTION_DEC_E:
+		case INSTRUCTION_DEC_H:
+		case INSTRUCTION_DEC_HL_IND:
+		case INSTRUCTION_DEC_L:
+			processor->af.flag.carry_half = ((value.low & NIBBLE_MAX) == NIBBLE_MAX);
+			processor->af.flag.subtract = true;
+			processor->af.flag.zero = !value.low;
+			break;
+		case INSTRUCTION_DEC_BC:
+		case INSTRUCTION_DEC_DE:
+		case INSTRUCTION_DEC_HL:
+		case INSTRUCTION_DEC_SP:
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
@@ -601,92 +564,64 @@ dmg_processor_instruction_inc(
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_INC_A:
-			value.low = processor->af.high;
+			value.low = ++processor->af.high;
 			break;
 		case INSTRUCTION_INC_B:
-			value.low = processor->bc.high;
+			value.low = ++processor->bc.high;
 			break;
-		case INSTRUCTION_INC_C:
-			value.low = processor->bc.low;
-			break;
-		case INSTRUCTION_INC_D:
-			value.low = processor->de.high;
-			break;
-		case INSTRUCTION_INC_E:
-			value.low = processor->de.low;
-			break;
-		case INSTRUCTION_INC_H:
-			value.low = processor->hl.high;
-			break;
-		case INSTRUCTION_INC_HL_IND:
-			value.low = dmg_runtime_read(processor->hl.word);
-			break;
-		case INSTRUCTION_INC_L:
-			value.low = processor->hl.low;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
-			break;
-	}
-
-	++value.low;
-	processor->af.flag.carry_half = !(value.low & NIBBLE_MAX);
-	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !value.low;
-
-	switch(instruction->opcode) {
-		case INSTRUCTION_INC_A:
-			processor->af.high = value.low;
-			break;
-		case INSTRUCTION_INC_B:
-			processor->bc.high = value.low;
-			break;
-		case INSTRUCTION_INC_C:
-			processor->bc.low = value.low;
-			break;
-		case INSTRUCTION_INC_D:
-			processor->de.high = value.low;
-			break;
-		case INSTRUCTION_INC_E:
-			processor->de.low = value.low;
-			break;
-		case INSTRUCTION_INC_H:
-			processor->hl.high = value.low;
-			break;
-		case INSTRUCTION_INC_HL_IND:
-			dmg_runtime_write(processor->hl.word, value.low);
-			break;
-		case INSTRUCTION_INC_L:
-			processor->hl.low = value.low;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
-			break;
-	}
-
-	return instruction->cycle;
-}
-
-static uint32_t
-dmg_processor_instruction_inc_u16(
-	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
-	)
-{
-
-	switch(instruction->opcode) {
 		case INSTRUCTION_INC_BC:
 			++processor->bc.word;
+			break;
+		case INSTRUCTION_INC_C:
+			value.low = ++processor->bc.low;
+			break;
+		case INSTRUCTION_INC_D:
+			value.low = ++processor->de.high;
 			break;
 		case INSTRUCTION_INC_DE:
 			++processor->de.word;
 			break;
+		case INSTRUCTION_INC_E:
+			value.low = ++processor->de.low;
+			break;
+		case INSTRUCTION_INC_H:
+			value.low = ++processor->hl.high;
+			break;
 		case INSTRUCTION_INC_HL:
 			++processor->hl.word;
 			break;
+		case INSTRUCTION_INC_HL_IND:
+			value.low = (dmg_runtime_read(processor->hl.word) + 1);
+			dmg_runtime_write(processor->hl.word, value.low);
+			break;
+		case INSTRUCTION_INC_L:
+			value.low = ++processor->hl.low;
+			break;
 		case INSTRUCTION_INC_SP:
 			++processor->sp.word;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_INC_A:
+		case INSTRUCTION_INC_B:
+		case INSTRUCTION_INC_C:
+		case INSTRUCTION_INC_D:
+		case INSTRUCTION_INC_E:
+		case INSTRUCTION_INC_H:
+		case INSTRUCTION_INC_HL_IND:
+		case INSTRUCTION_INC_L:
+			processor->af.flag.carry_half = !(value.low & NIBBLE_MAX);
+			processor->af.flag.subtract = false;
+			processor->af.flag.zero = !value.low;
+			break;
+		case INSTRUCTION_INC_BC:
+		case INSTRUCTION_INC_DE:
+		case INSTRUCTION_INC_HL:
+		case INSTRUCTION_INC_SP:
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
@@ -775,6 +710,26 @@ dmg_processor_instruction_jr(
 	}
 
 	return (taken ? instruction->cycle_taken : instruction->cycle);
+}
+
+static uint32_t
+dmg_processor_instruction_ld(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+
+		// TODO
+
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return instruction->cycle;
 }
 
 static uint32_t
@@ -1191,6 +1146,37 @@ dmg_processor_instruction_sub(
 }
 
 static uint32_t
+dmg_processor_instruction_unused(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	switch(instruction->opcode) {
+		case INSTRUCTION_EXTENDED_PREFIX:
+		case INSTRUCTION_UNUSED_D3:
+		case INSTRUCTION_UNUSED_DB:
+		case INSTRUCTION_UNUSED_DD:
+		case INSTRUCTION_UNUSED_E3:
+		case INSTRUCTION_UNUSED_E4:
+		case INSTRUCTION_UNUSED_EB:
+		case INSTRUCTION_UNUSED_EC:
+		case INSTRUCTION_UNUSED_ED:
+		case INSTRUCTION_UNUSED_F4:
+		case INSTRUCTION_UNUSED_FC:
+		case INSTRUCTION_UNUSED_FD:
+			TRACE_FORMAT(LEVEL_WARNING, "Processor encountered unused instruction [%04x]->%02x", processor->pc.word - 1, instruction->opcode);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
+			break;
+	}
+
+	return dmg_processor_instruction_stop(processor, instruction, operand);
+}
+
+static uint32_t
 dmg_processor_instruction_xor(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -1243,133 +1229,133 @@ dmg_processor_instruction_xor(
 
 static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_nop, /* 0x00 */
-	NULL,
-	NULL,
-	dmg_processor_instruction_inc_u16,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_inc,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_rlca,
-	NULL, /* 0x08 */
-	dmg_processor_instruction_add_u16,
-	NULL,
-	dmg_processor_instruction_dec_u16,
+	dmg_processor_instruction_ld, /* 0x08 */
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_dec,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_rrca,
 	dmg_processor_instruction_stop, /* 0x10 */
-	NULL,
-	NULL,
-	dmg_processor_instruction_inc_u16,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_inc,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_rla,
 	dmg_processor_instruction_jr, /* 0x18 */
-	dmg_processor_instruction_add_u16,
-	NULL,
-	dmg_processor_instruction_dec_u16,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_dec,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_rra,
 	dmg_processor_instruction_jr, /* 0x20 */
-	NULL,
-	NULL,
-	dmg_processor_instruction_inc_u16,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_inc,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_daa,
 	dmg_processor_instruction_jr, /* 0x28 */
-	dmg_processor_instruction_add_u16,
-	NULL,
-	dmg_processor_instruction_dec_u16,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_dec,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_cpl,
 	dmg_processor_instruction_jr, /* 0x30 */
-	NULL,
-	NULL,
-	dmg_processor_instruction_inc_u16,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_inc,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_scf,
 	dmg_processor_instruction_jr, /* 0x38 */
-	dmg_processor_instruction_add_u16,
-	NULL,
-	dmg_processor_instruction_dec_u16,
+	dmg_processor_instruction_add,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_dec,
 	dmg_processor_instruction_inc,
 	dmg_processor_instruction_dec,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_ccf,
-	NULL, /* 0x40 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x48 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x50 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x58 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x60 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x68 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL, /* 0x70 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_ld, /* 0x40 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x48 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x50 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x58 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x60 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x68 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x70 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_halt,
-	NULL,
-	NULL, /* 0x78 */
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld, /* 0x78 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_add, /* 0x80 */
 	dmg_processor_instruction_add,
 	dmg_processor_instruction_add,
@@ -1445,7 +1431,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_ret, /* 0xc8 */
 	dmg_processor_instruction_ret,
 	dmg_processor_instruction_jp,
-	NULL,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_adc,
@@ -1453,7 +1439,7 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_ret, /* 0xd0 */
 	dmg_processor_instruction_pop,
 	dmg_processor_instruction_jp,
-	NULL,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_push,
 	dmg_processor_instruction_sub,
@@ -1461,41 +1447,41 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_ret, /* 0xd8 */
 	dmg_processor_instruction_reti,
 	dmg_processor_instruction_jp,
-	NULL,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_call,
 	dmg_processor_instruction_sbc,
-	NULL,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_rst,
-	NULL, /* 0xe0 */
+	dmg_processor_instruction_ld, /* 0xe0 */
 	dmg_processor_instruction_pop,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_unused,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_push,
 	dmg_processor_instruction_and,
 	dmg_processor_instruction_rst,
-	dmg_processor_instruction_add_u16, /* 0xe8 */
+	dmg_processor_instruction_add, /* 0xe8 */
 	dmg_processor_instruction_jp,
-	NULL,
-	NULL,
-	NULL,
-	NULL,
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_unused,
+	dmg_processor_instruction_unused,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_xor,
 	dmg_processor_instruction_rst,
-	NULL, /* 0xf0 */
+	dmg_processor_instruction_ld, /* 0xf0 */
 	dmg_processor_instruction_pop,
-	NULL,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_di,
-	NULL,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_push,
 	dmg_processor_instruction_or,
 	dmg_processor_instruction_rst,
-	NULL, /* 0xf8 */
-	NULL,
-	NULL,
+	dmg_processor_instruction_ld, /* 0xf8 */
+	dmg_processor_instruction_ld,
+	dmg_processor_instruction_ld,
 	dmg_processor_instruction_ei,
-	NULL,
-	NULL,
+	dmg_processor_instruction_unused,
+	dmg_processor_instruction_unused,
 	dmg_processor_instruction_cp,
 	dmg_processor_instruction_rst,
 	};
