@@ -222,7 +222,6 @@ dmg_processor_instruction_add(
 			processor->af.flag.zero = false;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -461,13 +460,7 @@ dmg_processor_instruction_dec(
 			processor->af.flag.subtract = true;
 			processor->af.flag.zero = !value.low;
 			break;
-		case INSTRUCTION_DEC_BC:
-		case INSTRUCTION_DEC_DE:
-		case INSTRUCTION_DEC_HL:
-		case INSTRUCTION_DEC_SP:
-			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -618,13 +611,7 @@ dmg_processor_instruction_inc(
 			processor->af.flag.subtract = false;
 			processor->af.flag.zero = !value.low;
 			break;
-		case INSTRUCTION_INC_BC:
-		case INSTRUCTION_INC_DE:
-		case INSTRUCTION_INC_HL:
-		case INSTRUCTION_INC_SP:
-			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -719,11 +706,285 @@ dmg_processor_instruction_ld(
 	__in const dmg_register_t *operand
 	)
 {
+	dmg_register_t carry = {}, sum = {};
 
 	switch(instruction->opcode) {
-
-		// TODO
-
+		case INSTRUCTION_LD_A_A:
+			break;
+		case INSTRUCTION_LD_A_B:
+			processor->af.high = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_A_BC_IND:
+			processor->af.high = dmg_runtime_read(processor->bc.word);
+			break;
+		case INSTRUCTION_LD_A_C:
+			processor->af.high = processor->bc.low;
+			break;
+		case INSTRUCTION_LD_A_D:
+			processor->af.high = processor->de.high;
+			break;
+		case INSTRUCTION_LD_A_DE_IND:
+			processor->af.high = dmg_runtime_read(processor->de.word);
+			break;
+		case INSTRUCTION_LD_A_E:
+			processor->af.high = processor->de.low;
+			break;
+		case INSTRUCTION_LD_A_FF00_C_IND:
+			processor->af.high = dmg_runtime_read(ADDRESS_IO_BASE + processor->bc.low);
+			break;
+		case INSTRUCTION_LD_A_FF00_U8_IND:
+			processor->af.high = dmg_runtime_read(ADDRESS_IO_BASE + operand->low);
+			break;
+		case INSTRUCTION_LD_A_H:
+			processor->af.high = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_A_HL_IND:
+			processor->af.high = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_A_HL_IND_DEC:
+			processor->af.high = dmg_runtime_read(processor->hl.word--);
+			break;
+		case INSTRUCTION_LD_A_HL_IND_INC:
+			processor->af.high = dmg_runtime_read(processor->hl.word++);
+			break;
+		case INSTRUCTION_LD_A_L:
+			processor->af.high = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_A_U16_IND:
+			processor->af.high = dmg_runtime_read(operand->word);
+			break;
+		case INSTRUCTION_LD_A_U8:
+			processor->af.high = operand->low;
+			break;
+		case INSTRUCTION_LD_B_A:
+			processor->bc.high = processor->af.high;
+			break;
+		case INSTRUCTION_LD_B_B:
+			break;
+		case INSTRUCTION_LD_B_C:
+			processor->bc.high = processor->bc.low;
+			break;
+		case INSTRUCTION_LD_B_D:
+			processor->bc.high = processor->de.high;
+			break;
+		case INSTRUCTION_LD_B_E:
+			processor->bc.high = processor->de.low;
+			break;
+		case INSTRUCTION_LD_B_H:
+			processor->bc.high = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_B_HL_IND:
+			processor->bc.high = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_B_L:
+			processor->bc.high = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_B_U8:
+			processor->bc.high = operand->low;
+			break;
+		case INSTRUCTION_LD_BC_IND_A:
+			dmg_runtime_write(processor->bc.word, processor->af.high);
+			break;
+		case INSTRUCTION_LD_BC_U16:
+			processor->bc.word = operand->word;
+			break;
+		case INSTRUCTION_LD_C_A:
+			processor->bc.low = processor->af.high;
+			break;
+		case INSTRUCTION_LD_C_B:
+			processor->bc.low = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_C_C:
+			break;
+		case INSTRUCTION_LD_C_D:
+			processor->bc.low = processor->de.high;
+			break;
+		case INSTRUCTION_LD_C_E:
+			processor->bc.low = processor->de.low;
+			break;
+		case INSTRUCTION_LD_C_H:
+			processor->bc.low = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_C_HL_IND:
+			processor->bc.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_C_L:
+			processor->bc.low = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_C_U8:
+			processor->bc.low = operand->low;
+			break;
+		case INSTRUCTION_LD_D_A:
+			processor->de.high = processor->af.high;
+			break;
+		case INSTRUCTION_LD_D_B:
+			processor->de.high = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_D_C:
+			processor->de.high = processor->bc.low;
+			break;
+		case INSTRUCTION_LD_D_D:
+			break;
+		case INSTRUCTION_LD_D_E:
+			processor->de.high = processor->de.low;
+			break;
+		case INSTRUCTION_LD_D_H:
+			processor->de.high = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_D_HL_IND:
+			processor->de.high = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_D_L:
+			processor->de.high = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_D_U8:
+			processor->de.high = operand->low;
+			break;
+		case INSTRUCTION_LD_DE_IND_A:
+			dmg_runtime_write(processor->de.word, processor->af.high);
+			break;
+		case INSTRUCTION_LD_DE_U16:
+			processor->de.word = operand->word;
+			break;
+		case INSTRUCTION_LD_E_A:
+			processor->de.low = processor->af.high;
+			break;
+		case INSTRUCTION_LD_E_B:
+			processor->de.low = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_E_C:
+			processor->de.low = processor->de.low;
+			break;
+		case INSTRUCTION_LD_E_D:
+			processor->de.low = processor->de.high;
+			break;
+		case INSTRUCTION_LD_E_E:
+			break;
+		case INSTRUCTION_LD_E_H:
+			processor->de.low = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_E_HL_IND:
+			processor->de.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_E_L:
+			processor->de.low = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_E_U8:
+			processor->de.low = operand->low;
+			break;
+		case INSTRUCTION_LD_FF00_C_IND_A:
+			dmg_runtime_write(ADDRESS_IO_BASE + processor->bc.low, processor->af.high);
+			break;
+		case INSTRUCTION_LD_FF00_U8_IND_A:
+			dmg_runtime_write(ADDRESS_IO_BASE + operand->low, processor->af.high);
+			break;
+		case INSTRUCTION_LD_H_A:
+			processor->hl.high = processor->af.high;
+			break;
+		case INSTRUCTION_LD_H_B:
+			processor->hl.high = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_H_C:
+			processor->hl.high = processor->bc.low;
+			break;
+		case INSTRUCTION_LD_H_D:
+			processor->hl.high = processor->de.high;
+			break;
+		case INSTRUCTION_LD_H_E:
+			processor->hl.high = processor->de.low;
+			break;
+		case INSTRUCTION_LD_H_H:
+			break;
+		case INSTRUCTION_LD_H_HL_IND:
+			processor->hl.high = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_H_L:
+			processor->hl.high = processor->hl.low;
+			break;
+		case INSTRUCTION_LD_H_U8:
+			processor->hl.high = operand->low;
+			break;
+		case INSTRUCTION_LD_HL_IND_A:
+			dmg_runtime_write(processor->hl.word, processor->af.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_B:
+			dmg_runtime_write(processor->hl.word, processor->bc.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_C:
+			dmg_runtime_write(processor->hl.word, processor->bc.low);
+			break;
+		case INSTRUCTION_LD_HL_IND_D:
+			dmg_runtime_write(processor->hl.word, processor->de.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_DEC_A:
+			dmg_runtime_write(processor->hl.word--, processor->af.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_E:
+			dmg_runtime_write(processor->hl.word, processor->de.low);
+			break;
+		case INSTRUCTION_LD_HL_IND_H:
+			dmg_runtime_write(processor->hl.word, processor->hl.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_INC_A:
+			dmg_runtime_write(processor->hl.word++, processor->af.high);
+			break;
+		case INSTRUCTION_LD_HL_IND_L:
+			dmg_runtime_write(processor->hl.word, processor->hl.low);
+			break;
+		case INSTRUCTION_LD_HL_IND_U8:
+			dmg_runtime_write(processor->hl.word, operand->low);
+			break;
+		case INSTRUCTION_LD_HL_SP_I8:
+			sum.word = (processor->sp.word + (int8_t)operand->low);
+			carry.word = (processor->sp.word ^ sum.word ^ (int8_t)operand->low);
+			processor->hl.word = sum.word;
+			processor->af.flag.carry = ((carry.word & (1 << CHAR_BIT)) == (1 << CHAR_BIT));
+			processor->af.flag.carry_half = ((carry.low & (1 << NIBBLE_BIT)) == (1 << NIBBLE_BIT));
+			processor->af.flag.subtract = false;
+			processor->af.flag.zero = false;
+			break;
+		case INSTRUCTION_LD_HL_U16:
+			processor->hl.word = operand->word;
+			break;
+		case INSTRUCTION_LD_L_A:
+			processor->hl.low = processor->af.high;
+			break;
+		case INSTRUCTION_LD_L_B:
+			processor->hl.low = processor->bc.high;
+			break;
+		case INSTRUCTION_LD_L_C:
+			processor->hl.low = processor->bc.low;
+			break;
+		case INSTRUCTION_LD_L_D:
+			processor->hl.low = processor->de.high;
+			break;
+		case INSTRUCTION_LD_L_E:
+			processor->hl.low = processor->de.low;
+			break;
+		case INSTRUCTION_LD_L_H:
+			processor->hl.low = processor->hl.high;
+			break;
+		case INSTRUCTION_LD_L_HL_IND:
+			processor->hl.low = dmg_runtime_read(processor->hl.word);
+			break;
+		case INSTRUCTION_LD_L_L:
+			break;
+		case INSTRUCTION_LD_L_U8:
+			processor->hl.low = operand->low;
+			break;
+		case INSTRUCTION_LD_SP_HL:
+			processor->sp.word = processor->hl.word;
+			break;
+		case INSTRUCTION_LD_SP_U16:
+			processor->sp.word = operand->word;
+			break;
+		case INSTRUCTION_LD_U16_IND_A:
+			dmg_runtime_write(operand->word, processor->af.high);
+			break;
+		case INSTRUCTION_LD_U16_IND_SP:
+			dmg_runtime_write(operand->word, processor->sp.low);
+			dmg_runtime_write(operand->word + 1, processor->sp.high);
+			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
@@ -1765,7 +2026,6 @@ dmg_processor_instruction_extended_rl(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -1845,7 +2105,6 @@ dmg_processor_instruction_extended_rlc(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -1925,7 +2184,6 @@ dmg_processor_instruction_extended_rr(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -2005,7 +2263,6 @@ dmg_processor_instruction_extended_rrc(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -2181,7 +2438,6 @@ dmg_processor_instruction_extended_sla(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -2261,7 +2517,6 @@ dmg_processor_instruction_extended_sra(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -2339,7 +2594,6 @@ dmg_processor_instruction_extended_srl(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
@@ -2417,7 +2671,6 @@ dmg_processor_instruction_extended_swap(
 			processor->hl.low = value.low;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported opcode %02x", instruction->opcode);
 			break;
 	}
 
