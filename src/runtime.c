@@ -29,7 +29,6 @@ dmg_runtime_load(
 	__in const dmg_t *configuration
 	)
 {
-	SDL_version version = {};
 	int result = ERROR_SUCCESS;
 
 	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime loading ver.%u.%u.%u",
@@ -40,16 +39,9 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	SDL_GetVersion(&version);
-	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u",
-		version.major, version.minor, version.patch);
-
-	if(SDL_Init(SDL_INIT_VIDEO)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+	if((result = dmg_service_load()) != ERROR_SUCCESS) {
 		goto exit;
 	}
-
-	TRACE(LEVEL_INFORMATION, "SDL loaded");
 
 	if((result = dmg_memory_load(&g_runtime.memory, &configuration->bootrom, &configuration->rom)) != ERROR_SUCCESS) {
 		goto exit;
@@ -74,7 +66,15 @@ dmg_runtime_loop(void)
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
 
-	// TODO: LOOP SUBSYSTEMS
+	for(;;) {
+
+		if(!dmg_service_poll()) {
+			TRACE(LEVEL_WARNING, "Runtime exiting");
+			break;
+		}
+
+		// TODO: LOOP SUBSYSTEMS
+	}
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop exit");
 
@@ -90,12 +90,8 @@ dmg_runtime_unload(void)
 
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
+	dmg_service_unload();
 
-	TRACE(LEVEL_INFORMATION, "SDL unloading");
-
-	SDL_Quit();
-
-	TRACE(LEVEL_INFORMATION, "SDL unloaded");
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
 
 	memset(&g_runtime, 0, sizeof(g_runtime));

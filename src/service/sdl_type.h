@@ -16,13 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_SERVICE_SDL_TYPE_H_
+#define DMG_SERVICE_SDL_TYPE_H_
 
-#include "../../include/common.h"
+#include <SDL2/SDL.h>
+#include "../../include/service.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 21
-
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_SERVICE_SDL_TYPE_H_ */

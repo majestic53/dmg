@@ -23,6 +23,7 @@ DIR_INCLUDE_SYSTEM=../include/system/
 DIR_INCLUDE_TYPE=../include/type/
 DIR_SRC=./
 DIR_SRC_COMMON=./common/
+DIR_SRC_SERVICE=./service/
 DIR_SRC_SYSTEM=./system/
 DIR_SRC_TYPE=./type/
 
@@ -30,7 +31,7 @@ FLAGS=-march=native -std=c11 -Wall -Werror
 
 LIB=libdmg.a
 
-build: build_base build_common build_system build_type
+build: build_base build_common build_service build_system build_type
 
 build_base: base_dmg.o base_runtime.o
 
@@ -50,6 +51,11 @@ common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
 
 common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
+
+build_service: service_sdl.o
+
+service_sdl.o: $(DIR_SRC_SERVICE)sdl.c $(DIR_INCLUDE)service.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)sdl.c -o $(DIR_BUILD)service_sdl.o
 
 build_system: system_memory.o system_processor.o
 
@@ -81,6 +87,7 @@ archive:
 	@echo '--- BUILDING LIBRARY -----------------------'
 	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
+		$(DIR_BUILD)service_sdl.o \
 		$(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
 			$(DIR_BUILD)type_mapper.o

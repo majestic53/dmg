@@ -22,6 +22,7 @@
 #include "../include/system/memory.h"
 #include "../include/system/processor.h"
 #include "../include/runtime.h"
+#include "../include/service.h"
 
 typedef struct {
 	dmg_cycle_t cycle;

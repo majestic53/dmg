@@ -396,6 +396,41 @@ dmg_processor_instruction_cpl(
 }
 
 static uint32_t
+dmg_processor_instruction_daa(
+	__in dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in const dmg_register_t *operand
+	)
+{
+
+	if(!processor->af.flag.subtract) {
+
+		if(processor->af.flag.carry || (processor->af.high > DAA_MAX_HIGH)) {
+			processor->af.high += DAA_OFFSET_HIGH;
+			processor->af.flag.carry = true;
+		}
+
+		if(processor->af.flag.carry_half || ((processor->af.high & NIBBLE_MAX) > DAA_MAX_LOW)) {
+			processor->af.high += DAA_OFFSET_LOW;
+		}
+	} else {
+
+		if(processor->af.flag.carry) {
+			processor->af.high -= DAA_OFFSET_HIGH;
+		}
+
+		if(processor->af.flag.carry_half) {
+			processor->af.high -= DAA_OFFSET_LOW;
+		}
+	}
+
+	processor->af.flag.carry_half = false;
+	processor->af.flag.zero = !processor->af.high;
+
+	return instruction->cycle;
+}
+
+static uint32_t
 dmg_processor_instruction_dec(
 	__in dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
@@ -433,8 +468,8 @@ dmg_processor_instruction_dec(
 			--processor->hl.word;
 			break;
 		case INSTRUCTION_DEC_HL_IND:
-			value.low = (dmg_runtime_read(processor->hl.word) - 1);
-			dmg_runtime_write(processor->hl.word, value.low);
+			value.low = dmg_runtime_read(processor->hl.word);
+			dmg_runtime_write(processor->hl.word, --value.low);
 			break;
 		case INSTRUCTION_DEC_L:
 			value.low = --processor->hl.low;
@@ -463,41 +498,6 @@ dmg_processor_instruction_dec(
 		default:
 			break;
 	}
-
-	return instruction->cycle;
-}
-
-static uint32_t
-dmg_processor_instruction_daa(
-	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
-	)
-{
-
-	if(!processor->af.flag.subtract) {
-
-		if(processor->af.flag.carry || (processor->af.high > DAA_MAX_HIGH)) {
-			processor->af.high += DAA_OFFSET_HIGH;
-			processor->af.flag.carry = true;
-		}
-
-		if(processor->af.flag.carry_half || ((processor->af.high & NIBBLE_MAX) > DAA_MAX_LOW)) {
-			processor->af.high += DAA_OFFSET_LOW;
-		}
-	} else {
-
-		if(processor->af.flag.carry) {
-			processor->af.high -= DAA_OFFSET_HIGH;
-		}
-
-		if(processor->af.flag.carry_half) {
-			processor->af.high -= DAA_OFFSET_LOW;
-		}
-	}
-
-	processor->af.flag.carry_half = false;
-	processor->af.flag.zero = !processor->af.high;
 
 	return instruction->cycle;
 }
@@ -584,8 +584,8 @@ dmg_processor_instruction_inc(
 			++processor->hl.word;
 			break;
 		case INSTRUCTION_INC_HL_IND:
-			value.low = (dmg_runtime_read(processor->hl.word) + 1);
-			dmg_runtime_write(processor->hl.word, value.low);
+			value.low = dmg_runtime_read(processor->hl.word);
+			dmg_runtime_write(processor->hl.word, ++value.low);
 			break;
 		case INSTRUCTION_INC_L:
 			value.low = ++processor->hl.low;
@@ -626,7 +626,7 @@ dmg_processor_instruction_jp(
 	)
 {
 	bool taken = false;
-	dmg_register_t value;
+	dmg_register_t value = {};
 
 	value.word = operand->word;
 
@@ -635,8 +635,8 @@ dmg_processor_instruction_jp(
 			taken = processor->af.flag.carry;
 			break;
 		case INSTRUCTION_JP_HL:
-			taken = true;
 			value.word = processor->hl.word;
+			taken = true;
 			break;
 		case INSTRUCTION_JP_NC_U16:
 			taken = !processor->af.flag.carry;
@@ -853,7 +853,7 @@ dmg_processor_instruction_ld(
 			processor->de.low = processor->bc.high;
 			break;
 		case INSTRUCTION_LD_E_C:
-			processor->de.low = processor->de.low;
+			processor->de.low = processor->bc.low;
 			break;
 		case INSTRUCTION_LD_E_D:
 			processor->de.low = processor->de.high;
@@ -1179,7 +1179,7 @@ dmg_processor_instruction_rla(
 	processor->af.high_lsb = carry.low_lsb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !processor->af.high;
+	processor->af.flag.zero = false;
 
 	return instruction->cycle;
 }
@@ -1199,7 +1199,7 @@ dmg_processor_instruction_rlca(
 	processor->af.high_lsb = carry.low_lsb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !processor->af.high;
+	processor->af.flag.zero = false;
 
 	return instruction->cycle;
 }
@@ -1219,7 +1219,7 @@ dmg_processor_instruction_rra(
 	processor->af.high_msb = carry.low_msb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !processor->af.high;
+	processor->af.flag.zero = false;
 
 	return instruction->cycle;
 }
@@ -1239,7 +1239,7 @@ dmg_processor_instruction_rrca(
 	processor->af.high_msb = carry.low_msb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
-	processor->af.flag.zero = !processor->af.high;
+	processor->af.flag.zero = false;
 
 	return instruction->cycle;
 }
@@ -1995,7 +1995,7 @@ dmg_processor_instruction_extended_rl(
 	carry.low_lsb = processor->af.flag.carry;
 	processor->af.flag.carry = value.low_msb;
 	value.low <<= 1;
-	value.low |= carry.low_lsb;
+	value.low_lsb = carry.low_lsb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !value.low;
@@ -2074,7 +2074,7 @@ dmg_processor_instruction_extended_rlc(
 	carry.low_lsb = value.low_msb;
 	processor->af.flag.carry = carry.low_lsb;
 	value.low <<= 1;
-	value.low |= carry.low_lsb;
+	value.low_lsb = carry.low_lsb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !value.low;
@@ -2153,7 +2153,7 @@ dmg_processor_instruction_extended_rr(
 	carry.low_msb = processor->af.flag.carry;
 	processor->af.flag.carry = value.low_lsb;
 	value.low >>= 1;
-	value.low |= carry.low_msb;
+	value.low_msb = carry.low_msb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !value.low;
@@ -2232,7 +2232,7 @@ dmg_processor_instruction_extended_rrc(
 	carry.low_msb = value.low_lsb;
 	processor->af.flag.carry = carry.low_msb;
 	value.low >>= 1;
-	value.low |= carry.low_msb;
+	value.low_msb = carry.low_msb;
 	processor->af.flag.carry_half = false;
 	processor->af.flag.subtract = false;
 	processor->af.flag.zero = !value.low;
