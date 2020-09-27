@@ -42,7 +42,7 @@ dmg_trace(
 
 	if(g_trace.enable) {
 		time_t current = time(NULL);
-		dmg_cycle_t cycle = ((g_trace.cycle) ? *(g_trace.cycle) : 0);
+		uint32_t cycle = ((g_trace.cycle) ? *(g_trace.cycle) : 0);
 		char message[TRACE_LENGTH_MAX] = {}, timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
 		if(!stream) {
@@ -89,7 +89,7 @@ dmg_trace(
 void
 dmg_trace_enable(
 	__in bool enable,
-	__in dmg_cycle_t *cycle
+	__in uint32_t *cycle
 	)
 {
 	g_trace.enable = enable;

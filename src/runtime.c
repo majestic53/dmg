@@ -62,9 +62,13 @@ exit:
 static int
 dmg_runtime_loop(void)
 {
+	uint32_t cycle = 0;
 	int result = EXIT_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
+
+	g_runtime.cycle = 0;
+	g_runtime.cycle_last = 0;
 
 	for(;;) {
 
@@ -73,7 +77,16 @@ dmg_runtime_loop(void)
 			break;
 		}
 
-		// TODO: LOOP SUBSYSTEMS
+		while(cycle < CYCLE_PER_SEC) {
+			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
+			g_runtime.cycle += g_runtime.cycle_last;
+			cycle += g_runtime.cycle_last;
+
+			// TODO: LOOP SUBSYSTEMS
+		}
+
+		cycle %= CYCLE_PER_SEC;
+		dmg_service_sync();
 	}
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop exit");

@@ -29,6 +29,8 @@ int dmg_service_load(void);
 
 bool dmg_service_poll(void);
 
+void dmg_service_sync(void);
+
 void dmg_service_unload(void);
 
 #ifdef __cplusplus

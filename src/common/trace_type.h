@@ -46,7 +46,7 @@ static const char *LEVEL_STR[] = {
 
 typedef struct {
 	bool enable;
-	dmg_cycle_t *cycle;
+	uint32_t *cycle;
 } dmg_trace_t;
 
 #endif /* NDEBUG */

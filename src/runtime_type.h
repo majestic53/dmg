@@ -25,7 +25,8 @@
 #include "../include/service.h"
 
 typedef struct {
-	dmg_cycle_t cycle;
+	uint32_t cycle;
+	uint32_t cycle_last;
 	dmg_memory_t memory;
 	dmg_processor_t processor;
 

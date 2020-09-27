@@ -2936,6 +2936,81 @@ static const dmg_instruction_cb INSTRUCTION_EXTENDED_HANDLER[] = {
 	dmg_processor_instruction_extended_set,
 	};
 
+#ifndef NDEBUG
+
+static void
+dmg_processor_trace(
+	__in int level,
+	__inout dmg_processor_t *processor,
+	__in const dmg_instruction_t *instruction,
+	__in bool extended,
+	__in const dmg_register_t *operand
+	)
+{
+	const char *format = (extended ? INSTRUCTION_EXTENDED_STR[instruction->opcode] : INSTRUCTION_STR[instruction->opcode]);
+
+	switch(instruction->operand) {
+		case OPERAND_BYTE:
+
+			if(extended) {
+				TRACE_FORMAT(level, "[%04x] {%02x %02x %02x}", processor->pc.word - instruction->operand - 1, INSTRUCTION_EXTENDED_PREFIX,
+					instruction->opcode, operand->low);
+			} else {
+				TRACE_FORMAT(level, "[%04x] {%02x %02x}", processor->pc.word - instruction->operand - 1, instruction->opcode,
+					operand->low);
+			}
+
+			switch(instruction->opcode) {
+				case INSTRUCTION_ADD_SP_I8:
+				case INSTRUCTION_LD_HL_SP_I8:
+					TRACE_FORMAT(level, format, operand->low, operand->low);
+					break;
+				case INSTRUCTION_JR_C_I8:
+				case INSTRUCTION_JR_NC_I8:
+				case INSTRUCTION_JR_NZ_I8:
+				case INSTRUCTION_JR_I8:
+				case INSTRUCTION_JR_Z_I8:
+					TRACE_FORMAT(level, format, operand->low, operand->low, processor->pc.word + (int8_t)operand->low);
+					break;
+				default:
+					TRACE_FORMAT(level, format, operand->low);
+					break;
+			}
+			break;
+		case OPERAND_WORD:
+
+			if(extended) {
+				TRACE_FORMAT(level, "[%04x] {%02x %02x %02x %02x}", processor->pc.word - instruction->operand - 1, INSTRUCTION_EXTENDED_PREFIX,
+					instruction->opcode, operand->low, operand->high);
+			} else {
+				TRACE_FORMAT(level, "[%04x] {%02x %02x %02x}", processor->pc.word - instruction->operand - 1, instruction->opcode,
+					operand->low, operand->high);
+			}
+
+			TRACE_FORMAT(level, format, operand->word);
+			break;
+		default:
+
+			if(extended) {
+				TRACE_FORMAT(level, "[%04x] {%02x %02x}", processor->pc.word - instruction->operand - 1, INSTRUCTION_EXTENDED_PREFIX,
+					instruction->opcode);
+			} else {
+				TRACE_FORMAT(level, "[%04x] {%02x}", processor->pc.word - instruction->operand - 1, instruction->opcode);
+			}
+
+			TRACE(level, format);
+			break;
+	}
+}
+
+#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_processor_trace(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
+	}
+#else
+#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
+#endif /* NDEBUG */
+
 static uint32_t
 dmg_processor_execute(
 	__inout dmg_processor_t *processor
@@ -2944,12 +3019,13 @@ dmg_processor_execute(
 	uint32_t result = 0;
 
 	if(!processor->halt && !processor->stop) {
+		bool extended;
 		uint8_t opcode;
 		dmg_register_t operand = {};
 		const dmg_instruction_cb *handler;
 		const dmg_instruction_t *instruction;
 
-		if((opcode = dmg_processor_fetch(processor)) == INSTRUCTION_EXTENDED_PREFIX) {
+		if((extended = ((opcode = dmg_processor_fetch(processor)) == INSTRUCTION_EXTENDED_PREFIX))) {
 			opcode = dmg_processor_fetch(processor);
 			instruction = &INSTRUCTION_EXTENDED[opcode];
 			handler = &INSTRUCTION_EXTENDED_HANDLER[opcode];
@@ -2969,6 +3045,7 @@ dmg_processor_execute(
 				break;
 		}
 
+		TRACE_INSTRUCTION(LEVEL_VERBOSE, processor, instruction, extended, &operand);
 		result += (*handler)(processor, instruction, &operand);
 
 		switch(processor->interrupts_enable_state) {

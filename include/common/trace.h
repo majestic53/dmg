@@ -39,7 +39,7 @@ void dmg_trace(
 
 void dmg_trace_enable(
 	__in bool enable,
-	__in dmg_cycle_t *cycle
+	__in uint32_t *cycle
 	);
 
 #endif /* NDEBUG */

@@ -69,6 +69,7 @@
 #define ADDRESS_ROM_SWAP_END 0x7fff
 
 #define CYCLE 4
+#define CYCLE_PER_SEC 70224
 
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f
@@ -124,7 +125,5 @@ enum {
 #define TRACE_ERROR(_FORMAT_, _FILE_, _FUNCTION_, _LINE_)
 #define TRACE_FORMAT(_LEVEL_, _FORMAT_, ...)
 #endif /* NDEBUG */
-
-typedef uint32_t dmg_cycle_t;
 
 #endif /* DMG_COMMON_DEFINE_H_ */
