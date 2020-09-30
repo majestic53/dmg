@@ -22,11 +22,6 @@
 #include <SDL2/SDL.h>
 #include "../../include/service.h"
 
-#define FRAMES 60
-#define FRAME_RATE (MS_PER_SEC / (float)FRAMES)
-
-#define MS_PER_SEC 1000
-
 typedef struct {
 	uint32_t begin;
 	uint32_t end;

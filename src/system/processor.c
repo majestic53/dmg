@@ -2941,6 +2941,31 @@ static const dmg_instruction_cb INSTRUCTION_EXTENDED_HANDLER[] = {
 static void
 dmg_processor_trace(
 	__in int level,
+	__inout dmg_processor_t *processor
+	)
+{
+	TRACE_FORMAT(level, "AF=%04x (A=%02x, F=%02x [%c%c%c%c]) ", processor->af.word, processor->af.high, processor->af.low,
+		processor->af.flag.carry ? 'C' : '-', processor->af.flag.carry_half ? 'H' : '-',
+		processor->af.flag.subtract ? 'N' : '-', processor->af.flag.zero ? 'Z' : '-');
+	TRACE_FORMAT(level, "BC=%04x (B=%02x, C=%02x)", processor->bc.word, processor->bc.high, processor->bc.low);
+	TRACE_FORMAT(level, "DE=%04x (D=%02x, E=%02x)", processor->de.word, processor->de.high, processor->de.low);
+	TRACE_FORMAT(level, "HL=%04x (H=%02x, L=%02x)", processor->hl.word, processor->hl.high, processor->hl.low);
+	TRACE_FORMAT(level, "PC=%04x", processor->pc.word);
+	TRACE_FORMAT(level, "SP=%04x", processor->sp.word);
+	TRACE_FORMAT(level, "IME=%x", processor->interrupts_enable);
+	TRACE_FORMAT(level, "IE=%02x [%c%c%c%c%c]", processor->interrupt_enable, processor->interrupt_enable.vblank ? 'V' : '-',
+		processor->interrupt_enable.lcdc ? 'L' : '-', processor->interrupt_enable.timer ? 'T' : '-',
+		processor->interrupt_enable.serial ? 'S' : '-', processor->interrupt_enable.joypad ? 'J' : '-');
+	TRACE_FORMAT(level, "IF=%02x [%c%c%c%c%c]", processor->interrupt_flag, processor->interrupt_flag.vblank ? 'V' : '-',
+		processor->interrupt_flag.lcdc ? 'L' : '-', processor->interrupt_flag.timer ? 'T' : '-',
+		processor->interrupt_flag.serial ? 'S' : '-', processor->interrupt_flag.joypad ? 'J' : '-');
+	TRACE_FORMAT(level, "HALT=%x", processor->halt);
+	TRACE_FORMAT(level, "STOP=%x", processor->stop);
+}
+
+static void
+dmg_processor_instruction_trace(
+	__in int level,
 	__inout dmg_processor_t *processor,
 	__in const dmg_instruction_t *instruction,
 	__in bool extended,
@@ -3003,12 +3028,6 @@ dmg_processor_trace(
 	}
 }
 
-#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
-	if((_LEVEL_) <= (LEVEL)) { \
-		dmg_processor_trace(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
-	}
-#else
-#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
 #endif /* NDEBUG */
 
 static uint32_t
@@ -3017,6 +3036,8 @@ dmg_processor_execute(
 	)
 {
 	uint32_t result = 0;
+
+	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 
 	if(!processor->halt && !processor->stop) {
 		bool extended;
@@ -3046,6 +3067,7 @@ dmg_processor_execute(
 		}
 
 		TRACE_INSTRUCTION(LEVEL_VERBOSE, processor, instruction, extended, &operand);
+
 		result += (*handler)(processor, instruction, &operand);
 
 		switch(processor->interrupts_enable_state) {

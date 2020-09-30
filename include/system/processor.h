@@ -52,7 +52,7 @@ typedef union {
 
 typedef union {
 
-	struct {
+	union {
 
 		struct {
 

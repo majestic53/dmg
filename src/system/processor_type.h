@@ -1643,4 +1643,18 @@ typedef uint32_t (*dmg_instruction_cb)(
 	__in const dmg_register_t *operand
 	);
 
+#ifndef NDEBUG
+#define TRACE_PROCESSOR(_LEVEL_, _PROCESSOR_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_processor_trace(_LEVEL_, _PROCESSOR_); \
+	}
+#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_processor_instruction_trace(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
+	}
+#else
+#define TRACE_PROCESSOR(_LEVEL_, _PROCESSOR_)
+#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
+#endif /* NDEBUG */
+
 #endif /* DMG_SYSTEM_PROCESSOR_TYPE_H_ */

@@ -69,7 +69,12 @@
 #define ADDRESS_ROM_SWAP_END 0x7fff
 
 #define CYCLE 4
-#define CYCLE_PER_SEC 70224
+#define CYCLE_PER_FRAME 70224
+
+#define FRAME_PER_SEC 60
+#define FRAME_RATE (MS_PER_SEC / (float)FRAME_PER_SEC)
+
+#define MS_PER_SEC 1000
 
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f

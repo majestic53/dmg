@@ -77,7 +77,7 @@ dmg_runtime_loop(void)
 			break;
 		}
 
-		while(cycle < CYCLE_PER_SEC) {
+		while(cycle < CYCLE_PER_FRAME) {
 			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
 			g_runtime.cycle += g_runtime.cycle_last;
 			cycle += g_runtime.cycle_last;
@@ -85,7 +85,7 @@ dmg_runtime_loop(void)
 			// TODO: LOOP SUBSYSTEMS
 		}
 
-		cycle %= CYCLE_PER_SEC;
+		cycle %= CYCLE_PER_FRAME;
 		dmg_service_sync();
 	}
 

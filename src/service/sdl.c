@@ -55,7 +55,7 @@ dmg_service_poll(void)
 	g_sdl.end = SDL_GetTicks();
 
 	if((g_sdl.framerate = (g_sdl.end - g_sdl.begin)) >= MS_PER_SEC) {
-		g_sdl.framerate = (g_sdl.frame - ((g_sdl.framerate - MS_PER_SEC) / (float)FRAMES));
+		g_sdl.framerate = (g_sdl.frame - ((g_sdl.framerate - MS_PER_SEC) / (float)FRAME_PER_SEC));
 		g_sdl.framerate = ((g_sdl.framerate > 0.f) ? g_sdl.framerate : 0.f);
 #ifndef NDEBUG
 
