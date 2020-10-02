@@ -1710,8 +1710,8 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_jp,
 	dmg_processor_instruction_unused,
 	dmg_processor_instruction_call,
-	dmg_processor_instruction_sbc,
 	dmg_processor_instruction_unused,
+	dmg_processor_instruction_sbc,
 	dmg_processor_instruction_rst,
 	dmg_processor_instruction_ld, /* 0xe0 */
 	dmg_processor_instruction_pop,
