@@ -35,7 +35,7 @@ static const char *LEVEL_STR[] = {
 
 #endif /* COLOR */
 
-#define MS_PER_CYCLE 0.000952f /* (238 ns/cycle * 4) */
+#define MS_PER_CYCLE 0.000238f
 
 #define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
 #define TIMESTAMP_LENGTH_MAX 32

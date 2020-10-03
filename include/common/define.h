@@ -73,8 +73,8 @@
 #define ADDRESS_TIMER_DIVIDER 0xff04
 #define ADDRESS_TIMER_MODULO 0xff06
 
-#define CYCLE 1 // 4 cycles
-#define CYCLE_PER_FRAME 17556 // (70224 / 4)
+#define CYCLE 4
+#define CYCLE_PER_FRAME 70224
 
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f

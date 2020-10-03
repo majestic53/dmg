@@ -38,10 +38,10 @@ enum {
 };
 
 static const uint32_t SELECT_CYC[] = {
-	256, /* SELECT_4096 */
-	4, /* SELECT_262144 */
-	16, /* SELECT_65536 */
-	64, /* SELECT_16386 */
+	1024, /* SELECT_4096 */
+	16, /* SELECT_262144 */
+	64, /* SELECT_65536 */
+	256, /* SELECT_16386 */
 	};
 
 #ifndef NDEBUG
