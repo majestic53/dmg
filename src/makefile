@@ -27,7 +27,7 @@ DIR_SRC_SERVICE=./service/
 DIR_SRC_SYSTEM=./system/
 DIR_SRC_TYPE=./type/
 
-FLAGS=-march=native -std=c18 -Wall -Werror
+FLAGS=-march=native -std=c11 -Wall -Werror
 
 LIB=libdmg.a
 
