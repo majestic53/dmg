@@ -26,7 +26,8 @@ typedef union {
 	struct {
 		uint8_t select : 2;
 		uint8_t enable : 1;
-		uint8_t unused : 5;
+		uint8_t unused : 4;
+		uint8_t overflow : 1;
 	};
 
 	uint8_t raw;

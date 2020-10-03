@@ -22,7 +22,7 @@
 #include "../../include/system/timer.h"
 #include "../../include/runtime.h"
 
-#define CONTROL_MASK 0x3
+#define CONTROL_MASK 0x7
 
 #define POST_CONTROL 0x00
 #define POST_COUNTER 0x00
@@ -37,6 +37,20 @@ enum {
 	SELECT_MAX,
 };
 
-// TODO
+static const uint32_t SELECT_CYC[] = {
+	256, /* SELECT_4096 */
+	4, /* SELECT_262144 */
+	16, /* SELECT_65536 */
+	64, /* SELECT_16386 */
+	};
+
+#ifndef NDEBUG
+#define TRACE_TIMER(_LEVEL_, _TIMER_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_timer_trace(_LEVEL_, _TIMER_); \
+	}
+#else
+#define TRACE_TIMER(_LEVEL_, _TIMER_)
+#endif /* NDEBUG */
 
 #endif /* DMG_SYSTEM_TIMER_TYPE_H_ */

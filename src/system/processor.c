@@ -3146,17 +3146,7 @@ dmg_processor_load(
 
 	processor->interrupt_flag.raw = POST_IF;
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor AF=%04x", processor->af.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor BC=%04x", processor->bc.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor DE=%04x", processor->de.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor HL=%04x", processor->hl.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor PC=%04x", processor->pc.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor SP=%04x", processor->sp.word);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IME=%x", processor->interrupts_enable);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IE=%02x", processor->interrupt_enable.raw);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor IF=%02x", processor->interrupt_flag.raw);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Halt=%x", processor->halt);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Processor Stop=%x", processor->stop);
+	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 	TRACE(LEVEL_INFORMATION, "Processor loaded");
 
 	return result;
@@ -3220,7 +3210,7 @@ dmg_processor_write(
 			processor->interrupt_enable.raw = value;
 			break;
 		case ADDRESS_INTERRUPT_FLAG:
-			processor->interrupt_flag.raw |= (value & INTERRUPT_FLAG_MASK);
+			processor->interrupt_flag.raw = (POST_IF | (value & INTERRUPT_FLAG_MASK));
 
 			if(processor->stop && processor->interrupt_flag.joypad) {
 				processor->stop = false;

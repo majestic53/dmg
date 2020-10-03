@@ -22,6 +22,23 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
+static void
+dmg_timer_trace(
+	__in int level,
+	__inout dmg_timer_t *timer
+	)
+{
+	TRACE_FORMAT(level, "Timer TAC=%02x [Select=%u, Enable=%u]", timer->control.raw,
+		timer->control.select, timer->control.enable);
+	TRACE_FORMAT(level, "Timer TIMA=%02x", timer->counter);
+	TRACE_FORMAT(level, "Timer TMA=%02x", timer->modulo);
+	TRACE_FORMAT(level, "Timer DIV=%04x", timer->divider);
+}
+
+#endif /* NDEBUG */
+
 int
 dmg_timer_load(
 	__inout dmg_timer_t *timer,
@@ -39,11 +56,7 @@ dmg_timer_load(
 		timer->modulo = POST_MODULO;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Timer TAC=%02x [Select=%u, Enable=%u]", timer->control.raw,
-		timer->control.select, timer->control.enable);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Timer TIMA=%02x", timer->counter);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Timer TMA=%02x", timer->modulo);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Timer DIV=%04x", timer->divider);
+	TRACE_TIMER(LEVEL_VERBOSE, timer);
 	TRACE(LEVEL_INFORMATION, "Timer loaded");
 
 	return result;
@@ -59,7 +72,7 @@ dmg_timer_read(
 
 	switch(address) {
 		case ADDRESS_TIMER_CONTROL:
-			result = timer->control.raw;
+			result = (timer->control.raw & CONTROL_MASK);
 			break;
 		case ADDRESS_TIMER_COUNTER:
 			result = timer->counter;
@@ -86,11 +99,28 @@ dmg_timer_step(
 	__in uint32_t cycle
 	)
 {
-	timer->divider += cycle;
 
-	if(timer->control.enable) {
+	for(uint32_t tick = 0; tick < cycle; ++tick) {
+		TRACE_TIMER(LEVEL_VERBOSE, timer);
 
-		// TODO: COUNTER/MODULO
+		++timer->divider;
+
+		if(timer->control.enable) {
+
+			if(timer->control.overflow) {
+				timer->control.overflow = false;
+				timer->counter = timer->modulo;
+				dmg_runtime_interrupt(INTERRUPT_TIMER);
+
+				TRACE(LEVEL_VERBOSE, "Timer overflow");
+			}
+
+			if((++timer->cycle >= SELECT_CYC[timer->control.select])) {
+				timer->cycle %= SELECT_CYC[timer->control.select];
+				timer->control.overflow = (timer->counter == UINT8_MAX);
+				++timer->counter;
+			}
+		}
 	}
 }
 
