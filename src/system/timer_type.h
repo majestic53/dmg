@@ -16,24 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_RUNTIME_TYPE_H_
-#define DMG_RUNTIME_TYPE_H_
+#ifndef DMG_SYSTEM_TIMER_TYPE_H_
+#define DMG_SYSTEM_TIMER_TYPE_H_
 
-#include "../include/system/memory.h"
-#include "../include/system/processor.h"
-#include "../include/system/timer.h"
-#include "../include/runtime.h"
-#include "../include/service.h"
+#include "../../include/system/timer.h"
+#include "../../include/runtime.h"
 
-typedef struct {
-	uint32_t cycle;
-	uint32_t cycle_last;
-	dmg_memory_t memory;
-	dmg_processor_t processor;
-	dmg_timer_t timer;
+#define CONTROL_MASK 0x3
 
-	// TODO: ADD SUBSYSTEMS
+#define POST_CONTROL 0x00
+#define POST_COUNTER 0x00
+#define POST_DIVIDER 0xabcc
+#define POST_MODULO 0x00
 
-} dmg_runtime_t;
+enum {
+	SELECT_4096 = 0,
+	SELECT_262144,
+	SELECT_65536,
+	SELECT_16386,
+	SELECT_MAX,
+};
 
-#endif /* DMG_RUNTIME_TYPE_H_ */
+// TODO
+
+#endif /* DMG_SYSTEM_TIMER_TYPE_H_ */

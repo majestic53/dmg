@@ -51,6 +51,10 @@ dmg_runtime_load(
 		goto exit;
 	}
 
+	if((result = dmg_timer_load(&g_runtime.timer, &configuration->bootrom)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	// TODO: LOAD SUBSYSTEMS
 
 	TRACE(LEVEL_INFORMATION, "Runtime loaded");
@@ -79,10 +83,12 @@ dmg_runtime_loop(void)
 
 		while(cycle < CYCLE_PER_FRAME) {
 			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
-			g_runtime.cycle += g_runtime.cycle_last;
-			cycle += g_runtime.cycle_last;
+			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
 
 			// TODO: LOOP SUBSYSTEMS
+
+			g_runtime.cycle += g_runtime.cycle_last;
+			cycle += g_runtime.cycle_last;
 		}
 
 		cycle %= CYCLE_PER_FRAME;
@@ -101,6 +107,7 @@ dmg_runtime_unload(void)
 
 	// TODO: UNLOAD SUBSYSTEMS
 
+	dmg_timer_unload(&g_runtime.timer);
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
 	dmg_service_unload();
@@ -158,6 +165,12 @@ dmg_runtime_read(
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			result = dmg_memory_read(&g_runtime.memory, address);
 			break;
+		case ADDRESS_TIMER_CONTROL:
+		case ADDRESS_TIMER_COUNTER:
+		case ADDRESS_TIMER_DIVIDER:
+		case ADDRESS_TIMER_MODULO:
+			result = dmg_timer_read(&g_runtime.timer, address);
+			break;
 
 		// TODO: READ BYTE FROM SUBSYSTEM
 
@@ -192,6 +205,12 @@ dmg_runtime_write(
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			dmg_memory_write(&g_runtime.memory, address, value);
+			break;
+		case ADDRESS_TIMER_CONTROL:
+		case ADDRESS_TIMER_COUNTER:
+		case ADDRESS_TIMER_DIVIDER:
+		case ADDRESS_TIMER_MODULO:
+			dmg_timer_write(&g_runtime.timer, address, value);
 			break;
 
 		// TODO: WRITE BYTE TO SUBSYSTEM
