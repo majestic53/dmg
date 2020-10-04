@@ -25,22 +25,21 @@ extern "C" {
 int
 dmg_memory_load(
 	__inout dmg_memory_t *memory,
-	__in const dmg_buffer_t *bootrom,
-	__in const dmg_buffer_t *rom
+	__in const dmg_t *configuration
 	)
 {
 	int result;
 
 	TRACE(LEVEL_INFORMATION, "Memory loading");
 
-	if(bootrom->data) {
+	if(configuration->bootrom.data) {
 
-		if((result = dmg_bootrom_load(&memory->bootrom, bootrom)) != ERROR_SUCCESS) {
+		if((result = dmg_bootrom_load(&memory->bootrom, &configuration->bootrom)) != ERROR_SUCCESS) {
 			goto exit;
 		}
 	}
 
-	if((result = dmg_mapper_load(&memory->mapper, rom)) != ERROR_SUCCESS) {
+	if((result = dmg_mapper_load(&memory->mapper, &configuration->rom)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 

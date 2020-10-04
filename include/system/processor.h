@@ -107,7 +107,7 @@ extern "C" {
 
 int dmg_processor_load(
 	__inout dmg_processor_t *processor,
-	__in const dmg_buffer_t *bootrom
+	__in const dmg_t *configuration
 	);
 
 uint8_t dmg_processor_read(

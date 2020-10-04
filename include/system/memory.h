@@ -35,8 +35,7 @@ extern "C" {
 
 int dmg_memory_load(
 	__inout dmg_memory_t *memory,
-	__in const dmg_buffer_t *bootrom,
-	__in const dmg_buffer_t *rom
+	__in const dmg_t *configuration
 	);
 
 uint8_t dmg_memory_read(

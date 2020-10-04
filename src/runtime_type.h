@@ -21,6 +21,7 @@
 
 #include "../include/system/memory.h"
 #include "../include/system/processor.h"
+#include "../include/system/serial.h"
 #include "../include/system/timer.h"
 #include "../include/runtime.h"
 #include "../include/service.h"
@@ -30,6 +31,7 @@ typedef struct {
 	uint32_t cycle_last;
 	dmg_memory_t memory;
 	dmg_processor_t processor;
+	dmg_serial_t serial;
 	dmg_timer_t timer;
 
 	// TODO: ADD SUBSYSTEMS

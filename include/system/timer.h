@@ -47,7 +47,7 @@ extern "C" {
 
 int dmg_timer_load(
 	__inout dmg_timer_t *timer,
-	__in const dmg_buffer_t *bootrom
+	__in const dmg_t *configuration
 	);
 
 uint8_t dmg_timer_read(

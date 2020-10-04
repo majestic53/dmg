@@ -30,7 +30,7 @@ dmg_timer_trace(
 	__inout dmg_timer_t *timer
 	)
 {
-	TRACE_FORMAT(level, "Timer TAC=%02x [Select=%u, Enable=%u]", timer->control.raw,
+	TRACE_FORMAT(level, "Timer TAC=%02x [Select=%u, Enable=%x]", timer->control.raw,
 		timer->control.select, timer->control.enable);
 	TRACE_FORMAT(level, "Timer TIMA=%02x", timer->counter);
 	TRACE_FORMAT(level, "Timer TMA=%02x", timer->modulo);
@@ -42,14 +42,14 @@ dmg_timer_trace(
 int
 dmg_timer_load(
 	__inout dmg_timer_t *timer,
-	__in const dmg_buffer_t *bootrom
+	__in const dmg_t *configuration
 	)
 {
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Timer loading");
 
-	if(!bootrom->data) {
+	if(!configuration->bootrom.data) {
 		timer->control.raw = POST_CONTROL;
 		timer->counter = POST_COUNTER;
 		timer->divider = POST_DIVIDER;

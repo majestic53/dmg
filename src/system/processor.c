@@ -3128,14 +3128,14 @@ dmg_processor_service(
 int
 dmg_processor_load(
 	__inout dmg_processor_t *processor,
-	__in const dmg_buffer_t *bootrom
+	__in const dmg_t *configuration
 	)
 {
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Processor loading");
 
-	if(!bootrom->data) {
+	if(!configuration->bootrom.data) {
 		processor->af.word = POST_AF;
 		processor->bc.word = POST_BC;
 		processor->de.word = POST_DE;

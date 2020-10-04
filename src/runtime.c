@@ -43,15 +43,19 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, &configuration->bootrom, &configuration->rom)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_load(&g_runtime.processor, &configuration->bootrom)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_load(&g_runtime.processor, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_load(&g_runtime.timer, &configuration->bootrom)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_load(&g_runtime.serial, configuration)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_timer_load(&g_runtime.timer, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -83,6 +87,7 @@ dmg_runtime_loop(void)
 
 		while(cycle < CYCLE_PER_FRAME) {
 			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
 			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
 
 			// TODO: LOOP SUBSYSTEMS
@@ -108,6 +113,7 @@ dmg_runtime_unload(void)
 	// TODO: UNLOAD SUBSYSTEMS
 
 	dmg_timer_unload(&g_runtime.timer);
+	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
 	dmg_service_unload();
@@ -165,6 +171,10 @@ dmg_runtime_read(
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			result = dmg_memory_read(&g_runtime.memory, address);
 			break;
+		case ADDRESS_SERIAL_CONTROL:
+		case ADDRESS_SERIAL_DATA:
+			result = dmg_serial_read(&g_runtime.serial, address);
+			break;
 		case ADDRESS_TIMER_CONTROL:
 		case ADDRESS_TIMER_COUNTER:
 		case ADDRESS_TIMER_DIVIDER:
@@ -205,6 +215,10 @@ dmg_runtime_write(
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			dmg_memory_write(&g_runtime.memory, address, value);
+			break;
+		case ADDRESS_SERIAL_CONTROL:
+		case ADDRESS_SERIAL_DATA:
+			dmg_serial_write(&g_runtime.serial, address, value);
 			break;
 		case ADDRESS_TIMER_CONTROL:
 		case ADDRESS_TIMER_COUNTER:
