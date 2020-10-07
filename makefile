@@ -22,8 +22,10 @@ DIR_BIN=./bin/
 DIR_BIN_INCLUDE=./bin/include/
 DIR_BIN_LIB=./bin/lib/
 DIR_BUILD=./build/
+DIR_BUILD_TEST=./build/test/
 DIR_ROOT=./
 DIR_SRC=./src/
+DIR_TEST_TIMER=./test/timer/
 DIR_TOOL=./tool/
 
 BUILD_DEBUG=BUILD_FLAGS=-g\ -DCOLOR\ -DLEVEL=
@@ -41,15 +43,18 @@ setup:
 	mkdir -p $(DIR_BIN_INCLUDE)
 	mkdir -p $(DIR_BIN_LIB)
 	mkdir -p $(DIR_BUILD)
+	mkdir -p $(DIR_BUILD_TEST)
 
 build_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
 
 build_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
 
 analyze:

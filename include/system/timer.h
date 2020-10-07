@@ -34,9 +34,9 @@ typedef union {
 } dmg_tac_t;
 
 typedef struct {
-	uint32_t cycle;
 	dmg_tac_t control;
 	uint8_t counter;
+	uint32_t cycle;
 	uint16_t divider;
 	uint8_t modulo;
 } dmg_timer_t;

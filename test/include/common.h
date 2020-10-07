@@ -16,13 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TEST_COMMON_H_
+#define DMG_TEST_COMMON_H_
 
 #include "../../include/common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 27
+#define ARRAY_LENGTH(_TYPE_, _ARRAY_) \
+	(sizeof(_ARRAY_) / sizeof(_TYPE_))
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#define ASSERT(_CONDITION_) \
+	((_CONDITION_) ? EXIT_SUCCESS : EXIT_FAILURE)
+
+#define ASSERT_FAILURE(_CONDITION_) \
+	((_CONDITION_ == ERROR_FAILURE) ? EXIT_SUCCESS : EXIT_FAILURE)
+
+#define ASSERT_SUCCESS(_CONDITION_) \
+	((_CONDITION_ == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE)
+
+typedef int (*dmg_test_cb)(void);
+
+#endif /* DMG_TEST_COMMON_H_ */

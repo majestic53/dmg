@@ -34,8 +34,8 @@ enum {
 };
 
 static const uint32_t SELECT_CYC[] = {
-	0, /* SELECT_EXTERNAL */
-	0, /* SELECT_INTERNAL */
+	8, /* SELECT_EXTERNAL */
+	512, /* SELECT_INTERNAL */
 	};
 
 #ifndef NDEBUG

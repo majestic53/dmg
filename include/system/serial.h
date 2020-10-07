@@ -24,6 +24,17 @@
 typedef union {
 
 	struct {
+		uint8_t lsb : 1;
+		uint8_t unused : 6;
+		uint8_t msb : 1;
+	};
+
+	uint8_t raw;
+} dmg_sb_t;
+
+typedef union {
+
+	struct {
 		uint8_t select : 1;
 		uint8_t unused : 6;
 		uint8_t enable : 1;
@@ -33,9 +44,10 @@ typedef union {
 } dmg_sc_t;
 
 typedef struct {
-	uint32_t cycle;
 	dmg_sc_t control;
-	uint8_t data;
+	uint32_t cycle;
+	dmg_sb_t data;
+	uint32_t remaining;
 	dmg_serial_cb transfer;
 } dmg_serial_t;
 
