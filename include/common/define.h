@@ -118,6 +118,8 @@ enum {
 #define TRACE(_LEVEL_, _FORMAT_) \
 	TRACE_FORMAT(_LEVEL_, _FORMAT_, "")
 #ifndef NDEBUG
+#define TRACE_DISABLE() \
+	dmg_trace_enable(false, NULL)
 #define TRACE_ENABLE(_CYCLE_) \
 	dmg_trace_enable(true, _CYCLE_)
 #define TRACE_ERROR(_FORMAT_, _FILE_, _FUNCTION_, _LINE_) \
@@ -129,6 +131,7 @@ enum {
 		dmg_trace(NULL, _LEVEL_, __FILE__, __FUNCTION__, __LINE__, _FORMAT_, __VA_ARGS__); \
 	}
 #else
+#define TRACE_DISABLE()
 #define TRACE_ENABLE(_CYCLE_)
 #define TRACE_ERROR(_FORMAT_, _FILE_, _FUNCTION_, _LINE_)
 #define TRACE_FORMAT(_LEVEL_, _FORMAT_, ...)

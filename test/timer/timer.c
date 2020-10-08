@@ -51,12 +51,9 @@ dmg_test_timer_load(void)
 {
 	int result = EXIT_SUCCESS;
 
-	TRACE(LEVEL_INFORMATION, "Timer load test started");
-
 	dmg_test_timer_initialize();
 
 	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != EXIT_SUCCESS) {
-		TRACE(LEVEL_ERROR, "Timer load test #1 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -65,7 +62,6 @@ dmg_test_timer_load(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider == POST_DIVIDER)
 			|| ASSERT(g_timer.timer.modulo == POST_MODULO)) {
-		TRACE(LEVEL_ERROR, "Timer load test #2 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -73,7 +69,6 @@ dmg_test_timer_load(void)
 	g_timer.configuration.bootrom.data = (uint8_t *)1;
 
 	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != EXIT_SUCCESS) {
-		TRACE(LEVEL_ERROR, "Timer load test #3 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -82,11 +77,10 @@ dmg_test_timer_load(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
-		TRACE(LEVEL_ERROR, "Timer load test #4 FAIL");
 		result = EXIT_FAILURE;
 	}
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer load test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
+	TRACE_TEST(result);
 
 	return result;
 }
@@ -97,13 +91,10 @@ dmg_test_timer_read(void)
 	uint16_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	TRACE(LEVEL_INFORMATION, "Timer read test started");
-
 	dmg_test_timer_initialize();
 	g_timer.timer.control.raw = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_CONTROL) == (value & CONTROL_MASK))) {
-		TRACE(LEVEL_ERROR, "Timer read test #1 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -111,7 +102,6 @@ dmg_test_timer_read(void)
 	g_timer.timer.counter = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == (value & UINT8_MAX))) {
-		TRACE(LEVEL_ERROR, "Timer read test #2 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -119,7 +109,6 @@ dmg_test_timer_read(void)
 	g_timer.timer.divider = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == (value >> CHAR_BIT))) {
-		TRACE(LEVEL_ERROR, "Timer read test #3 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -127,11 +116,10 @@ dmg_test_timer_read(void)
 	g_timer.timer.modulo = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_MODULO) == (value & UINT8_MAX))) {
-		TRACE(LEVEL_ERROR, "Timer read test #4 FAIL");
 		result = EXIT_FAILURE;
 	}
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer read test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
+	TRACE_TEST(result);
 
 	return result;
 }
@@ -141,11 +129,69 @@ dmg_test_timer_step(void)
 {
 	int result = EXIT_SUCCESS;
 
-	TRACE(LEVEL_INFORMATION, "Timer step test started");
+	dmg_test_timer_initialize();
+	dmg_timer_load(&g_timer.timer, &g_timer.configuration);
+	g_timer.timer.divider = 0;
 
-	// TODO
+	for(uint16_t divider = 1; divider <= (UINT8_MAX + 1); ++divider) {
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer step test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
+		for(uint32_t cycle = 0; cycle < (SELECT_CYC[SELECT_16386] - CYCLE); cycle += CYCLE) {
+			dmg_timer_step(&g_timer.timer, CYCLE);
+
+			if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == ((divider - 1) & UINT8_MAX))) {
+				result = EXIT_FAILURE;
+				goto exit;
+			}
+		}
+
+		dmg_timer_step(&g_timer.timer, CYCLE);
+
+		if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == (divider & UINT8_MAX))) {
+			result = EXIT_FAILURE;
+			goto exit;
+		}
+	}
+
+	for(int select = SELECT_4096; select < SELECT_MAX; ++select) {
+		dmg_test_timer_initialize();
+		dmg_timer_load(&g_timer.timer, &g_timer.configuration);
+		g_timer.timer.modulo = rand();
+		g_timer.timer.counter = g_timer.timer.modulo;
+		g_timer.timer.control.enable = true;
+		g_timer.timer.control.select = select;
+
+		for(uint16_t counter = g_timer.timer.modulo; counter <= UINT8_MAX; ++counter) {
+
+			for(uint32_t cycle = 0; cycle < (SELECT_CYC[select] - CYCLE); cycle += CYCLE) {
+				dmg_timer_step(&g_timer.timer, CYCLE);
+
+				if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == (counter & UINT8_MAX))) {
+					result = EXIT_FAILURE;
+					goto exit;
+				}
+			}
+
+			dmg_timer_step(&g_timer.timer, CYCLE);
+
+			if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == ((counter + 1) & UINT8_MAX))) {
+				result = EXIT_FAILURE;
+				goto exit;
+			}
+		}
+
+		dmg_timer_step(&g_timer.timer, CYCLE);
+
+		if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == g_timer.timer.modulo)
+				&& ASSERT(g_timer.interrupt == true)) {
+			result = EXIT_FAILURE;
+			goto exit;
+		}
+
+		g_timer.interrupt = false;
+	}
+
+exit:
+	TRACE_TEST(result);
 
 	return result;
 }
@@ -154,8 +200,6 @@ int
 dmg_test_timer_unload(void)
 {
 	int result = EXIT_SUCCESS;
-
-	TRACE(LEVEL_INFORMATION, "Timer unload test started");
 
 	dmg_test_timer_initialize();
 	dmg_timer_load(&g_timer.timer, &g_timer.configuration);
@@ -166,11 +210,10 @@ dmg_test_timer_unload(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
-		TRACE(LEVEL_ERROR, "Timer unload test #1 FAIL");
 		result = EXIT_FAILURE;
 	}
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer unload test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
+	TRACE_TEST(result);
 
 	return result;
 }
@@ -181,13 +224,10 @@ dmg_test_timer_write(void)
 	uint16_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	TRACE(LEVEL_INFORMATION, "Timer write test started");
-
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_CONTROL, value);
 
 	if(ASSERT(g_timer.timer.control.raw == (value & CONTROL_MASK))) {
-		TRACE(LEVEL_ERROR, "Timer write test #1 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -195,7 +235,6 @@ dmg_test_timer_write(void)
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_COUNTER, value);
 
 	if(ASSERT(g_timer.timer.counter == (value & UINT8_MAX))) {
-		TRACE(LEVEL_ERROR, "Timer write test #2 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -203,7 +242,6 @@ dmg_test_timer_write(void)
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_DIVIDER, value);
 
 	if(ASSERT(g_timer.timer.divider == 0)) {
-		TRACE(LEVEL_ERROR, "Timer write test #3 FAIL");
 		result = EXIT_FAILURE;
 	}
 
@@ -211,11 +249,10 @@ dmg_test_timer_write(void)
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_MODULO, value);
 
 	if(ASSERT(g_timer.timer.modulo == (value & UINT8_MAX))) {
-		TRACE(LEVEL_ERROR, "Timer write test #4 FAIL");
 		result = EXIT_FAILURE;
 	}
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer write test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
+	TRACE_TEST(result);
 
 	return result;
 }
@@ -236,17 +273,12 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TRACE_ENABLE(&g_timer.timer.cycle);
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer test started (%u cases)", ARRAY_LENGTH(dmg_test_cb, TEST));
-
-	for(size_t test = 0; test < ARRAY_LENGTH(dmg_test_cb, TEST); ++test) {
+	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
 		if(TEST[test]() != EXIT_SUCCESS) {
 			result = EXIT_FAILURE;
 		}
 	}
-
-	TRACE_FORMAT(LEVEL_INFORMATION, "Timer test %s", (result == EXIT_SUCCESS) ? "PASS" : "FAIL");
 
 	return result;
 }

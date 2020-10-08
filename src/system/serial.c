@@ -151,12 +151,6 @@ dmg_serial_write(
 			break;
 		case ADDRESS_SERIAL_DATA:
 			serial->data.raw = value;
-
-// TODO
-fprintf(stdout, "%c", value);
-fflush(stdout);
-// ---
-
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported serial write [%04x]<-%02x", address, value);
