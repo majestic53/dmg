@@ -36,9 +36,8 @@
 typedef int (*dmg_test_cb)(void);
 
 #ifndef NDEBUG
-static uint32_t g_cycle = 0;
 #define TRACE_TEST(_RESULT_) { \
-		TRACE_ENABLE(&g_cycle); \
+		TRACE_ENABLE(NULL); \
 		if(_RESULT_ != EXIT_SUCCESS) { \
 			TRACE_FORMAT(LEVEL_ERROR, "Test %s -- FAIL", __FUNCTION__); \
 		} else { \
