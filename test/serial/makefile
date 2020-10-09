@@ -19,13 +19,13 @@ DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
 
-BIN=dmg-test-serial
+BIN=test-serial
 
 FLAGS=-march=native -std=c11 -Wall -Werror
 FLAGS_BIN=
 FLAGS_LIB=-lSDL2 -lSDL2main
 
-build: build_test link
+build: build_test link run
 
 build_test: test_serial.o
 
@@ -34,7 +34,18 @@ test_serial.o: $(DIR_ROOT)serial.c
 
 link:
 	@echo ''
-	@echo '--- BUILDING TEST --------------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_serial.o $(DIR_BUILD)system_serial.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN) $(FLAGS_BIN)
+	@echo '--- BUILDING SERIAL TEST -------------------'
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_serial.o $(DIR_BUILD)system_serial.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
+	@echo ''
+
+run:
+	@echo '--- RUNNING SERIAL TEST --------------------'
+	@cd $(DIR_BUILD_TEST) && if ./$(BIN) $(FLAGS_BIN); \
+	then \
+		echo '--- PASSED ---------------------------------'; \
+	else \
+		echo '--- FAILED ---------------------------------'; \
+		exit 1; \
+	fi
 	@echo ''

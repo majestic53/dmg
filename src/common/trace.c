@@ -42,7 +42,6 @@ dmg_trace(
 
 	if(g_trace.enable) {
 		time_t current = time(NULL);
-		uint32_t cycle = ((g_trace.cycle) ? *(g_trace.cycle) : 0);
 		char message[TRACE_LENGTH_MAX] = {}, timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
 		if(!stream) {
@@ -77,8 +76,12 @@ dmg_trace(
 #ifdef COLOR
 		fprintf(stream, "%s", LEVEL_STR[level]);
 #endif /* COLOR */
-		fprintf(stream, "[%s] {%u (%0.2f ms)} %s (%s:%s@%zu)", timestamp, cycle, cycle * MS_PER_CYCLE,
-			message, function, file, line);
+		if(g_trace.cycle) {
+			fprintf(stream, "[%s] {%u (%0.2f ms)} %s (%s:%s@%zu)", timestamp, *g_trace.cycle, *g_trace.cycle * MS_PER_CYCLE,
+				message, function, file, line);
+		} else {
+			fprintf(stream, "[%s] %s (%s:%s@%zu)", timestamp, message, function, file, line);
+		}
 #ifdef COLOR
 		fprintf(stream, "%s", LEVEL_STR[LEVEL_NONE]);
 #endif /* COLOR */

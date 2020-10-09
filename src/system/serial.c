@@ -109,7 +109,7 @@ dmg_serial_step(
 
 				serial->data.raw = ((serial->data.raw << 1) | in.lsb);
 
-				if(--serial->remaining) {
+				if(!--serial->remaining) {
 					serial->control.enable = false;
 					dmg_runtime_interrupt(INTERRUPT_SERIAL);
 
