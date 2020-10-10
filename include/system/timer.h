@@ -24,6 +24,16 @@
 typedef union {
 
 	struct {
+		uint8_t unused;
+		uint8_t counter;
+	};
+
+	uint16_t raw;
+} dmg_div_t;
+
+typedef union {
+
+	struct {
 		uint8_t select : 2;
 		uint8_t enable : 1;
 		uint8_t unused : 4;
@@ -37,7 +47,7 @@ typedef struct {
 	dmg_tac_t control;
 	uint8_t counter;
 	uint32_t cycle;
-	uint16_t divider;
+	dmg_div_t divider;
 	uint8_t modulo;
 } dmg_timer_t;
 

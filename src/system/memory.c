@@ -69,13 +69,13 @@ dmg_memory_read(
 
 	switch(address) {
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
-			result = memory->ram.data[address - ADDRESS_RAM_BEGIN];
+			result = ((uint8_t *)memory->ram.data)[address - ADDRESS_RAM_BEGIN];
 			break;
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
-			result = memory->ram.data[address - ADDRESS_RAM_ECHO_BEGIN];
+			result = ((uint8_t *)memory->ram.data)[address - ADDRESS_RAM_ECHO_BEGIN];
 			break;
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
-			result = memory->ram_high.data[address - ADDRESS_RAM_HIGH_BEGIN];
+			result = ((uint8_t *)memory->ram_high.data)[address - ADDRESS_RAM_HIGH_BEGIN];
 			break;
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 			result = dmg_mapper_read_ram(&memory->mapper, address);
@@ -133,13 +133,13 @@ dmg_memory_write(
 			dmg_bootrom_write(&memory->bootrom, address, value);
 			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
-			memory->ram.data[address - ADDRESS_RAM_BEGIN] = value;
+			((uint8_t *)memory->ram.data)[address - ADDRESS_RAM_BEGIN] = value;
 			break;
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
-			memory->ram.data[address - ADDRESS_RAM_ECHO_BEGIN] = value;
+			((uint8_t *)memory->ram.data)[address - ADDRESS_RAM_ECHO_BEGIN] = value;
 			break;
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
-			memory->ram_high.data[address - ADDRESS_RAM_HIGH_BEGIN] = value;
+			((uint8_t *)memory->ram_high.data)[address - ADDRESS_RAM_HIGH_BEGIN] = value;
 			break;
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 			dmg_mapper_write_ram(&memory->mapper, address, value);

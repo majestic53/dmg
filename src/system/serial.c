@@ -52,7 +52,7 @@ dmg_serial_load(
 		serial->data.raw = POST_DATA;
 	}
 
-	serial->transfer = configuration->output.transfer;
+	serial->transfer = configuration->transfer;
 
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial loaded");

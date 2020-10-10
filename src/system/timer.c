@@ -34,7 +34,7 @@ dmg_timer_trace(
 		timer->control.select, timer->control.enable);
 	TRACE_FORMAT(level, "Timer TIMA=%02x", timer->counter);
 	TRACE_FORMAT(level, "Timer TMA=%02x", timer->modulo);
-	TRACE_FORMAT(level, "Timer DIV=%04x", timer->divider);
+	TRACE_FORMAT(level, "Timer DIV=%04x", timer->divider.raw);
 }
 
 #endif /* NDEBUG */
@@ -52,7 +52,7 @@ dmg_timer_load(
 	if(!configuration->bootrom.data) {
 		timer->control.raw = POST_CONTROL;
 		timer->counter = POST_COUNTER;
-		timer->divider = POST_DIVIDER;
+		timer->divider.raw = POST_DIVIDER;
 		timer->modulo = POST_MODULO;
 	}
 
@@ -78,7 +78,7 @@ dmg_timer_read(
 			result = timer->counter;
 			break;
 		case ADDRESS_TIMER_DIVIDER:
-			result = (timer->divider >> CHAR_BIT);
+			result = timer->divider.counter;
 			break;
 		case ADDRESS_TIMER_MODULO:
 			result = timer->modulo;
@@ -103,7 +103,7 @@ dmg_timer_step(
 	for(uint32_t tick = 0; tick < cycle; ++tick) {
 		TRACE_TIMER(LEVEL_VERBOSE, timer);
 
-		++timer->divider;
+		++timer->divider.raw;
 
 		if(timer->control.enable) {
 
@@ -154,7 +154,7 @@ dmg_timer_write(
 			timer->counter = value;
 			break;
 		case ADDRESS_TIMER_DIVIDER:
-			timer->divider = 0;
+			timer->divider.raw = 0;
 			break;
 		case ADDRESS_TIMER_MODULO:
 			timer->modulo = value;

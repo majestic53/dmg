@@ -45,13 +45,15 @@
 #define OPTION_BOOTROM 'b'
 #define OPTION_HELP 'h'
 #define OPTION_ROM 'r'
+#define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:hr:v"
+#define OPTIONS "b:hr:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
 	FLAG_HELP,
 	FLAG_ROM,
+	FLAG_SCALE,
 	FLAG_VERSION,
 	FLAG_MAX,
 };
@@ -60,6 +62,7 @@ static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
 	"-h", /* FLAG_HELP */
 	"-r", /* FLAG_ROM */
+	"-s", /* FLAG_SCALE */
 	"-v", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
@@ -68,6 +71,7 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
 	"Display help information", /* FLAG_HELP */
 	"Specify rom binary", /* FLAG_ROM */
+	"Specify display scale", /* FLAG_SCALE */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
@@ -94,11 +98,11 @@ static const uint32_t DIRECTION[] = {
 	SDL_SCANCODE_DOWN, /* DMG_DIRECTION_DOWN */
 	};
 
-static const dmg_color_t PALETTE[] = {
-	{{ 0xb9, 0xe5, 0xbb, 0xff }}, /* DMG_PALETTE_WHITE */
-	{{ 0xa8, 0xb9, 0x5a, 0xff }}, /* DMG_PALETTE_GREY_LIGHT */
-	{{ 0x6e, 0x60, 0x1e, 0xff }}, /* DMG_PALETTE_GREY_DARK */
-	{{ 0x00, 0x1b, 0x2d, 0xff }}, /* DMG_PALETTE_BLACK */
+static const uint32_t PALETTE[] = {
+	0xbbe5b9, /* DMG_PALETTE_WHITE */
+	0x5ab9a8, /* DMG_PALETTE_GREY_LIGHT */
+	0x1e606e, /* DMG_PALETTE_GREY_DARK */
+	0x2d1b00, /* DMG_PALETTE_BLACK */
 	};
 
 #define SCALE 1

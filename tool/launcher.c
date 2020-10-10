@@ -45,7 +45,7 @@ dmg_launcher_load(
 		goto exit;
 	}
 
-	if(!(buffer->data = (uint8_t *)malloc(length))) {
+	if(!(buffer->data = (void *)malloc(length))) {
 		result = EXIT_FAILURE;
 		goto exit;
 	}
@@ -90,6 +90,9 @@ dmg_launcher_parse(
 			case OPTION_ROM:
 				launcher->rom = optarg;
 				break;
+			case OPTION_SCALE:
+				launcher->configuration.scale = strtol(optarg, NULL, 10);
+				break;
 			case OPTION_VERSION:
 				launcher->version = true;
 				break;
@@ -111,11 +114,15 @@ dmg_launcher_setup(
 	__inout dmg_launcher_t *launcher
 	)
 {
-	memcpy(launcher->configuration.input.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
-	memcpy(launcher->configuration.input.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
-	memcpy(launcher->configuration.output.palette, PALETTE, sizeof(dmg_color_t) * DMG_PALETTE_MAX);
-	launcher->configuration.output.scale = SCALE;
-	launcher->configuration.output.transfer = TRANSFER;
+	memcpy(launcher->configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
+	memcpy(launcher->configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
+	memcpy(launcher->configuration.palette, PALETTE, sizeof(uint32_t) * DMG_PALETTE_MAX);
+
+	if(!launcher->configuration.scale) {
+		launcher->configuration.scale = SCALE;
+	}
+
+	launcher->configuration.transfer = TRANSFER;
 }
 
 static void

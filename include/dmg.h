@@ -19,8 +19,6 @@
 #ifndef DMG_H_
 #define DMG_H_
 
-#include <stdint.h>
-
 enum {
 	DMG_BUTTON_A = 0,
 	DMG_BUTTON_B,
@@ -45,47 +43,27 @@ enum {
 	DMG_PALETTE_MAX,
 };
 
-typedef uint8_t (*dmg_serial_cb)(uint8_t);
+typedef unsigned (*dmg_serial_cb)(unsigned);
 
 typedef struct {
-	uint8_t *data;
-	uint32_t length;
+	void *data;
+	unsigned length;
 } dmg_buffer_t;
 
-typedef union {
-
-	struct {
-		uint8_t blue;
-		uint8_t green;
-		uint8_t red;
-		uint8_t alpha;
-	};
-
-	uint32_t raw;
-} dmg_color_t;
-
 typedef struct {
-	uint32_t button[DMG_BUTTON_MAX];
-	uint32_t direction[DMG_DIRECTION_MAX];
-} dmg_input_t;
-
-typedef struct {
-	dmg_color_t palette[DMG_PALETTE_MAX];
-	uint8_t scale;
-	dmg_serial_cb transfer;
-} dmg_output_t;
-
-typedef struct {
-	uint32_t major;
-	uint32_t minor;
-	uint32_t patch;
+	unsigned major;
+	unsigned minor;
+	unsigned patch;
 } dmg_version_t;
 
 typedef struct {
 	dmg_buffer_t bootrom;
 	dmg_buffer_t rom;
-	dmg_input_t input;
-	dmg_output_t output;
+	dmg_serial_cb transfer;
+	unsigned button[DMG_BUTTON_MAX];
+	unsigned direction[DMG_DIRECTION_MAX];
+	unsigned palette[DMG_PALETTE_MAX];
+	unsigned scale;
 } dmg_t;
 
 #ifdef __cplusplus

@@ -22,6 +22,7 @@ dmg [args]
 -b	Specify bootrom binary
 -h	Display help information
 -r	Specify rom binary
+-s	Specify display scale
 -v	Display version information
 ```
 
@@ -37,4 +38,10 @@ The following example shows how to launch dmg with a rom and bootrom file:
 
 ```
 $ ./bin/dmg -r rom.gb -b bootrom.gb
+```
+
+The following example shows how to launch dmg with the display scaled by 2x:
+
+```
+$ ./bin/dmg -r rom.gb -s 2
 ```

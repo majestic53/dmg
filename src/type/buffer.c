@@ -31,7 +31,7 @@ dmg_buffer_allocate(
 {
 	int result = ERROR_SUCCESS;
 
-	if(!(buffer->data = (uint8_t *)malloc(length))) {
+	if(!(buffer->data = (void *)malloc(length))) {
 		result = ERROR_SET(ERROR_FAILURE, "Failed to allocate buffer");
 		goto exit;
 	}

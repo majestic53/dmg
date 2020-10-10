@@ -50,13 +50,13 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	*header = (const dmg_header_t *)&buffer->data[HEADER_BEGIN];
+	*header = (const dmg_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title: %s", (*header)->title);
 
 	checksum = 0;
 	for(address = HEADER_CHECKSUM_BEGIN; address <= HEADER_CHECKSUM_END; ++address) {
-		checksum = (checksum - buffer->data[address] - 1);
+		checksum = (checksum - ((uint8_t *)buffer->data)[address] - 1);
 	}
 
 	if((checksum &= UINT8_MAX) != (*header)->checksum) {
@@ -117,7 +117,7 @@ dmg_cartridge_load(
 	}
 
 	for(index = 0; index < cartridge->rom.count; ++index) {
-		cartridge->rom.buffer[index].data = (buffer->data + (ROM_WIDTH * index));
+		cartridge->rom.buffer[index].data = (((uint8_t *)buffer->data) + (ROM_WIDTH * index));
 		cartridge->rom.buffer[index].length = ROM_WIDTH;
 
 		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom[%u][%u]=%p", index, cartridge->rom.buffer[index].length,
@@ -177,7 +177,7 @@ dmg_cartridge_read_ram(
 
 		switch(address) {
 			case 0 ... (RAM_WIDTH - 1):
-				result = cartridge->ram.buffer[bank].data[address];
+				result = ((uint8_t *)cartridge->ram.buffer[bank].data)[address];
 				break;
 			default:
 				result = UINT8_MAX;
@@ -213,7 +213,7 @@ dmg_cartridge_read_rom(
 
 	switch(address) {
 		case 0 ... (ROM_WIDTH - 1):
-			result = cartridge->rom.buffer[bank].data[address];
+			result = ((uint8_t *)cartridge->rom.buffer[bank].data)[address];
 			break;
 		default:
 			result = UINT8_MAX;
@@ -260,7 +260,7 @@ dmg_cartridge_write_ram(
 
 			switch(address) {
 				case 0 ... (RAM_WIDTH - 1):
-					cartridge->ram.buffer[bank].data[address] = value;
+					((uint8_t *)cartridge->ram.buffer[bank].data)[address] = value;
 					break;
 				default:
 					TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram write [%u][%04x]<-%02x", bank, address, value);

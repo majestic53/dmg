@@ -49,7 +49,7 @@ dmg_bootrom_validate(
 
 	checksum = 0;
 	for(address = 0; address < BOOTROM_WIDTH; ++address) {
-		checksum += buffer->data[address];
+		checksum += ((uint8_t *)buffer->data)[address];
 	}
 
 	if(checksum != BOOTROM_CHECKSUM) {
@@ -98,7 +98,7 @@ dmg_bootrom_read(
 
 	switch(address) {
 		case ADDRESS_BOOTROM_BEGIN ... ADDRESS_BOOTROM_END:
-			result = bootrom->buffer->data[address];
+			result = ((uint8_t *)bootrom->buffer->data)[address];
 			break;
 		default:
 			result = UINT8_MAX;

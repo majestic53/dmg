@@ -60,7 +60,7 @@ dmg_test_timer_load(void)
 	if(ASSERT(g_timer.timer.control.raw == POST_CONTROL)
 			|| ASSERT(g_timer.timer.counter == POST_COUNTER)
 			|| ASSERT(g_timer.timer.cycle == 0)
-			|| ASSERT(g_timer.timer.divider == POST_DIVIDER)
+			|| ASSERT(g_timer.timer.divider.raw == POST_DIVIDER)
 			|| ASSERT(g_timer.timer.modulo == POST_MODULO)) {
 		result = EXIT_FAILURE;
 	}
@@ -75,7 +75,7 @@ dmg_test_timer_load(void)
 	if(ASSERT(g_timer.timer.control.raw == 0)
 			|| ASSERT(g_timer.timer.counter == 0)
 			|| ASSERT(g_timer.timer.cycle == 0)
-			|| ASSERT(g_timer.timer.divider == 0)
+			|| ASSERT(g_timer.timer.divider.raw == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
 		result = EXIT_FAILURE;
 	}
@@ -106,7 +106,7 @@ dmg_test_timer_read(void)
 	}
 
 	dmg_test_timer_initialize();
-	g_timer.timer.divider = value;
+	g_timer.timer.divider.raw = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == (value >> CHAR_BIT))) {
 		result = EXIT_FAILURE;
@@ -131,7 +131,7 @@ dmg_test_timer_step(void)
 
 	dmg_test_timer_initialize();
 	dmg_timer_load(&g_timer.timer, &g_timer.configuration);
-	g_timer.timer.divider = 0;
+	g_timer.timer.divider.raw = 0;
 
 	for(uint16_t divider = 1; divider <= (UINT8_MAX + 1); ++divider) {
 
@@ -208,7 +208,7 @@ dmg_test_timer_unload(void)
 	if(ASSERT(g_timer.timer.control.raw == 0)
 			|| ASSERT(g_timer.timer.counter == 0)
 			|| ASSERT(g_timer.timer.cycle == 0)
-			|| ASSERT(g_timer.timer.divider == 0)
+			|| ASSERT(g_timer.timer.divider.raw == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
 		result = EXIT_FAILURE;
 	}
@@ -241,7 +241,7 @@ dmg_test_timer_write(void)
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_DIVIDER, value);
 
-	if(ASSERT(g_timer.timer.divider == 0)) {
+	if(ASSERT(g_timer.timer.divider.raw == 0)) {
 		result = EXIT_FAILURE;
 	}
 

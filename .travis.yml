@@ -15,4 +15,4 @@ addons:
 
 script:
   - make
-  - make debug
+  - make debug LEVEL=4

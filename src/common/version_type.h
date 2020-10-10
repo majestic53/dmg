@@ -23,6 +23,6 @@
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
-#define VERSION_PATCH 29
+#define VERSION_PATCH 30
 
 #endif /* DMG_COMMON_VERSION_TYPE_H_ */

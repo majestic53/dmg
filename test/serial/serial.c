@@ -32,9 +32,9 @@ typedef struct {
 
 dmg_serial_test_t g_serial = {};
 
-uint8_t
+unsigned
 dmg_transfer(
-	__in uint8_t in
+	__in unsigned in
 	)
 {
 	return in;
@@ -75,7 +75,7 @@ dmg_test_serial_load(void)
 
 	dmg_test_serial_initialize();
 	g_serial.configuration.bootrom.data = (uint8_t *)1;
-	g_serial.configuration.output.transfer = (dmg_serial_cb)2;
+	g_serial.configuration.transfer = (dmg_serial_cb)2;
 
 	if(ASSERT_SUCCESS(dmg_serial_load(&g_serial.serial, &g_serial.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;
@@ -85,7 +85,7 @@ dmg_test_serial_load(void)
 			|| ASSERT(g_serial.serial.cycle == 0)
 			|| ASSERT(g_serial.serial.data.raw == 0)
 			|| ASSERT(g_serial.serial.remaining == 0)
-			|| ASSERT(g_serial.serial.transfer == g_serial.configuration.output.transfer)) {
+			|| ASSERT(g_serial.serial.transfer == g_serial.configuration.transfer)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -205,7 +205,7 @@ dmg_test_serial_step(void)
 		}
 
 		dmg_test_serial_initialize();
-		g_serial.configuration.output.transfer = dmg_transfer;
+		g_serial.configuration.transfer = dmg_transfer;
 		dmg_serial_load(&g_serial.serial, &g_serial.configuration);
 		data.raw = value;
 		dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_DATA, data.raw);

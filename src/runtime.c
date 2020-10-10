@@ -39,10 +39,6 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	if((result = dmg_service_load()) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
 	if((result = dmg_memory_load(&g_runtime.memory, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
@@ -60,6 +56,10 @@ dmg_runtime_load(
 	}
 
 	// TODO: LOAD SUBSYSTEMS
+
+	if((result = dmg_service_load(configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE(LEVEL_INFORMATION, "Runtime loaded");
 
@@ -110,13 +110,14 @@ dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
 
+	dmg_service_unload();
+
 	// TODO: UNLOAD SUBSYSTEMS
 
 	dmg_timer_unload(&g_runtime.timer);
 	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
-	dmg_service_unload();
 
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
 

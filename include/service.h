@@ -25,9 +25,26 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_service_load(void);
+bool dmg_service_button(
+	__in int button
+	);
+
+bool dmg_service_direction(
+	__in int direction
+	);
+
+int dmg_service_load(
+	__in const dmg_t *configuration,
+	__in const char *title
+	);
 
 bool dmg_service_poll(void);
+
+void dmg_service_pixel(
+	__in int color,
+	__in uint8_t x,
+	__in uint8_t y
+	);
 
 void dmg_service_sync(void);
 

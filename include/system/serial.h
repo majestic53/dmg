@@ -47,7 +47,7 @@ typedef struct {
 	dmg_sc_t control;
 	uint32_t cycle;
 	dmg_sb_t data;
-	uint32_t remaining;
+	uint8_t remaining;
 	dmg_serial_cb transfer;
 } dmg_serial_t;
 

@@ -34,7 +34,6 @@ typedef union {
 	uint8_t raw;
 } __attribute__((packed)) dmg_flag_t;
 
-
 typedef union {
 
 	struct {
@@ -48,7 +47,6 @@ typedef union {
 
 	uint8_t raw;
 } __attribute__((packed)) dmg_interrupt_t;
-
 
 typedef union {
 
