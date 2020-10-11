@@ -79,10 +79,13 @@ dmg_runtime_loop(void)
 	g_runtime.cycle_last = 0;
 
 	for(;;) {
+		int event = dmg_service_poll();
 
-		if(!dmg_service_poll()) {
-			TRACE(LEVEL_WARNING, "Runtime exiting");
+		if(event & EVENT_QUIT) {
+			TRACE(LEVEL_INFORMATION, "Runtime loop exiting");
 			break;
+		} else if(event & EVENT_KEY) {
+			dmg_runtime_interrupt(INTERRUPT_JOYPAD);
 		}
 
 		while(cycle < CYCLE_PER_FRAME) {

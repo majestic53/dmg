@@ -21,6 +21,12 @@
 
 #include "./common.h"
 
+enum {
+	EVENT_NONE = 0,
+	EVENT_QUIT = 0x1,
+	EVENT_KEY = 0x2,
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -38,7 +44,7 @@ int dmg_service_load(
 	__in const char *title
 	);
 
-bool dmg_service_poll(void);
+int dmg_service_poll(void);
 
 void dmg_service_pixel(
 	__in int color,

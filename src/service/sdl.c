@@ -154,21 +154,17 @@ dmg_service_input_load(
 		TRACE_FORMAT(LEVEL_VERBOSE, "Button[%zu]=%u", index, g_sdl.button[index]);
 	}
 
+	memset(g_sdl.button_state, false, sizeof(bool) * DMG_BUTTON_MAX);
+
 	for(size_t index = 0; index < DMG_DIRECTION_MAX; ++index) {
 		g_sdl.direction[index] = configuration->direction[index];
 
 		TRACE_FORMAT(LEVEL_VERBOSE, "Direction[%zu]=%u", index, g_sdl.direction[index]);
 	}
 
-	// TODO
+	memset(g_sdl.direction_state, false, sizeof(bool) * DMG_DIRECTION_MAX);
 
 	return result;
-}
-
-static void
-dmg_service_input_unload(void)
-{
-	// TODO
 }
 
 bool
@@ -176,9 +172,25 @@ dmg_service_button(
 	__in int button
 	)
 {
-	// TODO
-	return false;
-	// ---
+	return g_sdl.button_state[button];
+}
+
+bool
+dmg_service_button_change(
+	__in const SDL_Event *event
+	)
+{
+	bool result = false;
+
+	for(int button = 0; button < DMG_BUTTON_MAX; ++button) {
+
+		if((result = (event->key.keysym.scancode == g_sdl.button[button]))) {
+			g_sdl.button_state[button] = (event->type == SDL_KEYDOWN);
+			break;
+		}
+	}
+
+	return result;
 }
 
 bool
@@ -186,9 +198,25 @@ dmg_service_direction(
 	__in int direction
 	)
 {
-	// TODO
-	return false;
-	// ---
+	return g_sdl.direction_state[direction];
+}
+
+bool
+dmg_service_direction_change(
+	__in const SDL_Event *event
+	)
+{
+	bool result = false;
+
+	for(int direction = 0; direction < DMG_DIRECTION_MAX; ++direction) {
+
+		if((result = (event->key.keysym.scancode == g_sdl.direction[direction]))) {
+			g_sdl.direction_state[direction] = (event->type == SDL_KEYDOWN);
+			break;
+		}
+	}
+
+	return result;
 }
 
 int
@@ -230,14 +258,14 @@ dmg_service_pixel(
 	__in uint8_t y
 	)
 {
-	g_sdl.pixel[x % DISPLAY_WIDTH][y % DISPLAY_HEIGHT].raw = g_sdl.palette[color % DMG_PALETTE_MAX].raw;
+	g_sdl.pixel[x][y].raw = g_sdl.palette[color].raw;
 }
 
-bool
+int
 dmg_service_poll(void)
 {
-	bool result = true;
 	SDL_Event event = {};
+	int result = EVENT_NONE;
 
 	g_sdl.end = SDL_GetTicks();
 
@@ -260,10 +288,24 @@ dmg_service_poll(void)
 	while(SDL_PollEvent(&event)) {
 
 		switch(event.type) {
-			case SDL_QUIT:
-				result = false;
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
 
-				TRACE(LEVEL_INFORMATION, "SDL quit event");
+				if(!event.key.repeat) {
+
+					if(dmg_service_button_change(&event)
+							|| dmg_service_direction_change(&event)) {
+						result |= EVENT_KEY;
+
+						TRACE_FORMAT(LEVEL_VERBOSE, "SDL key %s event=%u", (event.type == SDL_KEYUP) ? "up" : "down",
+							event.key.keysym.scancode);
+					}
+				}
+				break;
+			case SDL_QUIT:
+				result |= EVENT_QUIT;
+
+				TRACE(LEVEL_VERBOSE, "SDL quit event");
 				goto exit;
 			default:
 				break;
@@ -291,7 +333,6 @@ dmg_service_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
 
-	dmg_service_input_unload();
 	dmg_service_display_unload();
 	SDL_Quit();
 
