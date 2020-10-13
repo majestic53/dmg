@@ -16,35 +16,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_SYSTEM_SERIAL_TYPE_H_
-#define DMG_SYSTEM_SERIAL_TYPE_H_
+#ifndef DMG_SYSTEM_JOYPAD_TYPE_H_
+#define DMG_SYSTEM_JOYPAD_TYPE_H_
 
-#include "../../include/system/serial.h"
+#include "../../include/system/joypad.h"
 #include "../../include/runtime.h"
+#include "../../include/service.h"
 
-#define CONTROL_MASK 0x81
+#define POST_STATE 0xff
 
-#define POST_CONTROL 0x00
-#define POST_DATA 0x00
-
-enum {
-	SELECT_EXTERNAL = 0,
-	SELECT_INTERNAL,
-	SELECT_MAX,
-};
-
-static const uint32_t SELECT_CYC[] = {
-	8, /* SELECT_EXTERNAL */
-	512, /* SELECT_INTERNAL */
-	};
+#define STATE_CYCLE 1024
+#define STATE_MASK 0x30
+#define STATE_RESET 0xcf
 
 #ifndef NDEBUG
-#define TRACE_SERIAL(_LEVEL_, _SERIAL_) \
+#define TRACE_JOYPAD(_LEVEL_, _JOYPAD_) \
 	if((_LEVEL_) <= (LEVEL)) { \
-		dmg_serial_trace(_LEVEL_, _SERIAL_); \
+		dmg_joypad_trace(_LEVEL_, _JOYPAD_); \
 	}
 #else
-#define TRACE_SERIAL(_LEVEL_, _SERIAL_)
+#define TRACE_JOYPAD(_LEVEL_, _JOYPAD_)
 #endif /* NDEBUG */
 
-#endif /* DMG_SYSTEM_SERIAL_TYPE_H_ */
+#endif /* DMG_SYSTEM_JOYPAD_TYPE_H_ */

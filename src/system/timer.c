@@ -100,10 +100,10 @@ dmg_timer_step(
 	)
 {
 
-	for(uint32_t tick = 0; tick < cycle; ++tick) {
+	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 		TRACE_TIMER(LEVEL_VERBOSE, timer);
 
-		++timer->divider.raw;
+		timer->divider.raw += CYCLE;
 
 		if(timer->control.enable) {
 
@@ -115,7 +115,8 @@ dmg_timer_step(
 				TRACE(LEVEL_VERBOSE, "Timer overflow");
 			}
 
-			if((++timer->cycle >= SELECT_CYC[timer->control.select])) {
+			timer->cycle += CYCLE;
+			if(timer->cycle >= SELECT_CYC[timer->control.select]) {
 				timer->cycle %= SELECT_CYC[timer->control.select];
 				timer->control.overflow = (timer->counter == UINT8_MAX);
 				++timer->counter;

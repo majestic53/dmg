@@ -52,6 +52,8 @@
 
 #define ADDRESS_IO_BASE 0xff00
 
+#define ADDRESS_JOYPAD_STATE 0xff00
+
 #define ADDRESS_RAM_BEGIN 0xc000
 #define ADDRESS_RAM_END 0xdfff
 #define ADDRESS_RAM_ECHO_BEGIN 0xe000

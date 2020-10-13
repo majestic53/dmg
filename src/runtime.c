@@ -43,6 +43,10 @@ dmg_runtime_load(
 		goto exit;
 	}
 
+	if((result = dmg_joypad_load(&g_runtime.joypad, configuration)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	if((result = dmg_processor_load(&g_runtime.processor, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
@@ -79,17 +83,15 @@ dmg_runtime_loop(void)
 	g_runtime.cycle_last = 0;
 
 	for(;;) {
-		int event = dmg_service_poll();
 
-		if(event & EVENT_QUIT) {
+		if(!dmg_service_poll()) {
 			TRACE(LEVEL_INFORMATION, "Runtime loop exiting");
 			break;
-		} else if(event & EVENT_KEY) {
-			dmg_runtime_interrupt(INTERRUPT_JOYPAD);
 		}
 
 		while(cycle < CYCLE_PER_FRAME) {
 			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_joypad_step(&g_runtime.joypad, g_runtime.cycle_last);
 			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
 			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
 
@@ -120,6 +122,7 @@ dmg_runtime_unload(void)
 	dmg_timer_unload(&g_runtime.timer);
 	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
+	dmg_joypad_unload(&g_runtime.joypad);
 	dmg_memory_unload(&g_runtime.memory);
 
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
@@ -166,6 +169,9 @@ dmg_runtime_read(
 		case ADDRESS_INTERRUPT_FLAG:
 			result = dmg_processor_read(&g_runtime.processor, address);
 			break;
+		case ADDRESS_JOYPAD_STATE:
+			result = dmg_joypad_read(&g_runtime.joypad, address);
+			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
@@ -209,6 +215,9 @@ dmg_runtime_write(
 		case ADDRESS_INTERRUPT_ENABLE:
 		case ADDRESS_INTERRUPT_FLAG:
 			dmg_processor_write(&g_runtime.processor, address, value);
+			break;
+		case ADDRESS_JOYPAD_STATE:
+			dmg_joypad_write(&g_runtime.joypad, address, value);
 			break;
 		case ADDRESS_BOOTROM_DISABLE:
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:

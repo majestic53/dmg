@@ -63,9 +63,7 @@ typedef struct {
 	float framerate;
 	float frequency;
 	uint32_t button[DMG_BUTTON_MAX];
-	bool button_state[DMG_BUTTON_MAX];
 	uint32_t direction[DMG_DIRECTION_MAX];
-	bool direction_state[DMG_DIRECTION_MAX];
 	dmg_bgra_t palette[DMG_PALETTE_MAX];
 	uint32_t scale;
 	char title[TITLE_LENGTH_MAX];

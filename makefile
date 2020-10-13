@@ -25,6 +25,7 @@ DIR_BUILD=./build/
 DIR_BUILD_TEST=./build/test/
 DIR_ROOT=./
 DIR_SRC=./src/
+DIR_TEST_JOYPAD=./test/joypad/
 DIR_TEST_SERIAL=./test/serial/
 DIR_TEST_TIMER=./test/timer/
 DIR_TOOL=./tool/
@@ -49,6 +50,7 @@ setup:
 build_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
@@ -56,6 +58,7 @@ build_debug:
 build_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
