@@ -106,7 +106,7 @@ dmg_joypad_read(
 
 	switch(address) {
 		case ADDRESS_JOYPAD_STATE:
-			result = joypad->state.raw;
+			result = (joypad->state.raw | STATE_READ);
 			break;
 		default:
 			result = UINT8_MAX;
@@ -157,9 +157,11 @@ dmg_joypad_write(
 
 	switch(address) {
 		case ADDRESS_JOYPAD_STATE:
-			joypad->state.raw = ((value & STATE_MASK) | STATE_RESET);
+			joypad->state.raw = ((value & STATE_MASK) | STATE_WRITE);
 
 			TRACE_FORMAT(LEVEL_VERBOSE, "Joypad button=%x, direction=%x", joypad->state.button, joypad->state.direction);
+
+			dmg_joypad_poll(joypad);
 
 			if(!joypad->state.button) {
 

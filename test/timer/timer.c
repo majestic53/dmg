@@ -182,7 +182,7 @@ dmg_test_timer_step(void)
 		dmg_timer_step(&g_timer.timer, CYCLE);
 
 		if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == g_timer.timer.modulo)
-				&& ASSERT(g_timer.interrupt == true)) {
+				|| ASSERT(g_timer.interrupt == true)) {
 			result = EXIT_FAILURE;
 			goto exit;
 		}
@@ -272,6 +272,8 @@ main(
 	)
 {
 	int result = EXIT_SUCCESS;
+
+	TEST_INIT();
 
 	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 

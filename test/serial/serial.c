@@ -327,6 +327,8 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
+	TEST_INIT();
+
 	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
 		if(TEST[test]() != EXIT_SUCCESS) {

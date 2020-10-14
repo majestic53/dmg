@@ -33,15 +33,18 @@
 #define TEST_COUNT(_TESTS_) \
 	(sizeof(_TESTS_) / sizeof(dmg_test_cb))
 
+#define TEST_INIT() \
+	srand(time(NULL))
+
 typedef int (*dmg_test_cb)(void);
 
 #ifndef NDEBUG
 #define TRACE_TEST(_RESULT_) { \
 		TRACE_ENABLE(NULL); \
 		if(_RESULT_ != EXIT_SUCCESS) { \
-			TRACE_FORMAT(LEVEL_ERROR, "Test %s -- FAIL", __FUNCTION__); \
+			TRACE_FORMAT(LEVEL_ERROR, "{FAIL} %s", __FUNCTION__); \
 		} else { \
-			TRACE_FORMAT(LEVEL_INFORMATION, "Test %s -- PASS", __FUNCTION__); \
+			TRACE_FORMAT(LEVEL_INFORMATION, "{PASS} %s", __FUNCTION__); \
 		} \
 		TRACE_DISABLE(); \
 	}

@@ -27,7 +27,8 @@
 
 #define STATE_CYCLE 1024
 #define STATE_MASK 0x30
-#define STATE_RESET 0xcf
+#define STATE_READ 0xc0
+#define STATE_WRITE 0xcf
 
 #ifndef NDEBUG
 #define TRACE_JOYPAD(_LEVEL_, _JOYPAD_) \
