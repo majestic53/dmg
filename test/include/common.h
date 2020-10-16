@@ -33,7 +33,7 @@
 #define TEST_COUNT(_TESTS_) \
 	(sizeof(_TESTS_) / sizeof(dmg_test_cb))
 
-#define TEST_INIT() \
+#define TEST_SETUP() \
 	srand(time(NULL))
 
 typedef int (*dmg_test_cb)(void);

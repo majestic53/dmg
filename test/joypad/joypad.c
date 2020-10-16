@@ -20,10 +20,6 @@
 #include "../../src/system/joypad_type.h"
 #include "../include/common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 typedef struct {
 	dmg_t configuration;
 	dmg_joypad_t joypad;
@@ -33,6 +29,10 @@ typedef struct {
 } dmg_joypad_test_t;
 
 dmg_joypad_test_t g_joypad = {};
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 void
 dmg_runtime_interrupt(
@@ -376,7 +376,7 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TEST_INIT();
+	TEST_SETUP();
 
 	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 

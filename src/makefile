@@ -57,7 +57,7 @@ build_service: service_sdl.o
 service_sdl.o: $(DIR_SRC_SERVICE)sdl.c $(DIR_INCLUDE)service.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)sdl.c -o $(DIR_BUILD)service_sdl.o
 
-build_system: system_joypad.o system_memory.o system_processor.o system_serial.o system_timer.o
+build_system: system_joypad.o system_memory.o system_processor.o system_serial.o system_timer.o system_video.o
 
 system_joypad.o: $(DIR_SRC_SYSTEM)joypad.c $(DIR_INCLUDE_SYSTEM)joypad.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)joypad.c -o $(DIR_BUILD)system_joypad.o
@@ -73,6 +73,9 @@ system_serial.o: $(DIR_SRC_SYSTEM)serial.c $(DIR_INCLUDE_SYSTEM)serial.h
 
 system_timer.o: $(DIR_SRC_SYSTEM)timer.c $(DIR_INCLUDE_SYSTEM)timer.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)timer.c -o $(DIR_BUILD)system_timer.o
+
+system_video.o: $(DIR_SRC_SYSTEM)video.c $(DIR_INCLUDE_SYSTEM)video.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)video.c -o $(DIR_BUILD)system_video.o
 
 build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o
 
@@ -98,7 +101,7 @@ archive:
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
 		$(DIR_BUILD)service_sdl.o \
 		$(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o $(DIR_BUILD)system_serial.o \
-			$(DIR_BUILD)system_timer.o \
+			$(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
 			$(DIR_BUILD)type_mapper.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)

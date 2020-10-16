@@ -20,10 +20,6 @@
 #include "../../src/system/serial_type.h"
 #include "../include/common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 typedef struct {
 	dmg_t configuration;
 	dmg_serial_t serial;
@@ -31,6 +27,10 @@ typedef struct {
 } dmg_serial_test_t;
 
 dmg_serial_test_t g_serial = {};
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 unsigned
 dmg_transfer(
@@ -327,7 +327,7 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TEST_INIT();
+	TEST_SETUP();
 
 	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 

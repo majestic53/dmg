@@ -24,6 +24,7 @@
 #include "../include/system/processor.h"
 #include "../include/system/serial.h"
 #include "../include/system/timer.h"
+#include "../include/system/video.h"
 #include "../include/runtime.h"
 #include "../include/service.h"
 
@@ -35,6 +36,7 @@ typedef struct {
 	dmg_processor_t processor;
 	dmg_serial_t serial;
 	dmg_timer_t timer;
+	dmg_video_t video;
 
 	// TODO: ADD SUBSYSTEMS
 

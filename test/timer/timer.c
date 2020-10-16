@@ -20,10 +20,6 @@
 #include "../../src/system/timer_type.h"
 #include "../include/common.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
 typedef struct {
 	dmg_t configuration;
 	dmg_timer_t timer;
@@ -31,6 +27,10 @@ typedef struct {
 } dmg_timer_test_t;
 
 dmg_timer_test_t g_timer = {};
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 void
 dmg_runtime_interrupt(
@@ -273,7 +273,7 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TEST_INIT();
+	TEST_SETUP();
 
 	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 

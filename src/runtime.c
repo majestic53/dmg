@@ -59,6 +59,10 @@ dmg_runtime_load(
 		goto exit;
 	}
 
+	if((result = dmg_video_load(&g_runtime.video, configuration)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	// TODO: LOAD SUBSYSTEMS
 
 	if((result = dmg_service_load(configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
@@ -119,6 +123,7 @@ dmg_runtime_unload(void)
 
 	// TODO: UNLOAD SUBSYSTEMS
 
+	dmg_video_unload(&g_runtime.video);
 	dmg_timer_unload(&g_runtime.timer);
 	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
@@ -191,8 +196,23 @@ dmg_runtime_read(
 		case ADDRESS_TIMER_MODULO:
 			result = dmg_timer_read(&g_runtime.timer, address);
 			break;
+		case ADDRESS_VIDEO_BGP:
+		case ADDRESS_VIDEO_LCDC:
+		case ADDRESS_VIDEO_LY:
+		case ADDRESS_VIDEO_LYC:
+		case ADDRESS_VIDEO_OBP0:
+		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
+		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
+		case ADDRESS_VIDEO_SCX:
+		case ADDRESS_VIDEO_SCY:
+		case ADDRESS_VIDEO_STAT:
+		case ADDRESS_VIDEO_WX:
+		case ADDRESS_VIDEO_WY:
+			result = dmg_video_read(&g_runtime.video, address);
+			break;
 
-		// TODO: READ BYTE FROM SUBSYSTEM
+		// TODO: READ BYTE FROM SUBSYSTEMS
 
 		default:
 			result = UINT8_MAX;
@@ -239,8 +259,23 @@ dmg_runtime_write(
 		case ADDRESS_TIMER_MODULO:
 			dmg_timer_write(&g_runtime.timer, address, value);
 			break;
+		case ADDRESS_VIDEO_BGP:
+		case ADDRESS_VIDEO_DMA:
+		case ADDRESS_VIDEO_LCDC:
+		case ADDRESS_VIDEO_LYC:
+		case ADDRESS_VIDEO_OBP0:
+		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
+		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
+		case ADDRESS_VIDEO_SCX:
+		case ADDRESS_VIDEO_SCY:
+		case ADDRESS_VIDEO_STAT:
+		case ADDRESS_VIDEO_WX:
+		case ADDRESS_VIDEO_WY:
+			dmg_video_write(&g_runtime.video, address, value);
+			break;
 
-		// TODO: WRITE BYTE TO SUBSYSTEM
+		// TODO: WRITE BYTE TO SUBSYSTEMS
 
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported write [%04x]<-%02x", address, value);

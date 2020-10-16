@@ -28,6 +28,7 @@ DIR_SRC=./src/
 DIR_TEST_JOYPAD=./test/joypad/
 DIR_TEST_SERIAL=./test/serial/
 DIR_TEST_TIMER=./test/timer/
+DIR_TEST_VIDEO=./test/video/
 DIR_TOOL=./tool/
 
 BUILD_DEBUG=BUILD_FLAGS=-g\ -DCOLOR\ -DLEVEL=
@@ -53,6 +54,7 @@ build_debug:
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
 
 build_release:
@@ -61,6 +63,7 @@ build_release:
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE)$(LEVEL) build
+	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
 
 analyze:
