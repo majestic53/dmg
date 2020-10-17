@@ -311,7 +311,7 @@ dmg_test_serial_write(void)
 	return result;
 }
 
-static dmg_test_cb TEST[] = {
+static const dmg_test_cb TEST[] = {
 	dmg_test_serial_load,
 	dmg_test_serial_read,
 	dmg_test_serial_step,

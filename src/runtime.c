@@ -82,7 +82,6 @@ dmg_runtime_loop(void)
 	int result = EXIT_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
-
 	g_runtime.cycle = 0;
 	g_runtime.cycle_last = 0;
 
@@ -118,7 +117,6 @@ static void
 dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
-
 	dmg_service_unload();
 
 	// TODO: UNLOAD SUBSYSTEMS
@@ -129,9 +127,7 @@ dmg_runtime_unload(void)
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_joypad_unload(&g_runtime.joypad);
 	dmg_memory_unload(&g_runtime.memory);
-
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
-
 	memset(&g_runtime, 0, sizeof(g_runtime));
 }
 
@@ -216,7 +212,6 @@ dmg_runtime_read(
 
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported read [%04x]->%02x", address, result);
 			break;
 	}

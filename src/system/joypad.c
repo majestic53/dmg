@@ -87,10 +87,8 @@ dmg_joypad_load(
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Joypad loading");
-
 	joypad->state.raw = POST_STATE;
 	dmg_joypad_poll(joypad);
-
 	TRACE(LEVEL_INFORMATION, "Joypad loaded");
 
 	return result;
@@ -110,7 +108,6 @@ dmg_joypad_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported joypad read [%04x]->%02x", address, result);
 			break;
 	}
@@ -141,9 +138,7 @@ dmg_joypad_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Joypad unloading");
-
 	memset(joypad, 0, sizeof(*joypad));
-
 	TRACE(LEVEL_INFORMATION, "Joypad unloaded");
 }
 
@@ -158,9 +153,7 @@ dmg_joypad_write(
 	switch(address) {
 		case ADDRESS_JOYPAD_STATE:
 			joypad->state.raw = ((value & STATE_MASK) | STATE_WRITE);
-
 			TRACE_FORMAT(LEVEL_VERBOSE, "Joypad button=%x, direction=%x", joypad->state.button, joypad->state.direction);
-
 			dmg_joypad_poll(joypad);
 
 			if(!joypad->state.button) {

@@ -257,7 +257,7 @@ dmg_test_timer_write(void)
 	return result;
 }
 
-static dmg_test_cb TEST[] = {
+static const dmg_test_cb TEST[] = {
 	dmg_test_timer_load,
 	dmg_test_timer_read,
 	dmg_test_timer_step,

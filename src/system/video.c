@@ -176,7 +176,6 @@ dmg_video_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported video read [%04x]->%02x", address, result);
 			break;
 	}

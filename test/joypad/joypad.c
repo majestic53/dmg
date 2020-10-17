@@ -360,7 +360,7 @@ dmg_test_joypad_write(void)
 	return result;
 }
 
-static dmg_test_cb TEST[] = {
+static const dmg_test_cb TEST[] = {
 	dmg_test_joypad_load,
 	dmg_test_joypad_read,
 	dmg_test_joypad_step,

@@ -29,7 +29,7 @@ dmg_service_display_show(void)
 {
 	int result = ERROR_SUCCESS;
 
-	if(SDL_UpdateTexture(g_sdl.texture, NULL, (dmg_bgra_t *)g_sdl.pixel, DISPLAY_WIDTH * sizeof(dmg_bgra_t))) {
+	if(SDL_UpdateTexture(g_sdl.texture, NULL, (dmg_bgra_t *)g_sdl.pixel, WINDOW_WIDTH * sizeof(dmg_bgra_t))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -40,6 +40,16 @@ dmg_service_display_show(void)
 	}
 
 	if(SDL_RenderCopy(g_sdl.renderer, g_sdl.texture, NULL, NULL)) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	if(SDL_UpdateTexture(g_sdl.texture_viewport, NULL, &g_sdl.pixel_viewport, WINDOW_WIDTH * sizeof(dmg_bgra_t))) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	if(SDL_RenderCopy(g_sdl.renderer, g_sdl.texture_viewport, NULL, NULL)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -63,39 +73,36 @@ dmg_service_display_load(
 		g_sdl.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
 		g_sdl.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
 		g_sdl.palette[index].alpha = UINT8_MAX;
-
 		TRACE_FORMAT(LEVEL_VERBOSE, "Palette[%zu]=%08x (%02x, %02x, %02x)", index, g_sdl.palette[index].raw,
 			g_sdl.palette[index].red, g_sdl.palette[index].green, g_sdl.palette[index].blue);
 	}
 
-	for(uint8_t y = 0; y < DISPLAY_HEIGHT; ++y) {
+	for(uint32_t y = 0; y < WINDOW_HEIGHT; ++y) {
 
-		for(uint8_t x = 0; x < DISPLAY_WIDTH; ++x) {
-			g_sdl.pixel[x][y].raw = g_sdl.palette[DMG_PALETTE_WHITE].raw;
+		for(uint32_t x = 0; x < WINDOW_WIDTH; ++x) {
+			g_sdl.pixel[(WINDOW_WIDTH * y) + x].raw = g_sdl.palette[DMG_PALETTE_WHITE].raw;
 		}
 	}
 
 	g_sdl.scale = configuration->scale;
-	if(g_sdl.scale < DISPLAY_SCALE_MIN) {
-		g_sdl.scale = DISPLAY_SCALE_MIN;
-
+	if(g_sdl.scale < SCALE_MIN) {
+		g_sdl.scale = SCALE_MIN;
 		TRACE_FORMAT(LEVEL_WARNING, "Scale is too small: %u (setting to %u)", configuration->scale, g_sdl.scale);
-	} else if(g_sdl.scale > DISPLAY_SCALE_MAX) {
-		g_sdl.scale = DISPLAY_SCALE_MAX;
-
+	} else if(g_sdl.scale > SCALE_MAX) {
+		g_sdl.scale = SCALE_MAX;
 		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.scale);
 	}
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Scale=%u", g_sdl.scale);
 
-	if(snprintf(g_sdl.title, sizeof(g_sdl.title), "%s -- %s", strlen(title) ? title : DISPLAY_UNTITLED, DISPLAY_TITLE) < 0) {
-		memcpy(g_sdl.title, DISPLAY_UNTITLED, strlen(DISPLAY_UNTITLED));
+	if(snprintf(g_sdl.title, sizeof(g_sdl.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
+		memcpy(g_sdl.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
 	}
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Title[%u]=\"%s\"", strlen(g_sdl.title), g_sdl.title);
 
-	if(!(g_sdl.window = SDL_CreateWindow(g_sdl.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, DISPLAY_WIDTH * g_sdl.scale,
-			DISPLAY_HEIGHT * g_sdl.scale, SDL_WINDOW_RESIZABLE))) {
+	if(!(g_sdl.window = SDL_CreateWindow(g_sdl.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH * g_sdl.scale,
+			WINDOW_HEIGHT * g_sdl.scale, SDL_WINDOW_RESIZABLE))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -105,12 +112,13 @@ dmg_service_display_load(
 		goto exit;
 	}
 
-	if(SDL_RenderSetLogicalSize(g_sdl.renderer, DISPLAY_WIDTH, DISPLAY_HEIGHT)) {
+	if(SDL_RenderSetLogicalSize(g_sdl.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(SDL_SetRenderDrawColor(g_sdl.renderer, 0, 0, 0, 0)) {
+	if(SDL_SetRenderDrawColor(g_sdl.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
+			COLOR_BACKGROUND.alpha)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -121,11 +129,23 @@ dmg_service_display_load(
 	}
 
 	if(!(g_sdl.texture = SDL_CreateTexture(g_sdl.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-			DISPLAY_WIDTH, DISPLAY_HEIGHT))) {
+			WINDOW_WIDTH, WINDOW_HEIGHT))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
+	if(!(g_sdl.texture_viewport = SDL_CreateTexture(g_sdl.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+			WINDOW_WIDTH, WINDOW_HEIGHT))) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	if(SDL_SetTextureBlendMode(g_sdl.texture_viewport, SDL_BLENDMODE_BLEND)) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	dmg_service_viewport(0, 0);
 	result = dmg_service_display_show();
 
 exit:
@@ -150,13 +170,11 @@ dmg_service_input_load(
 
 	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
 		g_sdl.button[index] = configuration->button[index];
-
 		TRACE_FORMAT(LEVEL_VERBOSE, "Button[%zu]=%u", index, g_sdl.button[index]);
 	}
 
 	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
 		g_sdl.direction[index] = configuration->direction[index];
-
 		TRACE_FORMAT(LEVEL_VERBOSE, "Direction[%zu]=%u", index, g_sdl.direction[index]);
 	}
 
@@ -189,7 +207,6 @@ dmg_service_load(
 	SDL_version version = {};
 
 	SDL_GetVersion(&version);
-
 	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u", version.major, version.minor, version.patch);
 
 	if(SDL_Init(SDL_INIT_VIDEO)) {
@@ -209,16 +226,6 @@ dmg_service_load(
 
 exit:
 	return result;
-}
-
-void
-dmg_service_pixel(
-	__in int color,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	g_sdl.pixel[x][y].raw = g_sdl.palette[color].raw;
 }
 
 bool
@@ -250,7 +257,6 @@ dmg_service_poll(void)
 		switch(event.type) {
 			case SDL_QUIT:
 				result = false;
-
 				TRACE(LEVEL_VERBOSE, "SDL quit event");
 				goto exit;
 			default:
@@ -275,16 +281,51 @@ dmg_service_sync(void)
 }
 
 void
+dmg_service_tile(
+	__in uint8_t *tile,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+
+	for(uint32_t ty = 0; ty < TILE_HEIGHT; ++ty) {
+
+		for(uint32_t tx = 0; tx < TILE_WIDTH; ++tx) {
+			g_sdl.pixel[(WINDOW_WIDTH * ((TILE_HEIGHT * y) + ty)) + ((TILE_WIDTH * x) + tx)].raw
+				= g_sdl.palette[tile[(TILE_WIDTH * ty) + tx]].raw;
+		}
+	}
+}
+
+void
 dmg_service_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
-
 	dmg_service_display_unload();
 	SDL_Quit();
-
 	TRACE(LEVEL_INFORMATION, "SDL unloaded");
-
 	memset(&g_sdl, 0, sizeof(g_sdl));
+}
+
+void
+dmg_service_viewport(
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	memset(g_sdl.pixel_viewport, 0, sizeof(g_sdl.pixel_viewport));
+
+	for(uint32_t py = y; py < (VIEWPORT_HEIGHT + y); ++py) {
+
+		for(uint32_t px = x; px < (VIEWPORT_WIDTH + x); ++px) {
+
+			if((px == x) || (px == (VIEWPORT_WIDTH + x - 1))
+					|| (py == y) || (py == (VIEWPORT_HEIGHT + y - 1))) {
+				g_sdl.pixel_viewport[(WINDOW_WIDTH * (py % WINDOW_HEIGHT)) + (px % WINDOW_WIDTH)].raw
+					= COLOR_VIEWPORT.raw;
+			}
+		}
+	}
 }
 
 #ifdef __cplusplus

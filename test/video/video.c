@@ -88,7 +88,7 @@ dmg_test_video_write(void)
 	return result;
 }
 
-static dmg_test_cb TEST[] = {
+static const dmg_test_cb TEST[] = {
 	dmg_test_video_load,
 	dmg_test_video_read,
 	dmg_test_video_step,

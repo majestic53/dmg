@@ -96,7 +96,6 @@ dmg_memory_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported memory read [%04x]->%02x", address, result);
 			break;
 	}
@@ -110,13 +109,11 @@ dmg_memory_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Memory unloading");
-
 	dmg_buffer_free(&memory->ram_high);
 	dmg_buffer_free(&memory->ram);
 	dmg_mapper_unload(&memory->mapper);
 	dmg_bootrom_unload(&memory->bootrom);
 	memset(memory, 0, sizeof(*memory));
-
 	TRACE(LEVEL_INFORMATION, "Memory unloaded");
 }
 

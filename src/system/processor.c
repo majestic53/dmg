@@ -3074,13 +3074,11 @@ dmg_processor_execute(
 			case INTERRUPTS_STATE_SET:
 				processor->interrupts_enable_state = INTERRUPTS_STATE_NONE;
 				processor->interrupts_enable = !processor->interrupts_enable;
-
 				TRACE_FORMAT(LEVEL_VERBOSE, "Interrupts %s [%04x]", processor->interrupts_enable ? "enabled" : "disabled",
 						processor->pc.word);
 				break;
 			case INTERRUPTS_STATE_PENDING:
 				processor->interrupts_enable_state = INTERRUPTS_STATE_SET;
-
 				TRACE_FORMAT(LEVEL_VERBOSE, "Interrupts %s pending [%04x]", processor->interrupts_enable ? "disable" : "enable",
 						processor->pc.word);
 				break;
@@ -3116,7 +3114,6 @@ dmg_processor_service(
 			if(processor->halt) {
 				processor->halt = false;
 				result += CYCLE_INTERRUPT_HALT;
-
 				TRACE_FORMAT(LEVEL_VERBOSE, "Processor exiting halt state [%04x]", processor->pc.word);
 			}
 		}
@@ -3145,7 +3142,6 @@ dmg_processor_load(
 	}
 
 	processor->interrupt_flag.raw = POST_IF;
-
 	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 	TRACE(LEVEL_INFORMATION, "Processor loaded");
 
@@ -3169,7 +3165,6 @@ dmg_processor_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor read [%04x]->%02x", address, result);
 			break;
 	}
@@ -3191,9 +3186,7 @@ dmg_processor_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Processor unloading");
-
 	memset(processor, 0, sizeof(*processor));
-
 	TRACE(LEVEL_INFORMATION, "Processor unloaded");
 }
 
@@ -3214,7 +3207,6 @@ dmg_processor_write(
 
 			if(processor->stop && processor->interrupt_flag.joypad) {
 				processor->stop = false;
-
 				TRACE_FORMAT(LEVEL_VERBOSE, "Processor exiting stop state [%04x]", processor->pc.word);
 			}
 			break;

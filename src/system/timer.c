@@ -85,7 +85,6 @@ dmg_timer_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported timer read [%04x]->%02x", address, result);
 			break;
 	}
@@ -111,7 +110,6 @@ dmg_timer_step(
 				timer->control.overflow = false;
 				timer->counter = timer->modulo;
 				dmg_runtime_interrupt(INTERRUPT_TIMER);
-
 				TRACE(LEVEL_VERBOSE, "Timer overflow");
 			}
 
@@ -131,9 +129,7 @@ dmg_timer_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Timer unloading");
-
 	memset(timer, 0, sizeof(*timer));
-
 	TRACE(LEVEL_INFORMATION, "Timer unloaded");
 }
 
@@ -148,7 +144,6 @@ dmg_timer_write(
 	switch(address) {
 		case ADDRESS_TIMER_CONTROL:
 			timer->control.raw = (value & CONTROL_MASK);
-
 			TRACE_FORMAT(LEVEL_VERBOSE, "Timer select=%u, enable=%x", timer->control.select, timer->control.enable);
 			break;
 		case ADDRESS_TIMER_COUNTER:

@@ -80,7 +80,6 @@ dmg_bootrom_load(
 
 	bootrom->buffer = buffer;
 	bootrom->enable = true;
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom[%04x]=%p", bootrom->buffer->length, bootrom->buffer->data);
 	TRACE(LEVEL_INFORMATION, "Bootrom loaded");
 
@@ -102,7 +101,6 @@ dmg_bootrom_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported bootrom read [%04x]->%02x", address, result);
 			break;
 	}
@@ -116,9 +114,7 @@ dmg_bootrom_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Bootrom unloading");
-
 	memset(bootrom, 0, sizeof(*bootrom));
-
 	TRACE(LEVEL_INFORMATION, "Bootrom unloaded");
 }
 
@@ -135,7 +131,6 @@ dmg_bootrom_write(
 
 			if(bootrom->enable) {
 				bootrom->enable = false;
-
 				TRACE_FORMAT(LEVEL_INFORMATION, "Bootrom disabled [%04x]<-%02x", address, value);
 			}
 			break;

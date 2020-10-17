@@ -53,7 +53,6 @@ dmg_serial_load(
 	}
 
 	serial->transfer = configuration->transfer;
-
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial loaded");
 
@@ -77,7 +76,6 @@ dmg_serial_read(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported serial read [%04x]->%02x", address, result);
 			break;
 	}
@@ -113,7 +111,6 @@ dmg_serial_step(
 				if(!--serial->remaining) {
 					serial->control.enable = false;
 					dmg_runtime_interrupt(INTERRUPT_SERIAL);
-
 					TRACE(LEVEL_VERBOSE, "Serial transfer complete");
 					break;
 				}
@@ -128,9 +125,7 @@ dmg_serial_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Serial unloading");
-
 	memset(serial, 0, sizeof(*serial));
-
 	TRACE(LEVEL_INFORMATION, "Serial unloaded");
 }
 
@@ -147,7 +142,6 @@ dmg_serial_write(
 			serial->control.raw = (value & CONTROL_MASK);
 			serial->cycle = 0;
 			serial->remaining = CHAR_BIT;
-
 			TRACE_FORMAT(LEVEL_VERBOSE, "Serial select=%u, enable=%x", serial->control.select, serial->control.enable);
 			break;
 		case ADDRESS_SERIAL_DATA:

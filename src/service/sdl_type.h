@@ -22,13 +22,6 @@
 #include <SDL2/SDL.h>
 #include "../../include/service.h"
 
-#define DISPLAY_HEIGHT 144
-#define DISPLAY_SCALE_MIN 1
-#define DISPLAY_SCALE_MAX 4
-#define DISPLAY_TITLE "DMG"
-#define DISPLAY_UNTITLED "Untitled"
-#define DISPLAY_WIDTH 160
-
 #define FRAME_PER_SEC 60
 #define FRAME_RATE (MS_PER_SEC / (float)FRAME_PER_SEC)
 
@@ -37,12 +30,25 @@
 #define PALETTE_MASK_BLUE 0x000000ff
 #define PALETTE_MASK_GREEN 0x0000ff00
 #define PALETTE_MASK_RED 0x00ff0000
-
 #define PALETTE_SHIFT_BLUE 0
 #define PALETTE_SHIFT_GREEN 8
 #define PALETTE_SHIFT_RED 16
 
+#define SCALE_MAX 4
+#define SCALE_MIN 1
+
+#define TILE_HEIGHT 8
+#define TILE_WIDTH 8
+
+#define TITLE "DMG"
 #define TITLE_LENGTH_MAX 64
+#define TITLE_UNTITLED "Untitled"
+
+#define VIEWPORT_HEIGHT 144
+#define VIEWPORT_WIDTH 160
+
+#define WINDOW_HEIGHT 256
+#define WINDOW_WIDTH 256
 
 typedef union {
 
@@ -67,10 +73,15 @@ typedef struct {
 	dmg_bgra_t palette[DMG_PALETTE_MAX];
 	uint32_t scale;
 	char title[TITLE_LENGTH_MAX];
-	dmg_bgra_t pixel[DISPLAY_WIDTH][DISPLAY_HEIGHT];
+	dmg_bgra_t pixel[WINDOW_WIDTH * WINDOW_HEIGHT];
+	dmg_bgra_t pixel_viewport[WINDOW_WIDTH * WINDOW_HEIGHT];
 	SDL_Renderer *renderer;
 	SDL_Texture *texture;
+	SDL_Texture *texture_viewport;
 	SDL_Window *window;
 } dmg_sdl_t;
+
+static const dmg_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
+static const dmg_bgra_t COLOR_VIEWPORT = {{ 0x00, 0x00, 0xff, 0xff }};
 
 #endif /* DMG_SERVICE_SDL_TYPE_H_ */

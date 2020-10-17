@@ -51,7 +51,6 @@ dmg_cartridge_validate(
 	}
 
 	*header = (const dmg_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title: %s", (*header)->title);
 
 	checksum = 0;
@@ -74,7 +73,6 @@ dmg_cartridge_validate(
 	}
 
 	*rom = ROM_BANK[(*header)->rom];
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks: %u", *rom);
 
 	if((length = (ROM_WIDTH * *rom)) != buffer->length) {
@@ -90,7 +88,6 @@ dmg_cartridge_validate(
 	}
 
 	*ram = RAM_BANK[(*header)->ram];
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks: %u", *ram);
 
 exit:
@@ -119,7 +116,6 @@ dmg_cartridge_load(
 	for(index = 0; index < cartridge->rom.count; ++index) {
 		cartridge->rom.buffer[index].data = (((uint8_t *)buffer->data) + (ROM_WIDTH * index));
 		cartridge->rom.buffer[index].length = ROM_WIDTH;
-
 		TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom[%u][%u]=%p", index, cartridge->rom.buffer[index].length,
 			cartridge->rom.buffer[index].data);
 	}
@@ -139,7 +135,6 @@ dmg_cartridge_load(
 	}
 
 	dmg_cartridge_ram_enable(cartridge, true);
-
 	TRACE(LEVEL_INFORMATION, "Cartridge loaded");
 
 exit:
@@ -153,7 +148,6 @@ dmg_cartridge_ram_enable(
 	)
 {
 	cartridge->enable = enable;
-
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable: %x", cartridge->enable);
 }
 
@@ -168,7 +162,6 @@ dmg_cartridge_read_ram(
 
 	if(bank >= cartridge->ram.count) {
 		result = UINT8_MAX;
-
 		TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram bank [%u][%04x]->%02x", bank, address, result);
 		goto exit;
 	}
@@ -181,13 +174,11 @@ dmg_cartridge_read_ram(
 				break;
 			default:
 				result = UINT8_MAX;
-
 				TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge ram read [%u][%04x]->%02x", bank, address, result);
 				break;
 		}
 	} else {
 		result = UINT8_MAX;
-
 		TRACE_FORMAT(LEVEL_WARNING, "Cartridge ram disabled [%u][%04x]->%02x", bank, address, result);
 	}
 
@@ -206,7 +197,6 @@ dmg_cartridge_read_rom(
 
 	if(bank >= cartridge->rom.count) {
 		result = UINT8_MAX;
-
 		TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge rom bank [%u][%04x]->%02x", bank, address, result);
 		goto exit;
 	}
@@ -217,7 +207,6 @@ dmg_cartridge_read_rom(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported cartridge rom read [%u][%04x]->%02x", bank, address, result);
 			break;
 	}
@@ -239,9 +228,7 @@ dmg_cartridge_unload(
 
 	dmg_bank_free(&cartridge->ram);
 	dmg_bank_free(&cartridge->rom);
-
 	memset(cartridge, 0, sizeof(*cartridge));
-
 	TRACE(LEVEL_INFORMATION, "Cartridge unloaded");
 }
 

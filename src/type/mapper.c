@@ -130,7 +130,6 @@ dmg_mapper_read_ram(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram read [%u][%04x]->%02x", mapper->ram, address, result);
 			break;
 	}
@@ -155,7 +154,6 @@ dmg_mapper_read_rom(
 			break;
 		default:
 			result = UINT8_MAX;
-
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper rom read [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
 				address, result);
 			break;
@@ -170,10 +168,8 @@ dmg_mapper_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Mapper unloading");
-
 	dmg_cartridge_unload(&mapper->cartridge);
 	memset(mapper, 0, sizeof(*mapper));
-
 	TRACE(LEVEL_INFORMATION, "Mapper unloaded");
 }
 
