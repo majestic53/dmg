@@ -55,6 +55,12 @@ void dmg_service_viewport(
 	__in uint8_t y
 	);
 
+void dmg_service_window(
+	__in bool enable,
+	__in uint8_t x,
+	__in uint8_t y
+	);
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

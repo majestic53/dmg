@@ -63,25 +63,46 @@ typedef union {
 } dmg_bgra_t;
 
 typedef struct {
-	uint32_t begin;
-	uint32_t end;
-	uint32_t frame;
-	float framerate;
-	float frequency;
-	uint32_t button[DMG_BUTTON_MAX];
-	uint32_t direction[DMG_DIRECTION_MAX];
-	dmg_bgra_t palette[DMG_PALETTE_MAX];
+	bool redraw;
 	uint32_t scale;
+	uint8_t viewport_x;
+	uint8_t viewport_y;
+	bool window_enable;
+	uint8_t window_x;
+	uint8_t window_y;
 	char title[TITLE_LENGTH_MAX];
-	dmg_bgra_t pixel[WINDOW_WIDTH * WINDOW_HEIGHT];
-	dmg_bgra_t pixel_viewport[WINDOW_WIDTH * WINDOW_HEIGHT];
+	dmg_bgra_t palette[DMG_PALETTE_MAX];
+	dmg_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
+	dmg_bgra_t pixel_viewport[WINDOW_HEIGHT][WINDOW_WIDTH];
+	dmg_bgra_t pixel_window[WINDOW_HEIGHT][WINDOW_WIDTH];
 	SDL_Renderer *renderer;
 	SDL_Texture *texture;
 	SDL_Texture *texture_viewport;
+	SDL_Texture *texture_window;
 	SDL_Window *window;
+} dmg_display_t;
+
+typedef struct {
+	uint32_t begin;
+	uint32_t count;
+	uint32_t end;
+	float frequency;
+	float rate;
+} dmg_frame_t;
+
+typedef struct {
+	uint32_t button[DMG_BUTTON_MAX];
+	uint32_t direction[DMG_DIRECTION_MAX];
+} dmg_input_t;
+
+typedef struct {
+	dmg_frame_t frame;
+	dmg_input_t input;
+	dmg_display_t display;
 } dmg_sdl_t;
 
 static const dmg_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
 static const dmg_bgra_t COLOR_VIEWPORT = {{ 0x00, 0x00, 0xff, 0xff }};
+static const dmg_bgra_t COLOR_WINDOW = {{ 0x00, 0xff, 0xff, 0xff }};
 
 #endif /* DMG_SERVICE_SDL_TYPE_H_ */
