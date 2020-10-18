@@ -35,7 +35,7 @@ test_video.o: $(DIR_ROOT)video.c
 link:
 	@echo ''
 	@echo '--- BUILDING VIDEO TEST --------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_video.o $(DIR_BUILD)system_video.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_video.o $(DIR_BUILD)system_video.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)type_buffer.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 

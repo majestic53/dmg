@@ -22,6 +22,22 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
+static void
+dmg_mapper_trace(
+	__in int level,
+	__inout dmg_mapper_t *mapper
+	)
+{
+	TRACE_FORMAT(level, "Mapper type=%u", mapper->cartridge.header->mapper);
+	TRACE_FORMAT(level, "Mapper rom bank=%u", mapper->rom);
+	TRACE_FORMAT(level, "Mapper rom-swap bank=%u", mapper->rom_swap);
+	TRACE_FORMAT(level, "Mapper ram bank=%u", mapper->ram);
+}
+
+#endif /* NDEBUG */
+
 static void
 dmg_mapper_mbc1_write(
 	__inout dmg_mapper_t *mapper,
@@ -49,8 +65,8 @@ dmg_mapper_mbc1_write(
 			break;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode: %i", mapper->mbc1.mode);
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks: {%02x, %02x}, %02x", mapper->mbc1.lower, mapper->mbc1.upper, mapper->mbc1.raw);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode=%i", mapper->mbc1.mode);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks={%02x, %02x}, %02x", mapper->mbc1.lower, mapper->mbc1.upper, mapper->mbc1.raw);
 
 	switch(mapper->mbc1.mode) {
 		case MBC1_MODE_RAM:
@@ -106,10 +122,7 @@ dmg_mapper_load(
 			goto exit;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper type: %u", mapper->cartridge.header->mapper);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
+	TRACE_MAPPER(LEVEL_VERBOSE, mapper);
 	TRACE(LEVEL_INFORMATION, "Mapper loaded");
 
 exit:
@@ -215,9 +228,7 @@ dmg_mapper_write_rom(
 			break;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom bank: %u", mapper->rom);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper rom-swap bank: %u", mapper->rom_swap);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Mapper ram bank: %u", mapper->ram);
+	TRACE_MAPPER(LEVEL_VERBOSE, mapper);
 }
 
 #ifdef __cplusplus

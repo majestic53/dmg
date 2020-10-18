@@ -58,7 +58,7 @@ dmg_bootrom_validate(
 		goto exit;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom checksum: %04x", checksum);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom checksum=%04x", checksum);
 
 exit:
 	return result;

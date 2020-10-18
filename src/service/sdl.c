@@ -121,7 +121,7 @@ dmg_service_display_load(
 		g_sdl.display.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
 		g_sdl.display.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
 		g_sdl.display.palette[index].alpha = UINT8_MAX;
-		TRACE_FORMAT(LEVEL_VERBOSE, "Palette[%zu]=%08x (%02x, %02x, %02x)", index, g_sdl.display.palette[index].raw,
+		TRACE_FORMAT(LEVEL_VERBOSE, "Palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.display.palette[index].raw,
 			g_sdl.display.palette[index].red, g_sdl.display.palette[index].green, g_sdl.display.palette[index].blue);
 	}
 

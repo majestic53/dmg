@@ -19,7 +19,7 @@
 #ifndef DMG_SYSTEM_VIDEO_H_
 #define DMG_SYSTEM_VIDEO_H_
 
-#include "../common.h"
+#include "../type/buffer.h"
 
 typedef union {
 

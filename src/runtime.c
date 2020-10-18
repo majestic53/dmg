@@ -78,7 +78,6 @@ exit:
 static int
 dmg_runtime_loop(void)
 {
-	uint32_t cycle = 0;
 	int result = EXIT_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
@@ -92,7 +91,7 @@ dmg_runtime_loop(void)
 			break;
 		}
 
-		while(cycle < CYCLE_PER_FRAME) {
+		do {
 			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
 			dmg_joypad_step(&g_runtime.joypad, g_runtime.cycle_last);
 			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
@@ -101,10 +100,8 @@ dmg_runtime_loop(void)
 			// TODO: LOOP SUBSYSTEMS
 
 			g_runtime.cycle += g_runtime.cycle_last;
-			cycle += g_runtime.cycle_last;
-		}
+		} while(!dmg_video_step(&g_runtime.video, g_runtime.cycle_last));
 
-		cycle %= CYCLE_PER_FRAME;
 		dmg_service_sync();
 	}
 

@@ -22,6 +22,20 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
+static void
+dmg_memory_trace(
+	__in int level,
+	__inout dmg_memory_t *memory
+	)
+{
+	TRACE_FORMAT(level, "Memory Ram[%04x]=%p", memory->ram.length, memory->ram.data);
+	TRACE_FORMAT(level, "Memory Ram-High[%04x]=%p", memory->ram_high.length, memory->ram_high.data);
+}
+
+#endif /* NDEBUG */
+
 int
 dmg_memory_load(
 	__inout dmg_memory_t *memory,
@@ -51,8 +65,7 @@ dmg_memory_load(
 		goto exit;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Ram[%04x]=%p", memory->ram.length, memory->ram.data);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Ram-High[%04x]=%p", memory->ram_high.length, memory->ram_high.data);
+	TRACE_MEMORY(LEVEL_VERBOSE, memory);
 	TRACE(LEVEL_INFORMATION, "Memory loaded");
 
 exit:

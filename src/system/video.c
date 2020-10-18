@@ -30,7 +30,22 @@ dmg_video_trace(
 	__inout dmg_video_t *video
 	)
 {
-	// TODO
+	TRACE_FORMAT(level, "Video LCDC=%02x [Enable=%x (%c%c%c)]", video->lcdc.raw, video->lcdc.enable,
+		video->lcdc.background ? 'B' : '-', video->lcdc.sprite ? 'S' : '-', video->lcdc.window ? 'W' : '-');
+	TRACE_FORMAT(level, "Video STAT=%02x [Mode=%02x, Coin=%x, (%c%c%c%c)]", video->stat.raw, video->stat.mode,
+		video->stat.coincidence, video->stat.hblank ? 'H' : '-', video->stat.vblank ? 'V' : '-',
+		video->stat.search ? 'S' : '-', video->stat.lyc ? 'C' : '-');
+	TRACE_FORMAT(level, "Video BGP=%02x (%02x, %02x, %02x, %02x)", video->bgp.raw, video->bgp.white, video->bgp.grey_light,
+		video->bgp.grey_dark, video->bgp.black);
+	TRACE_FORMAT(level, "Video OBP0=%02x (%02x, %02x, %02x, %02x)", video->obp0.raw, video->obp0.white, video->obp0.grey_light,
+		video->obp0.grey_dark, video->obp0.black);
+	TRACE_FORMAT(level, "Video OBP1=%02x (%02x, %02x, %02x, %02x)", video->obp1.raw, video->obp1.white, video->obp1.grey_light,
+		video->obp1.grey_dark, video->obp1.black);
+	TRACE_FORMAT(level, "Video LY/LYC=%02x, %02x", video->ly, video->lyc);
+	TRACE_FORMAT(level, "Video SCX/SCY=%02x, %02x", video->scx, video->scy);
+	TRACE_FORMAT(level, "Video WX/WY=%02x, %02x", video->wx, video->wy);
+	TRACE_FORMAT(level, "Video Ram[%04x]=%p", video->ram.length, video->ram.data);
+	TRACE_FORMAT(level, "Video Ram-Sprite[%04x]=%p", video->ram_sprite.length, video->ram_sprite.data);
 }
 
 #endif /* NDEBUG */
@@ -92,11 +107,32 @@ dmg_video_load(
 
 	TRACE(LEVEL_INFORMATION, "Video loading");
 
-	// TODO
+	if(!configuration->bootrom.data) {
+		video->bgp.raw = POST_BGP;
+		video->lcdc.raw = POST_LCDC;
+		video->lyc = POST_LYC;
+		video->obp0.raw = POST_OBP0;
+		video->obp1.raw = POST_OBP1;
+		video->scx = POST_SCX;
+		video->scy = POST_SCY;
+		video->wx = POST_WX;
+		video->wy = POST_WY;
+	}
+
+	video->stat.mode = MODE_SEARCH;
+
+	if((result = dmg_buffer_allocate(&video->ram, RAM_WIDTH, 0)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_buffer_allocate(&video->ram_sprite, RAM_SPRITE_WIDTH, 0)) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE_VIDEO(LEVEL_VERBOSE, video);
 	TRACE(LEVEL_INFORMATION, "Video loaded");
 
+exit:
 	return result;
 }
 
@@ -189,9 +225,17 @@ dmg_video_step(
 	__in uint32_t cycle
 	)
 {
+	bool result;
+
 	// TODO
-	return true;
+	if((result = (video->cycle > CYCLE_PER_FRAME))) {
+		video->cycle %= CYCLE_PER_FRAME;
+	} else {
+		video->cycle += cycle;
+	}
 	// ---
+
+	return result;
 }
 
 void
@@ -200,9 +244,9 @@ dmg_video_unload(
 	)
 {
 	TRACE(LEVEL_INFORMATION, "Video unloading");
-
-	// TODO
-
+	dmg_buffer_free(&video->ram_sprite);
+	dmg_buffer_free(&video->ram);
+	memset(video, 0, sizeof(*video));
 	TRACE(LEVEL_INFORMATION, "Video unloaded");
 }
 

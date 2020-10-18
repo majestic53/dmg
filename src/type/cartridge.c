@@ -51,7 +51,7 @@ dmg_cartridge_validate(
 	}
 
 	*header = (const dmg_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title: %s", (*header)->title);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", (*header)->title);
 
 	checksum = 0;
 	for(address = HEADER_CHECKSUM_BEGIN; address <= HEADER_CHECKSUM_END; ++address) {
@@ -64,7 +64,7 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum: %02x", checksum);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum=%02x", checksum);
 
 	if((*header)->rom >= ROM_MAX) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge rom type unsupported: %u (expecting < %u)",
@@ -73,7 +73,7 @@ dmg_cartridge_validate(
 	}
 
 	*rom = ROM_BANK[(*header)->rom];
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks: %u", *rom);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks=%u", *rom);
 
 	if((length = (ROM_WIDTH * *rom)) != buffer->length) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge length mismatch: %u (expecting %u)",
@@ -88,7 +88,7 @@ dmg_cartridge_validate(
 	}
 
 	*ram = RAM_BANK[(*header)->ram];
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks: %u", *ram);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks=%u", *ram);
 
 exit:
 	return result;
@@ -148,7 +148,7 @@ dmg_cartridge_ram_enable(
 	)
 {
 	cartridge->enable = enable;
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable: %x", cartridge->enable);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram-enable=%x", cartridge->enable);
 }
 
 uint8_t

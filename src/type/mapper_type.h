@@ -42,4 +42,13 @@ enum {
 	MBC1_MODE_MAX,
 };
 
+#ifndef NDEBUG
+#define TRACE_MAPPER(_LEVEL_, _MAPPER_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_mapper_trace(_LEVEL_, _MAPPER_); \
+	}
+#else
+#define TRACE_MAPPER(_LEVEL_, _MAPPER_)
+#endif /* NDEBUG */
+
 #endif /* DMG_TYPE_MAPPER_TYPE_H_ */
