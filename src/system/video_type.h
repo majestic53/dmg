@@ -21,6 +21,9 @@
 
 #include "../../include/system/video.h"
 #include "../../include/runtime.h"
+#include "../../include/service.h"
+
+#define DMA_SCALE 0x0100
 
 #define POST_BGP 0xfc
 #define POST_LCDC 0x91
@@ -59,8 +62,13 @@ typedef bool (*dmg_mode_cb)(
 	if((_LEVEL_) <= (LEVEL)) { \
 		dmg_video_trace(_LEVEL_, _VIDEO_); \
 	}
+#define TRACE_VIDEO_DMA(_LEVEL_, _VIDEO_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_video_dma_trace(_LEVEL_, _VIDEO_); \
+	}
 #else
 #define TRACE_VIDEO(_LEVEL_, _VIDEO_)
+#define TRACE_VIDEO_DMA(_LEVEL_, _VIDEO_)
 #endif /* NDEBUG */
 
 #endif /* DMG_SYSTEM_VIDEO_TYPE_H_ */

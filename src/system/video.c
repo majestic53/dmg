@@ -48,7 +48,53 @@ dmg_video_trace(
 	TRACE_FORMAT(level, "Video Ram-Sprite[%04x]=%p", video->ram_sprite.length, video->ram_sprite.data);
 }
 
+static void
+dmg_video_dma_trace(
+	__in int level,
+	__inout dmg_video_t *video
+	)
+{
+	TRACE_FORMAT(level, "DMA enable=%x (remaining=%u)", video->dma.enable,
+		(ADDRESS_VIDEO_RAM_SPRITE_END + 1) - video->dma.destination);
+	TRACE_FORMAT(level, "DMA destination=%04x", video->dma.destination);
+	TRACE_FORMAT(level, "DMA source=%04x", video->dma.source);
+}
+
 #endif /* NDEBUG */
+
+static void
+dmg_video_dma_start(
+	__in dmg_video_t *video,
+	__in uint8_t value
+	)
+{
+	video->dma.enable = true;
+	video->dma.destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
+	video->dma.source = (DMA_SCALE * value);
+	TRACE_VIDEO_DMA(LEVEL_VERBOSE, video);
+}
+
+static void
+dmg_video_dma_step(
+	__in dmg_video_t *video,
+	__in uint32_t cycle
+	)
+{
+
+	if(video->dma.enable) {
+
+		for(uint32_t index = 0; index < (cycle / CYCLE); ++index) {
+
+			if(!(video->dma.enable = (video->dma.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
+				break;
+			}
+
+			dmg_runtime_write(video->dma.destination++, dmg_runtime_read(video->dma.source++));
+		}
+
+		TRACE_VIDEO_DMA(LEVEL_VERBOSE, video);
+	}
+}
 
 /*static bool
 dmg_video_hblank(
@@ -142,73 +188,75 @@ dmg_video_read(
 	__in uint16_t address
 	)
 {
+	bool read = true;
 	uint8_t result = 0;
 
 	switch(address) {
 		case ADDRESS_VIDEO_BGP:
-
-			// TODO
-
+			result = video->bgp.raw;
 			break;
 		case ADDRESS_VIDEO_LCDC:
-
-			// TODO
-
+			result = video->lcdc.raw;
 			break;
 		case ADDRESS_VIDEO_LY:
-
-			// TODO
-
+			result = video->ly;
 			break;
 		case ADDRESS_VIDEO_LYC:
-
-			// TODO
-
+			result = video->lyc;
 			break;
 		case ADDRESS_VIDEO_OBP0:
-
-			// TODO
-
+			result = video->obp0.raw;
 			break;
 		case ADDRESS_VIDEO_OBP1:
-
-			// TODO
-
+			result = video->obp1.raw;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 
-			// TODO
+			if(video->lcdc.enable) {
 
+				switch(video->stat.mode) {
+					case MODE_HBLANK:
+					case MODE_SEARCH:
+					case MODE_VBLANK:
+						break;
+					default:
+						read = false;
+						break;
+				}
+			}
+
+			result = (read ? ((uint8_t *)video->ram.data)[address - ADDRESS_VIDEO_RAM_BEGIN] : UINT8_MAX);
 			break;
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 
-			// TODO
+			if(video->lcdc.enable) {
 
+				switch(video->stat.mode) {
+					case MODE_HBLANK:
+					case MODE_VBLANK:
+						break;
+					default:
+						read = false;
+						break;
+				}
+			}
+
+			result = (read ? ((uint8_t *)video->ram_sprite.data)[address - ADDRESS_VIDEO_RAM_SPRITE_BEGIN] : UINT8_MAX);
 			break;
 		case ADDRESS_VIDEO_SCX:
-
-			// TODO
-
+			result = video->scx;
 			break;
 		case ADDRESS_VIDEO_SCY:
-
-			// TODO
-
+			result = video->scy;
 			break;
 		case ADDRESS_VIDEO_STAT:
-
-			// TODO
-
+			result = video->stat.raw;
 			break;
 		case ADDRESS_VIDEO_WX:
-
-			// TODO
-
+			result = video->wx;
 			break;
 		case ADDRESS_VIDEO_WY:
-
-			// TODO
-
+			result = video->wy;
 			break;
 		default:
 			result = UINT8_MAX;
@@ -226,6 +274,8 @@ dmg_video_step(
 	)
 {
 	bool result;
+
+	dmg_video_dma_step(video, cycle);
 
 	// TODO
 	if((result = (video->cycle > CYCLE_PER_FRAME))) {
@@ -257,72 +307,83 @@ dmg_video_write(
 	__in uint8_t value
 	)
 {
+	bool write = true;
 
 	switch(address) {
 		case ADDRESS_VIDEO_BGP:
-
-			// TODO
-
+			video->bgp.raw = value;
 			break;
 		case ADDRESS_VIDEO_DMA:
-
-			// TODO
-
+			dmg_video_dma_start(video, value);
 			break;
 		case ADDRESS_VIDEO_LCDC:
-
-			// TODO
-
+			video->lcdc.raw = value;
+			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 			break;
 		case ADDRESS_VIDEO_LYC:
-
-			// TODO
-
+			video->lyc = value;
 			break;
 		case ADDRESS_VIDEO_OBP0:
-
-			// TODO
-
+			video->obp0.raw = value;
 			break;
 		case ADDRESS_VIDEO_OBP1:
-
-			// TODO
-
+			video->obp1.raw = value;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 
-			// TODO
+			if(video->lcdc.enable) {
 
+				switch(video->stat.mode) {
+					case MODE_HBLANK:
+					case MODE_SEARCH:
+					case MODE_VBLANK:
+						break;
+					default:
+						write = false;
+						break;
+				}
+			}
+
+			if(write) {
+				((uint8_t *)video->ram.data)[address - ADDRESS_VIDEO_RAM_BEGIN] = value;
+			}
 			break;
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 
-			// TODO
+			if(video->lcdc.enable) {
 
+				switch(video->stat.mode) {
+					case MODE_HBLANK:
+					case MODE_VBLANK:
+						break;
+					default:
+						write = false;
+						break;
+				}
+			}
+
+			if(write) {
+				((uint8_t *)video->ram_sprite.data)[address - ADDRESS_VIDEO_RAM_SPRITE_BEGIN] = value;
+			}
 			break;
 		case ADDRESS_VIDEO_SCX:
-
-			// TODO
-
+			video->scx = value;
+			dmg_service_viewport(video->scx, video->scy);
 			break;
 		case ADDRESS_VIDEO_SCY:
-
-			// TODO
-
+			video->scy = value;
+			dmg_service_viewport(video->scx, video->scy);
 			break;
 		case ADDRESS_VIDEO_STAT:
-
-			// TODO
-
+			video->stat.raw = value;
 			break;
 		case ADDRESS_VIDEO_WX:
-
-			// TODO
-
+			video->wx = value;
+			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 			break;
 		case ADDRESS_VIDEO_WY:
-
-			// TODO
-
+			video->wy = value;
+			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported video write [%04x]<-%02x", address, value);

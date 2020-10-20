@@ -21,6 +21,12 @@
 
 #include "../type/buffer.h"
 
+typedef struct {
+	bool enable;
+	uint16_t destination;
+	uint16_t source;
+} dmg_dma_t;
+
 typedef union {
 
 	struct {
@@ -66,6 +72,7 @@ typedef union {
 
 typedef struct {
 	dmg_palette_t bgp;
+	dmg_dma_t dma;
 	uint32_t cycle;
 	dmg_lcdc_t lcdc;
 	uint8_t ly;

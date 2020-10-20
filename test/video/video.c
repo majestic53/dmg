@@ -28,6 +28,44 @@ extern "C" {
 
 // TODO
 
+uint8_t
+dmg_runtime_read(
+	__in uint16_t address
+	)
+{
+	// TODO
+	return 0;
+	// ---
+}
+
+void
+dmg_runtime_write(
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+	// TODO
+}
+
+void
+dmg_service_viewport(
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	// TODO
+}
+
+void
+dmg_service_window(
+	__in bool enable,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	// TODO
+}
+
 int
 dmg_test_video_load(void)
 {
