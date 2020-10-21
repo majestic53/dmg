@@ -25,6 +25,9 @@
 
 #define DMA_SCALE 0x0100
 
+#define LINE_HBLANK_MAX 144
+#define LINE_VBLANK_MAX 153
+
 #define POST_BGP 0xfc
 #define POST_LCDC 0x91
 #define POST_LYC 0x00

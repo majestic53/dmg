@@ -3067,7 +3067,6 @@ dmg_processor_execute(
 		}
 
 		TRACE_INSTRUCTION(LEVEL_VERBOSE, processor, instruction, extended, &operand);
-
 		result += (*handler)(processor, instruction, &operand);
 
 		switch(processor->interrupts_enable_state) {

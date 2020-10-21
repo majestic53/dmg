@@ -124,8 +124,7 @@ dmg_joypad_step(
 
 	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 
-		joypad->cycle += CYCLE;
-		if(joypad->cycle >= STATE_CYCLE) {
+		if((joypad->cycle += CYCLE) >= STATE_CYCLE) {
 			joypad->cycle %= STATE_CYCLE;
 			dmg_joypad_poll(joypad);
 		}

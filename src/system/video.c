@@ -96,14 +96,32 @@ dmg_video_dma_step(
 	}
 }
 
-/*static bool
+static bool
 dmg_video_hblank(
 	__in dmg_video_t *video
 	)
 {
-	// TODO
-	return false;
-	// ---
+	bool result;
+
+	if((result = (++video->ly == LINE_HBLANK_MAX))) {
+		video->stat.mode = MODE_VBLANK;
+
+		if(video->lcdc.enable) {
+			dmg_runtime_interrupt(INTERRUPT_VBLANK);
+		}
+
+		if(video->stat.vblank) {
+			dmg_runtime_interrupt(INTERRUPT_LCDC);
+		}
+	} else {
+		video->stat.mode = MODE_SEARCH;
+
+		if(video->stat.search) {
+			dmg_runtime_interrupt(INTERRUPT_LCDC);
+		}
+	}
+
+	return result;
 }
 
 static bool
@@ -111,9 +129,9 @@ dmg_video_search(
 	__in dmg_video_t *video
 	)
 {
-	// TODO
+	video->stat.mode = MODE_TRANSFER;
+
 	return false;
-	// ---
 }
 
 static bool
@@ -121,9 +139,28 @@ dmg_video_transfer(
 	__in dmg_video_t *video
 	)
 {
-	// TODO
+	video->stat.mode = MODE_HBLANK;
+
+	if(video->stat.hblank) {
+		dmg_runtime_interrupt(INTERRUPT_LCDC);
+	}
+
+	if(video->lcdc.enable) {
+
+		if(video->lcdc.background || video->lcdc.window) {
+
+			// TODO: RENDER BACKGROUND/WINDOW SCANLINE
+
+		}
+
+		if(video->lcdc.sprite) {
+
+			// TOOD: RENDER SPRITE SCANLINE
+
+		}
+	}
+
 	return false;
-	// ---
 }
 
 static bool
@@ -131,17 +168,25 @@ dmg_video_vblank(
 	__in dmg_video_t *video
 	)
 {
-	// TODO
-	return false;
-	// ---
-}*/
 
-//static const dmg_mode_cb MODE_HANDLER[] = {
-	//dmg_video_hblank, /* MODE_HBLANK */
-	//dmg_video_vblank, /* MODE_VBLANK */
-	//dmg_video_search, /* MODE_SEARCH */
-	//dmg_video_transfer, /* MODE_TRANSFER */
-	//};
+	if(++video->ly > LINE_VBLANK_MAX) {
+		video->ly = 0;
+		video->stat.mode = MODE_SEARCH;
+
+		if(video->stat.search) {
+			dmg_runtime_interrupt(INTERRUPT_LCDC);
+		}
+	}
+
+	return false;
+}
+
+static const dmg_mode_cb MODE_HANDLER[] = {
+	dmg_video_hblank, /* MODE_HBLANK */
+	dmg_video_vblank, /* MODE_VBLANK */
+	dmg_video_search, /* MODE_SEARCH */
+	dmg_video_transfer, /* MODE_TRANSFER */
+	};
 
 int
 dmg_video_load(
@@ -273,17 +318,21 @@ dmg_video_step(
 	__in uint32_t cycle
 	)
 {
-	bool result;
+	bool result = false;
 
 	dmg_video_dma_step(video, cycle);
 
-	// TODO
-	if((result = (video->cycle > CYCLE_PER_FRAME))) {
-		video->cycle %= CYCLE_PER_FRAME;
-	} else {
-		video->cycle += cycle;
+	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+
+		if((video->cycle += CYCLE) >= MODE_CYC[video->stat.mode]) {
+			video->cycle %= MODE_CYC[video->stat.mode];
+			result = MODE_HANDLER[video->stat.mode](video);
+
+			if((video->stat.coincidence = (video->ly == video->lyc)) && video->stat.lyc) {
+				dmg_runtime_interrupt(INTERRUPT_LCDC);
+			}
+		}
 	}
-	// ---
 
 	return result;
 }
@@ -319,6 +368,10 @@ dmg_video_write(
 		case ADDRESS_VIDEO_LCDC:
 			video->lcdc.raw = value;
 			dmg_service_window(video->lcdc.window, video->wx, video->wy);
+
+			if(!video->lcdc.enable) {
+				video->ly = 0;
+			}
 			break;
 		case ADDRESS_VIDEO_LYC:
 			video->lyc = value;

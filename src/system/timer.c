@@ -113,8 +113,7 @@ dmg_timer_step(
 				TRACE(LEVEL_VERBOSE, "Timer overflow");
 			}
 
-			timer->cycle += CYCLE;
-			if(timer->cycle >= SELECT_CYC[timer->control.select]) {
+			if((timer->cycle += CYCLE) >= SELECT_CYC[timer->control.select]) {
 				timer->cycle %= SELECT_CYC[timer->control.select];
 				timer->control.overflow = (timer->counter == UINT8_MAX);
 				++timer->counter;

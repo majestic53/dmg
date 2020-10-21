@@ -20,13 +20,17 @@
 #include "../../src/system/video_type.h"
 #include "../include/common.h"
 
-// TODO
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+void
+dmg_runtime_interrupt(
+	__in int type
+	)
+{
+	// TODO
+}
 
 uint8_t
 dmg_runtime_read(

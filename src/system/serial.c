@@ -95,8 +95,7 @@ dmg_serial_step(
 		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 			TRACE_SERIAL(LEVEL_VERBOSE, serial);
 
-			serial->cycle += CYCLE;
-			if(serial->cycle >= SELECT_CYC[serial->control.select]) {
+			if((serial->cycle += CYCLE) >= SELECT_CYC[serial->control.select]) {
 				dmg_sb_t in = {};
 
 				serial->cycle %= SELECT_CYC[serial->control.select];
