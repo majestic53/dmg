@@ -26,13 +26,17 @@ DIR_BUILD_TEST=./build/test/
 DIR_ROOT=./
 DIR_SRC=./src/
 DIR_TEST_JOYPAD=./test/joypad/
+DIR_TEST_MEMORY=./test/memory/
+DIR_TEST_PROCESSOR=./test/processor/
 DIR_TEST_SERIAL=./test/serial/
 DIR_TEST_TIMER=./test/timer/
 DIR_TEST_VIDEO=./test/video/
 DIR_TOOL=./tool/
 
 BUILD_DEBUG=BUILD_FLAGS=-g\ -DCOLOR\ -DLEVEL=
+BUILD_DEBUG_TEST=BUILD_FLAGS=-g\ -DCOLOR\ -DUNITTEST\ -DLEVEL=
 BUILD_RELEASE=BUILD_FLAGS=-O3\ -DNDEBUG\ -DCOLOR\ -DLEVEL=
+BUILD_RELEASE_TEST=BUILD_FLAGS=-O3\ -DNDEBUG\ -DCOLOR\ -DUNITTEST\ -DLEVEL=
 
 all: release
 debug: clean setup build_debug
@@ -51,19 +55,23 @@ setup:
 build_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
-	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG)$(LEVEL) build
-	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG)$(LEVEL) build
-	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG)$(LEVEL) build
-	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_MEMORY) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
 
 build_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
-	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE)$(LEVEL) build
-	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE)$(LEVEL) build
-	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE)$(LEVEL) build
-	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE)$(LEVEL) build
+	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_MEMORY) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
 
 analyze:

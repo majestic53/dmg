@@ -26,7 +26,7 @@ typedef struct {
 	bool interrupt;
 } dmg_timer_test_t;
 
-dmg_timer_test_t g_timer = {};
+static dmg_timer_test_t g_timer = {};
 
 #ifdef __cplusplus
 extern "C" {
@@ -40,7 +40,7 @@ dmg_runtime_interrupt(
 	g_timer.interrupt = (type == INTERRUPT_TIMER);
 }
 
-void
+static void
 dmg_test_timer_initialize(void)
 {
 	memset(&g_timer, 0, sizeof(g_timer));
@@ -90,6 +90,12 @@ dmg_test_timer_read(void)
 {
 	uint16_t value = rand();
 	int result = EXIT_SUCCESS;
+
+	dmg_test_timer_initialize();
+
+	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER - 1) == UINT8_MAX)) {
+		result = EXIT_FAILURE;
+	}
 
 	dmg_test_timer_initialize();
 	g_timer.timer.control.raw = value;

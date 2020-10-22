@@ -28,7 +28,7 @@ typedef struct {
 	bool interrupt;
 } dmg_joypad_test_t;
 
-dmg_joypad_test_t g_joypad = {};
+static dmg_joypad_test_t g_joypad = {};
 
 #ifdef __cplusplus
 extern "C" {
@@ -58,7 +58,7 @@ dmg_service_direction(
 	return g_joypad.direction[direction];
 }
 
-void
+static void
 dmg_test_joypad_initialize(void)
 {
 	memset(&g_joypad, 0, sizeof(g_joypad));
@@ -129,6 +129,12 @@ int
 dmg_test_joypad_read(void)
 {
 	int result = EXIT_SUCCESS;
+
+	dmg_test_joypad_initialize();
+
+	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE - 1) == UINT8_MAX)) {
+		result = EXIT_FAILURE;
+	}
 
 	dmg_test_joypad_initialize();
 	g_joypad.joypad.state.raw = rand();

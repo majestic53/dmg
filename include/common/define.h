@@ -96,7 +96,6 @@
 #define ADDRESS_VIDEO_WY 0xff4a
 
 #define CYCLE 4
-#define CYCLE_PER_FRAME 70224
 
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f

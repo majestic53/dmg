@@ -26,7 +26,7 @@ typedef struct {
 	bool interrupt;
 } dmg_serial_test_t;
 
-dmg_serial_test_t g_serial = {};
+static dmg_serial_test_t g_serial = {};
 
 #ifdef __cplusplus
 extern "C" {
@@ -48,7 +48,7 @@ dmg_runtime_interrupt(
 	g_serial.interrupt = (type == INTERRUPT_SERIAL);
 }
 
-void
+static void
 dmg_test_serial_initialize(void)
 {
 	memset(&g_serial, 0, sizeof(g_serial));
@@ -99,6 +99,12 @@ dmg_test_serial_read(void)
 {
 	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
+
+	dmg_test_serial_initialize();
+
+	if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA - 1) == UINT8_MAX)) {
+		result = EXIT_FAILURE;
+	}
 
 	dmg_test_serial_initialize();
 	g_serial.serial.control.raw = value;

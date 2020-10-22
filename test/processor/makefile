@@ -19,7 +19,7 @@ DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
 
-BIN=test-video
+BIN=test-processor
 
 FLAGS=-march=native -std=c11 -Wall -Werror
 FLAGS_BIN=
@@ -27,20 +27,20 @@ FLAGS_LIB=-lSDL2 -lSDL2main
 
 build: build_test link run
 
-build_test: test_video.o
+build_test: test_processor.o
 
-test_video.o: $(DIR_ROOT)video.c
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)video.c -o $(DIR_BUILD_TEST)test_video.o
+test_processor.o: $(DIR_ROOT)processor.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)processor.c -o $(DIR_BUILD_TEST)test_processor.o
 
 link:
 	@echo ''
-	@echo '--- BUILDING VIDEO TEST --------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_video.o $(DIR_BUILD)system_video.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	@echo '--- BUILDING PROCESSOR TEST ----------------'
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_processor.o $(DIR_BUILD)system_processor.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 
 run:
-	@echo '--- RUNNING VIDEO TEST ---------------------'
+	@echo '--- RUNNING PROCESSOR TEST -----------------'
 	@cd $(DIR_BUILD_TEST) && if ./$(BIN) $(FLAGS_BIN); \
 	then \
 		echo '--- PASSED ---------------------------------'; \

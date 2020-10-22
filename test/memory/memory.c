@@ -16,20 +16,60 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../../include/system/video.h"
-#include "../../src/system/video_type.h"
+#include "../../include/system/memory.h"
+#include "../../src/system/memory_type.h"
 #include "../include/common.h"
 
 typedef struct {
 	dmg_t configuration;
-	dmg_video_t video;
-} dmg_video_test_t;
+	dmg_memory_t memory;
+} dmg_memory_test_t;
 
-static dmg_video_test_t g_video = {};
+static dmg_memory_test_t g_memory = {};
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+int
+dmg_bootrom_load(
+	__inout dmg_bootrom_t *bootrom,
+	__in const dmg_buffer_t *buffer
+	)
+{
+	// TODO
+	return ERROR_SUCCESS;
+	// ---
+}
+
+uint8_t
+dmg_bootrom_read(
+	__in const dmg_bootrom_t *bootrom,
+	__in uint16_t address
+	)
+{
+	// TODO
+	return 0;
+	// ---
+}
+
+void
+dmg_bootrom_unload(
+	__inout dmg_bootrom_t *bootrom
+	)
+{
+	// TODO
+}
+
+void
+dmg_bootrom_write(
+	__inout dmg_bootrom_t *bootrom,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+	// TODO
+}
 
 int
 dmg_buffer_allocate(
@@ -51,16 +91,31 @@ dmg_buffer_free(
 	// TODO
 }
 
-void
-dmg_runtime_interrupt(
-	__in int type
+int
+dmg_mapper_load(
+	__inout dmg_mapper_t *mapper,
+	__in const dmg_buffer_t *buffer
 	)
 {
 	// TODO
+	return ERROR_SUCCESS;
+	// ---
 }
 
 uint8_t
-dmg_runtime_read(
+dmg_mapper_read_ram(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	)
+{
+	// TODO
+	return 0;
+	// ---
+}
+
+uint8_t
+dmg_mapper_read_rom(
+	__in const dmg_mapper_t *mapper,
 	__in uint16_t address
 	)
 {
@@ -70,7 +125,16 @@ dmg_runtime_read(
 }
 
 void
-dmg_runtime_write(
+dmg_mapper_unload(
+	__inout dmg_mapper_t *mapper
+	)
+{
+	// TODO
+}
+
+void
+dmg_mapper_write_ram(
+	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
 	)
@@ -79,44 +143,23 @@ dmg_runtime_write(
 }
 
 void
-dmg_service_viewport(
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	// TODO
-}
-
-void
-dmg_service_window(
-	__in bool enable,
-	__in uint8_t x,
-	__in uint8_t y
+dmg_mapper_write_rom(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
 	)
 {
 	// TODO
 }
 
 static void
-dmg_test_video_initialize(void)
+dmg_test_memory_initialize(void)
 {
-	memset(&g_video, 0, sizeof(g_video));
+	memset(&g_memory, 0, sizeof(g_memory));
 }
 
 int
-dmg_test_video_load(void)
-{
-	int result = EXIT_SUCCESS;
-
-	// TODO
-
-	TRACE_TEST(result);
-
-	return result;
-}
-
-int
-dmg_test_video_read(void)
+dmg_test_memory_load(void)
 {
 	int result = EXIT_SUCCESS;
 
@@ -128,7 +171,7 @@ dmg_test_video_read(void)
 }
 
 int
-dmg_test_video_step(void)
+dmg_test_memory_read(void)
 {
 	int result = EXIT_SUCCESS;
 
@@ -140,13 +183,13 @@ dmg_test_video_step(void)
 }
 
 int
-dmg_test_video_unload(void)
+dmg_test_memory_unload(void)
 {
 	int result = EXIT_SUCCESS;
 
-	dmg_test_video_initialize();
-	dmg_video_load(&g_video.video, &g_video.configuration);
-	dmg_video_unload(&g_video.video);
+	dmg_test_memory_initialize();
+	dmg_memory_load(&g_memory.memory, &g_memory.configuration);
+	dmg_memory_unload(&g_memory.memory);
 
 	// TODO
 
@@ -156,7 +199,7 @@ dmg_test_video_unload(void)
 }
 
 int
-dmg_test_video_write(void)
+dmg_test_memory_write(void)
 {
 	int result = EXIT_SUCCESS;
 
@@ -168,11 +211,10 @@ dmg_test_video_write(void)
 }
 
 static const dmg_test_cb TEST[] = {
-	dmg_test_video_load,
-	dmg_test_video_read,
-	dmg_test_video_step,
-	dmg_test_video_unload,
-	dmg_test_video_write,
+	dmg_test_memory_load,
+	dmg_test_memory_read,
+	dmg_test_memory_unload,
+	dmg_test_memory_write,
 	};
 
 int
