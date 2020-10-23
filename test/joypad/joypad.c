@@ -95,7 +95,7 @@ dmg_test_joypad_load(void)
 	}
 
 	dmg_test_joypad_initialize();
-	g_joypad.configuration.bootrom.data = (uint8_t *)1;
+	g_joypad.configuration.bootrom.data = (void *)1;
 
 	if(ASSERT_SUCCESS(dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;

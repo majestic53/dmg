@@ -23,6 +23,14 @@
 typedef struct {
 	dmg_t configuration;
 	dmg_memory_t memory;
+	bool bootrom;
+	uint16_t bootrom_address;
+	uint8_t bootrom_value;
+	bool mapper;
+	uint16_t mapper_ram_address;
+	uint8_t mapper_ram_value;
+	uint16_t mapper_rom_address;
+	uint8_t mapper_rom_value;
 } dmg_memory_test_t;
 
 static dmg_memory_test_t g_memory = {};
@@ -37,9 +45,9 @@ dmg_bootrom_load(
 	__in const dmg_buffer_t *buffer
 	)
 {
-	// TODO
+	g_memory.bootrom = true;
+
 	return ERROR_SUCCESS;
-	// ---
 }
 
 uint8_t
@@ -48,9 +56,9 @@ dmg_bootrom_read(
 	__in uint16_t address
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	g_memory.bootrom_address = address;
+
+	return g_memory.bootrom_value;
 }
 
 void
@@ -58,7 +66,7 @@ dmg_bootrom_unload(
 	__inout dmg_bootrom_t *bootrom
 	)
 {
-	// TODO
+	g_memory.bootrom = false;
 }
 
 void
@@ -68,7 +76,8 @@ dmg_bootrom_write(
 	__in uint8_t value
 	)
 {
-	// TODO
+	g_memory.bootrom_address = address;
+	g_memory.bootrom_value = value;
 }
 
 int
@@ -78,9 +87,7 @@ dmg_buffer_allocate(
 	__in uint8_t value
 	)
 {
-	// TODO
 	return ERROR_SUCCESS;
-	// ---
 }
 
 void
@@ -88,7 +95,7 @@ dmg_buffer_free(
 	__inout dmg_buffer_t *buffer
 	)
 {
-	// TODO
+	return;
 }
 
 int
@@ -97,9 +104,9 @@ dmg_mapper_load(
 	__in const dmg_buffer_t *buffer
 	)
 {
-	// TODO
+	g_memory.mapper = true;
+
 	return ERROR_SUCCESS;
-	// ---
 }
 
 uint8_t
@@ -108,9 +115,9 @@ dmg_mapper_read_ram(
 	__in uint16_t address
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	g_memory.mapper_ram_address = address;
+
+	return g_memory.mapper_ram_value;
 }
 
 uint8_t
@@ -119,9 +126,9 @@ dmg_mapper_read_rom(
 	__in uint16_t address
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	g_memory.mapper_rom_address = address;
+
+	return g_memory.mapper_rom_value;
 }
 
 void
@@ -129,7 +136,7 @@ dmg_mapper_unload(
 	__inout dmg_mapper_t *mapper
 	)
 {
-	// TODO
+	g_memory.mapper = false;
 }
 
 void
@@ -139,7 +146,8 @@ dmg_mapper_write_ram(
 	__in uint8_t value
 	)
 {
-	// TODO
+	g_memory.mapper_ram_address = address;
+	g_memory.mapper_ram_value = value;
 }
 
 void
@@ -149,7 +157,8 @@ dmg_mapper_write_rom(
 	__in uint8_t value
 	)
 {
-	// TODO
+	g_memory.mapper_rom_address = address;
+	g_memory.mapper_rom_value = value;
 }
 
 static void
@@ -163,7 +172,22 @@ dmg_test_memory_load(void)
 {
 	int result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_memory_initialize();
+
+	if(ASSERT_SUCCESS(dmg_memory_load(&g_memory.memory, &g_memory.configuration))
+			|| ASSERT(g_memory.bootrom == false)
+			|| ASSERT(g_memory.mapper == true)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.configuration.bootrom.data = (void *)1;
+
+	if(ASSERT_SUCCESS(dmg_memory_load(&g_memory.memory, &g_memory.configuration))
+			|| ASSERT(g_memory.bootrom == true)
+			|| ASSERT(g_memory.mapper == true)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -173,9 +197,68 @@ dmg_test_memory_load(void)
 int
 dmg_test_memory_read(void)
 {
+	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_memory_initialize();
+	g_memory.memory.ram.data = &value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_RAM_BEGIN) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.ram.data = &value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_RAM_ECHO_BEGIN) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.ram_high.data = &value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_RAM_HIGH_BEGIN) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.mapper_ram_value = value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_RAM_SWAP_BEGIN) == value)
+			|| ASSERT(g_memory.mapper_ram_address == ADDRESS_RAM_SWAP_BEGIN)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_RAM_UNUSED_BEGIN) == 0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.bootrom.enable = true;
+	g_memory.bootrom_value = value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_BOOTROM_BEGIN) == value)
+			|| ASSERT(g_memory.bootrom_address == ADDRESS_BOOTROM_BEGIN)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.mapper_rom_value = value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_BOOTROM_END + 1) == value)
+			|| ASSERT(g_memory.mapper_rom_address == (ADDRESS_BOOTROM_END + 1))) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.mapper_rom_value = value;
+
+	if(ASSERT(dmg_memory_read(&g_memory.memory, ADDRESS_ROM_SWAP_BEGIN) == value)
+			|| ASSERT(g_memory.mapper_rom_address == ADDRESS_ROM_SWAP_BEGIN)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -191,7 +274,12 @@ dmg_test_memory_unload(void)
 	dmg_memory_load(&g_memory.memory, &g_memory.configuration);
 	dmg_memory_unload(&g_memory.memory);
 
-	// TODO
+	if(ASSERT(g_memory.bootrom == false)
+			|| ASSERT(g_memory.mapper == false)
+			|| ASSERT(g_memory.memory.ram.data == NULL)
+			|| ASSERT(g_memory.memory.ram_high.data == NULL)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -202,8 +290,63 @@ int
 dmg_test_memory_write(void)
 {
 	int result = EXIT_SUCCESS;
+	uint8_t value_0 = rand(), value_1;
 
-	// TODO
+	dmg_test_memory_initialize();
+	dmg_memory_write(&g_memory.memory, ADDRESS_BOOTROM_DISABLE, value_0);
+
+	if(ASSERT(g_memory.bootrom_address == ADDRESS_BOOTROM_DISABLE)
+			|| ASSERT(g_memory.bootrom_value == value_0)) {
+		return EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.ram.data = &value_1;
+	dmg_memory_write(&g_memory.memory, ADDRESS_RAM_BEGIN, value_0);
+
+	if(ASSERT(value_1 == value_0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.ram.data = &value_1;
+	dmg_memory_write(&g_memory.memory, ADDRESS_RAM_ECHO_BEGIN, value_0);
+
+	if(ASSERT(value_1 == value_0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	g_memory.memory.ram_high.data = &value_1;
+	dmg_memory_write(&g_memory.memory, ADDRESS_RAM_HIGH_BEGIN, value_0);
+
+	if(ASSERT(value_1 == value_0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	dmg_memory_write(&g_memory.memory, ADDRESS_RAM_SWAP_BEGIN, value_0);
+
+	if(ASSERT(g_memory.mapper_ram_address == ADDRESS_RAM_SWAP_BEGIN)
+			|| ASSERT(g_memory.mapper_ram_value == value_0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	dmg_memory_write(&g_memory.memory, ADDRESS_RAM_UNUSED_BEGIN, value_0);
+
+	if(ASSERT(g_memory.mapper_ram_address == 0)
+			|| ASSERT(g_memory.mapper_ram_value == 0)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_memory_initialize();
+	dmg_memory_write(&g_memory.memory, ADDRESS_ROM_BEGIN, value_0);
+
+	if(ASSERT(g_memory.mapper_rom_address == ADDRESS_ROM_BEGIN)
+			|| ASSERT(g_memory.mapper_rom_value == value_0)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 

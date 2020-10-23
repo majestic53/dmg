@@ -74,7 +74,7 @@ dmg_test_serial_load(void)
 	}
 
 	dmg_test_serial_initialize();
-	g_serial.configuration.bootrom.data = (uint8_t *)1;
+	g_serial.configuration.bootrom.data = (void *)1;
 	g_serial.configuration.transfer = (dmg_serial_cb)2;
 
 	if(ASSERT_SUCCESS(dmg_serial_load(&g_serial.serial, &g_serial.configuration)) != EXIT_SUCCESS) {

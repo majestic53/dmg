@@ -39,11 +39,11 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_joypad_load(&g_runtime.joypad, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_joypad_load(&g_runtime.joypad, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -122,8 +122,8 @@ dmg_runtime_unload(void)
 	dmg_timer_unload(&g_runtime.timer);
 	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
-	dmg_joypad_unload(&g_runtime.joypad);
 	dmg_memory_unload(&g_runtime.memory);
+	dmg_joypad_unload(&g_runtime.joypad);
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
 	memset(&g_runtime, 0, sizeof(g_runtime));
 }
@@ -152,7 +152,7 @@ dmg_runtime_interrupt(
 	__in int type
 	)
 {
-	dmg_runtime_write(ADDRESS_INTERRUPT_FLAG, dmg_runtime_read(ADDRESS_INTERRUPT_FLAG) | (1 << type));
+	dmg_runtime_write(ADDRESS_PROCESSOR_INTERRUPT_FLAG, dmg_runtime_read(ADDRESS_PROCESSOR_INTERRUPT_FLAG) | (1 << type));
 }
 
 uint8_t
@@ -163,12 +163,12 @@ dmg_runtime_read(
 	uint8_t result = 0;
 
 	switch(address) {
-		case ADDRESS_INTERRUPT_ENABLE:
-		case ADDRESS_INTERRUPT_FLAG:
-			result = dmg_processor_read(&g_runtime.processor, address);
-			break;
 		case ADDRESS_JOYPAD_STATE:
 			result = dmg_joypad_read(&g_runtime.joypad, address);
+			break;
+		case ADDRESS_PROCESSOR_INTERRUPT_ENABLE:
+		case ADDRESS_PROCESSOR_INTERRUPT_FLAG:
+			result = dmg_processor_read(&g_runtime.processor, address);
 			break;
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
 		case ADDRESS_RAM_ECHO_BEGIN ... ADDRESS_RAM_ECHO_END:
@@ -189,19 +189,19 @@ dmg_runtime_read(
 		case ADDRESS_TIMER_MODULO:
 			result = dmg_timer_read(&g_runtime.timer, address);
 			break;
-		case ADDRESS_VIDEO_BGP:
-		case ADDRESS_VIDEO_LCDC:
-		case ADDRESS_VIDEO_LY:
-		case ADDRESS_VIDEO_LYC:
-		case ADDRESS_VIDEO_OBP0:
-		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
+		case ADDRESS_VIDEO_CONTROL:
+		case ADDRESS_VIDEO_LINE:
+		case ADDRESS_VIDEO_LINE_COINCIDENCE:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
-		case ADDRESS_VIDEO_SCX:
-		case ADDRESS_VIDEO_SCY:
-		case ADDRESS_VIDEO_STAT:
-		case ADDRESS_VIDEO_WX:
-		case ADDRESS_VIDEO_WY:
+		case ADDRESS_VIDEO_SCREEN_X:
+		case ADDRESS_VIDEO_SCREEN_Y:
+		case ADDRESS_VIDEO_STATUS:
+		case ADDRESS_VIDEO_WINDOW_X:
+		case ADDRESS_VIDEO_WINDOW_Y:
 			result = dmg_video_read(&g_runtime.video, address);
 			break;
 
@@ -224,12 +224,12 @@ dmg_runtime_write(
 {
 
 	switch(address) {
-		case ADDRESS_INTERRUPT_ENABLE:
-		case ADDRESS_INTERRUPT_FLAG:
-			dmg_processor_write(&g_runtime.processor, address, value);
-			break;
 		case ADDRESS_JOYPAD_STATE:
 			dmg_joypad_write(&g_runtime.joypad, address, value);
+			break;
+		case ADDRESS_PROCESSOR_INTERRUPT_ENABLE:
+		case ADDRESS_PROCESSOR_INTERRUPT_FLAG:
+			dmg_processor_write(&g_runtime.processor, address, value);
 			break;
 		case ADDRESS_BOOTROM_DISABLE:
 		case ADDRESS_RAM_BEGIN ... ADDRESS_RAM_END:
@@ -251,19 +251,19 @@ dmg_runtime_write(
 		case ADDRESS_TIMER_MODULO:
 			dmg_timer_write(&g_runtime.timer, address, value);
 			break;
-		case ADDRESS_VIDEO_BGP:
-		case ADDRESS_VIDEO_DMA:
-		case ADDRESS_VIDEO_LCDC:
-		case ADDRESS_VIDEO_LYC:
-		case ADDRESS_VIDEO_OBP0:
-		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
+		case ADDRESS_VIDEO_CONTROL:
+		case ADDRESS_VIDEO_LINE_COINCIDENCE:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
-		case ADDRESS_VIDEO_SCX:
-		case ADDRESS_VIDEO_SCY:
-		case ADDRESS_VIDEO_STAT:
-		case ADDRESS_VIDEO_WX:
-		case ADDRESS_VIDEO_WY:
+		case ADDRESS_VIDEO_SCREEN_X:
+		case ADDRESS_VIDEO_SCREEN_Y:
+		case ADDRESS_VIDEO_STATUS:
+		case ADDRESS_VIDEO_TRANSFER:
+		case ADDRESS_VIDEO_WINDOW_X:
+		case ADDRESS_VIDEO_WINDOW_Y:
 			dmg_video_write(&g_runtime.video, address, value);
 			break;
 

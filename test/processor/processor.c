@@ -20,6 +20,8 @@
 #include "../../src/system/processor_type.h"
 #include "../include/common.h"
 
+#define STEP_ADDRESS 0x1000
+
 typedef struct {
 	dmg_t configuration;
 	dmg_processor_t processor;
@@ -88,7 +90,7 @@ dmg_test_processor_load(void)
 	}
 
 	dmg_test_processor_initialize();
-	g_processor.configuration.bootrom.data = (uint8_t *)1;
+	g_processor.configuration.bootrom.data = (void *)1;
 
 	if(ASSERT_SUCCESS(dmg_processor_load(&g_processor.processor, &g_processor.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;
@@ -122,21 +124,21 @@ dmg_test_processor_read(void)
 
 	dmg_test_processor_initialize();
 
-	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_INTERRUPT_ENABLE - 1) == UINT8_MAX)) {
+	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE - 1) == UINT8_MAX)) {
 		result = EXIT_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	g_processor.processor.interrupt_enable.raw = value;
 
-	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_INTERRUPT_ENABLE) == value)) {
+	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE) == value)) {
 		result = EXIT_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	g_processor.processor.interrupt_flag.raw = value;
 
-	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_INTERRUPT_FLAG) == value)) {
+	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_FLAG) == value)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -149,10 +151,54 @@ int
 dmg_test_processor_step(void)
 {
 	int result = EXIT_SUCCESS;
+	uint8_t opcode = INSTRUCTION_NOP;
+	const dmg_instruction_t *instruction = &INSTRUCTION[opcode];
 
-	// TODO
-	(void)INTERRUPT_ADDR[0];
-	// ---
+	dmg_test_processor_initialize();
+	g_processor.processor.pc.word = STEP_ADDRESS;
+	g_processor.read_value = opcode;
+
+	if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
+			|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
+		result = EXIT_FAILURE;
+	}
+
+	for(int interrupt = INTERRUPT_VBLANK; interrupt < INTERRUPT_MAX; ++interrupt) {
+		dmg_test_processor_initialize();
+		g_processor.processor.pc.word = STEP_ADDRESS;
+		g_processor.processor.interrupts_enable = false;
+		g_processor.processor.interrupt_enable.raw = (1 << interrupt);
+		g_processor.processor.interrupt_flag.raw = (1 << interrupt);
+		g_processor.read_value = opcode;
+
+		if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
+				|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
+			result = EXIT_FAILURE;
+		}
+
+		dmg_test_processor_initialize();
+		g_processor.processor.pc.word = STEP_ADDRESS;
+		g_processor.processor.interrupts_enable = true;
+		g_processor.processor.interrupt_flag.raw = (1 << interrupt);
+		g_processor.read_value = opcode;
+
+		if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
+				|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
+			result = EXIT_FAILURE;
+		}
+
+		dmg_test_processor_initialize();
+		g_processor.processor.pc.word = STEP_ADDRESS;
+		g_processor.processor.interrupts_enable = true;
+		g_processor.processor.interrupt_enable.raw = (1 << interrupt);
+		g_processor.processor.interrupt_flag.raw = (1 << interrupt);
+		g_processor.read_value = opcode;
+
+		if(ASSERT(dmg_processor_step(&g_processor.processor) == (instruction->cycle + CYCLE_INTERRUPT))
+				|| ASSERT(g_processor.processor.pc.word == (INTERRUPT_ADDR[interrupt] + instruction->operand + 1))) {
+			result = EXIT_FAILURE;
+		}
+	}
 
 	TRACE_TEST(result);
 
@@ -195,14 +241,14 @@ dmg_test_processor_write(void)
 	int result = EXIT_SUCCESS;
 
 	dmg_test_processor_initialize();
-	dmg_processor_write(&g_processor.processor, ADDRESS_INTERRUPT_ENABLE, value);
+	dmg_processor_write(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE, value);
 
 	if(ASSERT(g_processor.processor.interrupt_enable.raw == value)) {
 		result = EXIT_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
-	dmg_processor_write(&g_processor.processor, ADDRESS_INTERRUPT_FLAG, value);
+	dmg_processor_write(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_FLAG, value);
 
 	if(ASSERT(g_processor.processor.interrupt_flag.raw == (POST_IF | (value & INTERRUPT_FLAG_MASK)))) {
 		result = EXIT_FAILURE;

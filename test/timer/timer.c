@@ -66,7 +66,7 @@ dmg_test_timer_load(void)
 	}
 
 	dmg_test_timer_initialize();
-	g_timer.configuration.bootrom.data = (uint8_t *)1;
+	g_timer.configuration.bootrom.data = (void *)1;
 
 	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;

@@ -3156,10 +3156,10 @@ dmg_processor_read(
 	uint8_t result = 0;
 
 	switch(address) {
-		case ADDRESS_INTERRUPT_ENABLE:
+		case ADDRESS_PROCESSOR_INTERRUPT_ENABLE:
 			result = processor->interrupt_enable.raw;
 			break;
-		case ADDRESS_INTERRUPT_FLAG:
+		case ADDRESS_PROCESSOR_INTERRUPT_FLAG:
 			result = processor->interrupt_flag.raw;
 			break;
 		default:
@@ -3198,10 +3198,10 @@ dmg_processor_write(
 {
 
 	switch(address) {
-		case ADDRESS_INTERRUPT_ENABLE:
+		case ADDRESS_PROCESSOR_INTERRUPT_ENABLE:
 			processor->interrupt_enable.raw = value;
 			break;
-		case ADDRESS_INTERRUPT_FLAG:
+		case ADDRESS_PROCESSOR_INTERRUPT_FLAG:
 			processor->interrupt_flag.raw = (POST_IF | (value & INTERRUPT_FLAG_MASK));
 
 			if(processor->stop && processor->interrupt_flag.joypad) {

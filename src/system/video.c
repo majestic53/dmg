@@ -83,7 +83,7 @@ dmg_video_dma_step(
 
 	if(video->dma.enable) {
 
-		for(uint32_t index = 0; index < (cycle / CYCLE); ++index) {
+		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 
 			if(!(video->dma.enable = (video->dma.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
 				break;
@@ -237,22 +237,22 @@ dmg_video_read(
 	uint8_t result = 0;
 
 	switch(address) {
-		case ADDRESS_VIDEO_BGP:
+		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
 			result = video->bgp.raw;
 			break;
-		case ADDRESS_VIDEO_LCDC:
+		case ADDRESS_VIDEO_CONTROL:
 			result = video->lcdc.raw;
 			break;
-		case ADDRESS_VIDEO_LY:
+		case ADDRESS_VIDEO_LINE:
 			result = video->ly;
 			break;
-		case ADDRESS_VIDEO_LYC:
+		case ADDRESS_VIDEO_LINE_COINCIDENCE:
 			result = video->lyc;
 			break;
-		case ADDRESS_VIDEO_OBP0:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
 			result = video->obp0.raw;
 			break;
-		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 			result = video->obp1.raw;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
@@ -288,19 +288,19 @@ dmg_video_read(
 
 			result = (read ? ((uint8_t *)video->ram_sprite.data)[address - ADDRESS_VIDEO_RAM_SPRITE_BEGIN] : UINT8_MAX);
 			break;
-		case ADDRESS_VIDEO_SCX:
+		case ADDRESS_VIDEO_SCREEN_X:
 			result = video->scx;
 			break;
-		case ADDRESS_VIDEO_SCY:
+		case ADDRESS_VIDEO_SCREEN_Y:
 			result = video->scy;
 			break;
-		case ADDRESS_VIDEO_STAT:
+		case ADDRESS_VIDEO_STATUS:
 			result = video->stat.raw;
 			break;
-		case ADDRESS_VIDEO_WX:
+		case ADDRESS_VIDEO_WINDOW_X:
 			result = video->wx;
 			break;
-		case ADDRESS_VIDEO_WY:
+		case ADDRESS_VIDEO_WINDOW_Y:
 			result = video->wy;
 			break;
 		default:
@@ -359,13 +359,10 @@ dmg_video_write(
 	bool write = true;
 
 	switch(address) {
-		case ADDRESS_VIDEO_BGP:
+		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
 			video->bgp.raw = value;
 			break;
-		case ADDRESS_VIDEO_DMA:
-			dmg_video_dma_start(video, value);
-			break;
-		case ADDRESS_VIDEO_LCDC:
+		case ADDRESS_VIDEO_CONTROL:
 			video->lcdc.raw = value;
 			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 
@@ -373,13 +370,13 @@ dmg_video_write(
 				video->ly = 0;
 			}
 			break;
-		case ADDRESS_VIDEO_LYC:
+		case ADDRESS_VIDEO_LINE_COINCIDENCE:
 			video->lyc = value;
 			break;
-		case ADDRESS_VIDEO_OBP0:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
 			video->obp0.raw = value;
 			break;
-		case ADDRESS_VIDEO_OBP1:
+		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 			video->obp1.raw = value;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
@@ -419,22 +416,25 @@ dmg_video_write(
 				((uint8_t *)video->ram_sprite.data)[address - ADDRESS_VIDEO_RAM_SPRITE_BEGIN] = value;
 			}
 			break;
-		case ADDRESS_VIDEO_SCX:
+		case ADDRESS_VIDEO_SCREEN_X:
 			video->scx = value;
 			dmg_service_viewport(video->scx, video->scy);
 			break;
-		case ADDRESS_VIDEO_SCY:
+		case ADDRESS_VIDEO_SCREEN_Y:
 			video->scy = value;
 			dmg_service_viewport(video->scx, video->scy);
 			break;
-		case ADDRESS_VIDEO_STAT:
+		case ADDRESS_VIDEO_STATUS:
 			video->stat.raw = value;
 			break;
-		case ADDRESS_VIDEO_WX:
+		case ADDRESS_VIDEO_TRANSFER:
+			dmg_video_dma_start(video, value);
+			break;
+		case ADDRESS_VIDEO_WINDOW_X:
 			video->wx = value;
 			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 			break;
-		case ADDRESS_VIDEO_WY:
+		case ADDRESS_VIDEO_WINDOW_Y:
 			video->wy = value;
 			dmg_service_window(video->lcdc.window, video->wx, video->wy);
 			break;

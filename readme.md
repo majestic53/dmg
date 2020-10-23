@@ -6,7 +6,12 @@ DMG
 About
 =
 
-A GameBoy emulator
+A DMG GameBoy emulator with support for the following mappers:
+
+|Mapper  |Value|
+|:-------|:----|
+|ROM-Only|0    |
+|MBC1    |1-3  |
 
 Table of Contents
 =
