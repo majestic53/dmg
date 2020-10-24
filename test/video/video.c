@@ -23,6 +23,15 @@
 typedef struct {
 	dmg_t configuration;
 	dmg_video_t video;
+	uint16_t address;
+	uint8_t value;
+	uint8_t viewport_x;
+	uint8_t viewport_y;
+	bool window_enable;
+	uint8_t window_x;
+	uint8_t window_y;
+	bool interrupt_lcdc;
+	bool interrupt_vblank;
 } dmg_video_test_t;
 
 static dmg_video_test_t g_video = {};
@@ -38,9 +47,7 @@ dmg_buffer_allocate(
 	__in uint8_t value
 	)
 {
-	// TODO
 	return ERROR_SUCCESS;
-	// ---
 }
 
 void
@@ -48,7 +55,7 @@ dmg_buffer_free(
 	__inout dmg_buffer_t *buffer
 	)
 {
-	// TODO
+	return;
 }
 
 void
@@ -56,7 +63,17 @@ dmg_runtime_interrupt(
 	__in int type
 	)
 {
-	// TODO
+
+	switch(type) {
+		case INTERRUPT_LCDC:
+			g_video.interrupt_lcdc = true;
+			break;
+		case INTERRUPT_VBLANK:
+			g_video.interrupt_vblank = true;
+			break;
+		default:
+			break;
+	}
 }
 
 uint8_t
@@ -64,9 +81,9 @@ dmg_runtime_read(
 	__in uint16_t address
 	)
 {
-	// TODO
-	return 0;
-	// ---
+	g_video.address = address;
+
+	return g_video.value;
 }
 
 void
@@ -75,7 +92,8 @@ dmg_runtime_write(
 	__in uint8_t value
 	)
 {
-	// TODO
+	g_video.address = address;
+	g_video.value = value;
 }
 
 void
@@ -84,7 +102,8 @@ dmg_service_viewport(
 	__in uint8_t y
 	)
 {
-	// TODO
+	g_video.viewport_x = x;
+	g_video.viewport_y = y;
 }
 
 void
@@ -94,7 +113,9 @@ dmg_service_window(
 	__in uint8_t y
 	)
 {
-	// TODO
+	g_video.window_enable = enable;
+	g_video.window_x = x;
+	g_video.window_y = y;
 }
 
 static void
@@ -108,7 +129,46 @@ dmg_test_video_load(void)
 {
 	int result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_video_initialize();
+
+	if(ASSERT_SUCCESS(dmg_video_load(&g_video.video, &g_video.configuration))) {
+		result = EXIT_FAILURE;
+	}
+
+	if(ASSERT(g_video.video.bgp.raw == POST_BGP)
+			|| ASSERT(g_video.video.lcdc.raw == POST_LCDC)
+			|| ASSERT(g_video.video.ly == 0)
+			|| ASSERT(g_video.video.lyc == POST_LYC)
+			|| ASSERT(g_video.video.obp0.raw == POST_OBP0)
+			|| ASSERT(g_video.video.obp1.raw == POST_OBP1)
+			|| ASSERT(g_video.video.scx == POST_SCX)
+			|| ASSERT(g_video.video.scy == POST_SCY)
+			|| ASSERT(g_video.video.stat.mode == MODE_SEARCH)
+			|| ASSERT(g_video.video.wx == POST_WX)
+			|| ASSERT(g_video.video.wy == POST_WY)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.configuration.bootrom.data = (void *)1;
+
+	if(ASSERT_SUCCESS(dmg_video_load(&g_video.video, &g_video.configuration))) {
+		result = EXIT_FAILURE;
+	}
+
+	if(ASSERT(g_video.video.bgp.raw == 0)
+			|| ASSERT(g_video.video.lcdc.raw == 0)
+			|| ASSERT(g_video.video.ly == 0)
+			|| ASSERT(g_video.video.lyc == 0)
+			|| ASSERT(g_video.video.obp0.raw == 0)
+			|| ASSERT(g_video.video.obp1.raw == 0)
+			|| ASSERT(g_video.video.scx == 0)
+			|| ASSERT(g_video.video.scy == 0)
+			|| ASSERT(g_video.video.stat.mode == MODE_SEARCH)
+			|| ASSERT(g_video.video.wx == 0)
+			|| ASSERT(g_video.video.wy == 0)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -118,9 +178,138 @@ dmg_test_video_load(void)
 int
 dmg_test_video_read(void)
 {
+	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_video_initialize();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE - 1) == UINT8_MAX)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.bgp.raw = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE) == g_video.video.bgp.raw)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.lcdc.raw = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_CONTROL) == g_video.video.lcdc.raw)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.ly = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == g_video.video.ly)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.lyc = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE) == g_video.video.lyc)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.obp0.raw = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0) == g_video.video.obp0.raw)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.obp1.raw = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1) == g_video.video.obp1.raw)) {
+		result = EXIT_FAILURE;
+	}
+
+	for(int mode = 0; mode < MODE_MAX; ++mode) {
+		dmg_test_video_initialize();
+		g_video.video.lcdc.enable = true;
+		g_video.video.ram.data = &value;
+
+		switch(g_video.video.stat.mode) {
+			case MODE_HBLANK:
+			case MODE_SEARCH:
+			case MODE_VBLANK:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == value)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+			default:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == 0)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+		}
+
+		dmg_test_video_initialize();
+		g_video.video.lcdc.enable = true;
+		g_video.video.ram_sprite.data = &value;
+
+		switch(g_video.video.stat.mode) {
+			case MODE_HBLANK:
+			case MODE_VBLANK:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == value)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+			default:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == 0)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+		}
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.scx = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_X) == g_video.video.scx)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.scy = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_Y) == g_video.video.scy)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.stat.raw = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_STATUS) == g_video.video.stat.raw)) {
+		result = EXIT_FAILURE;
+	}
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_TRANSFER) == UINT8_MAX)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.wx = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_X) == g_video.video.wx)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.wy = rand();
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_Y) == g_video.video.wy)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -148,7 +337,21 @@ dmg_test_video_unload(void)
 	dmg_video_load(&g_video.video, &g_video.configuration);
 	dmg_video_unload(&g_video.video);
 
-	// TODO
+	if(ASSERT(g_video.video.bgp.raw == 0)
+			|| ASSERT(g_video.video.lcdc.raw == 0)
+			|| ASSERT(g_video.video.ly == 0)
+			|| ASSERT(g_video.video.lyc == 0)
+			|| ASSERT(g_video.video.obp0.raw == 0)
+			|| ASSERT(g_video.video.obp1.raw == 0)
+			|| ASSERT(g_video.video.scx == 0)
+			|| ASSERT(g_video.video.scy == 0)
+			|| ASSERT(g_video.video.stat.mode == 0)
+			|| ASSERT(g_video.video.wx == 0)
+			|| ASSERT(g_video.video.wy == 0)
+			|| ASSERT(g_video.video.ram.data == NULL)
+			|| ASSERT(g_video.video.ram_sprite.data == NULL)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
@@ -158,9 +361,154 @@ dmg_test_video_unload(void)
 int
 dmg_test_video_write(void)
 {
+	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.wx = rand();
+	g_video.video.wy = rand();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_CONTROL, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_CONTROL) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	if((g_video.video.lcdc.enable && ASSERT(g_video.video.ly == 0))
+			|| ASSERT(g_video.window_enable == g_video.video.lcdc.window)
+			|| ASSERT(g_video.window_x == g_video.video.wx)
+			|| ASSERT(g_video.window_y == g_video.video.wy)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	g_video.video.ly = (value + 1);
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_LINE, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == (value + 1))) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1) == value)) {
+		result = EXIT_FAILURE;
+	}
+
+	for(int mode = 0; mode < MODE_MAX; ++mode) {
+		uint8_t data;
+
+		dmg_test_video_initialize();
+		g_video.video.lcdc.enable = true;
+		g_video.video.ram.data = &data;
+		data = (value + 1);
+		dmg_video_write(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN, value);
+
+		switch(g_video.video.stat.mode) {
+			case MODE_HBLANK:
+			case MODE_SEARCH:
+			case MODE_VBLANK:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == value)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+			default:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == 0)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+		}
+
+		dmg_test_video_initialize();
+		g_video.video.lcdc.enable = true;
+		g_video.video.ram_sprite.data = &data;
+		data = (value + 1);
+		dmg_video_write(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN, value);
+
+		switch(g_video.video.stat.mode) {
+			case MODE_HBLANK:
+			case MODE_VBLANK:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == value)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+			default:
+
+				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == 0)) {
+					result = EXIT_FAILURE;
+				}
+				break;
+		}
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_SCREEN_X, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_X) == value)) { // TODO
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_SCREEN_Y, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_Y) == value)) { // TODO
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_STATUS, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_STATUS) == value)) { // TODO
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_TRANSFER, value & UINT8_MAX);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_TRANSFER) == UINT8_MAX)
+			|| ASSERT(g_video.video.dma.enable == true)
+			|| ASSERT(g_video.video.dma.destination == ADDRESS_VIDEO_RAM_SPRITE_BEGIN)
+			|| ASSERT(g_video.video.dma.source == (DMA_SCALE * (value & UINT8_MAX)))) {
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_WINDOW_X, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_X) == value)) { // TODO
+		result = EXIT_FAILURE;
+	}
+
+	dmg_test_video_initialize();
+	dmg_video_write(&g_video.video, ADDRESS_VIDEO_WINDOW_Y, value);
+
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_Y) == value)) { // TODO
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
