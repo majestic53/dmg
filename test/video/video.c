@@ -319,9 +319,51 @@ dmg_test_video_read(void)
 int
 dmg_test_video_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int mode, result = EXIT_SUCCESS;
 
-	// TODO
+	dmg_test_video_initialize();
+	dmg_video_load(&g_video.video, &g_video.configuration);
+	g_video.video.stat.hblank = true;
+	g_video.video.stat.search = true;
+	g_video.video.stat.vblank = true;
+
+	for(uint32_t line = 0; line < (LINE_HBLANK_MAX * 3); ++line) {
+		mode = g_video.video.stat.mode;
+
+		if(ASSERT(g_video.interrupt_vblank == false)) {
+			result = EXIT_FAILURE;
+		}
+
+		for(uint32_t cycle = 0; cycle < (MODE_CYC[mode] - CYCLE); cycle += CYCLE) {
+			dmg_video_step(&g_video.video, CYCLE);
+		}
+
+		dmg_video_step(&g_video.video, CYCLE);
+
+		if(ASSERT(g_video.video.stat.mode != mode)) {
+			result = EXIT_FAILURE;
+		}
+
+		switch(g_video.video.stat.mode) {
+			case MODE_HBLANK:
+			case MODE_SEARCH:
+			case MODE_VBLANK:
+
+				if(ASSERT(g_video.interrupt_lcdc == true)) {
+					result = EXIT_FAILURE;
+				}
+
+				g_video.interrupt_lcdc = false;
+				break;
+			default:
+				break;
+		}
+	}
+
+	if(ASSERT(g_video.video.stat.mode == MODE_VBLANK)
+			|| ASSERT(g_video.interrupt_vblank == true)) {
+		result = EXIT_FAILURE;
+	}
 
 	TRACE_TEST(result);
 
