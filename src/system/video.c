@@ -96,6 +96,14 @@ dmg_video_dma_step(
 	}
 }
 
+static void
+dmg_video_render_background(
+	__in dmg_video_t *video
+	)
+{
+	// TODO
+}
+
 static bool
 dmg_video_hblank(
 	__in dmg_video_t *video
@@ -113,6 +121,8 @@ dmg_video_hblank(
 		if(video->stat.vblank) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
+
+		dmg_video_render_background(video);
 	} else {
 		video->stat.mode = MODE_SEARCH;
 
