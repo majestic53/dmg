@@ -30,9 +30,9 @@ dmg_serial_trace(
 	__inout dmg_serial_t *serial
 	)
 {
-	TRACE_FORMAT(level, "Serial SC=%02x [Select=%u, Enable=%x]", serial->control.raw,
+	TRACE_FORMAT(level, "Serial control=%02x [Select=%u, Enable=%x]", serial->control.raw,
 		serial->control.select, serial->control.enable);
-	TRACE_FORMAT(level, "Serial SD=%02x", serial->data);
+	TRACE_FORMAT(level, "Serial data=%02x", serial->data);
 }
 
 #endif /* NDEBUG */
@@ -96,7 +96,7 @@ dmg_serial_step(
 			TRACE_SERIAL(LEVEL_VERBOSE, serial);
 
 			if((serial->cycle += CYCLE) >= SELECT_CYC[serial->control.select]) {
-				dmg_sb_t in = {};
+				dmg_serial_data_t in = {};
 
 				serial->cycle %= SELECT_CYC[serial->control.select];
 				in.lsb = true;

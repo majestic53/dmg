@@ -30,71 +30,37 @@ dmg_video_trace(
 	__inout dmg_video_t *video
 	)
 {
-	TRACE_FORMAT(level, "Video LCDC=%02x [Enable=%x (%c%c%c)]", video->lcdc.raw, video->lcdc.enable,
-		video->lcdc.background ? 'B' : '-', video->lcdc.sprite ? 'S' : '-', video->lcdc.window ? 'W' : '-');
-	TRACE_FORMAT(level, "Video STAT=%02x [Mode=%02x, Coin=%x, (%c%c%c%c)]", video->stat.raw, video->stat.mode,
-		video->stat.coincidence, video->stat.hblank ? 'H' : '-', video->stat.vblank ? 'V' : '-',
-		video->stat.search ? 'S' : '-', video->stat.lyc ? 'C' : '-');
-	TRACE_FORMAT(level, "Video BGP=%02x (%02x, %02x, %02x, %02x)", video->bgp.raw, video->bgp.white, video->bgp.grey_light,
-		video->bgp.grey_dark, video->bgp.black);
-	TRACE_FORMAT(level, "Video OBP0=%02x (%02x, %02x, %02x, %02x)", video->obp0.raw, video->obp0.white, video->obp0.grey_light,
-		video->obp0.grey_dark, video->obp0.black);
-	TRACE_FORMAT(level, "Video OBP1=%02x (%02x, %02x, %02x, %02x)", video->obp1.raw, video->obp1.white, video->obp1.grey_light,
-		video->obp1.grey_dark, video->obp1.black);
-	TRACE_FORMAT(level, "Video LY/LYC=%02x, %02x", video->ly, video->lyc);
-	TRACE_FORMAT(level, "Video SCX/SCY=%02x, %02x", video->scx, video->scy);
-	TRACE_FORMAT(level, "Video WX/WY=%02x, %02x", video->wx, video->wy);
-	TRACE_FORMAT(level, "Video Ram[%04x]=%p", video->ram.length, video->ram.data);
-	TRACE_FORMAT(level, "Video Ram-Sprite[%04x]=%p", video->ram_sprite.length, video->ram_sprite.data);
+	TRACE_FORMAT(level, "Video control=%02x [Enable=%x (%c%c%c)]", video->control.raw, video->control.enable,
+		video->control.background ? 'B' : '-', video->control.sprite ? 'S' : '-', video->control.window ? 'W' : '-');
+	TRACE_FORMAT(level, "Video status=%02x [Mode=%02x, Coin=%x, (%c%c%c%c)]", video->status.raw, video->status.mode,
+		video->status.coincidence, video->status.hblank ? 'H' : '-', video->status.vblank ? 'V' : '-',
+		video->status.search ? 'S' : '-', video->status.line_coincidence ? 'C' : '-');
+	TRACE_FORMAT(level, "Video background=%02x (%02x, %02x, %02x, %02x)", video->background.raw,
+		video->background.white, video->background.grey_light, video->background.grey_dark, video->background.black);
+	TRACE_FORMAT(level, "Video object-0=%02x (%02x, %02x, %02x, %02x)", video->object_0.raw,
+		video->object_0.white, video->object_0.grey_light, video->object_0.grey_dark, video->object_0.black);
+	TRACE_FORMAT(level, "Video object-1=%02x (%02x, %02x, %02x, %02x)", video->object_1.raw,
+		video->object_1.white, video->object_1.grey_light, video->object_1.grey_dark, video->object_1.black);
+	TRACE_FORMAT(level, "Video line/coincidence=%02x, %02x", video->line, video->line_coincidence);
+	TRACE_FORMAT(level, "Video screen-x/y=%02x, %02x", video->screen_x, video->screen_y);
+	TRACE_FORMAT(level, "Video window-x/y=%02x, %02x", video->window_x, video->window_y);
+	TRACE_FORMAT(level, "Video ram[%04x]=%p", video->ram.length, video->ram.data);
+	TRACE_FORMAT(level, "Video ram-sprite[%04x]=%p", video->ram_sprite.length, video->ram_sprite.data);
 }
 
 static void
-dmg_video_dma_trace(
+dmg_video_trace_transfer(
 	__in int level,
 	__inout dmg_video_t *video
 	)
 {
-	TRACE_FORMAT(level, "DMA enable=%x (remaining=%u)", video->dma.enable,
-		(ADDRESS_VIDEO_RAM_SPRITE_END + 1) - video->dma.destination);
-	TRACE_FORMAT(level, "DMA destination=%04x", video->dma.destination);
-	TRACE_FORMAT(level, "DMA source=%04x", video->dma.source);
+	TRACE_FORMAT(level, "DMA enable=%x (remaining=%u)", video->transfer.enable,
+		(ADDRESS_VIDEO_RAM_SPRITE_END + 1) - video->transfer.destination);
+	TRACE_FORMAT(level, "DMA destination=%04x", video->transfer.destination);
+	TRACE_FORMAT(level, "DMA source=%04x", video->transfer.source);
 }
 
 #endif /* NDEBUG */
-
-static void
-dmg_video_dma_start(
-	__in dmg_video_t *video,
-	__in uint8_t value
-	)
-{
-	video->dma.enable = true;
-	video->dma.destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
-	video->dma.source = (DMA_SCALE * value);
-	TRACE_VIDEO_DMA(LEVEL_VERBOSE, video);
-}
-
-static void
-dmg_video_dma_step(
-	__in dmg_video_t *video,
-	__in uint32_t cycle
-	)
-{
-
-	if(video->dma.enable) {
-
-		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
-
-			if(!(video->dma.enable = (video->dma.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
-				break;
-			}
-
-			dmg_runtime_write(video->dma.destination++, dmg_runtime_read(video->dma.source++));
-		}
-
-		TRACE_VIDEO_DMA(LEVEL_VERBOSE, video);
-	}
-}
 
 static void
 dmg_video_render_background(
@@ -104,6 +70,40 @@ dmg_video_render_background(
 	// TODO
 }
 
+static void
+dmg_video_transfer_start(
+	__in dmg_video_t *video,
+	__in uint8_t value
+	)
+{
+	video->transfer.enable = true;
+	video->transfer.destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
+	video->transfer.source = (TRANSFER_SCALE * value);
+	TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
+}
+
+static void
+dmg_video_transfer_step(
+	__in dmg_video_t *video,
+	__in uint32_t cycle
+	)
+{
+
+	if(video->transfer.enable) {
+
+		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+
+			if(!(video->transfer.enable = (video->transfer.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
+				break;
+			}
+
+			dmg_runtime_write(video->transfer.destination++, dmg_runtime_read(video->transfer.source++));
+		}
+
+		TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
+	}
+}
+
 static bool
 dmg_video_hblank(
 	__in dmg_video_t *video
@@ -111,22 +111,22 @@ dmg_video_hblank(
 {
 	bool result;
 
-	if((result = (++video->ly == LINE_HBLANK_MAX))) {
-		video->stat.mode = MODE_VBLANK;
+	if((result = (++video->line == LINE_HBLANK_MAX))) {
+		video->status.mode = MODE_VBLANK;
 
-		if(video->lcdc.enable) {
+		if(video->control.enable) {
 			dmg_runtime_interrupt(INTERRUPT_VBLANK);
 		}
 
-		if(video->stat.vblank) {
+		if(video->status.vblank) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
 
 		dmg_video_render_background(video);
 	} else {
-		video->stat.mode = MODE_SEARCH;
+		video->status.mode = MODE_SEARCH;
 
-		if(video->stat.search) {
+		if(video->status.search) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
 	}
@@ -139,7 +139,7 @@ dmg_video_search(
 	__in dmg_video_t *video
 	)
 {
-	video->stat.mode = MODE_TRANSFER;
+	video->status.mode = MODE_TRANSFER;
 
 	return false;
 }
@@ -149,21 +149,21 @@ dmg_video_transfer(
 	__in dmg_video_t *video
 	)
 {
-	video->stat.mode = MODE_HBLANK;
+	video->status.mode = MODE_HBLANK;
 
-	if(video->stat.hblank) {
+	if(video->status.hblank) {
 		dmg_runtime_interrupt(INTERRUPT_LCDC);
 	}
 
-	if(video->lcdc.enable) {
+	if(video->control.enable) {
 
-		if(video->lcdc.background || video->lcdc.window) {
+		if(video->control.background || video->control.window) {
 
 			// TODO: RENDER BACKGROUND/WINDOW SCANLINE
 
 		}
 
-		if(video->lcdc.sprite) {
+		if(video->control.sprite) {
 
 			// TOOD: RENDER SPRITE SCANLINE
 
@@ -179,11 +179,11 @@ dmg_video_vblank(
 	)
 {
 
-	if(++video->ly > LINE_VBLANK_MAX) {
-		video->ly = 0;
-		video->stat.mode = MODE_SEARCH;
+	if(++video->line > LINE_VBLANK_MAX) {
+		video->line = 0;
+		video->status.mode = MODE_SEARCH;
 
-		if(video->stat.search) {
+		if(video->status.search) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
 	}
@@ -191,7 +191,7 @@ dmg_video_vblank(
 	return false;
 }
 
-static const dmg_mode_cb MODE_HANDLER[] = {
+static const dmg_mode MODE_HANDLER[] = {
 	dmg_video_hblank, /* MODE_HBLANK */
 	dmg_video_vblank, /* MODE_VBLANK */
 	dmg_video_search, /* MODE_SEARCH */
@@ -209,18 +209,18 @@ dmg_video_load(
 	TRACE(LEVEL_INFORMATION, "Video loading");
 
 	if(!configuration->bootrom.data) {
-		video->bgp.raw = POST_BGP;
-		video->lcdc.raw = POST_LCDC;
-		video->lyc = POST_LYC;
-		video->obp0.raw = POST_OBP0;
-		video->obp1.raw = POST_OBP1;
-		video->scx = POST_SCX;
-		video->scy = POST_SCY;
-		video->wx = POST_WX;
-		video->wy = POST_WY;
+		video->background.raw = POST_BACKGROUND_PALETTE;
+		video->control.raw = POST_CONTROL;
+		video->line_coincidence = POST_LINE_COINCIDENCE;
+		video->object_0.raw = POST_OBJECT_PALETTE_0;
+		video->object_1.raw = POST_OBJECT_PALETTE_1;
+		video->screen_x = POST_SCREEN_X;
+		video->screen_y = POST_SCREEN_Y;
+		video->window_x = POST_WINDOW_X;
+		video->window_y = POST_WINDOW_Y;
 	}
 
-	video->stat.mode = MODE_SEARCH;
+	video->status.mode = MODE_SEARCH;
 
 	if((result = dmg_buffer_allocate(&video->ram, RAM_WIDTH, 0)) != ERROR_SUCCESS) {
 		goto exit;
@@ -248,28 +248,28 @@ dmg_video_read(
 
 	switch(address) {
 		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
-			result = video->bgp.raw;
+			result = video->background.raw;
 			break;
 		case ADDRESS_VIDEO_CONTROL:
-			result = video->lcdc.raw;
+			result = video->control.raw;
 			break;
 		case ADDRESS_VIDEO_LINE:
-			result = video->ly;
+			result = video->line;
 			break;
 		case ADDRESS_VIDEO_LINE_COINCIDENCE:
-			result = video->lyc;
+			result = video->line_coincidence;
 			break;
 		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
-			result = video->obp0.raw;
+			result = video->object_0.raw;
 			break;
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
-			result = video->obp1.raw;
+			result = video->object_1.raw;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 
-			if(video->lcdc.enable) {
+			if(video->control.enable) {
 
-				switch(video->stat.mode) {
+				switch(video->status.mode) {
 					case MODE_HBLANK:
 					case MODE_SEARCH:
 					case MODE_VBLANK:
@@ -284,9 +284,9 @@ dmg_video_read(
 			break;
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 
-			if(video->lcdc.enable) {
+			if(video->control.enable) {
 
-				switch(video->stat.mode) {
+				switch(video->status.mode) {
 					case MODE_HBLANK:
 					case MODE_VBLANK:
 						break;
@@ -299,19 +299,19 @@ dmg_video_read(
 			result = (read ? ((uint8_t *)video->ram_sprite.data)[address - ADDRESS_VIDEO_RAM_SPRITE_BEGIN] : UINT8_MAX);
 			break;
 		case ADDRESS_VIDEO_SCREEN_X:
-			result = video->scx;
+			result = video->screen_x;
 			break;
 		case ADDRESS_VIDEO_SCREEN_Y:
-			result = video->scy;
+			result = video->screen_y;
 			break;
 		case ADDRESS_VIDEO_STATUS:
-			result = video->stat.raw;
+			result = video->status.raw;
 			break;
 		case ADDRESS_VIDEO_WINDOW_X:
-			result = video->wx;
+			result = video->window_x;
 			break;
 		case ADDRESS_VIDEO_WINDOW_Y:
-			result = video->wy;
+			result = video->window_y;
 			break;
 		default:
 			result = UINT8_MAX;
@@ -330,15 +330,15 @@ dmg_video_step(
 {
 	bool result = false;
 
-	dmg_video_dma_step(video, cycle);
+	dmg_video_transfer_step(video, cycle);
 
 	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 
-		if((video->cycle += CYCLE) >= MODE_CYC[video->stat.mode]) {
-			video->cycle %= MODE_CYC[video->stat.mode];
-			result = MODE_HANDLER[video->stat.mode](video);
+		if((video->cycle += CYCLE) >= MODE_CYC[video->status.mode]) {
+			video->cycle %= MODE_CYC[video->status.mode];
+			result = MODE_HANDLER[video->status.mode](video);
 
-			if((video->stat.coincidence = (video->ly == video->lyc)) && video->stat.lyc) {
+			if((video->status.coincidence = (video->line == video->line_coincidence)) && video->status.line_coincidence) {
 				dmg_runtime_interrupt(INTERRUPT_LCDC);
 			}
 		}
@@ -370,30 +370,30 @@ dmg_video_write(
 
 	switch(address) {
 		case ADDRESS_VIDEO_BACKGROUND_PALETTE:
-			video->bgp.raw = value;
+			video->background.raw = value;
 			break;
 		case ADDRESS_VIDEO_CONTROL:
-			video->lcdc.raw = value;
-			dmg_service_window(video->lcdc.window, video->wx, video->wy);
+			video->control.raw = value;
+			dmg_service_window(video->control.window, video->window_x, video->window_y);
 
-			if(!video->lcdc.enable) {
-				video->ly = 0;
+			if(!video->control.enable) {
+				video->line = 0;
 			}
 			break;
 		case ADDRESS_VIDEO_LINE_COINCIDENCE:
-			video->lyc = value;
+			video->line_coincidence = value;
 			break;
 		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
-			video->obp0.raw = value;
+			video->object_0.raw = value;
 			break;
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
-			video->obp1.raw = value;
+			video->object_1.raw = value;
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 
-			if(video->lcdc.enable) {
+			if(video->control.enable) {
 
-				switch(video->stat.mode) {
+				switch(video->status.mode) {
 					case MODE_HBLANK:
 					case MODE_SEARCH:
 					case MODE_VBLANK:
@@ -410,9 +410,9 @@ dmg_video_write(
 			break;
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 
-			if(video->lcdc.enable) {
+			if(video->control.enable) {
 
-				switch(video->stat.mode) {
+				switch(video->status.mode) {
 					case MODE_HBLANK:
 					case MODE_VBLANK:
 						break;
@@ -427,26 +427,26 @@ dmg_video_write(
 			}
 			break;
 		case ADDRESS_VIDEO_SCREEN_X:
-			video->scx = value;
-			dmg_service_viewport(video->scx, video->scy);
+			video->screen_x = value;
+			dmg_service_viewport(video->screen_x, video->screen_y);
 			break;
 		case ADDRESS_VIDEO_SCREEN_Y:
-			video->scy = value;
-			dmg_service_viewport(video->scx, video->scy);
+			video->screen_y = value;
+			dmg_service_viewport(video->screen_x, video->screen_y);
 			break;
 		case ADDRESS_VIDEO_STATUS:
-			video->stat.raw = value;
+			video->status.raw = value;
 			break;
 		case ADDRESS_VIDEO_TRANSFER:
-			dmg_video_dma_start(video, value);
+			dmg_video_transfer_start(video, value);
 			break;
 		case ADDRESS_VIDEO_WINDOW_X:
-			video->wx = value;
-			dmg_service_window(video->lcdc.window, video->wx, video->wy);
+			video->window_x = value;
+			dmg_service_window(video->control.window, video->window_x, video->window_y);
 			break;
 		case ADDRESS_VIDEO_WINDOW_Y:
-			video->wy = value;
-			dmg_service_window(video->lcdc.window, video->wx, video->wy);
+			video->window_y = value;
+			dmg_service_window(video->control.window, video->window_x, video->window_y);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported video write [%04x]<-%02x", address, value);

@@ -24,31 +24,31 @@
 typedef union {
 
 	struct {
-		uint8_t lsb : 1;
-		uint8_t unused : 6;
-		uint8_t msb : 1;
-	};
-
-	uint8_t raw;
-} dmg_sb_t;
-
-typedef union {
-
-	struct {
 		uint8_t select : 1;
 		uint8_t unused : 6;
 		uint8_t enable : 1;
 	};
 
 	uint8_t raw;
-} dmg_sc_t;
+} dmg_serial_control_t;
+
+typedef union {
+
+	struct {
+		uint8_t lsb : 1;
+		uint8_t unused : 6;
+		uint8_t msb : 1;
+	};
+
+	uint8_t raw;
+} dmg_serial_data_t;
 
 typedef struct {
-	dmg_sc_t control;
+	dmg_serial_control_t control;
 	uint32_t cycle;
-	dmg_sb_t data;
+	dmg_serial_data_t data;
 	uint8_t remaining;
-	dmg_serial_cb transfer;
+	dmg_serial_transfer transfer;
 } dmg_serial_t;
 
 #ifdef __cplusplus

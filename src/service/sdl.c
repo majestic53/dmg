@@ -121,7 +121,7 @@ dmg_service_display_load(
 		g_sdl.display.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
 		g_sdl.display.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
 		g_sdl.display.palette[index].alpha = UINT8_MAX;
-		TRACE_FORMAT(LEVEL_VERBOSE, "Palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.display.palette[index].raw,
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.display.palette[index].raw,
 			g_sdl.display.palette[index].red, g_sdl.display.palette[index].green, g_sdl.display.palette[index].blue);
 	}
 
@@ -141,13 +141,13 @@ dmg_service_display_load(
 		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.display.scale);
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Scale=%u", g_sdl.display.scale);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL scale=%u", g_sdl.display.scale);
 
 	if(snprintf(g_sdl.display.title, sizeof(g_sdl.display.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
 		memcpy(g_sdl.display.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "Title[%u]=\"%s\"", strlen(g_sdl.display.title), g_sdl.display.title);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL title[%u]=\"%s\"", strlen(g_sdl.display.title), g_sdl.display.title);
 
 	if(!(g_sdl.display.window = SDL_CreateWindow(g_sdl.display.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			WINDOW_WIDTH * g_sdl.display.scale, WINDOW_HEIGHT * g_sdl.display.scale, SDL_WINDOW_RESIZABLE))) {
@@ -231,12 +231,12 @@ dmg_service_input_load(
 
 	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
 		g_sdl.input.button[index] = configuration->button[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "Button[%zu]=%u", index, g_sdl.input.button[index]);
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL button[%zu]=%u", index, g_sdl.input.button[index]);
 	}
 
 	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
 		g_sdl.input.direction[index] = configuration->direction[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "Direction[%zu]=%u", index, g_sdl.input.direction[index]);
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL direction[%zu]=%u", index, g_sdl.input.direction[index]);
 	}
 
 	return result;
@@ -307,7 +307,7 @@ dmg_service_poll(void)
 			SDL_SetWindowTitle(g_sdl.display.window, title);
 		}
 
-		TRACE_FORMAT(LEVEL_VERBOSE, "Framerate=%.01f", g_sdl.frame.rate);
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL framerate=%.01f", g_sdl.frame.rate);
 #endif /* NDEBUG */
 		g_sdl.frame.begin = g_sdl.frame.end;
 		g_sdl.frame.count = 0;

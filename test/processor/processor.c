@@ -152,7 +152,7 @@ dmg_test_processor_step(void)
 {
 	int result = EXIT_SUCCESS;
 	uint8_t opcode = INSTRUCTION_NOP;
-	const dmg_instruction_t *instruction = &INSTRUCTION[opcode];
+	const dmg_processor_instruction_t *instruction = &INSTRUCTION[opcode];
 
 	dmg_test_processor_initialize();
 	g_processor.processor.pc.word = STEP_ADDRESS;

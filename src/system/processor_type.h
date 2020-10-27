@@ -71,7 +71,7 @@ typedef struct {
 	uint8_t operand;
 	uint8_t cycle;
 	uint8_t cycle_taken;
-} dmg_instruction_t;
+} dmg_processor_instruction_t;
 
 enum {
 	INSTRUCTION_NOP = 0, /* 0x00 */
@@ -593,7 +593,7 @@ enum {
 	INSTRUCTION_EXTENDED_MAX,
 };
 
-static const dmg_instruction_t INSTRUCTION[] = {
+static const dmg_processor_instruction_t INSTRUCTION[] = {
 	{ INSTRUCTION_NOP, OPERAND_NONE, CYCLE, 0 }, /* 0x00 */
 	{ INSTRUCTION_LD_BC_U16, OPERAND_WORD, CYCLE * 3, 0},
 	{ INSTRUCTION_LD_BC_IND_A, OPERAND_NONE, CYCLE * 2, 0},
@@ -852,7 +852,7 @@ static const dmg_instruction_t INSTRUCTION[] = {
 	{ INSTRUCTION_RST_38, OPERAND_NONE, CYCLE * 4, 0},
 	};
 
-static const dmg_instruction_t INSTRUCTION_EXTENDED[] = {
+static const dmg_processor_instruction_t INSTRUCTION_EXTENDED[] = {
 	{ INSTRUCTION_EXTENDED_RLC_B, OPERAND_NONE, CYCLE * 2, 0 }, /* 0x00 */
 	{ INSTRUCTION_EXTENDED_RLC_C, OPERAND_NONE, CYCLE * 2, 0 },
 	{ INSTRUCTION_EXTENDED_RLC_D, OPERAND_NONE, CYCLE * 2, 0 },
@@ -1111,10 +1111,10 @@ static const dmg_instruction_t INSTRUCTION_EXTENDED[] = {
 	{ INSTRUCTION_EXTENDED_SET_7_A, OPERAND_NONE, CYCLE * 2, 0 },
 	};
 
-typedef uint32_t (*dmg_instruction_cb)(
+typedef uint32_t (*dmg_processor_instruction)(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	);
 
 #ifndef NDEBUG
@@ -1644,13 +1644,13 @@ static const char *INSTRUCTION_EXTENDED_STR[] =  {
 	if((_LEVEL_) <= (LEVEL)) { \
 		dmg_processor_trace(_LEVEL_, _PROCESSOR_); \
 	}
-#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
+#define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
 	if((_LEVEL_) <= (LEVEL)) { \
-		dmg_processor_instruction_trace(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
+		dmg_processor_trace_instruction(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
 	}
 #else
 #define TRACE_PROCESSOR(_LEVEL_, _PROCESSOR_)
-#define TRACE_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
+#define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
 #endif /* NDEBUG */
 
 #endif /* DMG_SYSTEM_PROCESSOR_TYPE_H_ */

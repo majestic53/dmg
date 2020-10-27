@@ -32,7 +32,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} __attribute__((packed)) dmg_flag_t;
+} __attribute__((packed)) dmg_processor_flag_t;
 
 typedef union {
 
@@ -46,7 +46,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} __attribute__((packed)) dmg_interrupt_t;
+} __attribute__((packed)) dmg_processor_interrupt_t;
 
 typedef union {
 
@@ -62,7 +62,7 @@ typedef union {
 					uint8_t low_msb : 1;
 				};
 
-				dmg_flag_t flag;
+				dmg_processor_flag_t flag;
 				uint8_t low;
 			};
 
@@ -82,20 +82,20 @@ typedef union {
 	};
 
 	uint32_t dword;
-} __attribute__((packed)) dmg_register_t;
+} __attribute__((packed)) dmg_processor_register_t;
 
 typedef struct {
-	dmg_register_t af;
-	dmg_register_t bc;
-	dmg_register_t de;
-	dmg_register_t hl;
-	dmg_register_t pc;
-	dmg_register_t sp;
+	dmg_processor_register_t af;
+	dmg_processor_register_t bc;
+	dmg_processor_register_t de;
+	dmg_processor_register_t hl;
 	bool interrupts_enable;
 	int interrupts_enable_state;
-	dmg_interrupt_t interrupt_enable;
-	dmg_interrupt_t interrupt_flag;
+	dmg_processor_interrupt_t interrupt_enable;
+	dmg_processor_interrupt_t interrupt_flag;
 	bool halt;
+	dmg_processor_register_t pc;
+	dmg_processor_register_t sp;
 	bool stop;
 } dmg_processor_t;
 

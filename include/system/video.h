@@ -21,12 +21,6 @@
 
 #include "../type/buffer.h"
 
-typedef struct {
-	bool enable;
-	uint16_t destination;
-	uint16_t source;
-} dmg_dma_t;
-
 typedef union {
 
 	struct {
@@ -41,7 +35,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_lcdc_t;
+} dmg_video_control_t;
 
 typedef union {
 
@@ -53,7 +47,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_palette_t;
+} dmg_video_palette_t;
 
 typedef union {
 
@@ -63,29 +57,35 @@ typedef union {
 		uint8_t hblank : 1;
 		uint8_t vblank : 1;
 		uint8_t search : 1;
-		uint8_t lyc : 1;
+		uint8_t line_coincidence : 1;
 		uint8_t unused : 1;
 	};
 
 	uint8_t raw;
-} dmg_stat_t;
+} dmg_video_status_t;
 
 typedef struct {
-	dmg_palette_t bgp;
-	dmg_dma_t dma;
+	bool enable;
+	uint16_t destination;
+	uint16_t source;
+} dmg_video_transfer_t;
+
+typedef struct {
+	dmg_video_palette_t background;
 	uint32_t cycle;
-	dmg_lcdc_t lcdc;
-	uint8_t ly;
-	uint8_t lyc;
-	dmg_palette_t obp0;
-	dmg_palette_t obp1;
+	dmg_video_control_t control;
+	uint8_t line;
+	uint8_t line_coincidence;
+	dmg_video_palette_t object_0;
+	dmg_video_palette_t object_1;
 	dmg_buffer_t ram;
 	dmg_buffer_t ram_sprite;
-	uint8_t scx;
-	uint8_t scy;
-	dmg_stat_t stat;
-	uint8_t wx;
-	uint8_t wy;
+	uint8_t screen_x;
+	uint8_t screen_y;
+	dmg_video_status_t status;
+	dmg_video_transfer_t transfer;
+	uint8_t window_x;
+	uint8_t window_y;
 } dmg_video_t;
 
 #ifdef __cplusplus

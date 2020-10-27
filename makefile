@@ -78,4 +78,4 @@ analyze:
 	@echo ''
 	cloc $(DIR_ROOT)
 	@echo ''
-	cppcheck --enable=all --std=c11 $(DIR_SRC) $(DIR_TOOL)
+	cppcheck --enable=all --std=c11 $(DIR_ROOT)

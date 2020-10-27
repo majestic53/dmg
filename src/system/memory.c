@@ -30,8 +30,8 @@ dmg_memory_trace(
 	__inout dmg_memory_t *memory
 	)
 {
-	TRACE_FORMAT(level, "Memory Ram[%04x]=%p", memory->ram.length, memory->ram.data);
-	TRACE_FORMAT(level, "Memory Ram-High[%04x]=%p", memory->ram_high.length, memory->ram_high.data);
+	TRACE_FORMAT(level, "Memory ram[%04x]=%p", memory->ram.length, memory->ram.data);
+	TRACE_FORMAT(level, "Memory ram-high[%04x]=%p", memory->ram_high.length, memory->ram_high.data);
 }
 
 #endif /* NDEBUG */

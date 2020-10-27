@@ -75,7 +75,7 @@ dmg_test_serial_load(void)
 
 	dmg_test_serial_initialize();
 	g_serial.configuration.bootrom.data = (void *)1;
-	g_serial.configuration.transfer = (dmg_serial_cb)2;
+	g_serial.configuration.transfer = (dmg_serial_transfer)2;
 
 	if(ASSERT_SUCCESS(dmg_serial_load(&g_serial.serial, &g_serial.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;
@@ -132,8 +132,8 @@ dmg_test_serial_step(void)
 	int result = EXIT_SUCCESS;
 
 	for(int select = SELECT_EXTERNAL; select < (SELECT_MAX - 1); ++select) {
-		dmg_sb_t data = {};
-		dmg_sc_t control = {};
+		dmg_serial_data_t data = {};
+		dmg_serial_control_t control = {};
 
 		dmg_test_serial_initialize();
 		dmg_serial_load(&g_serial.serial, &g_serial.configuration);
@@ -283,7 +283,7 @@ dmg_test_serial_unload(void)
 int
 dmg_test_serial_write(void)
 {
-	dmg_sc_t control = {};
+	dmg_serial_control_t control = {};
 	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
 

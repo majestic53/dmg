@@ -23,23 +23,23 @@
 #include "../../include/runtime.h"
 #include "../../include/service.h"
 
-#define DMA_SCALE 0x0100
-
 #define LINE_HBLANK_MAX 144
 #define LINE_VBLANK_MAX 153
 
-#define POST_BGP 0xfc
-#define POST_LCDC 0x91
-#define POST_LYC 0x00
-#define POST_OBP0 0xff
-#define POST_OBP1 0xff
-#define POST_SCX 0x00
-#define POST_SCY 0x00
-#define POST_WX 0x00
-#define POST_WY 0x00
+#define POST_BACKGROUND_PALETTE 0xfc
+#define POST_CONTROL 0x91
+#define POST_LINE_COINCIDENCE 0x00
+#define POST_OBJECT_PALETTE_0 0xff
+#define POST_OBJECT_PALETTE_1 0xff
+#define POST_SCREEN_X 0x00
+#define POST_SCREEN_Y 0x00
+#define POST_WINDOW_X 0x00
+#define POST_WINDOW_Y 0x00
 
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_BEGIN, ADDRESS_VIDEO_RAM_END)
 #define RAM_SPRITE_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_SPRITE_BEGIN, ADDRESS_VIDEO_RAM_SPRITE_END)
+
+#define TRANSFER_SCALE 0x0100
 
 enum {
 	MODE_HBLANK = 0,
@@ -56,7 +56,7 @@ static const uint32_t MODE_CYC[] = {
 	172, /* MODE_TRANSFER */
 	};
 
-typedef bool (*dmg_mode_cb)(
+typedef bool (*dmg_mode)(
 	__in dmg_video_t *video
 	);
 
@@ -65,13 +65,13 @@ typedef bool (*dmg_mode_cb)(
 	if((_LEVEL_) <= (LEVEL)) { \
 		dmg_video_trace(_LEVEL_, _VIDEO_); \
 	}
-#define TRACE_VIDEO_DMA(_LEVEL_, _VIDEO_) \
+#define TRACE_VIDEO_TRANSFER(_LEVEL_, _VIDEO_) \
 	if((_LEVEL_) <= (LEVEL)) { \
-		dmg_video_dma_trace(_LEVEL_, _VIDEO_); \
+		dmg_video_trace_transfer(_LEVEL_, _VIDEO_); \
 	}
 #else
 #define TRACE_VIDEO(_LEVEL_, _VIDEO_)
-#define TRACE_VIDEO_DMA(_LEVEL_, _VIDEO_)
+#define TRACE_VIDEO_TRANSFER(_LEVEL_, _VIDEO_)
 #endif /* NDEBUG */
 
 #endif /* DMG_SYSTEM_VIDEO_TYPE_H_ */

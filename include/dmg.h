@@ -43,7 +43,7 @@ enum {
 	DMG_PALETTE_MAX,
 };
 
-typedef unsigned (*dmg_serial_cb)(unsigned);
+typedef unsigned (*dmg_serial_transfer)(unsigned);
 
 typedef struct {
 	void *data;
@@ -59,7 +59,7 @@ typedef struct {
 typedef struct {
 	dmg_buffer_t bootrom;
 	dmg_buffer_t rom;
-	dmg_serial_cb transfer;
+	dmg_serial_transfer transfer;
 	unsigned button[DMG_BUTTON_MAX];
 	unsigned direction[DMG_DIRECTION_MAX];
 	unsigned palette[DMG_PALETTE_MAX];

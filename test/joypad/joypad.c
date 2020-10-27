@@ -152,7 +152,7 @@ int
 dmg_test_joypad_step(void)
 {
 	int result = EXIT_SUCCESS;
-	dmg_joypad_p1_t expected = {};
+	dmg_joypad_state_t expected = {};
 
 	dmg_test_joypad_initialize();
 	dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration);
@@ -284,7 +284,7 @@ int
 dmg_test_joypad_write(void)
 {
 	int result = EXIT_SUCCESS;
-	dmg_joypad_p1_t expected = {}, value = {};
+	dmg_joypad_state_t expected = {}, value = {};
 
 	dmg_test_joypad_initialize();
 	expected.raw = POST_STATE;
@@ -309,8 +309,10 @@ dmg_test_joypad_write(void)
 	}
 
 	dmg_joypad_write(&g_joypad.joypad, ADDRESS_JOYPAD_STATE, value.raw);
+	value.raw = dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE);
 
-	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)) {
+	if(ASSERT(value.raw == expected.raw)
+			|| ASSERT(value.button == expected.button)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -328,8 +330,10 @@ dmg_test_joypad_write(void)
 	}
 
 	dmg_joypad_write(&g_joypad.joypad, ADDRESS_JOYPAD_STATE, value.raw);
+	value.raw = dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE);
 
-	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)) {
+	if(ASSERT(value.raw == expected.raw)
+			|| ASSERT(value.direction == expected.direction)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -356,8 +360,11 @@ dmg_test_joypad_write(void)
 	}
 
 	dmg_joypad_write(&g_joypad.joypad, ADDRESS_JOYPAD_STATE, value.raw);
+	value.raw = dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE);
 
-	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)) {
+	if(ASSERT(value.raw == expected.raw)
+			|| ASSERT(value.button == expected.button)
+			|| ASSERT(value.direction == expected.direction)) {
 		result = EXIT_FAILURE;
 	}
 

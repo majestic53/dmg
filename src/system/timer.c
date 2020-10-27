@@ -30,11 +30,11 @@ dmg_timer_trace(
 	__inout dmg_timer_t *timer
 	)
 {
-	TRACE_FORMAT(level, "Timer TAC=%02x [Select=%u, Enable=%x]", timer->control.raw,
+	TRACE_FORMAT(level, "Timer control=%02x [Select=%u, Enable=%x]", timer->control.raw,
 		timer->control.select, timer->control.enable);
-	TRACE_FORMAT(level, "Timer TIMA=%02x", timer->counter);
-	TRACE_FORMAT(level, "Timer TMA=%02x", timer->modulo);
-	TRACE_FORMAT(level, "Timer DIV=%04x", timer->divider.raw);
+	TRACE_FORMAT(level, "Timer counter=%02x", timer->counter);
+	TRACE_FORMAT(level, "Timer divider=%04x", timer->divider.raw);
+	TRACE_FORMAT(level, "Timer modulo=%02x", timer->modulo);
 }
 
 #endif /* NDEBUG */

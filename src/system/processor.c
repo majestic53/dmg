@@ -76,11 +76,11 @@ dmg_processor_push_word(
 static uint32_t
 dmg_processor_instruction_adc(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, sum = {}, value = {};
+	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_ADC_A_A:
@@ -129,11 +129,11 @@ dmg_processor_instruction_adc(
 static uint32_t
 dmg_processor_instruction_add(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, sum = {}, value = {};
+	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_ADD_A_A:
@@ -231,11 +231,11 @@ dmg_processor_instruction_add(
 static uint32_t
 dmg_processor_instruction_and(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_AND_A_A:
@@ -282,8 +282,8 @@ dmg_processor_instruction_and(
 static uint32_t
 dmg_processor_instruction_call(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	bool taken = false;
@@ -320,8 +320,8 @@ dmg_processor_instruction_call(
 static uint32_t
 dmg_processor_instruction_ccf(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->af.flag.carry = !processor->af.flag.carry;
@@ -334,11 +334,11 @@ dmg_processor_instruction_ccf(
 static uint32_t
 dmg_processor_instruction_cp(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_CP_A_A:
@@ -384,8 +384,8 @@ dmg_processor_instruction_cp(
 static uint32_t
 dmg_processor_instruction_cpl(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->af.high = ~processor->af.high;
@@ -398,8 +398,8 @@ dmg_processor_instruction_cpl(
 static uint32_t
 dmg_processor_instruction_daa(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -433,11 +433,11 @@ dmg_processor_instruction_daa(
 static uint32_t
 dmg_processor_instruction_dec(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_DEC_A:
@@ -505,8 +505,8 @@ dmg_processor_instruction_dec(
 static uint32_t
 dmg_processor_instruction_di(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -520,8 +520,8 @@ dmg_processor_instruction_di(
 static uint32_t
 dmg_processor_instruction_ei(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -535,8 +535,8 @@ dmg_processor_instruction_ei(
 static uint32_t
 dmg_processor_instruction_halt(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->halt = true;
@@ -549,11 +549,11 @@ dmg_processor_instruction_halt(
 static uint32_t
 dmg_processor_instruction_inc(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_INC_A:
@@ -621,12 +621,12 @@ dmg_processor_instruction_inc(
 static uint32_t
 dmg_processor_instruction_jp(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	bool taken = false;
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	value.word = operand->word;
 
@@ -665,8 +665,8 @@ dmg_processor_instruction_jp(
 static uint32_t
 dmg_processor_instruction_jr(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	bool taken = false;
@@ -702,11 +702,11 @@ dmg_processor_instruction_jr(
 static uint32_t
 dmg_processor_instruction_ld(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, sum = {};
+	dmg_processor_register_t carry = {}, sum = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_LD_A_A:
@@ -996,8 +996,8 @@ dmg_processor_instruction_ld(
 static uint32_t
 dmg_processor_instruction_nop(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	return instruction->cycle;
@@ -1006,11 +1006,11 @@ dmg_processor_instruction_nop(
 static uint32_t
 dmg_processor_instruction_or(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_OR_A_A:
@@ -1057,8 +1057,8 @@ dmg_processor_instruction_or(
 static uint32_t
 dmg_processor_instruction_pop(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1087,8 +1087,8 @@ dmg_processor_instruction_pop(
 static uint32_t
 dmg_processor_instruction_push(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1116,8 +1116,8 @@ dmg_processor_instruction_push(
 static uint32_t
 dmg_processor_instruction_ret(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	bool taken = false;
@@ -1153,8 +1153,8 @@ dmg_processor_instruction_ret(
 static uint32_t
 dmg_processor_instruction_reti(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->pc.word = dmg_processor_pop_word(processor);
@@ -1167,11 +1167,11 @@ dmg_processor_instruction_reti(
 static uint32_t
 dmg_processor_instruction_rla(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {};
+	dmg_processor_register_t carry = {};
 
 	carry.low_lsb = processor->af.flag.carry;
 	processor->af.flag.carry = processor->af.high_msb;
@@ -1187,11 +1187,11 @@ dmg_processor_instruction_rla(
 static uint32_t
 dmg_processor_instruction_rlca(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {};
+	dmg_processor_register_t carry = {};
 
 	carry.low_lsb = processor->af.high_msb;
 	processor->af.flag.carry = carry.low_lsb;
@@ -1207,11 +1207,11 @@ dmg_processor_instruction_rlca(
 static uint32_t
 dmg_processor_instruction_rra(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {};
+	dmg_processor_register_t carry = {};
 
 	carry.low_msb = processor->af.flag.carry;
 	processor->af.flag.carry = processor->af.high_lsb;
@@ -1227,11 +1227,11 @@ dmg_processor_instruction_rra(
 static uint32_t
 dmg_processor_instruction_rrca(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {};
+	dmg_processor_register_t carry = {};
 
 	carry.low_msb = processor->af.high_lsb;
 	processor->af.flag.carry = carry.low_msb;
@@ -1247,8 +1247,8 @@ dmg_processor_instruction_rrca(
 static uint32_t
 dmg_processor_instruction_rst(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1275,11 +1275,11 @@ dmg_processor_instruction_rst(
 static uint32_t
 dmg_processor_instruction_sbc(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, sum = {}, value = {};
+	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_SBC_A_A:
@@ -1328,8 +1328,8 @@ dmg_processor_instruction_sbc(
 static uint32_t
 dmg_processor_instruction_scf(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->af.flag.carry = true;
@@ -1342,8 +1342,8 @@ dmg_processor_instruction_scf(
 static uint32_t
 dmg_processor_instruction_stop(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 	processor->stop = true;
@@ -1356,11 +1356,11 @@ dmg_processor_instruction_stop(
 static uint32_t
 dmg_processor_instruction_sub(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, sum = {}, value = {};
+	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_SUB_A_A:
@@ -1409,8 +1409,8 @@ dmg_processor_instruction_sub(
 static uint32_t
 dmg_processor_instruction_unused(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1440,11 +1440,11 @@ dmg_processor_instruction_unused(
 static uint32_t
 dmg_processor_instruction_xor(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_XOR_A_A:
@@ -1488,7 +1488,7 @@ dmg_processor_instruction_xor(
 	return instruction->cycle;
 }
 
-static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
+static const dmg_processor_instruction INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_nop, /* 0x00 */
 	dmg_processor_instruction_ld,
 	dmg_processor_instruction_ld,
@@ -1750,8 +1750,8 @@ static const dmg_instruction_cb INSTRUCTION_HANDLER[] = {
 static uint32_t
 dmg_processor_instruction_extended_bit(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1858,8 +1858,8 @@ dmg_processor_instruction_extended_bit(
 static uint32_t
 dmg_processor_instruction_extended_res(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -1956,11 +1956,11 @@ dmg_processor_instruction_extended_res(
 static uint32_t
 dmg_processor_instruction_extended_rl(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, value = {};
+	dmg_processor_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_RL_A:
@@ -2035,11 +2035,11 @@ dmg_processor_instruction_extended_rl(
 static uint32_t
 dmg_processor_instruction_extended_rlc(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, value = {};
+	dmg_processor_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_RLC_A:
@@ -2114,11 +2114,11 @@ dmg_processor_instruction_extended_rlc(
 static uint32_t
 dmg_processor_instruction_extended_rr(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, value = {};
+	dmg_processor_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_RR_A:
@@ -2193,11 +2193,11 @@ dmg_processor_instruction_extended_rr(
 static uint32_t
 dmg_processor_instruction_extended_rrc(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, value = {};
+	dmg_processor_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_RRC_A:
@@ -2272,8 +2272,8 @@ dmg_processor_instruction_extended_rrc(
 static uint32_t
 dmg_processor_instruction_extended_set(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
 
@@ -2370,11 +2370,11 @@ dmg_processor_instruction_extended_set(
 static uint32_t
 dmg_processor_instruction_extended_sla(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_SLA_A:
@@ -2447,11 +2447,11 @@ dmg_processor_instruction_extended_sla(
 static uint32_t
 dmg_processor_instruction_extended_sra(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t carry = {}, value = {};
+	dmg_processor_register_t carry = {}, value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_SRA_A:
@@ -2526,11 +2526,11 @@ dmg_processor_instruction_extended_sra(
 static uint32_t
 dmg_processor_instruction_extended_srl(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_SRL_A:
@@ -2603,11 +2603,11 @@ dmg_processor_instruction_extended_srl(
 static uint32_t
 dmg_processor_instruction_extended_swap(
 	__in dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_instruction_t *instruction,
+	__in const dmg_processor_register_t *operand
 	)
 {
-	dmg_register_t value = {};
+	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
 		case INSTRUCTION_EXTENDED_SWAP_A:
@@ -2677,7 +2677,7 @@ dmg_processor_instruction_extended_swap(
 	return instruction->cycle;
 }
 
-static const dmg_instruction_cb INSTRUCTION_EXTENDED_HANDLER[] = {
+static const dmg_processor_instruction INSTRUCTION_EXTENDED_HANDLER[] = {
 	dmg_processor_instruction_extended_rlc, /* 0x00 */
 	dmg_processor_instruction_extended_rlc,
 	dmg_processor_instruction_extended_rlc,
@@ -2944,32 +2944,32 @@ dmg_processor_trace(
 	__inout dmg_processor_t *processor
 	)
 {
-	TRACE_FORMAT(level, "AF=%04x (A=%02x, F=%02x [%c%c%c%c]) ", processor->af.word, processor->af.high, processor->af.low,
+	TRACE_FORMAT(level, "Processor AF=%04x (A=%02x, F=%02x [%c%c%c%c]) ", processor->af.word, processor->af.high, processor->af.low,
 		processor->af.flag.carry ? 'C' : '-', processor->af.flag.carry_half ? 'H' : '-',
 		processor->af.flag.subtract ? 'N' : '-', processor->af.flag.zero ? 'Z' : '-');
-	TRACE_FORMAT(level, "BC=%04x (B=%02x, C=%02x)", processor->bc.word, processor->bc.high, processor->bc.low);
-	TRACE_FORMAT(level, "DE=%04x (D=%02x, E=%02x)", processor->de.word, processor->de.high, processor->de.low);
-	TRACE_FORMAT(level, "HL=%04x (H=%02x, L=%02x)", processor->hl.word, processor->hl.high, processor->hl.low);
-	TRACE_FORMAT(level, "PC=%04x", processor->pc.word);
-	TRACE_FORMAT(level, "SP=%04x", processor->sp.word);
-	TRACE_FORMAT(level, "IME=%x", processor->interrupts_enable);
-	TRACE_FORMAT(level, "IE=%02x [%c%c%c%c%c]", processor->interrupt_enable, processor->interrupt_enable.vblank ? 'V' : '-',
+	TRACE_FORMAT(level, "Processor BC=%04x (B=%02x, C=%02x)", processor->bc.word, processor->bc.high, processor->bc.low);
+	TRACE_FORMAT(level, "Processor DE=%04x (D=%02x, E=%02x)", processor->de.word, processor->de.high, processor->de.low);
+	TRACE_FORMAT(level, "Processor HL=%04x (H=%02x, L=%02x)", processor->hl.word, processor->hl.high, processor->hl.low);
+	TRACE_FORMAT(level, "Processor PC=%04x", processor->pc.word);
+	TRACE_FORMAT(level, "Processor SP=%04x", processor->sp.word);
+	TRACE_FORMAT(level, "Processor IME=%x", processor->interrupts_enable);
+	TRACE_FORMAT(level, "Processor IE=%02x [%c%c%c%c%c]", processor->interrupt_enable, processor->interrupt_enable.vblank ? 'V' : '-',
 		processor->interrupt_enable.lcdc ? 'L' : '-', processor->interrupt_enable.timer ? 'T' : '-',
 		processor->interrupt_enable.serial ? 'S' : '-', processor->interrupt_enable.joypad ? 'J' : '-');
-	TRACE_FORMAT(level, "IF=%02x [%c%c%c%c%c]", processor->interrupt_flag, processor->interrupt_flag.vblank ? 'V' : '-',
+	TRACE_FORMAT(level, "Processor IF=%02x [%c%c%c%c%c]", processor->interrupt_flag, processor->interrupt_flag.vblank ? 'V' : '-',
 		processor->interrupt_flag.lcdc ? 'L' : '-', processor->interrupt_flag.timer ? 'T' : '-',
 		processor->interrupt_flag.serial ? 'S' : '-', processor->interrupt_flag.joypad ? 'J' : '-');
-	TRACE_FORMAT(level, "HALT=%x", processor->halt);
-	TRACE_FORMAT(level, "STOP=%x", processor->stop);
+	TRACE_FORMAT(level, "Processor halt=%x", processor->halt);
+	TRACE_FORMAT(level, "Processor stop=%x", processor->stop);
 }
 
 static void
-dmg_processor_instruction_trace(
+dmg_processor_trace_instruction(
 	__in int level,
 	__inout dmg_processor_t *processor,
-	__in const dmg_instruction_t *instruction,
+	__in const dmg_processor_instruction_t *instruction,
 	__in bool extended,
-	__in const dmg_register_t *operand
+	__in const dmg_processor_register_t *operand
 	)
 {
 	const char *format = (extended ? INSTRUCTION_EXTENDED_STR[instruction->opcode] : INSTRUCTION_STR[instruction->opcode]);
@@ -3042,9 +3042,9 @@ dmg_processor_execute(
 	if(!processor->halt && !processor->stop) {
 		bool extended;
 		uint8_t opcode;
-		dmg_register_t operand = {};
-		const dmg_instruction_cb *handler;
-		const dmg_instruction_t *instruction;
+		dmg_processor_register_t operand = {};
+		const dmg_processor_instruction *handler;
+		const dmg_processor_instruction_t *instruction;
 
 		if((extended = ((opcode = dmg_processor_fetch(processor)) == INSTRUCTION_EXTENDED_PREFIX))) {
 			opcode = dmg_processor_fetch(processor);
@@ -3066,7 +3066,7 @@ dmg_processor_execute(
 				break;
 		}
 
-		TRACE_INSTRUCTION(LEVEL_VERBOSE, processor, instruction, extended, &operand);
+		TRACE_PROCESSOR_INSTRUCTION(LEVEL_VERBOSE, processor, instruction, extended, &operand);
 		result += (*handler)(processor, instruction, &operand);
 
 		switch(processor->interrupts_enable_state) {
