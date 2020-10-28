@@ -70,40 +70,6 @@ dmg_video_render_background(
 	// TODO
 }
 
-static void
-dmg_video_transfer_start(
-	__in dmg_video_t *video,
-	__in uint8_t value
-	)
-{
-	video->transfer.enable = true;
-	video->transfer.destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
-	video->transfer.source = (TRANSFER_SCALE * value);
-	TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
-}
-
-static void
-dmg_video_transfer_step(
-	__in dmg_video_t *video,
-	__in uint32_t cycle
-	)
-{
-
-	if(video->transfer.enable) {
-
-		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
-
-			if(!(video->transfer.enable = (video->transfer.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
-				break;
-			}
-
-			dmg_runtime_write(video->transfer.destination++, dmg_runtime_read(video->transfer.source++));
-		}
-
-		TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
-	}
-}
-
 static bool
 dmg_video_hblank(
 	__in dmg_video_t *video
@@ -330,9 +296,17 @@ dmg_video_step(
 {
 	bool result = false;
 
-	dmg_video_transfer_step(video, cycle);
-
 	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+
+		if(video->transfer.enable) {
+
+			if(!(video->transfer.enable = (video->transfer.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
+				break;
+			}
+
+			dmg_runtime_write(video->transfer.destination++, dmg_runtime_read(video->transfer.source++));
+			TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
+		}
 
 		if((video->cycle += CYCLE) >= MODE_CYC[video->status.mode]) {
 			video->cycle %= MODE_CYC[video->status.mode];
@@ -374,7 +348,8 @@ dmg_video_write(
 			break;
 		case ADDRESS_VIDEO_CONTROL:
 			video->control.raw = value;
-			dmg_service_window(video->control.window, video->window_x, video->window_y);
+			dmg_service_viewport(video->control.enable && video->control.background, video->screen_x, video->screen_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
 
 			if(!video->control.enable) {
 				video->line = 0;
@@ -428,25 +403,28 @@ dmg_video_write(
 			break;
 		case ADDRESS_VIDEO_SCREEN_X:
 			video->screen_x = value;
-			dmg_service_viewport(video->screen_x, video->screen_y);
+			dmg_service_viewport(video->control.enable && video->control.background, video->screen_x, video->screen_y);
 			break;
 		case ADDRESS_VIDEO_SCREEN_Y:
 			video->screen_y = value;
-			dmg_service_viewport(video->screen_x, video->screen_y);
+			dmg_service_viewport(video->control.enable && video->control.background, video->screen_x, video->screen_y);
 			break;
 		case ADDRESS_VIDEO_STATUS:
 			video->status.raw = value;
 			break;
 		case ADDRESS_VIDEO_TRANSFER:
-			dmg_video_transfer_start(video, value);
+			video->transfer.enable = true;
+			video->transfer.destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
+			video->transfer.source = (TRANSFER_SCALE * value);
+			TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
 			break;
 		case ADDRESS_VIDEO_WINDOW_X:
 			video->window_x = value;
-			dmg_service_window(video->control.window, video->window_x, video->window_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
 			break;
 		case ADDRESS_VIDEO_WINDOW_Y:
 			video->window_y = value;
-			dmg_service_window(video->control.window, video->window_x, video->window_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported video write [%04x]<-%02x", address, value);

@@ -31,12 +31,16 @@
 	((_CONDITION_ == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE)
 
 #define TEST_COUNT(_TESTS_) \
-	(sizeof(_TESTS_) / sizeof(dmg_test_cb))
+	(sizeof(_TESTS_) / sizeof(dmg_test))
 
-#define TEST_SETUP() \
-	srand(time(NULL))
+#define TEST_SEED(_SEED_) { \
+		TRACE_TEST_SEED(_SEED_); \
+		srand(_SEED_); \
+	}
 
-typedef int (*dmg_test_cb)(void);
+#define TEST_TRIALS 10
+
+typedef int (*dmg_test)(void);
 
 #ifndef NDEBUG
 #define TRACE_TEST(_RESULT_) { \
@@ -44,12 +48,24 @@ typedef int (*dmg_test_cb)(void);
 		if(_RESULT_ != EXIT_SUCCESS) { \
 			TRACE_FORMAT(LEVEL_ERROR, "{FAIL} %s", __FUNCTION__); \
 		} else { \
-			TRACE_FORMAT(LEVEL_INFORMATION, "{PASS} %s", __FUNCTION__); \
+			TRACE_FORMAT(LEVEL_VERBOSE, "{PASS} %s", __FUNCTION__); \
 		} \
+		TRACE_DISABLE(); \
+	}
+#define TRACE_TEST_SEED(_SEED_) { \
+		TRACE_ENABLE(NULL); \
+		TRACE_FORMAT(LEVEL_VERBOSE, "{SEED} %x", _SEED_); \
+		TRACE_DISABLE(); \
+	}
+#define TRACE_TEST_TRIAL(_TRIAL_) { \
+		TRACE_ENABLE(NULL); \
+		TRACE_FORMAT(LEVEL_INFORMATION, "{TRIAL} %u", (_TRIAL_) + 1); \
 		TRACE_DISABLE(); \
 	}
 #else
 #define TRACE_TEST(_RESULT_)
+#define TRACE_TEST_SEED(_SEED_)
+#define TRACE_TEST_TRIAL(_TRIAL_)
 #endif /* NDEBUG */
 
 #endif /* DMG_TEST_COMMON_H_ */

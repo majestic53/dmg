@@ -37,7 +37,7 @@ dmg_service_display_show(void)
 			goto exit;
 		}
 
-		if(SDL_UpdateTexture(g_sdl.display.texture, NULL, (dmg_bgra_t *)g_sdl.display.pixel, WINDOW_WIDTH * sizeof(dmg_bgra_t))) {
+		if(SDL_UpdateTexture(g_sdl.display.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.display.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
@@ -57,7 +57,7 @@ dmg_service_display_show(void)
 			}
 		}
 
-		if(SDL_UpdateTexture(g_sdl.display.texture_viewport, NULL, &g_sdl.display.pixel_viewport, WINDOW_WIDTH * sizeof(dmg_bgra_t))) {
+		if(SDL_UpdateTexture(g_sdl.display.texture_viewport, NULL, &g_sdl.display.pixel_viewport, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
@@ -77,7 +77,7 @@ dmg_service_display_show(void)
 				}
 			}
 
-			if(SDL_UpdateTexture(g_sdl.display.texture_window, NULL, &g_sdl.display.pixel_window, WINDOW_WIDTH * sizeof(dmg_bgra_t))) {
+			if(SDL_UpdateTexture(g_sdl.display.texture_window, NULL, &g_sdl.display.pixel_window, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
 				result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 				goto exit;
 			}
@@ -204,7 +204,7 @@ dmg_service_display_load(
 		goto exit;
 	}
 
-	dmg_service_viewport(0, 0);
+	dmg_service_viewport(false, 0, 0);
 	dmg_service_window(false, 0, 0);
 	result = dmg_service_display_show();
 
@@ -374,6 +374,7 @@ dmg_service_unload(void)
 
 void
 dmg_service_viewport(
+	__in bool enable,
 	__in uint8_t x,
 	__in uint8_t y
 	)

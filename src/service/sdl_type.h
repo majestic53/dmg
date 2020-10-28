@@ -60,27 +60,27 @@ typedef union {
 	};
 
 	uint32_t raw;
-} dmg_bgra_t;
+} dmg_sdl_bgra_t;
 
 typedef struct {
+	dmg_sdl_bgra_t palette[DMG_PALETTE_MAX];
+	dmg_sdl_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
+	dmg_sdl_bgra_t pixel_viewport[WINDOW_HEIGHT][WINDOW_WIDTH];
+	dmg_sdl_bgra_t pixel_window[WINDOW_HEIGHT][WINDOW_WIDTH];
 	bool redraw;
-	uint32_t scale;
-	uint8_t viewport_x;
-	uint8_t viewport_y;
-	bool window_enable;
-	uint8_t window_x;
-	uint8_t window_y;
-	char title[TITLE_LENGTH_MAX];
-	dmg_bgra_t palette[DMG_PALETTE_MAX];
-	dmg_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
-	dmg_bgra_t pixel_viewport[WINDOW_HEIGHT][WINDOW_WIDTH];
-	dmg_bgra_t pixel_window[WINDOW_HEIGHT][WINDOW_WIDTH];
 	SDL_Renderer *renderer;
+	uint32_t scale;
 	SDL_Texture *texture;
 	SDL_Texture *texture_viewport;
 	SDL_Texture *texture_window;
+	char title[TITLE_LENGTH_MAX];
+	uint8_t viewport_x;
+	uint8_t viewport_y;
 	SDL_Window *window;
-} dmg_display_t;
+	bool window_enable;
+	uint8_t window_x;
+	uint8_t window_y;
+} dmg_sdl_display_t;
 
 typedef struct {
 	uint32_t begin;
@@ -88,21 +88,21 @@ typedef struct {
 	uint32_t end;
 	float frequency;
 	float rate;
-} dmg_frame_t;
+} dmg_sdl_frame_t;
 
 typedef struct {
 	uint32_t button[DMG_BUTTON_MAX];
 	uint32_t direction[DMG_DIRECTION_MAX];
-} dmg_input_t;
+} dmg_sdl_input_t;
 
 typedef struct {
-	dmg_frame_t frame;
-	dmg_input_t input;
-	dmg_display_t display;
+	dmg_sdl_display_t display;
+	dmg_sdl_frame_t frame;
+	dmg_sdl_input_t input;
 } dmg_sdl_t;
 
-static const dmg_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
-static const dmg_bgra_t COLOR_VIEWPORT = {{ 0x00, 0x00, 0xff, 0xff }};
-static const dmg_bgra_t COLOR_WINDOW = {{ 0x00, 0xff, 0xff, 0xff }};
+static const dmg_sdl_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
+static const dmg_sdl_bgra_t COLOR_VIEWPORT = {{ 0x00, 0x00, 0xff, 0xff }};
+static const dmg_sdl_bgra_t COLOR_WINDOW = {{ 0x00, 0xff, 0xff, 0xff }};
 
 #endif /* DMG_SERVICE_SDL_TYPE_H_ */

@@ -20,16 +20,13 @@
 #include "../../src/system/video_type.h"
 #include "../include/common.h"
 
+#define TRANSFER 0x10
+
 typedef struct {
 	dmg_t configuration;
 	dmg_video_t video;
 	uint16_t address;
 	uint8_t value;
-	uint8_t viewport_x;
-	uint8_t viewport_y;
-	bool window_enable;
-	uint8_t window_x;
-	uint8_t window_y;
 	bool interrupt_lcdc;
 	bool interrupt_vblank;
 } dmg_video_test_t;
@@ -98,12 +95,12 @@ dmg_runtime_write(
 
 void
 dmg_service_viewport(
+	__in bool enable,
 	__in uint8_t x,
 	__in uint8_t y
 	)
 {
-	g_video.viewport_x = x;
-	g_video.viewport_y = y;
+	return;
 }
 
 void
@@ -113,9 +110,7 @@ dmg_service_window(
 	__in uint8_t y
 	)
 {
-	g_video.window_enable = enable;
-	g_video.window_x = x;
-	g_video.window_y = y;
+	return;
 }
 
 static void
@@ -320,6 +315,33 @@ int
 dmg_test_video_step(void)
 {
 	int result = EXIT_SUCCESS;
+	uint16_t destination, source;
+
+	dmg_test_video_initialize();
+	dmg_video_load(&g_video.video, &g_video.configuration);
+	destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
+	source = (TRANSFER_SCALE * TRANSFER);
+	g_video.video.transfer.enable = true;
+	g_video.video.transfer.destination = destination;
+	g_video.video.transfer.source = source;
+	g_video.value = rand();
+
+	for(uint32_t cycle = 0; cycle <= (CYCLE * RAM_SPRITE_WIDTH); cycle += CYCLE) {
+
+		if(ASSERT(g_video.video.transfer.enable == true)
+				|| ASSERT(g_video.video.transfer.destination == destination++)
+				|| ASSERT(g_video.video.transfer.source == source++)) {
+			result = EXIT_FAILURE;
+		}
+
+		dmg_video_step(&g_video.video, CYCLE);
+	}
+
+	if(ASSERT(g_video.video.transfer.enable == false)
+			|| ASSERT(g_video.video.transfer.destination == (ADDRESS_VIDEO_RAM_SPRITE_END + 1))
+			|| ASSERT(g_video.video.transfer.source == ((TRANSFER_SCALE * TRANSFER) + RAM_SPRITE_WIDTH))) {
+		result = EXIT_FAILURE;
+	}
 
 	dmg_test_video_initialize();
 	dmg_video_load(&g_video.video, &g_video.configuration);
@@ -422,10 +444,7 @@ dmg_test_video_write(void)
 		result = EXIT_FAILURE;
 	}
 
-	if((g_video.video.control.enable && ASSERT(g_video.video.line == 0))
-			|| ASSERT(g_video.window_enable == g_video.video.control.window)
-			|| ASSERT(g_video.window_x == g_video.video.window_x)
-			|| ASSERT(g_video.window_y == g_video.video.window_y)) {
+	if(g_video.video.control.enable && ASSERT(g_video.video.line == 0)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -557,7 +576,7 @@ dmg_test_video_write(void)
 	return result;
 }
 
-static const dmg_test_cb TEST[] = {
+static const dmg_test TEST[] = {
 	dmg_test_video_load,
 	dmg_test_video_read,
 	dmg_test_video_step,
@@ -573,12 +592,20 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TEST_SETUP();
+	if(argc > 1) {
+		TEST_SEED(strtol(argv[1], NULL, 16));
+	} else {
+		TEST_SEED(time(NULL));
+	}
 
-	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
+	for(size_t trial = 0; trial < TEST_TRIALS; ++trial) {
+		TRACE_TEST_TRIAL(trial);
 
-		if(TEST[test]() != EXIT_SUCCESS) {
-			result = EXIT_FAILURE;
+		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
+
+			if(TEST[test]() != EXIT_SUCCESS) {
+				result = EXIT_FAILURE;
+			}
 		}
 	}
 

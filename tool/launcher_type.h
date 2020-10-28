@@ -99,10 +99,10 @@ static const uint32_t DIRECTION[] = {
 	};
 
 static const uint32_t PALETTE[] = {
-	0xbbe5b9, /* DMG_PALETTE_WHITE */
-	0x5ab9a8, /* DMG_PALETTE_GREY_LIGHT */
-	0x1e606e, /* DMG_PALETTE_GREY_DARK */
-	0x2d1b00, /* DMG_PALETTE_BLACK */
+	0xffffff, //0xbbe5b9, /* DMG_PALETTE_WHITE */
+	0x949494, //0x5ab9a8, /* DMG_PALETTE_GREY_LIGHT */
+	0x525252, //0x1e606e, /* DMG_PALETTE_GREY_DARK */
+	0x000000, //0x2d1b00, /* DMG_PALETTE_BLACK */
 	};
 
 #define SCALE 1

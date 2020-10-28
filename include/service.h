@@ -51,6 +51,7 @@ void dmg_service_tile(
 void dmg_service_unload(void);
 
 void dmg_service_viewport(
+	__in bool enable,
 	__in uint8_t x,
 	__in uint8_t y
 	);

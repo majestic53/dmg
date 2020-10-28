@@ -373,7 +373,7 @@ dmg_test_joypad_write(void)
 	return result;
 }
 
-static const dmg_test_cb TEST[] = {
+static const dmg_test TEST[] = {
 	dmg_test_joypad_load,
 	dmg_test_joypad_read,
 	dmg_test_joypad_step,
@@ -389,12 +389,20 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	TEST_SETUP();
+	if(argc > 1) {
+		TEST_SEED(strtol(argv[1], NULL, 16));
+	} else {
+		TEST_SEED(time(NULL));
+	}
 
-	for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
+	for(size_t trial = 0; trial < TEST_TRIALS; ++trial) {
+		TRACE_TEST_TRIAL(trial);
 
-		if(TEST[test]() != EXIT_SUCCESS) {
-			result = EXIT_FAILURE;
+		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
+
+			if(TEST[test]() != EXIT_SUCCESS) {
+				result = EXIT_FAILURE;
+			}
 		}
 	}
 
