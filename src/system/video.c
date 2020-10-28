@@ -307,6 +307,9 @@ dmg_video_step(
 			dmg_runtime_write(video->transfer.destination++, dmg_runtime_read(video->transfer.source++));
 			TRACE_VIDEO_TRANSFER(LEVEL_VERBOSE, video);
 		}
+	}
+
+	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 
 		if((video->cycle += CYCLE) >= MODE_CYC[video->status.mode]) {
 			video->cycle %= MODE_CYC[video->status.mode];

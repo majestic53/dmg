@@ -326,7 +326,7 @@ dmg_test_video_step(void)
 	g_video.video.transfer.source = source;
 	g_video.value = rand();
 
-	for(uint32_t cycle = 0; cycle <= (CYCLE * RAM_SPRITE_WIDTH); cycle += CYCLE) {
+	for(uint32_t cycle = 0; cycle < (CYCLE * RAM_SPRITE_WIDTH); cycle += CYCLE) {
 
 		if(ASSERT(g_video.video.transfer.enable == true)
 				|| ASSERT(g_video.video.transfer.destination == destination++)
@@ -336,6 +336,8 @@ dmg_test_video_step(void)
 
 		dmg_video_step(&g_video.video, CYCLE);
 	}
+
+	dmg_video_step(&g_video.video, CYCLE);
 
 	if(ASSERT(g_video.video.transfer.enable == false)
 			|| ASSERT(g_video.video.transfer.destination == (ADDRESS_VIDEO_RAM_SPRITE_END + 1))
