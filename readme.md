@@ -1,7 +1,7 @@
 DMG
 =
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://travis-ci.com/majestic53/dmg.svg?branch=master)](https://travis-ci.com/majestic53/dmg)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Lines](https://tokei.rs/b1/github/majestic53/dmg?category=code)](https://tokei.rs/b1/github/majestic53/dmg?category=code) [![Files](https://tokei.rs/b1/github/majestic53/dmg?category=files)](https://tokei.rs/b1/github/majestic53/dmg?category=files) [![Build Status](https://travis-ci.com/majestic53/dmg.svg?branch=master)](https://travis-ci.com/majestic53/dmg)
 
 About
 =
