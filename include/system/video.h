@@ -27,10 +27,10 @@ typedef union {
 		uint8_t background : 1;
 		uint8_t sprite : 1;
 		uint8_t sprite_size : 1;
-		uint8_t background_select : 1;
-		uint8_t background_data : 1;
+		uint8_t background_tile_map : 1;
+		uint8_t tile_data : 1;
 		uint8_t window : 1;
-		uint8_t window_select : 1;
+		uint8_t window_tile_map : 1;
 		uint8_t enable : 1;
 	};
 

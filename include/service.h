@@ -38,6 +38,12 @@ int dmg_service_load(
 	__in const char *title
 	);
 
+void dmg_service_pixel(
+	__in uint8_t color,
+	__in uint8_t x,
+	__in uint8_t y
+	);
+
 bool dmg_service_poll(void);
 
 void dmg_service_sync(void);

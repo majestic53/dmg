@@ -62,13 +62,39 @@ dmg_video_trace_transfer(
 
 #endif /* NDEBUG */
 
+// TODO: DEBUG
 static void
 dmg_video_render_background(
 	__in dmg_video_t *video
 	)
 {
-	// TODO
+
+	for(uint32_t y = 0; y < 32; ++y) {
+
+		for(uint32_t x = 0; x < 32; ++x) {
+			uint16_t address = (TILE_MAP[video->control.background_tile_map] + (y * 32) + x);
+
+			if(!video->control.background_tile_map) {
+				address = (TILE_DATA[video->control.tile_data] + (sizeof(uint16_t) * ((int8_t)dmg_runtime_read(address) + (INT8_MAX + 1))));
+			} else {
+				address = (TILE_DATA[video->control.tile_data] + (sizeof(uint16_t) * dmg_runtime_read(address)));
+			}
+
+//fprintf(stdout, "|%04x", address);
+
+			// TODO: USE THE ADDRESS TO PULL OUT THE TILE DATA AND PASS TO SERVICE TILE ROUTINE(x,y)
+
+		}
+
+//fprintf(stdout, "\n");
+
+	}
+
+//fprintf(stdout, "\n");
+//exit(0);
+
 }
+// ---
 
 static bool
 dmg_video_hblank(
@@ -88,7 +114,9 @@ dmg_video_hblank(
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
 
-		dmg_video_render_background(video);
+// TODO: DEBUG
+dmg_video_render_background(video);
+// ---
 	} else {
 		video->status.mode = MODE_SEARCH;
 

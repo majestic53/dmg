@@ -56,6 +56,16 @@ static const uint32_t MODE_CYC[] = {
 	172, /* MODE_TRANSFER */
 	};
 
+static const uint16_t TILE_DATA[] = {
+	0x8800, /* 0x8800 - 0x97ff */
+	0x8000, /* 0x8000 - 0x8fff */
+	};
+
+static const uint16_t TILE_MAP[] = {
+	0x9800, /* 0x9800 - 0x9bff */
+	0x9c00, /* 0x9c00 - 0x9fff */
+	};
+
 typedef bool (*dmg_mode)(
 	__in dmg_video_t *video
 	);

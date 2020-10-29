@@ -94,6 +94,26 @@ dmg_runtime_write(
 }
 
 void
+dmg_service_pixel(
+	__in uint8_t color,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	return;
+}
+
+void
+dmg_service_tile(
+	__in uint8_t *tile,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	return;
+}
+
+void
 dmg_service_viewport(
 	__in bool enable,
 	__in uint8_t x,

@@ -289,6 +289,17 @@ exit:
 	return result;
 }
 
+void
+dmg_service_pixel(
+	__in uint8_t color,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	g_sdl.display.redraw = true;
+	g_sdl.display.pixel[y][x].raw = g_sdl.display.palette[color].raw;
+}
+
 bool
 dmg_service_poll(void)
 {
