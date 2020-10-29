@@ -22,6 +22,32 @@
 extern "C" {
 #endif /* __cplusplus */
 
+static dmg_launcher_t g_launcher = {};
+
+static unsigned
+dmg_launcher_capture(
+	__in unsigned in
+	)
+{
+	g_launcher.capture.data <<= DATA_SHIFT;
+	g_launcher.capture.data |= (in & DATA_MASK);
+	++g_launcher.capture.length;
+
+	if(g_launcher.capture.length == CHAR_BIT) {
+		g_launcher.capture.length = 0;
+
+		if(!isprint(g_launcher.capture.data) && !isspace(g_launcher.capture.data)) {
+			fprintf(stdout, "\\%02x", g_launcher.capture.data);
+		} else {
+			fprintf(stdout, "%c", g_launcher.capture.data);
+		}
+
+		fflush(stdout);
+	}
+
+	return UINT8_MAX;
+}
+
 static int
 dmg_launcher_load(
 	__inout dmg_buffer_t *buffer,
@@ -69,7 +95,6 @@ exit:
 
 static int
 dmg_launcher_parse(
-	__inout dmg_launcher_t *launcher,
 	__in int argc,
 	__in char *argv[]
 	)
@@ -82,19 +107,22 @@ dmg_launcher_parse(
 
 		switch(option) {
 			case OPTION_BOOTROM:
-				launcher->bootrom = optarg;
+				g_launcher.bootrom = optarg;
+				break;
+			case OPTION_CAPTURE:
+				g_launcher.configuration.transfer = dmg_launcher_capture;
 				break;
 			case OPTION_HELP:
-				launcher->help = true;
+				g_launcher.help = true;
 				break;
 			case OPTION_ROM:
-				launcher->rom = optarg;
+				g_launcher.rom = optarg;
 				break;
 			case OPTION_SCALE:
-				launcher->configuration.scale = strtol(optarg, NULL, 10);
+				g_launcher.configuration.scale = strtol(optarg, NULL, 10);
 				break;
 			case OPTION_VERSION:
-				launcher->version = true;
+				g_launcher.version = true;
 				break;
 			case '?':
 				result = EXIT_FAILURE;
@@ -110,36 +138,34 @@ exit:
 }
 
 static void
-dmg_launcher_setup(
-	__inout dmg_launcher_t *launcher
-	)
+dmg_launcher_setup(void)
 {
-	memcpy(launcher->configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
-	memcpy(launcher->configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
-	memcpy(launcher->configuration.palette, PALETTE, sizeof(uint32_t) * DMG_PALETTE_MAX);
+	memcpy(g_launcher.configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
+	memcpy(g_launcher.configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
+	memcpy(g_launcher.configuration.palette, PALETTE, sizeof(uint32_t) * DMG_PALETTE_MAX);
 
-	if(!launcher->configuration.scale) {
-		launcher->configuration.scale = SCALE;
+	if(!g_launcher.configuration.scale) {
+		g_launcher.configuration.scale = SCALE;
 	}
 
-	launcher->configuration.transfer = TRANSFER;
+	if(!g_launcher.configuration.transfer) {
+		g_launcher.configuration.transfer = TRANSFER;
+	}
 }
 
 static void
-dmg_launcher_unload(
-	__inout dmg_launcher_t *launcher
-	)
+dmg_launcher_unload(void)
 {
 
-	if(launcher->configuration.rom.data) {
-		free(launcher->configuration.rom.data);
+	if(g_launcher.configuration.rom.data) {
+		free(g_launcher.configuration.rom.data);
 	}
 
-	if(launcher->configuration.bootrom.data) {
-		free(launcher->configuration.bootrom.data);
+	if(g_launcher.configuration.bootrom.data) {
+		free(g_launcher.configuration.bootrom.data);
 	}
 
-	memset(launcher, 0, sizeof(*launcher));
+	memset(&g_launcher, 0, sizeof(g_launcher));
 }
 
 static void
@@ -201,40 +227,39 @@ main(
 	)
 {
 	int result = EXIT_SUCCESS;
-	dmg_launcher_t launcher = {};
 
-	if((result = dmg_launcher_parse(&launcher, argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_launcher_parse(argc, argv)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
-	if(launcher.help) {
+	if(g_launcher.help) {
 		dmg_launcher_usage(stdout, true);
-	} else if(launcher.version) {
+	} else if(g_launcher.version) {
 		dmg_launcher_version(stdout, false);
 	} else {
-		dmg_launcher_setup(&launcher);
+		dmg_launcher_setup();
 
-		if(launcher.bootrom) {
+		if(g_launcher.bootrom) {
 
-			if((result = dmg_launcher_load(&launcher.configuration.bootrom, launcher.bootrom)) != EXIT_SUCCESS) {
-				fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], launcher.bootrom);
+			if((result = dmg_launcher_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
+				fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
 				goto exit;
 			}
 		}
 
-		if((result = dmg_launcher_load(&launcher.configuration.rom, launcher.rom)) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], launcher.rom);
+		if((result = dmg_launcher_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
 			goto exit;
 		}
 
-		if((result = dmg(&launcher.configuration)) != EXIT_SUCCESS) {
+		if((result = dmg(&g_launcher.configuration)) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
 			goto exit;
 		}
 	}
 
 exit:
-	dmg_launcher_unload(&launcher);
+	dmg_launcher_unload();
 
 	return result;
 }

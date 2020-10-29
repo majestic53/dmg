@@ -20,6 +20,7 @@ The following arguments are available:
 dmg [args]
 
 -b	Specify bootrom binary
+-c	Enable serial capture
 -h	Display help information
 -r	Specify rom binary
 -s	Specify display scale

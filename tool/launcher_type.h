@@ -21,6 +21,7 @@
 
 #include <SDL2/SDL.h>
 #include <getopt.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -38,19 +39,24 @@
 #define __out
 #endif /* __out */
 
+#define DATA_MASK 1
+#define DATA_SHIFT 1
+
 #define DMG "DMG"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
 #define DMG_USAGE "dmg [args]"
 
 #define OPTION_BOOTROM 'b'
+#define OPTION_CAPTURE 'c'
 #define OPTION_HELP 'h'
 #define OPTION_ROM 'r'
 #define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:hr:s:v"
+#define OPTIONS "b:chr:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
+	FLAG_CAPTURE,
 	FLAG_HELP,
 	FLAG_ROM,
 	FLAG_SCALE,
@@ -60,6 +66,7 @@ enum {
 
 static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
+	"-c", /* FLAG_CAPTURE */
 	"-h", /* FLAG_HELP */
 	"-r", /* FLAG_ROM */
 	"-s", /* FLAG_SCALE */
@@ -69,6 +76,7 @@ static const char *FLAG_STR[] = {
 
 static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
+	"Enable serial capture", /* FLAG_CAPTURE */
 	"Display help information", /* FLAG_HELP */
 	"Specify rom binary", /* FLAG_ROM */
 	"Specify display scale", /* FLAG_SCALE */
@@ -77,9 +85,15 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	};
 
 typedef struct {
+	uint8_t data;
+	uint8_t length;
+} dmg_launcher_capture_t;
+
+typedef struct {
 	dmg_t configuration;
 	const char *bootrom;
 	const char *rom;
+	dmg_launcher_capture_t capture;
 	bool help;
 	bool version;
 } dmg_launcher_t;

@@ -296,9 +296,9 @@ dmg_video_step(
 {
 	bool result = false;
 
-	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+	if(video->transfer.enable) {
 
-		if(video->transfer.enable) {
+		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 
 			if(!(video->transfer.enable = (video->transfer.destination <= ADDRESS_VIDEO_RAM_SPRITE_END))) {
 				break;

@@ -25,7 +25,7 @@ extern "C" {
 int
 dmg_cartridge_validate(
 	__in const dmg_buffer_t *buffer,
-	__out const dmg_header_t **header,
+	__out const dmg_cartridge_header_t **header,
 	__out uint32_t *rom,
 	__out uint32_t *ram
 	)
@@ -50,7 +50,7 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	*header = (const dmg_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
+	*header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", (*header)->title);
 
 	checksum = 0;

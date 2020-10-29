@@ -21,13 +21,19 @@
 
 #include "./bank.h"
 
+#define CARTRIDGE_HEADER_LICENSEE_LENGTH 2
+#define CARTRIDGE_HEADER_LOGO_LENGTH 48
+#define CARTRIDGE_HEADER_MAGIC_LENGTH 4
+#define CARTRIDGE_HEADER_MANUFACTURER_LENGTH 4
+#define CARTRIDGE_HEADER_TITLE_LENGTH 11
+
 typedef struct {
-	uint8_t magic[4];
-	uint8_t logo[48];
-	char title[11];
-	char manufacturer[4];
+	uint8_t magic[CARTRIDGE_HEADER_MAGIC_LENGTH];
+	uint8_t logo[CARTRIDGE_HEADER_LOGO_LENGTH];
+	char title[CARTRIDGE_HEADER_TITLE_LENGTH];
+	char manufacturer[CARTRIDGE_HEADER_MANUFACTURER_LENGTH];
 	uint8_t cgb;
-	char licensee[2];
+	char licensee[CARTRIDGE_HEADER_LICENSEE_LENGTH];
 	uint8_t sgb;
 	uint8_t mapper;
 	uint8_t rom;
@@ -37,10 +43,10 @@ typedef struct {
 	uint8_t version;
 	uint8_t checksum;
 	uint16_t checksum_global;
-} __attribute__((packed)) dmg_header_t;
+} __attribute__((packed)) dmg_cartridge_header_t;
 
 typedef struct {
-	const dmg_header_t *header;
+	const dmg_cartridge_header_t *header;
 	bool enable;
 	dmg_bank_t ram;
 	dmg_bank_t rom;

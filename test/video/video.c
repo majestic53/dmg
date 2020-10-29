@@ -20,7 +20,7 @@
 #include "../../src/system/video_type.h"
 #include "../include/common.h"
 
-#define TRANSFER 0x10
+#define TRANSFER_BASE 0x10
 
 typedef struct {
 	dmg_t configuration;
@@ -320,7 +320,7 @@ dmg_test_video_step(void)
 	dmg_test_video_initialize();
 	dmg_video_load(&g_video.video, &g_video.configuration);
 	destination = ADDRESS_VIDEO_RAM_SPRITE_BEGIN;
-	source = (TRANSFER_SCALE * TRANSFER);
+	source = (TRANSFER_SCALE * TRANSFER_BASE);
 	g_video.video.transfer.enable = true;
 	g_video.video.transfer.destination = destination;
 	g_video.video.transfer.source = source;
@@ -341,7 +341,7 @@ dmg_test_video_step(void)
 
 	if(ASSERT(g_video.video.transfer.enable == false)
 			|| ASSERT(g_video.video.transfer.destination == (ADDRESS_VIDEO_RAM_SPRITE_END + 1))
-			|| ASSERT(g_video.video.transfer.source == ((TRANSFER_SCALE * TRANSFER) + RAM_SPRITE_WIDTH))) {
+			|| ASSERT(g_video.video.transfer.source == ((TRANSFER_SCALE * TRANSFER_BASE) + RAM_SPRITE_WIDTH))) {
 		result = EXIT_FAILURE;
 	}
 
