@@ -63,6 +63,36 @@ dmg_video_trace_transfer(
 #endif /* NDEBUG */
 
 // TODO: DEBUG
+#ifndef UNITTEST
+
+static uint8_t
+dmg_video_palette_color(
+	__in const dmg_video_palette_t *palette,
+	__in uint8_t color
+	)
+{
+	uint8_t result = color;
+
+	switch(color) {
+		case DMG_PALETTE_WHITE:
+			result = palette->white;
+			break;
+		case DMG_PALETTE_GREY_LIGHT:
+			result = palette->grey_light;
+			break;
+		case DMG_PALETTE_GREY_DARK:
+			result = palette->grey_dark;
+			break;
+		case DMG_PALETTE_BLACK:
+			result = palette->black;
+			break;
+		default:
+			break;
+	}
+
+	return result;
+}
+
 static void
 dmg_video_render_background(
 	__in dmg_video_t *video
@@ -72,28 +102,36 @@ dmg_video_render_background(
 	for(uint32_t y = 0; y < 32; ++y) {
 
 		for(uint32_t x = 0; x < 32; ++x) {
+			const dmg_video_tile_t *tile;
+			uint8_t color[TILE_WIDTH * TILE_HEIGHT] = {};
 			uint16_t address = (TILE_MAP[video->control.background_tile_map] + (y * 32) + x);
 
-			if(!video->control.background_tile_map) {
-				address = (TILE_DATA[video->control.tile_data] + (sizeof(uint16_t) * ((int8_t)dmg_runtime_read(address) + (INT8_MAX + 1))));
+			if(!video->control.tile_data) {
+				address = (TILE_DATA[video->control.tile_data]
+						+ (sizeof(dmg_video_tile_t) * (((int8_t)((uint8_t *)video->ram.data)[address]) + (INT8_MAX + 1))));
 			} else {
-				address = (TILE_DATA[video->control.tile_data] + (sizeof(uint16_t) * dmg_runtime_read(address)));
+				address = (TILE_DATA[video->control.tile_data]
+						+ (sizeof(dmg_video_tile_t) * ((uint8_t *)video->ram.data)[address]));
 			}
 
-//fprintf(stdout, "|%04x", address);
+			tile = (const dmg_video_tile_t *)&(((uint8_t *)video->ram.data)[address]);
 
-			// TODO: USE THE ADDRESS TO PULL OUT THE TILE DATA AND PASS TO SERVICE TILE ROUTINE(x,y)
+			for(uint8_t py = 0; py < TILE_HEIGHT; ++py) {
 
+				for(uint8_t px = 0; px < TILE_WIDTH; ++px) {
+					uint8_t col = ((((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
+							| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1));
+
+					color[(py * TILE_WIDTH) + px] = dmg_video_palette_color(&video->background, col);
+				}
+			}
+
+			dmg_service_tile(color, x, y);
 		}
-
-//fprintf(stdout, "\n");
-
 	}
-
-//fprintf(stdout, "\n");
-//exit(0);
-
 }
+
+#endif /* UNITTEST */
 // ---
 
 static bool
@@ -115,7 +153,9 @@ dmg_video_hblank(
 		}
 
 // TODO: DEBUG
+#ifndef UNITTEST
 dmg_video_render_background(video);
+#endif /* UNITTEST */
 // ---
 	} else {
 		video->status.mode = MODE_SEARCH;

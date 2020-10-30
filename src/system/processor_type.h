@@ -1638,16 +1638,19 @@ static const char *INSTRUCTION_EXTENDED_STR[] =  {
 	"set7 a",
 	};
 
+#define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_processor_trace_instruction(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
+	}
+#else
+#define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)
 #endif /* UNITTEST */
 
 #define TRACE_PROCESSOR(_LEVEL_, _PROCESSOR_) \
 	if((_LEVEL_) <= (LEVEL)) { \
 		dmg_processor_trace(_LEVEL_, _PROCESSOR_); \
 	}
-#define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_) \
-	if((_LEVEL_) <= (LEVEL)) { \
-		dmg_processor_trace_instruction(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_); \
-	}
+
 #else
 #define TRACE_PROCESSOR(_LEVEL_, _PROCESSOR_)
 #define TRACE_PROCESSOR_INSTRUCTION(_LEVEL_, _PROCESSOR_, _INSTRUCTION_, _EXTENDED_, _OPERAND_)

@@ -18,6 +18,7 @@ DIR_BIN=../../bin/
 DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
+DIR_SRC_SYSTEM=../../src/system/
 
 BIN=test-joypad
 
@@ -27,15 +28,18 @@ FLAGS_LIB=-lSDL2 -lSDL2main
 
 build: build_test link run
 
-build_test: test_joypad.o
+build_test: test_joypad.o test_system_joypad.o
 
 test_joypad.o: $(DIR_ROOT)joypad.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)joypad.c -o $(DIR_BUILD_TEST)test_joypad.o
 
+test_system_joypad.o: $(DIR_SRC_SYSTEM)joypad.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)joypad.c -o $(DIR_BUILD_TEST)test_system_joypad.o
+
 link:
 	@echo ''
 	@echo '--- BUILDING JOYPAD TEST -------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_joypad.o $(DIR_BUILD)system_joypad.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_joypad.o $(DIR_BUILD_TEST)test_system_joypad.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 

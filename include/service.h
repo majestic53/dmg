@@ -49,7 +49,7 @@ bool dmg_service_poll(void);
 void dmg_service_sync(void);
 
 void dmg_service_tile(
-	__in uint8_t *tile,
+	__in uint8_t *color,
 	__in uint8_t x,
 	__in uint8_t y
 	);

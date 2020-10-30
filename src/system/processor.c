@@ -2963,6 +2963,8 @@ dmg_processor_trace(
 	TRACE_FORMAT(level, "Processor stop=%x", processor->stop);
 }
 
+#ifndef UNITTEST
+
 static void
 dmg_processor_trace_instruction(
 	__in int level,
@@ -3028,6 +3030,7 @@ dmg_processor_trace_instruction(
 	}
 }
 
+#endif /* UNITTEST */
 #endif /* NDEBUG */
 
 static uint32_t

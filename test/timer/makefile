@@ -18,6 +18,7 @@ DIR_BIN=../../bin/
 DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
+DIR_SRC_SYSTEM=../../src/system/
 
 BIN=test-timer
 
@@ -27,15 +28,18 @@ FLAGS_LIB=-lSDL2 -lSDL2main
 
 build: build_test link run
 
-build_test: test_timer.o
+build_test: test_timer.o test_system_timer.o
 
 test_timer.o: $(DIR_ROOT)timer.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)timer.c -o $(DIR_BUILD_TEST)test_timer.o
 
+test_system_timer.o: $(DIR_SRC_SYSTEM)timer.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)timer.c -o $(DIR_BUILD_TEST)test_system_timer.o
+
 link:
 	@echo ''
 	@echo '--- BUILDING TIMER TEST --------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_timer.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_timer.o $(DIR_BUILD_TEST)test_system_timer.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 

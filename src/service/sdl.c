@@ -357,7 +357,7 @@ dmg_service_sync(void)
 
 void
 dmg_service_tile(
-	__in uint8_t *tile,
+	__in uint8_t *color,
 	__in uint8_t x,
 	__in uint8_t y
 	)
@@ -368,7 +368,7 @@ dmg_service_tile(
 
 		for(uint32_t tx = 0; tx < TILE_WIDTH; ++tx) {
 			g_sdl.display.pixel[(TILE_HEIGHT * y) + ty][(TILE_WIDTH * x) + tx].raw
-				= g_sdl.display.palette[tile[(TILE_WIDTH * ty) + tx]].raw;
+				= g_sdl.display.palette[color[(TILE_WIDTH * ty) + tx]].raw;
 		}
 	}
 }

@@ -31,9 +31,8 @@ dmg_launcher_capture(
 {
 	g_launcher.capture.data <<= DATA_SHIFT;
 	g_launcher.capture.data |= (in & DATA_MASK);
-	++g_launcher.capture.length;
 
-	if(g_launcher.capture.length == CHAR_BIT) {
+	if(++g_launcher.capture.length == CHAR_BIT) {
 		g_launcher.capture.length = 0;
 
 		if(!isprint(g_launcher.capture.data) && !isspace(g_launcher.capture.data)) {

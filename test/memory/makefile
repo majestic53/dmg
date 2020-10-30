@@ -18,6 +18,7 @@ DIR_BIN=../../bin/
 DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
+DIR_SRC_SYSTEM=../../src/system/
 
 BIN=test-memory
 
@@ -27,15 +28,18 @@ FLAGS_LIB=-lSDL2 -lSDL2main
 
 build: build_test link run
 
-build_test: test_memory.o
+build_test: test_memory.o test_system_memory.o
 
 test_memory.o: $(DIR_ROOT)memory.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)memory.c -o $(DIR_BUILD_TEST)test_memory.o
 
+test_system_memory.o: $(DIR_SRC_SYSTEM)memory.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)memory.c -o $(DIR_BUILD_TEST)test_system_memory.o
+
 link:
 	@echo ''
 	@echo '--- BUILDING MEMORY TEST -------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_memory.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_memory.o $(DIR_BUILD_TEST)test_system_memory.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 

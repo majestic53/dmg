@@ -18,6 +18,7 @@ DIR_BIN=../../bin/
 DIR_BUILD=../../build/
 DIR_BUILD_TEST=../../build/test/
 DIR_ROOT=./
+DIR_SRC_SYSTEM=../../src/system/
 
 BIN=test-video
 
@@ -27,15 +28,18 @@ FLAGS_LIB=-lSDL2 -lSDL2main
 
 build: build_test link run
 
-build_test: test_video.o
+build_test: test_video.o test_system_video.o
 
 test_video.o: $(DIR_ROOT)video.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_ROOT)video.c -o $(DIR_BUILD_TEST)test_video.o
 
+test_system_video.o: $(DIR_SRC_SYSTEM)video.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)video.c -o $(DIR_BUILD_TEST)test_system_video.o
+
 link:
 	@echo ''
 	@echo '--- BUILDING VIDEO TEST --------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_video.o $(DIR_BUILD)system_video.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_video.o $(DIR_BUILD_TEST)test_system_video.o $(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 
