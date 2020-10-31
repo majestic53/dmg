@@ -49,15 +49,17 @@
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
 #define OPTION_HELP 'h'
+#define OPTION_PALETTE 'p'
 #define OPTION_ROM 'r'
 #define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:chr:s:v"
+#define OPTIONS "b:chp:r:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
 	FLAG_CAPTURE,
 	FLAG_HELP,
+	FLAG_PALETTE,
 	FLAG_ROM,
 	FLAG_SCALE,
 	FLAG_VERSION,
@@ -68,6 +70,7 @@ static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
 	"-c", /* FLAG_CAPTURE */
 	"-h", /* FLAG_HELP */
+	"-p", /* FLAG_PALETTE */
 	"-r", /* FLAG_ROM */
 	"-s", /* FLAG_SCALE */
 	"-v", /* FLAG_VERSION */
@@ -78,6 +81,7 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
 	"Enable serial capture", /* FLAG_CAPTURE */
 	"Display help information", /* FLAG_HELP */
+	"Specify color palette", /* FLAG_PALETTE */
 	"Specify rom binary", /* FLAG_ROM */
 	"Specify display scale", /* FLAG_SCALE */
 	"Display version information", /* FLAG_VERSION */
@@ -95,6 +99,7 @@ typedef struct {
 	const char *rom;
 	dmg_launcher_capture_t capture;
 	bool help;
+	long palette;
 	bool version;
 } dmg_launcher_t;
 
@@ -112,11 +117,46 @@ static const uint32_t DIRECTION[] = {
 	SDL_SCANCODE_DOWN, /* DMG_DIRECTION_DOWN */
 	};
 
-static const uint32_t PALETTE[] = {
-	0xffffff, //0xbbe5b9, /* DMG_PALETTE_WHITE */
-	0x949494, //0x5ab9a8, /* DMG_PALETTE_GREY_LIGHT */
-	0x525252, //0x1e606e, /* DMG_PALETTE_GREY_DARK */
-	0x000000, //0x2d1b00, /* DMG_PALETTE_BLACK */
+enum {
+	PALETTE_GREY = 0,
+	PALETTE_GREEN_LIGHT,
+	PALETTE_GREEN_DARK,
+	PALETTE_GREEN_LCD,
+	PALETTE_TEAL,
+	PALETTE_MAX,
+};
+
+static const uint32_t PALETTE[][DMG_PALETTE_MAX] = {
+		{ /* PALETTE_GREY */
+			0xffffff, /* DMG_PALETTE_WHITE */
+			0x949494, /* DMG_PALETTE_GREY_LIGHT */
+			0x525252, /* DMG_PALETTE_GREY_DARK */
+			0x000000, /* DMG_PALETTE_BLACK */
+		},
+		{ /* PALETTE_GREEN_LIGHT */
+			0xe0f8d0, /* DMG_PALETTE_WHITE */
+			0x88c070, /* DMG_PALETTE_GREY_LIGHT */
+			0x306850, /* DMG_PALETTE_GREY_DARK */
+			0x081820, /* DMG_PALETTE_BLACK */
+		},
+		{ /* PALETTE_GREEN_DARK */
+			0xb7c166, /* DMG_PALETTE_WHITE */
+			0x7b8a32, /* DMG_PALETTE_GREY_LIGHT */
+			0x43591d, /* DMG_PALETTE_GREY_DARK */
+			0x132c13, /* DMG_PALETTE_BLACK */
+		},
+		{ /* PALETTE_GREEN_LCD */
+			0x9bbb0e, /* DMG_PALETTE_WHITE */
+			0x73a067, /* DMG_PALETTE_GREY_LIGHT */
+			0x356237, /* DMG_PALETTE_GREY_DARK */
+			0x0f380e, /* DMG_PALETTE_BLACK */
+		},
+		{ /* PALETTE_TEAL */
+			0xe2f3e4, /* DMG_PALETTE_WHITE */
+			0x94e344, /* DMG_PALETTE_GREY_LIGHT */
+			0x46878f, /* DMG_PALETTE_GREY_DARK */
+			0x332c50, /* DMG_PALETTE_BLACK */
+		},
 	};
 
 #define SCALE 1

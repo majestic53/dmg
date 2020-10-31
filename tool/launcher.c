@@ -114,6 +114,9 @@ dmg_launcher_parse(
 			case OPTION_HELP:
 				g_launcher.help = true;
 				break;
+			case OPTION_PALETTE:
+				g_launcher.palette = strtol(optarg, NULL, 10);
+				break;
 			case OPTION_ROM:
 				g_launcher.rom = optarg;
 				break;
@@ -141,7 +144,12 @@ dmg_launcher_setup(void)
 {
 	memcpy(g_launcher.configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
 	memcpy(g_launcher.configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
-	memcpy(g_launcher.configuration.palette, PALETTE, sizeof(uint32_t) * DMG_PALETTE_MAX);
+
+	if(g_launcher.palette >= PALETTE_MAX) {
+		g_launcher.palette = PALETTE_GREY;
+	}
+
+	memcpy(g_launcher.configuration.palette, &(PALETTE[g_launcher.palette]), sizeof(uint32_t) * DMG_PALETTE_MAX);
 
 	if(!g_launcher.configuration.scale) {
 		g_launcher.configuration.scale = SCALE;

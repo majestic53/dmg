@@ -474,7 +474,7 @@ dmg_test_video_write(void)
 	g_video.video.line = (value + 1);
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_LINE, value);
 
-	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == (value + 1))) {
+	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == (uint8_t)(value + 1))) {
 		result = EXIT_FAILURE;
 	}
 
