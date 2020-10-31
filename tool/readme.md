@@ -32,13 +32,13 @@ dmg [args]
 
 The following color palettes are available:
 
-|Id|Colors                                                                                     |
-|:-|:------------------------------------------------------------------------------------------|
-|0 |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |
-|1 |![Light-green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light.png)|
-|2 |![Dark-green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |
-|3 |![LCD-green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |
-|4 |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |
+|Id|Palette    |                                                                                          |
+|:-|:----------|:-----------------------------------------------------------------------------------------|
+|0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |
+|1 |Light-Green|![Light-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light.png)|
+|2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |
+|3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |
+|4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |
 
 #### Examples
 
