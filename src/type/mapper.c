@@ -82,6 +82,9 @@ dmg_mapper_mbc1_write(
 			break;
 	}
 
+	mapper->ram %= mapper->cartridge.ram.count;
+	mapper->rom_swap %= mapper->cartridge.rom.count;
+
 	switch(mapper->rom_swap) {
 		case MBC1_BANK_00:
 		case MBC1_BANK_20:

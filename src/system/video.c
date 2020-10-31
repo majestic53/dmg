@@ -62,7 +62,6 @@ dmg_video_trace_transfer(
 
 #endif /* NDEBUG */
 
-// TODO: DEBUG
 #ifndef UNITTEST
 
 static uint8_t
@@ -113,6 +112,30 @@ dmg_video_tile_data(
 	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
 }
 
+static void
+dmg_video_render_background_line(
+	__in dmg_video_t *video
+	)
+{
+	uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
+	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+
+	for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
+		uint8_t px, value;
+
+		if(!(px = (x % TILE_WIDTH))) {
+			tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+		}
+
+		value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
+			| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
+
+		dmg_service_pixel(dmg_video_palette_color(&video->background, value), x/* - video->screen_x*/, y/* - video->screen_y*/);
+	}
+}
+
 /*static void
 dmg_video_render_background_pixel(
 	__in dmg_video_t *video,
@@ -126,7 +149,7 @@ dmg_video_render_background_pixel(
 			| ((tile->line[y % TILE_HEIGHT].low >> (TILE_WIDTH - (x % TILE_WIDTH) - 1)) & 1);
 
 	dmg_service_pixel(dmg_video_palette_color(&video->background, value), x, y);
-}*/
+}
 
 static void
 dmg_video_render_background_tile(
@@ -164,16 +187,15 @@ dmg_video_render_background(
 		}
 	}
 
-	/*for(uint32_t y = 0; y < 256; ++y) {
+	for(uint32_t y = 0; y < (TILE_PITCH * TILE_HEIGHT); ++y) {
 
-		for(uint32_t x = 0; x < 256; ++x) {
+		for(uint32_t x = 0; x < (TILE_PITCH * TILE_WIDTH); ++x) {
 			dmg_video_render_background_pixel(video, x, y);
 		}
-	}*/
-}
+	}
+}*/
 
 #endif /* UNITTEST */
-// ---
 
 static bool
 dmg_video_hblank(
@@ -193,11 +215,9 @@ dmg_video_hblank(
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
 
-// TODO: DEBUG
 #ifndef UNITTEST
-dmg_video_render_background(video);
+		//dmg_video_render_background(video);
 #endif /* UNITTEST */
-// ---
 	} else {
 		video->status.mode = MODE_SEARCH;
 
@@ -232,10 +252,15 @@ dmg_video_transfer(
 
 	if(video->control.enable) {
 
-		if(video->control.background || video->control.window) {
+		if(video->control.background) {
+#ifndef UNITTEST
+			dmg_video_render_background_line(video);
+#endif /* UNITTEST */
+		}
 
-			// TODO: RENDER BACKGROUND/WINDOW SCANLINE
+		if(video->control.window) {
 
+			// TODO: RENDER WINDOW SCANLINE
 		}
 
 		if(video->control.sprite) {
