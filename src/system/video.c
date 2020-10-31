@@ -93,42 +93,83 @@ dmg_video_palette_color(
 	return result;
 }
 
+static const dmg_video_tile_t *
+dmg_video_tile_data(
+	__in const void *ram,
+	__in int map,
+	__in int data,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	uint16_t address = (TILE_MAP[map] + (y * TILE_PITCH) + x);
+
+	if(!data) {
+		address = (TILE_DATA[data] + (sizeof(dmg_video_tile_t) * (((int8_t)((uint8_t *)ram)[address]) + (INT8_MAX + 1))));
+	} else {
+		address = (TILE_DATA[data] + (sizeof(dmg_video_tile_t) * ((uint8_t *)ram)[address]));
+	}
+
+	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
+}
+
+/*static void
+dmg_video_render_background_pixel(
+	__in dmg_video_t *video,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+								x / TILE_WIDTH, y / TILE_HEIGHT);
+	uint8_t value = (((tile->line[y % TILE_HEIGHT].high >> (TILE_WIDTH - (x % TILE_WIDTH) - 1)) & 1) << 1)
+			| ((tile->line[y % TILE_HEIGHT].low >> (TILE_WIDTH - (x % TILE_WIDTH) - 1)) & 1);
+
+	dmg_service_pixel(dmg_video_palette_color(&video->background, value), x, y);
+}*/
+
+static void
+dmg_video_render_background_tile(
+	__in dmg_video_t *video,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	uint8_t color[TILE_WIDTH * TILE_HEIGHT] = {};
+	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data, x, y);
+
+	for(uint8_t py = 0; py < TILE_HEIGHT; ++py) {
+
+		for(uint8_t px = 0; px < TILE_WIDTH; ++px) {
+			uint8_t value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
+					| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
+
+			color[(py * TILE_WIDTH) + px] = dmg_video_palette_color(&video->background, value);
+		}
+	}
+
+	dmg_service_tile(color, x, y);
+}
+
 static void
 dmg_video_render_background(
 	__in dmg_video_t *video
 	)
 {
 
-	for(uint32_t y = 0; y < 32; ++y) {
+	for(uint32_t y = 0; y < TILE_PITCH; ++y) {
 
-		for(uint32_t x = 0; x < 32; ++x) {
-			const dmg_video_tile_t *tile;
-			uint8_t color[TILE_WIDTH * TILE_HEIGHT] = {};
-			uint16_t address = (TILE_MAP[video->control.background_tile_map] + (y * 32) + x);
-
-			if(!video->control.tile_data) {
-				address = (TILE_DATA[video->control.tile_data]
-						+ (sizeof(dmg_video_tile_t) * (((int8_t)((uint8_t *)video->ram.data)[address]) + (INT8_MAX + 1))));
-			} else {
-				address = (TILE_DATA[video->control.tile_data]
-						+ (sizeof(dmg_video_tile_t) * ((uint8_t *)video->ram.data)[address]));
-			}
-
-			tile = (const dmg_video_tile_t *)&(((uint8_t *)video->ram.data)[address]);
-
-			for(uint8_t py = 0; py < TILE_HEIGHT; ++py) {
-
-				for(uint8_t px = 0; px < TILE_WIDTH; ++px) {
-					uint8_t col = ((((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
-							| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1));
-
-					color[(py * TILE_WIDTH) + px] = dmg_video_palette_color(&video->background, col);
-				}
-			}
-
-			dmg_service_tile(color, x, y);
+		for(uint32_t x = 0; x < TILE_PITCH; ++x) {
+			dmg_video_render_background_tile(video, x, y);
 		}
 	}
+
+	/*for(uint32_t y = 0; y < 256; ++y) {
+
+		for(uint32_t x = 0; x < 256; ++x) {
+			dmg_video_render_background_pixel(video, x, y);
+		}
+	}*/
 }
 
 #endif /* UNITTEST */
