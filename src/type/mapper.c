@@ -51,7 +51,7 @@ dmg_mapper_mbc1_write(
 			mapper->mbc1.mode = value;
 			break;
 		case ADDRESS_MBC1_RAM_ENABLE_BEGIN ... ADDRESS_MBC1_RAM_ENABLE_END:
-			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == MBC1_RAM_ENABLE);
+			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
 			break;
 		case ADDRESS_MBC1_ROM_LOWER_BEGIN ... ADDRESS_MBC1_ROM_LOWER_END:
 			mapper->mbc1.lower = value;
@@ -97,6 +97,69 @@ dmg_mapper_mbc1_write(
 	}
 }
 
+static void
+dmg_mapper_mbc3_write(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+
+	switch(address) {
+		case ADDRESS_MBC3_RAM_ENABLE_BEGIN ... ADDRESS_MBC3_RAM_ENABLE_END:
+			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
+			break;
+		case ADDRESS_MBC3_RAM_BEGIN ... ADDRESS_MBC3_RAM_END:
+			mapper->ram = ((value & MBC3_RAM_MASK) % mapper->cartridge.ram.count);
+			break;
+		case ADDRESS_MBC3_ROM_BEGIN ... ADDRESS_MBC3_ROM_END:
+			mapper->mbc3.rom = value;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+				address, value);
+			break;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC3 bank=%02x", mapper->mbc3.rom);
+
+	if(!(mapper->rom_swap = (mapper->mbc3.rom % mapper->cartridge.rom.count))) {
+		++mapper->rom_swap;
+	}
+}
+
+static void
+dmg_mapper_mbc5_write(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+
+	switch(address) {
+		case ADDRESS_MBC5_RAM_ENABLE_BEGIN ... ADDRESS_MBC5_RAM_ENABLE_END:
+			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
+			break;
+		case ADDRESS_MBC5_RAM_BEGIN ... ADDRESS_MBC5_RAM_END:
+			mapper->ram = ((value & MBC5_RAM_MASK) % mapper->cartridge.ram.count);
+			break;
+		case ADDRESS_MBC5_ROM_LOWER_BEGIN ... ADDRESS_MBC5_ROM_LOWER_END:
+			mapper->mbc5.lower = value;
+			break;
+		case ADDRESS_MBC5_ROM_UPPER_BEGIN ... ADDRESS_MBC5_ROM_UPPER_END:
+			mapper->mbc5.upper = value;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC5 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+				address, value);
+			break;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC5 banks={%02x, %02x}, %02x", mapper->mbc5.lower, mapper->mbc5.upper, mapper->mbc5.raw & MBC5_ROM_MASK);
+
+	mapper->rom_swap = ((mapper->mbc5.raw & MBC5_ROM_MASK) % mapper->cartridge.rom.count);
+}
+
 int
 dmg_mapper_load(
 	__inout dmg_mapper_t *mapper,
@@ -116,6 +179,14 @@ dmg_mapper_load(
 		case MAPPER_MBC1:
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
+		case MAPPER_MBC3_RAM:
+		case MAPPER_MBC3_RAM_BATTERY:
+		case MAPPER_MBC5:
+		case MAPPER_MBC5_RAM:
+		case MAPPER_MBC5_RAM_BATTERY:
+		case MAPPER_MBC5_RUMBLE:
+		case MAPPER_MBC5_RUMBLE_SRAM:
+		case MAPPER_MBC5_RUMBLE_SRAM_BATTERY:
 			mapper->ram = 0;
 			mapper->rom = 0;
 			mapper->rom_swap = (mapper->rom + 1);
@@ -225,6 +296,18 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
 			dmg_mapper_mbc1_write(mapper, address, value);
+			break;
+		case MAPPER_MBC3_RAM:
+		case MAPPER_MBC3_RAM_BATTERY:
+			dmg_mapper_mbc3_write(mapper, address, value);
+			break;
+		case MAPPER_MBC5:
+		case MAPPER_MBC5_RAM:
+		case MAPPER_MBC5_RAM_BATTERY:
+		case MAPPER_MBC5_RUMBLE:
+		case MAPPER_MBC5_RUMBLE_SRAM:
+		case MAPPER_MBC5_RUMBLE_SRAM_BATTERY:
+			dmg_mapper_mbc5_write(mapper, address, value);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper type: %u", type);

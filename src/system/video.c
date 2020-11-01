@@ -132,7 +132,32 @@ dmg_video_render_background_line(
 		value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
 			| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
 
-		dmg_service_pixel(dmg_video_palette_color(&video->background, value), x/* - video->screen_x*/, y/* - video->screen_y*/);
+		dmg_service_pixel(dmg_video_palette_color(&video->background, value), x - video->screen_x, y - video->screen_y);
+	}
+}
+
+static void
+dmg_video_render_window_line(
+	__in dmg_video_t *video
+	)
+{
+	uint32_t x = (video->window_x - (TILE_WIDTH - 1)), y = (video->window_y + video->line),
+		py = (y % TILE_HEIGHT);
+	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+
+	for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
+		uint8_t px, value;
+
+		if(!(px = (x % TILE_WIDTH))) {
+			tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+		}
+
+		value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
+			| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
+
+		dmg_service_pixel(dmg_video_palette_color(&video->background, value), x, y);
 	}
 }
 
@@ -214,10 +239,6 @@ dmg_video_hblank(
 		if(video->status.vblank) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
-
-#ifndef UNITTEST
-		//dmg_video_render_background(video);
-#endif /* UNITTEST */
 	} else {
 		video->status.mode = MODE_SEARCH;
 
@@ -258,9 +279,10 @@ dmg_video_transfer(
 #endif /* UNITTEST */
 		}
 
-		if(video->control.window) {
-
-			// TODO: RENDER WINDOW SCANLINE
+		if(video->control.window && (video->line >= video->window_y)) {
+#ifndef UNITTEST
+			dmg_video_render_window_line(video);
+#endif /* UNITTEST */
 		}
 
 		if(video->control.sprite) {
@@ -286,6 +308,10 @@ dmg_video_vblank(
 		if(video->status.search) {
 			dmg_runtime_interrupt(INTERRUPT_LCDC);
 		}
+
+#ifndef UNITTEST
+		//dmg_video_render_background(video);
+#endif /* UNITTEST */
 	}
 
 	return false;
@@ -486,7 +512,7 @@ dmg_video_write(
 		case ADDRESS_VIDEO_CONTROL:
 			video->control.raw = value;
 			dmg_service_viewport(video->control.enable && video->control.background, video->screen_x, video->screen_y);
-			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x - (TILE_WIDTH - 1), video->window_y);
 
 			if(!video->control.enable) {
 				video->line = 0;
@@ -557,11 +583,11 @@ dmg_video_write(
 			break;
 		case ADDRESS_VIDEO_WINDOW_X:
 			video->window_x = value;
-			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x - (TILE_WIDTH - 1), video->window_y);
 			break;
 		case ADDRESS_VIDEO_WINDOW_Y:
 			video->window_y = value;
-			dmg_service_window(video->control.enable && video->control.window, video->window_x, video->window_y);
+			dmg_service_window(video->control.enable && video->control.window, video->window_x - (TILE_WIDTH - 1), video->window_y);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported video write [%04x]<-%02x", address, value);

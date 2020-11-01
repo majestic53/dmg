@@ -89,17 +89,17 @@ dmg_service_display_show(void)
 		goto exit;
 	}
 
+	if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture_viewport, NULL, NULL)) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
 	if(g_sdl.display.window_enable) {
 
 		if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture_window, NULL, NULL)) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
-	}
-
-	if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture_viewport, NULL, NULL)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
 	}
 
 	SDL_RenderPresent(g_sdl.display.renderer);

@@ -55,6 +55,8 @@ enum {
 	ROM_512KB,
 	ROM_1MB,
 	ROM_2MB,
+	ROM_4MB,
+	ROM_8MB,
 	ROM_MAX,
 };
 
@@ -66,6 +68,8 @@ static const size_t ROM_BANK[] = {
 	32, /* ROM_512KB */
 	64, /* ROM_1MB */
 	128, /* ROM_2MB */
+	256, /* ROM_4MB */
+	512, /* ROM_8MB */
 	0, /* ROM_MAX */
 	};
 

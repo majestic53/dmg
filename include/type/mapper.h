@@ -37,10 +37,33 @@ typedef struct {
 	int mode;
 } dmg_mbc1_t;
 
+typedef union {
+
+	struct {
+		uint8_t rom : 7;
+		uint8_t unused : 1;
+	};
+
+	uint8_t raw;
+} dmg_mbc3_t;
+
+typedef union {
+
+	struct {
+		uint16_t lower : 8;
+		uint16_t upper : 1;
+		uint16_t unused : 7;
+	};
+
+	uint16_t raw;
+} dmg_mbc5_t;
+
 typedef struct {
 
 	union {
 		dmg_mbc1_t mbc1;
+		dmg_mbc3_t mbc3;
+		dmg_mbc5_t mbc5;
 	};
 
 	dmg_cartridge_t cartridge;
