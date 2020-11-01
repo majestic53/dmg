@@ -39,6 +39,8 @@ The following color palettes are available:
 |2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |
 |3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |
 |4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |
+|5 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |
+|6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |
 
 #### Examples
 
