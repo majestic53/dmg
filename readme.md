@@ -12,6 +12,8 @@ A DMG GameBoy emulator with support for the following mappers:
 |:-------|:----|
 |ROM-Only|0    |
 |MBC1    |1-3  |
+|MBC3    |18-19|
+|MBC5    |25-30|
 
 Table of Contents
 =
