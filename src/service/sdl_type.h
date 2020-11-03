@@ -37,18 +37,12 @@
 #define SCALE_MAX 4
 #define SCALE_MIN 1
 
-#define TILE_HEIGHT 8
-#define TILE_WIDTH 8
-
 #define TITLE "DMG"
 #define TITLE_LENGTH_MAX 64
 #define TITLE_UNTITLED "Untitled"
 
-#define VIEWPORT_HEIGHT 144
-#define VIEWPORT_WIDTH 160
-
-#define WINDOW_HEIGHT 256
-#define WINDOW_WIDTH 256
+#define WINDOW_HEIGHT 144
+#define WINDOW_WIDTH 160
 
 typedef union {
 
@@ -65,21 +59,12 @@ typedef union {
 typedef struct {
 	dmg_sdl_bgra_t palette[DMG_PALETTE_MAX];
 	dmg_sdl_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
-	dmg_sdl_bgra_t pixel_viewport[WINDOW_HEIGHT][WINDOW_WIDTH];
-	dmg_sdl_bgra_t pixel_window[WINDOW_HEIGHT][WINDOW_WIDTH];
 	bool redraw;
 	SDL_Renderer *renderer;
 	uint32_t scale;
 	SDL_Texture *texture;
-	SDL_Texture *texture_viewport;
-	SDL_Texture *texture_window;
 	char title[TITLE_LENGTH_MAX];
-	uint8_t viewport_x;
-	uint8_t viewport_y;
 	SDL_Window *window;
-	bool window_enable;
-	uint8_t window_x;
-	uint8_t window_y;
 } dmg_sdl_display_t;
 
 typedef struct {
@@ -102,7 +87,5 @@ typedef struct {
 } dmg_sdl_t;
 
 static const dmg_sdl_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
-static const dmg_sdl_bgra_t COLOR_VIEWPORT = {{ 0x00, 0x00, 0xff, 0xff }};
-static const dmg_sdl_bgra_t COLOR_WINDOW = {{ 0x00, 0xff, 0xff, 0xff }};
 
 #endif /* DMG_SERVICE_SDL_TYPE_H_ */

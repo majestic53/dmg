@@ -117,6 +117,9 @@
 #define NIBBLE_BIT 4
 #define NIBBLE_MAX 0x0f
 
+#define VIEWPORT_HEIGHT 144
+#define VIEWPORT_WIDTH 160
+
 enum {
 	ERROR_SUCCESS = 0,
 	ERROR_FAILURE,

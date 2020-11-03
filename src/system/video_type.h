@@ -45,8 +45,6 @@
 
 #define TRANSFER_SCALE 0x0100
 
-#define VIEWPORT_WIDTH 160
-
 enum {
 	MODE_HBLANK = 0,
 	MODE_VBLANK,

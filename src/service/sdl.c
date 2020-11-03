@@ -41,65 +41,11 @@ dmg_service_display_show(void)
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
-
-		memset(g_sdl.display.pixel_viewport, 0, sizeof(g_sdl.display.pixel_viewport));
-
-		for(uint32_t y = g_sdl.display.viewport_y; y < (VIEWPORT_HEIGHT + g_sdl.display.viewport_y); ++y) {
-
-			for(uint32_t x = g_sdl.display.viewport_x; x < (VIEWPORT_WIDTH + g_sdl.display.viewport_x); ++x) {
-
-				if((x == g_sdl.display.viewport_x)
-						|| (x == (VIEWPORT_WIDTH + g_sdl.display.viewport_x - 1))
-						|| (y == g_sdl.display.viewport_y)
-						|| (y == (VIEWPORT_HEIGHT + g_sdl.display.viewport_y - 1))) {
-					g_sdl.display.pixel_viewport[y % WINDOW_HEIGHT][x % WINDOW_WIDTH].raw = COLOR_VIEWPORT.raw;
-				}
-			}
-		}
-
-		if(SDL_UpdateTexture(g_sdl.display.texture_viewport, NULL, &g_sdl.display.pixel_viewport, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-			goto exit;
-		}
-
-		if(g_sdl.display.window_enable) {
-			memset(g_sdl.display.pixel_window, 0, sizeof(g_sdl.display.pixel_window));
-
-			for(uint32_t y = (g_sdl.display.viewport_y + g_sdl.display.window_y);
-					y < ((g_sdl.display.viewport_y + g_sdl.display.window_y) + (VIEWPORT_HEIGHT - g_sdl.display.window_y)); ++y) {
-
-				for(uint32_t x = (g_sdl.display.viewport_x + g_sdl.display.window_x);
-						x < ((g_sdl.display.viewport_x + g_sdl.display.window_x) + (VIEWPORT_WIDTH - g_sdl.display.window_x)); ++x) {
-					if((x == (g_sdl.display.viewport_x + g_sdl.display.window_x))
-							|| (y == (g_sdl.display.viewport_y + g_sdl.display.window_y))) {
-						g_sdl.display.pixel_window[y % WINDOW_HEIGHT][x % WINDOW_WIDTH].raw = COLOR_WINDOW.raw;
-					}
-				}
-			}
-
-			if(SDL_UpdateTexture(g_sdl.display.texture_window, NULL, &g_sdl.display.pixel_window, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
-				result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-				goto exit;
-			}
-		}
 	}
 
 	if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture, NULL, NULL)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
-	}
-
-	if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture_viewport, NULL, NULL)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
-	}
-
-	if(g_sdl.display.window_enable) {
-
-		if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture_window, NULL, NULL)) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-			goto exit;
-		}
 	}
 
 	SDL_RenderPresent(g_sdl.display.renderer);
@@ -128,7 +74,7 @@ dmg_service_display_load(
 	for(uint32_t y = 0; y < WINDOW_HEIGHT; ++y) {
 
 		for(uint32_t x = 0; x < WINDOW_WIDTH; ++x) {
-			g_sdl.display.pixel[x][y].raw = g_sdl.display.palette[DMG_PALETTE_WHITE].raw;
+			g_sdl.display.pixel[y][x].raw = g_sdl.display.palette[DMG_PALETTE_WHITE].raw;
 		}
 	}
 
@@ -182,30 +128,6 @@ dmg_service_display_load(
 		goto exit;
 	}
 
-	if(!(g_sdl.display.texture_viewport = SDL_CreateTexture(g_sdl.display.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-			WINDOW_WIDTH, WINDOW_HEIGHT))) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
-	}
-
-	if(SDL_SetTextureBlendMode(g_sdl.display.texture_viewport, SDL_BLENDMODE_BLEND)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
-	}
-
-	if(!(g_sdl.display.texture_window = SDL_CreateTexture(g_sdl.display.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
-			WINDOW_WIDTH, WINDOW_HEIGHT))) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
-	}
-
-	if(SDL_SetTextureBlendMode(g_sdl.display.texture_window, SDL_BLENDMODE_BLEND)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-		goto exit;
-	}
-
-	dmg_service_viewport(false, 0, 0);
-	dmg_service_window(false, 0, 0);
 	result = dmg_service_display_show();
 
 exit:
@@ -215,8 +137,6 @@ exit:
 static void
 dmg_service_display_unload(void)
 {
-	SDL_DestroyTexture(g_sdl.display.texture_window);
-	SDL_DestroyTexture(g_sdl.display.texture_viewport);
 	SDL_DestroyTexture(g_sdl.display.texture);
 	SDL_DestroyRenderer(g_sdl.display.renderer);
 	SDL_DestroyWindow(g_sdl.display.window);
@@ -356,24 +276,6 @@ dmg_service_sync(void)
 }
 
 void
-dmg_service_tile(
-	__in uint8_t *color,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	g_sdl.display.redraw = true;
-
-	for(uint32_t ty = 0; ty < TILE_HEIGHT; ++ty) {
-
-		for(uint32_t tx = 0; tx < TILE_WIDTH; ++tx) {
-			g_sdl.display.pixel[(TILE_HEIGHT * y) + ty][(TILE_WIDTH * x) + tx].raw
-				= g_sdl.display.palette[color[(TILE_WIDTH * ty) + tx]].raw;
-		}
-	}
-}
-
-void
 dmg_service_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
@@ -381,37 +283,6 @@ dmg_service_unload(void)
 	SDL_Quit();
 	TRACE(LEVEL_INFORMATION, "SDL unloaded");
 	memset(&g_sdl, 0, sizeof(g_sdl));
-}
-
-void
-dmg_service_viewport(
-	__in bool enable,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-
-	if((x != g_sdl.display.viewport_x) || (y != g_sdl.display.viewport_y)) {
-		g_sdl.display.redraw = true;
-		g_sdl.display.viewport_x = x;
-		g_sdl.display.viewport_y = y;
-	}
-}
-
-void
-dmg_service_window(
-	__in bool enable,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-
-	if((enable != g_sdl.display.window_enable) || (x != g_sdl.display.window_x) || (y != g_sdl.display.window_y)) {
-		g_sdl.display.redraw = true;
-		g_sdl.display.window_enable = enable;
-		g_sdl.display.window_x = x;
-		g_sdl.display.window_y = y;
-	}
 }
 
 #ifdef __cplusplus

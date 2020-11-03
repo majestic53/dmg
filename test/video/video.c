@@ -103,36 +103,6 @@ dmg_service_pixel(
 	return;
 }
 
-void
-dmg_service_tile(
-	__in uint8_t *tile,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	return;
-}
-
-void
-dmg_service_viewport(
-	__in bool enable,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	return;
-}
-
-void
-dmg_service_window(
-	__in bool enable,
-	__in uint8_t x,
-	__in uint8_t y
-	)
-{
-	return;
-}
-
 static void
 dmg_test_video_initialize(void)
 {

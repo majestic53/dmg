@@ -3,6 +3,8 @@ DMG
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Lines](https://tokei.rs/b1/github/majestic53/dmg?category=code)](https://github.com/majestic53/dmg/search?l=c) [![Files](https://tokei.rs/b1/github/majestic53/dmg?category=files)](https://github.com/majestic53/dmg/search?l=c) [![Build Status](https://travis-ci.com/majestic53/dmg.svg?branch=master)](https://travis-ci.com/majestic53/dmg)
 
+![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
+
 About
 =
 
@@ -55,7 +57,7 @@ Usage
 
 The project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
 
-For an example, see the launcher tool under ```tool/```
+For an example, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool) under ```tool/```
 
 #### Runtime Routines
 

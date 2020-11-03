@@ -32,15 +32,15 @@ dmg [args]
 
 The following color palettes are available:
 
-|Id|Palette    |                                                                                          |
-|:-|:----------|:-----------------------------------------------------------------------------------------|
-|0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |
-|1 |Light-Green|![Light-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light.png)|
-|2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |
-|3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |
-|4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |
-|5 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |
-|6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |
+|Id|Palette    |                                                                                          |                                                                                                    |
+|:-|:----------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
+|0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |![Grey Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_grey_demo.png)              |
+|1 |Light-Green|![Light-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light.png)|![Light-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light_demo.png)|
+|2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |![Dark-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark_demo.png)  |
+|3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |![LCD-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd_demo.png)    |
+|4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |![Teal Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_teal_demo.png)              |
+|5 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |![Red Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_red_demo.png)                |
+|6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |![Purple Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_purple_demo.png)          |
 
 #### Examples
 
