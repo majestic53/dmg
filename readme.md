@@ -3,10 +3,10 @@ DMG
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Lines](https://tokei.rs/b1/github/majestic53/dmg?category=code)](https://github.com/majestic53/dmg/search?l=c) [![Files](https://tokei.rs/b1/github/majestic53/dmg?category=files)](https://github.com/majestic53/dmg/search?l=c) [![Build Status](https://travis-ci.com/majestic53/dmg.svg?branch=master)](https://travis-ci.com/majestic53/dmg)
 
-![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
-
 About
 =
+
+![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
 
 A DMG GameBoy emulator with support for the following mappers:
 
