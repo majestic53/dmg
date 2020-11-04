@@ -156,7 +156,6 @@ dmg_mapper_mbc5_write(
 	}
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "MBC5 banks={%02x, %02x}, %02x", mapper->mbc5.lower, mapper->mbc5.upper, mapper->mbc5.raw & MBC5_ROM_MASK);
-
 	mapper->rom_swap = ((mapper->mbc5.raw & MBC5_ROM_MASK) % mapper->cartridge.rom.count);
 }
 

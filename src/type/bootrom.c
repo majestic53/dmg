@@ -28,7 +28,7 @@ dmg_bootrom_validate(
 	)
 {
 	uint32_t address;
-	uint16_t checksum;
+	uint16_t checksum = 0;
 	int result = ERROR_SUCCESS;
 
 	if(!buffer) {
@@ -47,7 +47,6 @@ dmg_bootrom_validate(
 		goto exit;
 	}
 
-	checksum = 0;
 	for(address = 0; address < BOOTROM_WIDTH; ++address) {
 		checksum += ((uint8_t *)buffer->data)[address];
 	}

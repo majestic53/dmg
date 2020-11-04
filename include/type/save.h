@@ -16,20 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_H_
-#define DMG_COMMON_H_
+#ifndef DMG_TYPE_SAVE_H_
+#define DMG_TYPE_SAVE_H_
 
-#include <limits.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include "./common/error.h"
-#include "./common/trace.h"
-#include "./common/version.h"
+#include "./buffer.h"
 
-#endif /* DMG_COMMON_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+int dmg_save_export(
+	__in const void *context,
+	__in FILE *file
+	);
+
+int dmg_save_import(
+	__in void *context,
+	__in FILE *file
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TYPE_SAVE_H_ */

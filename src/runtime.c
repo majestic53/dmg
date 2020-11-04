@@ -25,6 +25,60 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
+dmg_runtime_export(
+	__in const dmg_t *configuration
+	)
+{
+	FILE *file = NULL;
+	int result = ERROR_SUCCESS;
+
+	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime export to %s", configuration->export);
+
+	if(!(file = fopen(configuration->export, "wb+"))) {
+		result = ERROR_FAILURE;
+		goto exit;
+	}
+
+	result = dmg_save_export(&g_runtime, file);
+
+exit:
+
+	if(file) {
+		fclose(file);
+		file = NULL;
+	}
+
+	return result;
+}
+
+static int
+dmg_runtime_import(
+	__in const dmg_t *configuration
+	)
+{
+	FILE *file = NULL;
+	int result = ERROR_SUCCESS;
+
+	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime import from %s", configuration->import);
+
+	if(!(file = fopen(configuration->import, "rb"))) {
+		result = ERROR_FAILURE;
+		goto exit;
+	}
+
+	result = dmg_save_import(&g_runtime, file);
+
+exit:
+
+	if(file) {
+		fclose(file);
+		file = NULL;
+	}
+
+	return result;
+}
+
+static int
 dmg_runtime_load(
 	__in const dmg_t *configuration
 	)
@@ -39,33 +93,39 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	if((result = dmg_joypad_load(&g_runtime.joypad, configuration)) != ERROR_SUCCESS) {
+	g_runtime.configuration = configuration;
+
+	if((result = dmg_joypad_load(&g_runtime.joypad, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_load(&g_runtime.processor, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_load(&g_runtime.processor, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_load(&g_runtime.serial, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_load(&g_runtime.serial, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_load(&g_runtime.timer, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_timer_load(&g_runtime.timer, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_load(&g_runtime.video, configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_video_load(&g_runtime.video, g_runtime.configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
 	// TODO: LOAD SUBSYSTEMS
 
-	if((result = dmg_service_load(configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
+	if((result = dmg_service_load(g_runtime.configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if(g_runtime.configuration->import && ((result = dmg_runtime_import(g_runtime.configuration)) != ERROR_SUCCESS)) {
 		goto exit;
 	}
 
@@ -114,6 +174,11 @@ static void
 dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
+
+	if(g_runtime.configuration->export) {
+		dmg_runtime_export(g_runtime.configuration);
+	}
+
 	dmg_service_unload();
 
 	// TODO: UNLOAD SUBSYSTEMS

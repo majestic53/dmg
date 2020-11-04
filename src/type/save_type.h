@@ -16,32 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_RUNTIME_TYPE_H_
-#define DMG_RUNTIME_TYPE_H_
+#ifndef DMG_TYPE_SAVE_TYPE_H_
+#define DMG_TYPE_SAVE_TYPE_H_
 
-#include "../include/system/joypad.h"
-#include "../include/system/memory.h"
-#include "../include/system/processor.h"
-#include "../include/system/serial.h"
-#include "../include/system/timer.h"
-#include "../include/system/video.h"
-#include "../include/type/save.h"
-#include "../include/runtime.h"
-#include "../include/service.h"
+#include "../../include/type/save.h"
+#include "../runtime_type.h"
+
+#define SAVE_VERSION_1 1
+
+#define SAVE_MAGIC 0x444d4700
+#define SAVE_VERSION SAVE_VERSION_1
+
+#define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
+#define TIMESTAMP_LENGTH_MAX 32
+#define TIMESTAMP_MALFORMED "Malformed timestamp"
 
 typedef struct {
-	uint32_t cycle;
-	uint32_t cycle_last;
-	const dmg_t *configuration;
-	dmg_joypad_t joypad;
-	dmg_memory_t memory;
-	dmg_processor_t processor;
-	dmg_serial_t serial;
-	dmg_timer_t timer;
-	dmg_video_t video;
+	uint32_t magic;
+	uint8_t version;
+	uint32_t timestamp;
+	uint32_t length;
+} __attribute__((packed)) dmg_save_header_t;
 
-	// TODO: ADD SUBSYSTEMS
+#ifndef NDEBUG
+#define TRACE_SAVE(_LEVEL_, _SAVE_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_save_trace(_LEVEL_, _SAVE_); \
+	}
+#else
+#define TRACE_SAVE(_LEVEL_, _SAVE_)
+#endif /* NDEBUG */
 
-} dmg_runtime_t;
-
-#endif /* DMG_RUNTIME_TYPE_H_ */
+#endif /* DMG_TYPE_SAVE_TYPE_H_ */

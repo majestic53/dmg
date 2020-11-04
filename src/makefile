@@ -77,7 +77,7 @@ system_timer.o: $(DIR_SRC_SYSTEM)timer.c $(DIR_INCLUDE_SYSTEM)timer.h
 system_video.o: $(DIR_SRC_SYSTEM)video.c $(DIR_INCLUDE_SYSTEM)video.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)video.c -o $(DIR_BUILD)system_video.o
 
-build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o
+build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o type_save.o
 
 type_bank.o: $(DIR_SRC_TYPE)bank.c $(DIR_INCLUDE_TYPE)bank.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)bank.c -o $(DIR_BUILD)type_bank.o
@@ -94,6 +94,9 @@ type_cartridge.o: $(DIR_SRC_TYPE)cartridge.c $(DIR_INCLUDE_TYPE)cartridge.h
 type_mapper.o: $(DIR_SRC_TYPE)mapper.c $(DIR_INCLUDE_TYPE)mapper.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)mapper.c -o $(DIR_BUILD)type_mapper.o
 
+type_save.o: $(DIR_SRC_TYPE)save.c $(DIR_INCLUDE_TYPE)save.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)save.c -o $(DIR_BUILD)type_save.o
+
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
@@ -103,7 +106,7 @@ archive:
 		$(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o $(DIR_BUILD)system_serial.o \
 			$(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
-			$(DIR_BUILD)type_mapper.o
+			$(DIR_BUILD)type_mapper.o $(DIR_BUILD)type_save.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

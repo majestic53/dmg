@@ -8,14 +8,14 @@ About
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
 
-A DMG GameBoy emulator with support for the following mappers:
+A DMG GameBoy emulator with support for the following cartridge types:
 
-|Mapper  |Value|
-|:-------|:----|
-|ROM-Only|0    |
-|MBC1    |1-3  |
-|MBC3    |18-19|
-|MBC5    |25-30|
+|Cartridge type|Value|
+|:-------------|:----|
+|ROM-Only      |0    |
+|MBC1          |1-3  |
+|MBC3          |18-19|
+|MBC5          |25-30|
 
 Table of Contents
 =

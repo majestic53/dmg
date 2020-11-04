@@ -19,6 +19,9 @@
 #ifndef DMG_H_
 #define DMG_H_
 
+/**
+ * Button key enum
+ */
 enum {
 	DMG_BUTTON_A = 0,
 	DMG_BUTTON_B,
@@ -27,6 +30,9 @@ enum {
 	DMG_BUTTON_MAX,
 };
 
+/**
+ * Direction key enum
+ */
 enum {
 	DMG_DIRECTION_RIGHT = 0,
 	DMG_DIRECTION_LEFT,
@@ -35,6 +41,9 @@ enum {
 	DMG_DIRECTION_MAX,
 };
 
+/**
+ * Palette enum
+ */
 enum {
 	DMG_PALETTE_WHITE = 0,
 	DMG_PALETTE_GREY_LIGHT,
@@ -43,37 +52,80 @@ enum {
 	DMG_PALETTE_MAX,
 };
 
+/**
+ * Serial transfer callback
+ * @param Input bit
+ * @return Output bit
+ */
 typedef unsigned (*dmg_serial_transfer)(unsigned);
 
+/**
+ * Buffer struct
+ */
 typedef struct {
+	/* Data pointer */
 	void *data;
+	/* Data length */
 	unsigned length;
 } dmg_buffer_t;
 
+/**
+ * Version struct
+ */
 typedef struct {
+	/* Major version */
 	unsigned major;
+	/* Minor version */
 	unsigned minor;
+	/* Patch version */
 	unsigned patch;
 } dmg_version_t;
 
+/**
+ * Configuration struct
+ */
 typedef struct {
+	/* Bootrom buffer */
 	dmg_buffer_t bootrom;
+	/* Rom buffer */
 	dmg_buffer_t rom;
+	/* Serial transfer callback */
 	dmg_serial_transfer transfer;
+	/* Button key-bindings */
 	unsigned button[DMG_BUTTON_MAX];
+	/* Direction key-bindings */
 	unsigned direction[DMG_DIRECTION_MAX];
+	/* Display palette */
 	unsigned palette[DMG_PALETTE_MAX];
+	/* Display scale */
 	unsigned scale;
+	/* Export path */
+	const char *export;
+	/* Import path */
+	const char *import;
 } dmg_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+/**
+ * Run emulator
+ * @param Const pointer to configuration struct
+ * @return EXIT_SUCCESS on success
+ */
 int dmg(const dmg_t *);
 
+/**
+ * Retrieve emulator error
+ * @return Const pointer to error string
+ */
 const char *dmg_error(void);
 
+/**
+ * Retrieve emulator version
+ * @return Const pointer to version struct
+ */
 const dmg_version_t *dmg_version(void);
 
 #ifdef __cplusplus
