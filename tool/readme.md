@@ -39,8 +39,9 @@ The following color palettes are available:
 |2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |![Dark-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark_demo.png)  |
 |3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |![LCD-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd_demo.png)    |
 |4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |![Teal Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_teal_demo.png)              |
-|5 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |![Red Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_red_demo.png)                |
+|5 |Blue       |![Blue](https://github.com/majestic53/dmg/blob/master/docs/palette_blue.png)              |![Blue Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_blue_demo.png)              |
 |6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |![Purple Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_purple_demo.png)          |
+|7 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |![Red Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_red_demo.png)                |
 
 #### Examples
 
