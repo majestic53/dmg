@@ -80,7 +80,7 @@ $ ./bin/dmg -r rom.gb -p 1
 The following example shows how to launch dmg and export a save file:
 
 ```
-$ ./bin/dmg -r rom.gb -e rom.dmg
+$ ./bin/dmg -r rom.gb -o rom.dmg
 ```
 
 The following example shows how to launch dmg and import a save file:
