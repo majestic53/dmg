@@ -8,7 +8,7 @@ About
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
 
-A DMG GameBoy emulator with support for the following cartridge types:
+A GameBoy emulator with support for the following cartridge types:
 
 |Cartridge type|Value|
 |:-------------|:----|
