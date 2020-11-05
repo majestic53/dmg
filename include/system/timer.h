@@ -55,6 +55,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_timer_export(
+	__in const dmg_timer_t *timer,
+	__in FILE *file
+	);
+
+int dmg_timer_import(
+	__inout dmg_timer_t *timer,
+	__in FILE *file
+	);
+
 int dmg_timer_load(
 	__inout dmg_timer_t *timer,
 	__in const dmg_t *configuration

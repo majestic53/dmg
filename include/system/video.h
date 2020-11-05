@@ -99,6 +99,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_video_export(
+	__in const dmg_video_t *video,
+	__in FILE *file
+	);
+
+int dmg_video_import(
+	__inout dmg_video_t *video,
+	__in FILE *file
+	);
+
 int dmg_video_load(
 	__inout dmg_video_t *video,
 	__in const dmg_t *configuration

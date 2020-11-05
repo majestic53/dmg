@@ -33,6 +33,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_memory_export(
+	__in const dmg_memory_t *memory,
+	__in FILE *file
+	);
+
+int dmg_memory_import(
+	__inout dmg_memory_t *memory,
+	__in FILE *file
+	);
+
 int dmg_memory_load(
 	__inout dmg_memory_t *memory,
 	__in const dmg_t *configuration

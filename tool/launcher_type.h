@@ -49,16 +49,20 @@
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
 #define OPTION_HELP 'h'
+#define OPTION_INPUT 'i'
+#define OPTION_OUTPUT 'o'
 #define OPTION_PALETTE 'p'
 #define OPTION_ROM 'r'
 #define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:chp:r:s:v"
+#define OPTIONS "b:chi:o:p:r:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
 	FLAG_CAPTURE,
 	FLAG_HELP,
+	FLAG_INPUT,
+	FLAG_OUTPUT,
 	FLAG_PALETTE,
 	FLAG_ROM,
 	FLAG_SCALE,
@@ -70,6 +74,8 @@ static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
 	"-c", /* FLAG_CAPTURE */
 	"-h", /* FLAG_HELP */
+	"-i", /* FLAG_INPUT */
+	"-o", /* FLAG_OUTPUT */
 	"-p", /* FLAG_PALETTE */
 	"-r", /* FLAG_ROM */
 	"-s", /* FLAG_SCALE */
@@ -81,6 +87,8 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
 	"Enable serial capture", /* FLAG_CAPTURE */
 	"Display help information", /* FLAG_HELP */
+	"Specify input save file path", /* FLAG_INPUT */
+	"Specify output save file path", /* FLAG_OUTPUT */
 	"Specify color palette", /* FLAG_PALETTE */
 	"Specify rom binary", /* FLAG_ROM */
 	"Specify display scale", /* FLAG_SCALE */

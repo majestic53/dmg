@@ -22,6 +22,8 @@ dmg [args]
 -b	Specify bootrom binary
 -c	Enable serial capture
 -h	Display help information
+-i	Specify input save file path
+-o	Specify output save file path
 -p	Specify color palette
 -r	Specify rom binary
 -s	Specify display scale
@@ -73,4 +75,16 @@ The following example shows how to launch dmg with an alternative color palette:
 
 ```
 $ ./bin/dmg -r rom.gb -p 1
+```
+
+The following example shows how to launch dmg and export a save file:
+
+```
+$ ./bin/dmg -r rom.gb -e rom.dmg
+```
+
+The following example shows how to launch dmg and import a save file:
+
+```
+$ ./bin/dmg -r rom.gb -i rom.dmg
 ```

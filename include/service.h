@@ -21,6 +21,8 @@
 
 #include "./common.h"
 
+typedef int (*dmg_service_handler)(FILE *);
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -31,6 +33,16 @@ bool dmg_service_button(
 
 bool dmg_service_direction(
 	__in int direction
+	);
+
+int dmg_service_export(
+	__in dmg_service_handler handler,
+	__in const char *path
+	);
+
+int dmg_service_import(
+	__in dmg_service_handler handler,
+	__in const char *path
 	);
 
 int dmg_service_load(

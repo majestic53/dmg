@@ -40,6 +40,40 @@ dmg_timer_trace(
 #endif /* NDEBUG */
 
 int
+dmg_timer_export(
+	__in const dmg_timer_t *timer,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Timer exporting");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Timer exported");
+
+	return result;
+}
+
+int
+dmg_timer_import(
+	__inout dmg_timer_t *timer,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Timer importing");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Timer imported");
+
+	return result;
+}
+
+int
 dmg_timer_load(
 	__inout dmg_timer_t *timer,
 	__in const dmg_t *configuration

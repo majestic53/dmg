@@ -37,6 +37,40 @@ dmg_memory_trace(
 #endif /* NDEBUG */
 
 int
+dmg_memory_export(
+	__in const dmg_memory_t *memory,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Memory exporting");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Memory exported");
+
+	return result;
+}
+
+int
+dmg_memory_import(
+	__inout dmg_memory_t *memory,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Memory importing");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Memory imported");
+
+	return result;
+}
+
+int
 dmg_memory_load(
 	__inout dmg_memory_t *memory,
 	__in const dmg_t *configuration

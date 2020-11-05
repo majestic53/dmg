@@ -103,6 +103,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_processor_export(
+	__in const dmg_processor_t *processor,
+	__in FILE *file
+	);
+
+int dmg_processor_import(
+	__inout dmg_processor_t *processor,
+	__in FILE *file
+	);
+
 int dmg_processor_load(
 	__inout dmg_processor_t *processor,
 	__in const dmg_t *configuration

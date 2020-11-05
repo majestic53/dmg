@@ -3125,6 +3125,40 @@ dmg_processor_service(
 }
 
 int
+dmg_processor_export(
+	__in const dmg_processor_t *processor,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Processor exporting");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Processor exported");
+
+	return result;
+}
+
+int
+dmg_processor_import(
+	__inout dmg_processor_t *processor,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Processor importing");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Processor imported");
+
+	return result;
+}
+
+int
 dmg_processor_load(
 	__inout dmg_processor_t *processor,
 	__in const dmg_t *configuration

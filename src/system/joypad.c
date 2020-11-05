@@ -79,6 +79,40 @@ dmg_joypad_poll(
 }
 
 int
+dmg_joypad_export(
+	__in const dmg_joypad_t *joypad,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Joypad exporting");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Joypad exported");
+
+	return result;
+}
+
+int
+dmg_joypad_import(
+	__inout dmg_joypad_t *joypad,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Joypad importing");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Joypad imported");
+
+	return result;
+}
+
+int
 dmg_joypad_load(
 	__inout dmg_joypad_t *joypad,
 	__in const dmg_t *configuration

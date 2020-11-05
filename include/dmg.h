@@ -99,10 +99,10 @@ typedef struct {
 	unsigned palette[DMG_PALETTE_MAX];
 	/* Display scale */
 	unsigned scale;
-	/* Export path */
-	const char *export;
-	/* Import path */
-	const char *import;
+	/* Input save file path */
+	char *save_in;
+	/* Output save file path */
+	char *save_out;
 } dmg_t;
 
 #ifdef __cplusplus

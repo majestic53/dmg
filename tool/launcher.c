@@ -114,6 +114,12 @@ dmg_launcher_parse(
 			case OPTION_HELP:
 				g_launcher.help = true;
 				break;
+			case OPTION_INPUT:
+				g_launcher.configuration.save_in = optarg;
+				break;
+			case OPTION_OUTPUT:
+				g_launcher.configuration.save_out = optarg;
+				break;
 			case OPTION_PALETTE:
 				g_launcher.palette = strtol(optarg, NULL, 10);
 				break;

@@ -292,6 +292,40 @@ static const dmg_mode MODE_HANDLER[] = {
 	};
 
 int
+dmg_video_export(
+	__in const dmg_video_t *video,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Video exporting");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Video exported");
+
+	return result;
+}
+
+int
+dmg_video_import(
+	__inout dmg_video_t *video,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Video importing");
+
+	// TODO
+
+	TRACE(LEVEL_INFORMATION, "Video imported");
+
+	return result;
+}
+
+int
 dmg_video_load(
 	__inout dmg_video_t *video,
 	__in const dmg_t *configuration

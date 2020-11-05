@@ -47,6 +47,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_joypad_export(
+	__in const dmg_joypad_t *joypad,
+	__in FILE *file
+	);
+
+int dmg_joypad_import(
+	__inout dmg_joypad_t *joypad,
+	__in FILE *file
+	);
+
 int dmg_joypad_load(
 	__inout dmg_joypad_t *joypad,
 	__in const dmg_t *configuration

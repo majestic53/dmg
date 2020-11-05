@@ -26,55 +26,83 @@ extern "C" {
 
 static int
 dmg_runtime_export(
-	__in const dmg_t *configuration
+	__in FILE *file
 	)
 {
-	FILE *file = NULL;
-	int result = ERROR_SUCCESS;
+	int result;
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime export to %s", configuration->export);
+	TRACE(LEVEL_INFORMATION, "Runtime exporting");
 
-	if(!(file = fopen(configuration->export, "wb+"))) {
-		result = ERROR_FAILURE;
+	if((result = dmg_joypad_export(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	result = dmg_save_export(&g_runtime, file);
-
-exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
+	if((result = dmg_memory_export(&g_runtime.memory, file)) != ERROR_SUCCESS) {
+		goto exit;
 	}
 
+	if((result = dmg_processor_export(&g_runtime.processor, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_serial_export(&g_runtime.serial, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_timer_export(&g_runtime.timer, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_video_export(&g_runtime.video, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	// TODO: EXPORT SUBSYSTEMS
+
+	TRACE(LEVEL_INFORMATION, "Runtime exported");
+
+exit:
 	return result;
 }
 
 static int
 dmg_runtime_import(
-	__in const dmg_t *configuration
+	__in FILE *file
 	)
 {
-	FILE *file = NULL;
-	int result = ERROR_SUCCESS;
+	int result;
 
-	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime import from %s", configuration->import);
+	TRACE(LEVEL_INFORMATION, "Runtime importing");
 
-	if(!(file = fopen(configuration->import, "rb"))) {
-		result = ERROR_FAILURE;
+	if((result = dmg_joypad_import(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	result = dmg_save_import(&g_runtime, file);
-
-exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
+	if((result = dmg_memory_import(&g_runtime.memory, file)) != ERROR_SUCCESS) {
+		goto exit;
 	}
 
+	if((result = dmg_processor_import(&g_runtime.processor, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_serial_import(&g_runtime.serial, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_timer_import(&g_runtime.timer, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_video_import(&g_runtime.video, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	// TODO: IMPORT SUBSYSTEMS
+
+	TRACE(LEVEL_INFORMATION, "Runtime imported");
+
+exit:
 	return result;
 }
 
@@ -125,7 +153,7 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	if(g_runtime.configuration->import && ((result = dmg_runtime_import(g_runtime.configuration)) != ERROR_SUCCESS)) {
+	if((result = dmg_service_import(dmg_runtime_import, g_runtime.configuration->save_in)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -174,11 +202,7 @@ static void
 dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
-
-	if(g_runtime.configuration->export) {
-		dmg_runtime_export(g_runtime.configuration);
-	}
-
+	dmg_service_export(dmg_runtime_export, g_runtime.configuration->save_out);
 	dmg_service_unload();
 
 	// TODO: UNLOAD SUBSYSTEMS

@@ -55,6 +55,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_serial_export(
+	__in const dmg_serial_t *serial,
+	__in FILE *file
+	);
+
+int dmg_serial_import(
+	__inout dmg_serial_t *serial,
+	__in FILE *file
+	);
+
 int dmg_serial_load(
 	__inout dmg_serial_t *serial,
 	__in const dmg_t *configuration
