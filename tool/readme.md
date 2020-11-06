@@ -37,8 +37,8 @@ The following color palettes are available:
 |Id|Palette    |                                                                                          |                                                                                                    |
 |:-|:----------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
 |0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |![Grey Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_grey_demo.png)              |
-|1 |Light-Green|![Light-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light.png)|![Light-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_light_demo.png)|
-|2 |Dark-Green |![Dark-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark.png)  |![Dark-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_dark_demo.png)  |
+|1 |Green      |![Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green.png)            |![Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_demo.png)            |
+|2 |Olive-Green|![Olive-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive.png)|![Olive-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive_demo.png)|
 |3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |![LCD-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd_demo.png)    |
 |4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |![Teal Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_teal_demo.png)              |
 |5 |Blue       |![Blue](https://github.com/majestic53/dmg/blob/master/docs/palette_blue.png)              |![Blue Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_blue_demo.png)              |
