@@ -27,7 +27,7 @@ extern "C" {
 static void
 dmg_video_trace(
 	__in int level,
-	__inout dmg_video_t *video
+	__inout const dmg_video_t *video
 	)
 {
 	TRACE_FORMAT(level, "Video control=%02x [Enable=%x (%c%c%c)]", video->control.raw, video->control.enable,
@@ -300,11 +300,13 @@ dmg_video_export(
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Video exporting");
+	TRACE_VIDEO(LEVEL_VERBOSE, video);
 
 	// TODO
 
 	TRACE(LEVEL_INFORMATION, "Video exported");
 
+//exit:
 	return result;
 }
 
@@ -320,8 +322,10 @@ dmg_video_import(
 
 	// TODO
 
+	TRACE_VIDEO(LEVEL_VERBOSE, video);
 	TRACE(LEVEL_INFORMATION, "Video imported");
 
+//exit:
 	return result;
 }
 

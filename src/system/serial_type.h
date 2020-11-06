@@ -21,6 +21,7 @@
 
 #include "../../include/system/serial.h"
 #include "../../include/runtime.h"
+#include "../../include/service.h"
 
 #define CONTROL_MASK 0x81
 

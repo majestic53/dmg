@@ -27,7 +27,7 @@ extern "C" {
 static void
 dmg_memory_trace(
 	__in int level,
-	__inout dmg_memory_t *memory
+	__inout const dmg_memory_t *memory
 	)
 {
 	TRACE_FORMAT(level, "Memory ram[%04x]=%p", memory->ram.length, memory->ram.data);
@@ -45,11 +45,13 @@ dmg_memory_export(
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Memory exporting");
+	TRACE_MEMORY(LEVEL_VERBOSE, memory);
 
 	// TODO
 
 	TRACE(LEVEL_INFORMATION, "Memory exported");
 
+//exit:
 	return result;
 }
 
@@ -65,8 +67,10 @@ dmg_memory_import(
 
 	// TODO
 
+	TRACE_MEMORY(LEVEL_VERBOSE, memory);
 	TRACE(LEVEL_INFORMATION, "Memory imported");
 
+//exit:
 	return result;
 }
 

@@ -22,6 +22,14 @@
 
 typedef struct {
 	dmg_t configuration;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 	dmg_memory_t memory;
 	bool bootrom;
 	uint16_t bootrom_address;
@@ -159,6 +167,34 @@ dmg_mapper_write_rom(
 {
 	g_memory.mapper_rom_address = address;
 	g_memory.mapper_rom_value = value;
+}
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_memory.export_file = file;
+	g_memory.export_data = data;
+	g_memory.export_length = length;
+
+	return g_memory.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_memory.import_file = file;
+	g_memory.import_data = data;
+	g_memory.import_length = length;
+
+	return g_memory.import;
 }
 
 static void

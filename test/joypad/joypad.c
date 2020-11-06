@@ -22,6 +22,14 @@
 
 typedef struct {
 	dmg_t configuration;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 	dmg_joypad_t joypad;
 	bool button[DMG_BUTTON_MAX];
 	bool direction[DMG_DIRECTION_MAX];
@@ -56,6 +64,34 @@ dmg_service_direction(
 	)
 {
 	return g_joypad.direction[direction];
+}
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_joypad.export_file = file;
+	g_joypad.export_data = data;
+	g_joypad.export_length = length;
+
+	return g_joypad.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_joypad.import_file = file;
+	g_joypad.import_data = data;
+	g_joypad.import_length = length;
+
+	return g_joypad.import;
 }
 
 static void

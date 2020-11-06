@@ -21,6 +21,7 @@
 
 #include "../../include/system/processor.h"
 #include "../../include/runtime.h"
+#include "../../include/service.h"
 
 #define CYCLE_IDLE CYCLE
 #define CYCLE_INTERRUPT (5 * CYCLE)

@@ -27,7 +27,7 @@ extern "C" {
 static void
 dmg_timer_trace(
 	__in int level,
-	__inout dmg_timer_t *timer
+	__inout const dmg_timer_t *timer
 	)
 {
 	TRACE_FORMAT(level, "Timer control=%02x [Select=%u, Enable=%x]", timer->control.raw,
@@ -48,11 +48,31 @@ dmg_timer_export(
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Timer exporting");
+	TRACE_TIMER(LEVEL_VERBOSE, timer);
 
-	// TODO
+	if((result = dmg_service_export_data(file, &timer->control, sizeof(timer->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &timer->counter, sizeof(timer->counter))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &timer->cycle, sizeof(timer->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &timer->divider, sizeof(timer->divider))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &timer->modulo, sizeof(timer->modulo))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE(LEVEL_INFORMATION, "Timer exported");
 
+exit:
 	return result;
 }
 
@@ -66,10 +86,30 @@ dmg_timer_import(
 
 	TRACE(LEVEL_INFORMATION, "Timer importing");
 
-	// TODO
+	if((result = dmg_service_import_data(file, &timer->control, sizeof(timer->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
+	if((result = dmg_service_import_data(file, &timer->counter, sizeof(timer->counter))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &timer->cycle, sizeof(timer->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &timer->divider, sizeof(timer->divider))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &timer->modulo, sizeof(timer->modulo))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE_TIMER(LEVEL_VERBOSE, timer);
 	TRACE(LEVEL_INFORMATION, "Timer imported");
 
+exit:
 	return result;
 }
 

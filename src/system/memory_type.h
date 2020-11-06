@@ -21,6 +21,7 @@
 
 #include "../../include/system/memory.h"
 #include "../../include/runtime.h"
+#include "../../include/service.h"
 
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_BEGIN, ADDRESS_RAM_END)
 #define RAM_HIGH_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_HIGH_BEGIN, ADDRESS_RAM_HIGH_END)

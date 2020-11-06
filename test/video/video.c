@@ -24,6 +24,14 @@
 
 typedef struct {
 	dmg_t configuration;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 	dmg_video_t video;
 	uint16_t address;
 	uint8_t value;
@@ -91,6 +99,34 @@ dmg_runtime_write(
 {
 	g_video.address = address;
 	g_video.value = value;
+}
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_video.export_file = file;
+	g_video.export_data = data;
+	g_video.export_length = length;
+
+	return g_video.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_video.import_file = file;
+	g_video.import_data = data;
+	g_video.import_length = length;
+
+	return g_video.import;
 }
 
 void

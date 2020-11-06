@@ -40,9 +40,21 @@ int dmg_service_export(
 	__in const char *path
 	);
 
+int dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	);
+
 int dmg_service_import(
 	__in dmg_service_handler handler,
 	__in const char *path
+	);
+
+int dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
 	);
 
 int dmg_service_load(

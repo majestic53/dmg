@@ -24,6 +24,14 @@
 
 typedef struct {
 	dmg_t configuration;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 	dmg_processor_t processor;
 	uint8_t read_address;
 	uint8_t read_value;
@@ -36,6 +44,34 @@ static dmg_processor_test_t g_processor = {};
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_processor.export_file = file;
+	g_processor.export_data = data;
+	g_processor.export_length = length;
+
+	return g_processor.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_processor.import_file = file;
+	g_processor.import_data = data;
+	g_processor.import_length = length;
+
+	return g_processor.import;
+}
 
 uint8_t
 dmg_runtime_read(

@@ -27,7 +27,7 @@ extern "C" {
 static void
 dmg_serial_trace(
 	__in int level,
-	__inout dmg_serial_t *serial
+	__inout const dmg_serial_t *serial
 	)
 {
 	TRACE_FORMAT(level, "Serial control=%02x [Select=%u, Enable=%x]", serial->control.raw,
@@ -46,11 +46,27 @@ dmg_serial_export(
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Serial exporting");
+	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 
-	// TODO
+	if((result = dmg_service_export_data(file, &serial->control, sizeof(serial->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &serial->cycle, sizeof(serial->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &serial->data, sizeof(serial->data))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &serial->remaining, sizeof(serial->remaining))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE(LEVEL_INFORMATION, "Serial exported");
 
+exit:
 	return result;
 }
 
@@ -64,10 +80,26 @@ dmg_serial_import(
 
 	TRACE(LEVEL_INFORMATION, "Serial importing");
 
-	// TODO
+	if((result = dmg_service_import_data(file, &serial->control, sizeof(serial->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
+	if((result = dmg_service_import_data(file, &serial->cycle, sizeof(serial->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &serial->data, sizeof(serial->data))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &serial->remaining, sizeof(serial->remaining))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial imported");
 
+exit:
 	return result;
 }
 

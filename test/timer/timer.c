@@ -22,6 +22,14 @@
 
 typedef struct {
 	dmg_t configuration;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 	dmg_timer_t timer;
 	bool interrupt;
 } dmg_timer_test_t;
@@ -38,6 +46,34 @@ dmg_runtime_interrupt(
 	)
 {
 	g_timer.interrupt = (type == INTERRUPT_TIMER);
+}
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_timer.export_file = file;
+	g_timer.export_data = data;
+	g_timer.export_length = length;
+
+	return g_timer.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_timer.import_file = file;
+	g_timer.import_data = data;
+	g_timer.import_length = length;
+
+	return g_timer.import;
 }
 
 static void
