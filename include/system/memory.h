@@ -27,7 +27,7 @@ typedef struct {
 	dmg_mapper_t mapper;
 	dmg_buffer_t ram;
 	dmg_buffer_t ram_high;
-} dmg_memory_t;
+} __attribute__((packed)) dmg_memory_t;
 
 #ifdef __cplusplus
 extern "C" {

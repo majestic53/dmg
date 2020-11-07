@@ -20,6 +20,7 @@
 #define DMG_TYPE_MAPPER_TYPE_H_
 
 #include "../../include/type/mapper.h"
+#include "../../include/service.h"
 
 enum {
 	MAPPER_ROM_ONLY = 0,

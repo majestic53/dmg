@@ -67,7 +67,7 @@ typedef struct {
 	void *data;
 	/* Data length */
 	unsigned length;
-} dmg_buffer_t;
+} __attribute__((packed)) dmg_buffer_t;
 
 /**
  * Version struct
@@ -79,7 +79,7 @@ typedef struct {
 	unsigned minor;
 	/* Patch version */
 	unsigned patch;
-} dmg_version_t;
+} __attribute__((packed)) dmg_version_t;
 
 /**
  * Configuration struct
@@ -103,7 +103,7 @@ typedef struct {
 	char *save_in;
 	/* Output save file path */
 	char *save_out;
-} dmg_t;
+} __attribute__((packed)) dmg_t;
 
 #ifdef __cplusplus
 extern "C" {

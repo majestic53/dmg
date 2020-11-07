@@ -50,11 +50,21 @@ typedef struct {
 	bool enable;
 	dmg_bank_t ram;
 	dmg_bank_t rom;
-} dmg_cartridge_t;
+} __attribute__((packed)) dmg_cartridge_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+int dmg_cartridge_export(
+	__in const dmg_cartridge_t *cartridge,
+	__in FILE *file
+	);
+
+int dmg_cartridge_import(
+	__inout dmg_cartridge_t *cartridge,
+	__in FILE *file
+	);
 
 int dmg_cartridge_load(
 	__inout dmg_cartridge_t *cartridge,

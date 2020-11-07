@@ -20,6 +20,7 @@
 #define DMG_TYPE_CARTRIDGE_TYPE_H_
 
 #include "../../include/type/cartridge.h"
+#include "../../include/service.h"
 
 #define HEADER_BEGIN 0x0100
 #define HEADER_CHECKSUM_BEGIN 0x0134

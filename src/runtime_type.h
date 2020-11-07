@@ -29,9 +29,6 @@
 #include "../include/service.h"
 
 typedef struct {
-	uint32_t cycle;
-	uint32_t cycle_last;
-	const dmg_t *configuration;
 	dmg_joypad_t joypad;
 	dmg_memory_t memory;
 	dmg_processor_t processor;
@@ -41,6 +38,6 @@ typedef struct {
 
 	// TODO: ADD SUBSYSTEMS
 
-} dmg_runtime_t;
+} __attribute__((packed)) dmg_runtime_t;
 
 #endif /* DMG_RUNTIME_TYPE_H_ */

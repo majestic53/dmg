@@ -302,11 +302,85 @@ dmg_video_export(
 	TRACE(LEVEL_INFORMATION, "Video exporting");
 	TRACE_VIDEO(LEVEL_VERBOSE, video);
 
-	// TODO
+	if((result = dmg_service_export_data(file, &video->background, sizeof(video->background))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->cycle, sizeof(video->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->control, sizeof(video->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->line, sizeof(video->line))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->line_coincidence, sizeof(video->line_coincidence))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->object_0, sizeof(video->object_0))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->object_1, sizeof(video->object_1))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t address = 0; address < video->ram.length; ++address) {
+
+		if((result = dmg_service_export_data(file, &((uint8_t *)video->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	for(uint32_t address = 0; address < video->ram_sprite.length; ++address) {
+
+		if((result = dmg_service_export_data(file, &((uint8_t *)video->ram_sprite.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	if((result = dmg_service_export_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
+
+		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
+
+			for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
+
+				if((result = dmg_service_export_data(file, &video->viewport[viewport][y][x],
+						sizeof(video->viewport[viewport][y][x]))) != ERROR_SUCCESS) {
+					goto exit;
+				}
+			}
+		}
+	}
+
+	if((result = dmg_service_export_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE(LEVEL_INFORMATION, "Video exported");
 
-//exit:
+exit:
 	return result;
 }
 
@@ -320,12 +394,86 @@ dmg_video_import(
 
 	TRACE(LEVEL_INFORMATION, "Video importing");
 
-	// TODO
+	if((result = dmg_service_import_data(file, &video->background, sizeof(video->background))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->cycle, sizeof(video->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->control, sizeof(video->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->line, sizeof(video->line))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->line_coincidence, sizeof(video->line_coincidence))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->object_0, sizeof(video->object_0))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->object_1, sizeof(video->object_1))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t address = 0; address < video->ram.length; ++address) {
+
+		if((result = dmg_service_import_data(file, &((uint8_t *)video->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	for(uint32_t address = 0; address < video->ram_sprite.length; ++address) {
+
+		if((result = dmg_service_import_data(file, &((uint8_t *)video->ram_sprite.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	if((result = dmg_service_import_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
+
+		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
+
+			for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
+
+				if((result = dmg_service_import_data(file, &video->viewport[viewport][y][x],
+						sizeof(video->viewport[viewport][y][x]))) != ERROR_SUCCESS) {
+					goto exit;
+				}
+			}
+		}
+	}
+
+	if((result = dmg_service_import_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE_VIDEO(LEVEL_VERBOSE, video);
 	TRACE(LEVEL_INFORMATION, "Video imported");
 
-//exit:
+exit:
 	return result;
 }
 

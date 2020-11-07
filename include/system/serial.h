@@ -30,7 +30,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_serial_control_t;
+} __attribute__((packed)) dmg_serial_control_t;
 
 typedef union {
 
@@ -41,7 +41,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_serial_data_t;
+} __attribute__((packed)) dmg_serial_data_t;
 
 typedef struct {
 	dmg_serial_control_t control;
@@ -49,7 +49,7 @@ typedef struct {
 	dmg_serial_data_t data;
 	uint8_t remaining;
 	dmg_serial_transfer transfer;
-} dmg_serial_t;
+} __attribute__((packed)) dmg_serial_t;
 
 #ifdef __cplusplus
 extern "C" {

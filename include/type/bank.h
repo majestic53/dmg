@@ -24,7 +24,7 @@
 typedef struct {
 	dmg_buffer_t *buffer;
 	uint32_t count;
-} dmg_bank_t;
+} __attribute__((packed)) dmg_bank_t;
 
 #ifdef __cplusplus
 extern "C" {

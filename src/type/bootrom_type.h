@@ -20,6 +20,7 @@
 #define DMG_TYPE_BOOTROM_TYPE_H_
 
 #include "../../include/type/bootrom.h"
+#include "../../include/service.h"
 
 #define BOOTROM_CHECKSUM 0x626e
 #define BOOTROM_WIDTH ADDRESS_WIDTH(ADDRESS_BOOTROM_BEGIN, ADDRESS_BOOTROM_END)

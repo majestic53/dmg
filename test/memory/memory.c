@@ -48,6 +48,24 @@ extern "C" {
 #endif /* __cplusplus */
 
 int
+dmg_bootrom_export(
+	__in const dmg_bootrom_t *bootrom,
+	__in FILE *file
+	)
+{
+	return ERROR_SUCCESS;
+}
+
+int
+dmg_bootrom_import(
+	__inout dmg_bootrom_t *bootrom,
+	__in FILE *file
+	)
+{
+	return ERROR_SUCCESS;
+}
+
+int
 dmg_bootrom_load(
 	__inout dmg_bootrom_t *bootrom,
 	__in const dmg_buffer_t *buffer
@@ -104,6 +122,24 @@ dmg_buffer_free(
 	)
 {
 	return;
+}
+
+int
+dmg_mapper_export(
+	__in const dmg_mapper_t *mapper,
+	__in FILE *file
+	)
+{
+	return ERROR_SUCCESS;
+}
+
+int
+dmg_mapper_import(
+	__inout dmg_mapper_t *mapper,
+	__in FILE *file
+	)
+{
+	return ERROR_SUCCESS;
 }
 
 int

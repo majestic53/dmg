@@ -35,7 +35,7 @@ typedef struct {
 	};
 
 	int mode;
-} dmg_mbc1_t;
+} __attribute__((packed)) dmg_mbc1_t;
 
 typedef union {
 
@@ -45,7 +45,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_mbc3_t;
+} __attribute__((packed)) dmg_mbc3_t;
 
 typedef union {
 
@@ -56,7 +56,7 @@ typedef union {
 	};
 
 	uint16_t raw;
-} dmg_mbc5_t;
+} __attribute__((packed)) dmg_mbc5_t;
 
 typedef struct {
 
@@ -64,17 +64,27 @@ typedef struct {
 		dmg_mbc1_t mbc1;
 		dmg_mbc3_t mbc3;
 		dmg_mbc5_t mbc5;
-	};
+	} map;
 
 	dmg_cartridge_t cartridge;
 	uint32_t ram;
 	uint32_t rom;
 	uint32_t rom_swap;
-} dmg_mapper_t;
+} __attribute__((packed)) dmg_mapper_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+int dmg_mapper_export(
+	__in const dmg_mapper_t *mapper,
+	__in FILE *file
+	);
+
+int dmg_mapper_import(
+	__inout dmg_mapper_t *mapper,
+	__in FILE *file
+	);
 
 int dmg_mapper_load(
 	__inout dmg_mapper_t *mapper,

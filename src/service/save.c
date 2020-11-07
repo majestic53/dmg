@@ -52,11 +52,11 @@ dmg_service_export(
 	__in const char *path
 	)
 {
-	uint32_t length;
 	FILE *file = NULL;
+	uint16_t checksum = 0;
 	int result = ERROR_SUCCESS;
+	uint32_t address = 0, length;
 	dmg_save_header_t header = {};
-	uint16_t address = 0, checksum = 0;
 
 	if(path) {
 		TRACE_FORMAT(LEVEL_INFORMATION, "Save file exporting: %s", path);
@@ -82,7 +82,7 @@ dmg_service_export(
 		length = (ftell(file) - sizeof(dmg_save_header_t));
 		fseek(file, offsetof(dmg_save_header_t, length), SEEK_SET);
 
-		if(fwrite(&length, sizeof(length), 1, file) != 1) {
+		if(fwrite(&length, sizeof(length), sizeof(uint8_t), file) != sizeof(uint8_t)) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to write to save file: %s", path);
 			goto exit;
 		}
@@ -92,7 +92,7 @@ dmg_service_export(
 		for(; address < (length + sizeof(dmg_save_header_t)); ++address) {
 			uint8_t value;
 
-			if(fread(&value, sizeof(value), 1, file) != 1) {
+			if(fread(&value, sizeof(value), sizeof(uint8_t), file) != sizeof(uint8_t)) {
 				result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to read from save file: %s", path);
 				goto exit;
 			}
@@ -102,7 +102,7 @@ dmg_service_export(
 
 		fseek(file, 0, SEEK_END);
 
-		if(fwrite(&checksum, sizeof(checksum), 1, file) != 1) {
+		if(fwrite(&checksum, sizeof(checksum), sizeof(uint8_t), file) != sizeof(uint8_t)) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to write to save file: %s", path);
 			goto exit;
 		}
@@ -187,11 +187,28 @@ dmg_service_import(
 		header = (const dmg_save_header_t *)buffer.data;
 		TRACE_SAVE(LEVEL_VERBOSE, header);
 
-		if((header->magic != SAVE_MAGIC)
-				|| (header->version != SAVE_VERSION)
-				|| (header->length != buffer.length - (sizeof(dmg_save_header_t) + sizeof(uint16_t)))
-				|| (expected != checksum)) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file header mismatch: %s", path);
+		if(header->magic != SAVE_MAGIC) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file magic number mismatch: %s (%u != %u)", path,
+					header->magic, SAVE_MAGIC);
+			goto exit;
+		}
+
+		if(header->version != SAVE_VERSION) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file version mismatch: %s (%u != %u)", path,
+					header->version, SAVE_VERSION);
+			goto exit;
+		}
+
+		length = (buffer.length - (sizeof(dmg_save_header_t) + sizeof(uint16_t)));
+		if(header->length != length) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file length mismatch: %s (%u != %u)", path,
+					header->length, length);
+			goto exit;
+		}
+
+		if(expected != checksum) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file checksum mismatch: %s (%04x != %04x)", path,
+					expected, checksum);
 			goto exit;
 		}
 

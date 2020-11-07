@@ -97,7 +97,7 @@ typedef struct {
 	dmg_processor_register_t pc;
 	dmg_processor_register_t sp;
 	bool stop;
-} dmg_processor_t;
+} __attribute__((packed)) dmg_processor_t;
 
 #ifdef __cplusplus
 extern "C" {

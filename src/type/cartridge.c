@@ -25,14 +25,14 @@ extern "C" {
 int
 dmg_cartridge_validate(
 	__in const dmg_buffer_t *buffer,
-	__out const dmg_cartridge_header_t **header,
 	__out uint32_t *rom,
 	__out uint32_t *ram
 	)
 {
-	uint16_t checksum;
+	uint16_t checksum = 0;
 	uint32_t address, length;
 	int result = ERROR_SUCCESS;
+	const dmg_cartridge_header_t *header;
 
 	if(!buffer) {
 		result = ERROR_SET(ERROR_INVALID, "Cartridge is NULL");
@@ -50,29 +50,28 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	*header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
-	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", (*header)->title);
+	header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", header->title);
 
-	checksum = 0;
 	for(address = HEADER_CHECKSUM_BEGIN; address <= HEADER_CHECKSUM_END; ++address) {
 		checksum = (checksum - ((uint8_t *)buffer->data)[address] - 1);
 	}
 
-	if((checksum &= UINT8_MAX) != (*header)->checksum) {
+	if((checksum &= UINT8_MAX) != header->checksum) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge checksum mismatch: %02x (expecting %02x)",
-				checksum, (*header)->checksum);
+				checksum, header->checksum);
 		goto exit;
 	}
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum=%02x", checksum);
 
-	if((*header)->rom >= ROM_MAX) {
+	if(header->rom >= ROM_MAX) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge rom type unsupported: %u (expecting < %u)",
-				(*header)->rom, ROM_MAX);
+				header->rom, ROM_MAX);
 		goto exit;
 	}
 
-	*rom = ROM_BANK[(*header)->rom];
+	*rom = ROM_BANK[header->rom];
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks=%u", *rom);
 
 	if((length = (ROM_WIDTH * *rom)) != buffer->length) {
@@ -81,14 +80,80 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	if((*header)->ram >= RAM_MAX) {
+	if(header->ram >= RAM_MAX) {
 		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge ram type unsupported: %u (expecting < %u)",
-				(*header)->ram, RAM_MAX);
+				header->ram, RAM_MAX);
 		goto exit;
 	}
 
-	*ram = RAM_BANK[(*header)->ram];
+	*ram = RAM_BANK[header->ram];
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram banks=%u", *ram);
+
+exit:
+	return result;
+}
+
+int
+dmg_cartridge_export(
+	__in const dmg_cartridge_t *cartridge,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Cartridge exporting");
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge enable=%x", cartridge->enable);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u]", cartridge->ram.count);
+
+	if((result = dmg_service_export_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t bank = 0; bank < cartridge->ram.count; ++bank) {
+
+		for(uint32_t address = 0; address < cartridge->ram.buffer[bank].length; ++address) {
+
+			if((result = dmg_service_export_data(file, &((uint8_t *)cartridge->ram.buffer[bank].data)[address], sizeof(uint8_t)))
+					!= ERROR_SUCCESS) {
+				goto exit;
+			}
+		}
+	}
+
+	TRACE(LEVEL_INFORMATION, "Cartridge exported");
+
+exit:
+	return result;
+}
+
+int
+dmg_cartridge_import(
+	__inout dmg_cartridge_t *cartridge,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Cartridge importing");
+
+	if((result = dmg_service_import_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t bank = 0; bank < cartridge->ram.count; ++bank) {
+
+		for(uint32_t address = 0; address < cartridge->ram.buffer[bank].length; ++address) {
+
+			if((result = dmg_service_import_data(file, &((uint8_t *)cartridge->ram.buffer[bank].data)[address], sizeof(uint8_t)))
+					!= ERROR_SUCCESS) {
+				goto exit;
+			}
+		}
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge enable=%x", cartridge->enable);
+	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u]", cartridge->ram.count);
+	TRACE(LEVEL_INFORMATION, "Cartridge imported");
 
 exit:
 	return result;
@@ -105,9 +170,11 @@ dmg_cartridge_load(
 
 	TRACE(LEVEL_INFORMATION, "Cartridge loading");
 
-	if((result = dmg_cartridge_validate(buffer, &cartridge->header, &rom, &ram)) != ERROR_SUCCESS) {
+	if((result = dmg_cartridge_validate(buffer, &rom, &ram)) != ERROR_SUCCESS) {
 		goto exit;
 	}
+
+	cartridge->header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
 
 	if((result = dmg_bank_allocate(&cartridge->rom, rom)) != ERROR_SUCCESS) {
 		goto exit;

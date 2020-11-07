@@ -34,14 +34,14 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_joypad_state_t;
+} __attribute__((packed)) dmg_joypad_state_t;
 
 typedef struct {
 	uint32_t cycle;
 	bool button[DMG_BUTTON_MAX];
 	bool direction[DMG_DIRECTION_MAX];
 	dmg_joypad_state_t state;
-} dmg_joypad_t;
+} __attribute__((packed)) dmg_joypad_t;
 
 #ifdef __cplusplus
 extern "C" {

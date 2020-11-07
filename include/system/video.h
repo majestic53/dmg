@@ -41,7 +41,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_video_control_t;
+} __attribute__((packed)) dmg_video_control_t;
 
 typedef union {
 
@@ -53,7 +53,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_video_palette_t;
+} __attribute__((packed)) dmg_video_palette_t;
 
 typedef union {
 
@@ -68,13 +68,13 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_video_status_t;
+} __attribute__((packed)) dmg_video_status_t;
 
 typedef struct {
 	bool enable;
 	uint16_t destination;
 	uint16_t source;
-} dmg_video_transfer_t;
+} __attribute__((packed)) dmg_video_transfer_t;
 
 typedef struct {
 	dmg_video_palette_t background;
@@ -93,7 +93,7 @@ typedef struct {
 	uint8_t viewport[VIEWPORT_MAX][VIEWPORT_HEIGHT][VIEWPORT_WIDTH];
 	uint8_t window_x;
 	uint8_t window_y;
-} dmg_video_t;
+} __attribute__((packed)) dmg_video_t;
 
 #ifdef __cplusplus
 extern "C" {

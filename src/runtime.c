@@ -18,6 +18,12 @@
 
 #include "./runtime_type.h"
 
+static uint32_t g_cycle = 0;
+
+static uint32_t g_cycle_last = 0;
+
+static const dmg_t *g_configuration = NULL;
+
 static dmg_runtime_t g_runtime = {};
 
 #ifdef __cplusplus
@@ -121,39 +127,39 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	g_runtime.configuration = configuration;
+	g_configuration = configuration;
 
-	if((result = dmg_joypad_load(&g_runtime.joypad, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_joypad_load(&g_runtime.joypad, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_load(&g_runtime.processor, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_load(&g_runtime.processor, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_load(&g_runtime.serial, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_load(&g_runtime.serial, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_load(&g_runtime.timer, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_timer_load(&g_runtime.timer, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_load(&g_runtime.video, g_runtime.configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_video_load(&g_runtime.video, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
 	// TODO: LOAD SUBSYSTEMS
 
-	if((result = dmg_service_load(g_runtime.configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
+	if((result = dmg_service_load(g_configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import(dmg_runtime_import, g_runtime.configuration->save_in)) != ERROR_SUCCESS) {
+	if((result = dmg_service_import(dmg_runtime_import, g_configuration->save_in)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -169,8 +175,8 @@ dmg_runtime_loop(void)
 	int result = EXIT_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
-	g_runtime.cycle = 0;
-	g_runtime.cycle_last = 0;
+	g_cycle = 0;
+	g_cycle_last = 0;
 
 	for(;;) {
 
@@ -180,15 +186,15 @@ dmg_runtime_loop(void)
 		}
 
 		do {
-			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
-			dmg_joypad_step(&g_runtime.joypad, g_runtime.cycle_last);
-			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
-			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
+			g_cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
+			dmg_serial_step(&g_runtime.serial, g_cycle_last);
+			dmg_timer_step(&g_runtime.timer, g_cycle_last);
 
 			// TODO: LOOP SUBSYSTEMS
 
-			g_runtime.cycle += g_runtime.cycle_last;
-		} while(!dmg_video_step(&g_runtime.video, g_runtime.cycle_last));
+			g_cycle += g_cycle_last;
+		} while(!dmg_video_step(&g_runtime.video, g_cycle_last));
 
 		dmg_service_sync();
 	}
@@ -202,7 +208,7 @@ static void
 dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
-	dmg_service_export(dmg_runtime_export, g_runtime.configuration->save_out);
+	dmg_service_export(dmg_runtime_export, g_configuration->save_out);
 	dmg_service_unload();
 
 	// TODO: UNLOAD SUBSYSTEMS
@@ -224,7 +230,7 @@ dmg_runtime(
 {
 	int result;
 
-	TRACE_ENABLE(&g_runtime.cycle);
+	TRACE_ENABLE(&g_cycle);
 	ERROR_CLEAR();
 
 	if((result = dmg_runtime_load(configuration)) == ERROR_SUCCESS) {

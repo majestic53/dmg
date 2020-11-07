@@ -23,6 +23,48 @@ extern "C" {
 #endif /* __cplusplus */
 
 int
+dmg_bootrom_export(
+	__in const dmg_bootrom_t *bootrom,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Bootrom exporting");
+	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom enable=%x", bootrom->enable);
+
+	if((result = dmg_service_export_data(file, &bootrom->enable, sizeof(bootrom->enable))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE(LEVEL_INFORMATION, "Bootrom exported");
+
+exit:
+	return result;
+}
+
+int
+dmg_bootrom_import(
+	__inout dmg_bootrom_t *bootrom,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Bootrom importing");
+
+	if((result = dmg_service_import_data(file, &bootrom->enable, sizeof(bootrom->enable))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom enable=%x", bootrom->enable);
+	TRACE(LEVEL_INFORMATION, "Bootrom imported");
+
+exit:
+	return result;
+}
+
+int
 dmg_bootrom_validate(
 	__in const dmg_buffer_t *buffer
 	)

@@ -24,11 +24,21 @@
 typedef struct {
 	const dmg_buffer_t *buffer;
 	bool enable;
-} dmg_bootrom_t;
+} __attribute__((packed)) dmg_bootrom_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+int dmg_bootrom_export(
+	__in const dmg_bootrom_t *bootrom,
+	__in FILE *file
+	);
+
+int dmg_bootrom_import(
+	__inout dmg_bootrom_t *bootrom,
+	__in FILE *file
+	);
 
 int dmg_bootrom_load(
 	__inout dmg_bootrom_t *bootrom,

@@ -27,7 +27,7 @@ extern "C" {
 static void
 dmg_mapper_trace(
 	__in int level,
-	__inout dmg_mapper_t *mapper
+	__inout const dmg_mapper_t *mapper
 	)
 {
 	TRACE_FORMAT(level, "Mapper type=%u", mapper->cartridge.header->mapper);
@@ -48,16 +48,16 @@ dmg_mapper_mbc1_write(
 
 	switch(address) {
 		case ADDRESS_MBC1_MODE_BEGIN ... ADDRESS_MBC1_MODE_END:
-			mapper->mbc1.mode = value;
+			mapper->map.mbc1.mode = value;
 			break;
 		case ADDRESS_MBC1_RAM_ENABLE_BEGIN ... ADDRESS_MBC1_RAM_ENABLE_END:
 			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
 			break;
 		case ADDRESS_MBC1_ROM_LOWER_BEGIN ... ADDRESS_MBC1_ROM_LOWER_END:
-			mapper->mbc1.lower = value;
+			mapper->map.mbc1.lower = value;
 			break;
 		case ADDRESS_MBC1_ROM_UPPER_BEGIN ... ADDRESS_MBC1_ROM_UPPER_END:
-			mapper->mbc1.upper = value;
+			mapper->map.mbc1.upper = value;
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC1 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
@@ -65,20 +65,20 @@ dmg_mapper_mbc1_write(
 			break;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode=%i", mapper->mbc1.mode);
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks={%02x, %02x}, %02x", mapper->mbc1.lower, mapper->mbc1.upper, mapper->mbc1.raw);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 mode=%i", mapper->map.mbc1.mode);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC1 banks={%02x, %02x}, %02x", mapper->map.mbc1.lower, mapper->map.mbc1.upper, mapper->map.mbc1.raw);
 
-	switch(mapper->mbc1.mode) {
+	switch(mapper->map.mbc1.mode) {
 		case MBC1_MODE_RAM:
-			mapper->ram = mapper->mbc1.upper;
-			mapper->rom_swap = mapper->mbc1.lower;
+			mapper->ram = mapper->map.mbc1.upper;
+			mapper->rom_swap = mapper->map.mbc1.lower;
 			break;
 		case MBC1_MODE_ROM:
 			mapper->ram = 0;
-			mapper->rom_swap = mapper->mbc1.raw;
+			mapper->rom_swap = mapper->map.mbc1.raw;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mbc1 mode %u", mapper->mbc1.mode);
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mbc1 mode %u", mapper->map.mbc1.mode);
 			break;
 	}
 
@@ -113,7 +113,7 @@ dmg_mapper_mbc3_write(
 			mapper->ram = ((value & MBC3_RAM_MASK) % mapper->cartridge.ram.count);
 			break;
 		case ADDRESS_MBC3_ROM_BEGIN ... ADDRESS_MBC3_ROM_END:
-			mapper->mbc3.rom = value;
+			mapper->map.mbc3.rom = value;
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
@@ -121,9 +121,9 @@ dmg_mapper_mbc3_write(
 			break;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC3 bank=%02x", mapper->mbc3.rom);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC3 bank=%02x", mapper->map.mbc3.rom);
 
-	if(!(mapper->rom_swap = (mapper->mbc3.rom % mapper->cartridge.rom.count))) {
+	if(!(mapper->rom_swap = (mapper->map.mbc3.rom % mapper->cartridge.rom.count))) {
 		++mapper->rom_swap;
 	}
 }
@@ -144,10 +144,10 @@ dmg_mapper_mbc5_write(
 			mapper->ram = ((value & MBC5_RAM_MASK) % mapper->cartridge.ram.count);
 			break;
 		case ADDRESS_MBC5_ROM_LOWER_BEGIN ... ADDRESS_MBC5_ROM_LOWER_END:
-			mapper->mbc5.lower = value;
+			mapper->map.mbc5.lower = value;
 			break;
 		case ADDRESS_MBC5_ROM_UPPER_BEGIN ... ADDRESS_MBC5_ROM_UPPER_END:
-			mapper->mbc5.upper = value;
+			mapper->map.mbc5.upper = value;
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC5 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
@@ -155,8 +155,82 @@ dmg_mapper_mbc5_write(
 			break;
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "MBC5 banks={%02x, %02x}, %02x", mapper->mbc5.lower, mapper->mbc5.upper, mapper->mbc5.raw & MBC5_ROM_MASK);
-	mapper->rom_swap = ((mapper->mbc5.raw & MBC5_ROM_MASK) % mapper->cartridge.rom.count);
+	TRACE_FORMAT(LEVEL_VERBOSE, "MBC5 banks={%02x, %02x}, %02x", mapper->map.mbc5.lower, mapper->map.mbc5.upper, mapper->map.mbc5.raw & MBC5_ROM_MASK);
+	mapper->rom_swap = ((mapper->map.mbc5.raw & MBC5_ROM_MASK) % mapper->cartridge.rom.count);
+}
+
+int
+dmg_mapper_export(
+	__in const dmg_mapper_t *mapper,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Mapper exporting");
+	TRACE_MAPPER(LEVEL_VERBOSE, mapper);
+
+	if((result = dmg_service_export_data(file, &mapper->map, sizeof(mapper->map))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_cartridge_export(&mapper->cartridge, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &mapper->ram, sizeof(mapper->ram))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &mapper->rom, sizeof(mapper->rom))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE(LEVEL_INFORMATION, "Mapper exported");
+
+exit:
+	return result;
+}
+
+int
+dmg_mapper_import(
+	__inout dmg_mapper_t *mapper,
+	__in FILE *file
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	TRACE(LEVEL_INFORMATION, "Mapper importing");
+
+	if((result = dmg_service_import_data(file, &mapper->map, sizeof(mapper->map))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_cartridge_import(&mapper->cartridge, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &mapper->ram, sizeof(mapper->ram))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &mapper->rom, sizeof(mapper->rom))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE_MAPPER(LEVEL_VERBOSE, mapper);
+	TRACE(LEVEL_INFORMATION, "Mapper imported");
+
+exit:
+	return result;
 }
 
 int

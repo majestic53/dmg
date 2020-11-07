@@ -31,7 +31,7 @@ typedef union {
 	};
 
 	uint8_t raw;
-} dmg_timer_control_t;
+} __attribute__((packed)) dmg_timer_control_t;
 
 typedef union {
 
@@ -41,7 +41,7 @@ typedef union {
 	};
 
 	uint16_t raw;
-} dmg_timer_divider_t;
+} __attribute__((packed)) dmg_timer_divider_t;
 
 typedef struct {
 	dmg_timer_control_t control;
@@ -49,7 +49,7 @@ typedef struct {
 	uint32_t cycle;
 	dmg_timer_divider_t divider;
 	uint8_t modulo;
-} dmg_timer_t;
+} __attribute__((packed)) dmg_timer_t;
 
 #ifdef __cplusplus
 extern "C" {
