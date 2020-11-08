@@ -22,11 +22,6 @@
 #include "../../include/type/cartridge.h"
 #include "../../include/service.h"
 
-#define HEADER_BEGIN 0x0100
-#define HEADER_CHECKSUM_BEGIN 0x0134
-#define HEADER_CHECKSUM_END 0x014c
-#define HEADER_END 0x014f
-
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_BEGIN, ADDRESS_RAM_END)
 #define ROM_WIDTH ADDRESS_WIDTH(ADDRESS_ROM_BEGIN, ADDRESS_ROM_END)
 

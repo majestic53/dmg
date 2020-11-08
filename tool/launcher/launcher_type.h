@@ -19,25 +19,7 @@
 #ifndef DMG_TOOL_LAUNCHER_TYPE_H_
 #define DMG_TOOL_LAUNCHER_TYPE_H_
 
-#include <SDL2/SDL.h>
-#include <getopt.h>
-#include <limits.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include "../include/dmg.h"
-
-#ifndef __in
-#define __in
-#endif /* __in */
-#ifndef __inout
-#define __inout
-#endif /* __inout */
-#ifndef __out
-#define __out
-#endif /* __out */
+#include "../include/file.h"
 
 #define DATA_MASK 1
 #define DATA_SHIFT 1

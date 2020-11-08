@@ -50,10 +50,10 @@ dmg_cartridge_validate(
 		goto exit;
 	}
 
-	header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
+	header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[ADDRESS_HEADER_BEGIN]);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge title=%s", header->title);
 
-	for(address = HEADER_CHECKSUM_BEGIN; address <= HEADER_CHECKSUM_END; ++address) {
+	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
 		checksum = (checksum - ((uint8_t *)buffer->data)[address] - 1);
 	}
 
@@ -188,7 +188,7 @@ dmg_cartridge_load(
 		goto exit;
 	}
 
-	cartridge->header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[HEADER_BEGIN]);
+	cartridge->header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[ADDRESS_HEADER_BEGIN]);
 
 	if((result = dmg_bank_allocate(&cartridge->rom, rom)) != ERROR_SUCCESS) {
 		goto exit;

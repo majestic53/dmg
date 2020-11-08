@@ -258,8 +258,8 @@ dmg_mapper_load(
 		case MAPPER_MBC5_RAM:
 		case MAPPER_MBC5_RAM_BATTERY:
 		case MAPPER_MBC5_RUMBLE:
-		case MAPPER_MBC5_RUMBLE_SRAM:
-		case MAPPER_MBC5_RUMBLE_SRAM_BATTERY:
+		case MAPPER_MBC5_RUMBLE_RAM:
+		case MAPPER_MBC5_RUMBLE_RAM_BATTERY:
 			mapper->ram = 0;
 			mapper->rom = 0;
 			mapper->rom_swap = (mapper->rom + 1);
@@ -378,8 +378,8 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC5_RAM:
 		case MAPPER_MBC5_RAM_BATTERY:
 		case MAPPER_MBC5_RUMBLE:
-		case MAPPER_MBC5_RUMBLE_SRAM:
-		case MAPPER_MBC5_RUMBLE_SRAM_BATTERY:
+		case MAPPER_MBC5_RUMBLE_RAM:
+		case MAPPER_MBC5_RUMBLE_RAM_BATTERY:
 			dmg_mapper_mbc5_write(mapper, address, value);
 			break;
 		default:
