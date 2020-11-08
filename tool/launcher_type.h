@@ -42,6 +42,10 @@
 #define DATA_MASK 1
 #define DATA_SHIFT 1
 
+#define DEFAULT_PALETTE PALETTE_GREY
+#define DEFAULT_SCALE 1
+#define DEFAULT_TRANSFER NULL
+
 #define DMG "DMG"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
 #define DMG_USAGE "dmg [args]"
@@ -187,9 +191,5 @@ static const uint32_t PALETTE[][DMG_PALETTE_MAX] = {
 			0x1b0326, /* DMG_PALETTE_BLACK */
 		},
 	};
-
-#define SCALE 1
-
-#define TRANSFER NULL
 
 #endif /* DMG_TOOL_LAUNCHER_TYPE_H_ */

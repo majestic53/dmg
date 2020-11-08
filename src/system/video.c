@@ -135,22 +135,23 @@ dmg_video_scanline_background(
 	__in dmg_video_t *video
 	)
 {
-	uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
-	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
-								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 
-	for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
-		uint8_t px, value;
-
-		if(!(px = (x % TILE_WIDTH))) {
-			tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+	if(video->control.background) {
+		uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
+		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+
+		for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
+			uint8_t px, value;
+
+			if(!(px = (x % TILE_WIDTH))) {
+				tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+			}
+
+			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
+			video->viewport[VIEWPORT_BACKGROUND][y - video->screen_y][x - video->screen_x] = dmg_video_palette_color(&video->background, value);
 		}
-
-		value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
-			| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-
-		video->viewport[VIEWPORT_BACKGROUND][y - video->screen_y][x - video->screen_x] = dmg_video_palette_color(&video->background, value);
 	}
 }
 
@@ -159,7 +160,12 @@ dmg_video_scanline_sprite(
 	__in dmg_video_t *video
 	)
 {
-	// TODO: RENDER SPRITE SCANLINE
+
+	if(video->control.sprite) {
+
+		// TODO: RENDER SPRITE SCANLINE
+
+	}
 }
 
 static void
@@ -167,23 +173,27 @@ dmg_video_scanline_window(
 	__in dmg_video_t *video
 	)
 {
-	uint32_t x = (video->window_x - (TILE_WIDTH - 1)), y = (video->window_y + video->line),
-		py = (y % TILE_HEIGHT);
-	const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
-								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 
-	for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
-		uint8_t px, value;
-
-		if(!(px = (x % TILE_WIDTH))) {
-			tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+	if(video->control.window && (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
+		uint32_t x = 0, y = video->line, py = (y % TILE_HEIGHT);
+		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+
+		for(; x < (VIEWPORT_WIDTH - (video->window_x - (TILE_WIDTH - 1))); ++x) {
+			uint8_t px, value;
+
+			if(!(px = (x % TILE_WIDTH))) {
+				tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+			}
+
+			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
+
+			if((y + video->window_y) < LINE_HBLANK_MAX) {
+				video->viewport[VIEWPORT_BACKGROUND][y + video->window_y][x + (video->window_x - (TILE_WIDTH - 1))]
+					= dmg_video_palette_color(&video->background, value);
+			}
 		}
-
-		value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1)
-			| ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-
-		video->viewport[VIEWPORT_BACKGROUND][y][x] = dmg_video_palette_color(&video->background, value);
 	}
 }
 
@@ -239,24 +249,11 @@ dmg_video_transfer(
 	}
 
 	if(video->control.enable) {
-
-		if(video->control.background) {
 #ifndef UNITTEST
-			dmg_video_scanline_background(video);
+		dmg_video_scanline_background(video);
+		dmg_video_scanline_window(video);
+		dmg_video_scanline_sprite(video);
 #endif /* UNITTEST */
-		}
-
-		if(video->control.window && (video->line >= video->window_y)) {
-#ifndef UNITTEST
-			dmg_video_scanline_window(video);
-#endif /* UNITTEST */
-		}
-
-		if(video->control.sprite) {
-#ifndef UNITTEST
-			dmg_video_scanline_sprite(video);
-#endif /* UNITTEST */
-		}
 	}
 
 	return false;

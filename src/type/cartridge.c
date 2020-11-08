@@ -105,6 +105,10 @@ dmg_cartridge_export(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge enable=%x", cartridge->enable);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u]", cartridge->ram.count);
 
+	if((result = dmg_service_export_data(file, &cartridge->header->checksum, sizeof(cartridge->header->checksum))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	if((result = dmg_service_export_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
 		goto exit;
 	}
@@ -132,9 +136,19 @@ dmg_cartridge_import(
 	__in FILE *file
 	)
 {
+	uint8_t checksum;
 	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Cartridge importing");
+
+	if((result = dmg_service_import_data(file, &checksum, sizeof(checksum))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if(checksum != cartridge->header->checksum) {
+		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge checksum mismatch: %02x != %02x", checksum, cartridge->header->checksum);
+		goto exit;
+	}
 
 	if((result = dmg_service_import_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
 		goto exit;

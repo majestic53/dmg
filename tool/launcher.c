@@ -146,39 +146,16 @@ exit:
 }
 
 static void
-dmg_launcher_setup(void)
-{
-	memcpy(g_launcher.configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
-	memcpy(g_launcher.configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
-
-	if(g_launcher.palette >= PALETTE_MAX) {
-		g_launcher.palette = PALETTE_GREY;
-	}
-
-	memcpy(g_launcher.configuration.palette, &(PALETTE[g_launcher.palette]), sizeof(uint32_t) * DMG_PALETTE_MAX);
-
-	if(!g_launcher.configuration.scale) {
-		g_launcher.configuration.scale = SCALE;
-	}
-
-	if(!g_launcher.configuration.transfer) {
-		g_launcher.configuration.transfer = TRANSFER;
-	}
-}
-
-static void
-dmg_launcher_unload(void)
+dmg_launcher_unload(
+	__inout dmg_buffer_t *buffer
+	)
 {
 
-	if(g_launcher.configuration.rom.data) {
-		free(g_launcher.configuration.rom.data);
+	if(buffer->data) {
+		free(buffer->data);
 	}
 
-	if(g_launcher.configuration.bootrom.data) {
-		free(g_launcher.configuration.bootrom.data);
-	}
-
-	memset(&g_launcher, 0, sizeof(g_launcher));
+	memset(buffer, 0, sizeof(*buffer));
 }
 
 static void
@@ -241,6 +218,8 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
+	g_launcher.palette = DEFAULT_PALETTE;
+
 	if((result = dmg_launcher_parse(argc, argv)) != EXIT_SUCCESS) {
 		goto exit;
 	}
@@ -250,7 +229,22 @@ main(
 	} else if(g_launcher.version) {
 		dmg_launcher_version(stdout, false);
 	} else {
-		dmg_launcher_setup();
+		memcpy(g_launcher.configuration.button, BUTTON, sizeof(uint32_t) * DMG_BUTTON_MAX);
+		memcpy(g_launcher.configuration.direction, DIRECTION, sizeof(uint32_t) * DMG_DIRECTION_MAX);
+
+		if(g_launcher.palette >= PALETTE_MAX) {
+			g_launcher.palette = DEFAULT_PALETTE;
+		}
+
+		memcpy(g_launcher.configuration.palette, &(PALETTE[g_launcher.palette]), sizeof(uint32_t) * DMG_PALETTE_MAX);
+
+		if(!g_launcher.configuration.scale) {
+			g_launcher.configuration.scale = DEFAULT_SCALE;
+		}
+
+		if(!g_launcher.configuration.transfer) {
+			g_launcher.configuration.transfer = DEFAULT_TRANSFER;
+		}
 
 		if(g_launcher.bootrom) {
 
@@ -272,7 +266,9 @@ main(
 	}
 
 exit:
-	dmg_launcher_unload();
+	dmg_launcher_unload(&g_launcher.configuration.rom);
+	dmg_launcher_unload(&g_launcher.configuration.bootrom);
+	memset(&g_launcher, 0, sizeof(g_launcher));
 
 	return result;
 }

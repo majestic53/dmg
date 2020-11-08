@@ -57,6 +57,11 @@ dmg_bootrom_import(
 		goto exit;
 	}
 
+	if(bootrom->enable && !bootrom->buffer) {
+		result = ERROR_SET(ERROR_INVALID, "Bootrom data is NULL");
+		goto exit;
+	}
+
 	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom enable=%x", bootrom->enable);
 	TRACE(LEVEL_INFORMATION, "Bootrom imported");
 
@@ -111,17 +116,21 @@ dmg_bootrom_load(
 	__in const dmg_buffer_t *buffer
 	)
 {
-	int result;
+	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Bootrom loading");
 
-	if((result = dmg_bootrom_validate(buffer)) != ERROR_SUCCESS) {
-		goto exit;
+	if(buffer->data) {
+
+		if((result = dmg_bootrom_validate(buffer)) != ERROR_SUCCESS) {
+			goto exit;
+		}
+
+		bootrom->buffer = buffer;
+		bootrom->enable = true;
+		TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom[%04x]=%p", bootrom->buffer->length, bootrom->buffer->data);
 	}
 
-	bootrom->buffer = buffer;
-	bootrom->enable = true;
-	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom[%04x]=%p", bootrom->buffer->length, bootrom->buffer->data);
 	TRACE(LEVEL_INFORMATION, "Bootrom loaded");
 
 exit:

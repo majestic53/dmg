@@ -247,7 +247,7 @@ dmg_test_memory_load(void)
 	dmg_test_memory_initialize();
 
 	if(ASSERT_SUCCESS(dmg_memory_load(&g_memory.memory, &g_memory.configuration))
-			|| ASSERT(g_memory.bootrom == false)
+			|| ASSERT(g_memory.bootrom == true)
 			|| ASSERT(g_memory.mapper == true)) {
 		result = EXIT_FAILURE;
 	}

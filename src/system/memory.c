@@ -124,11 +124,8 @@ dmg_memory_load(
 
 	TRACE(LEVEL_INFORMATION, "Memory loading");
 
-	if(configuration->bootrom.data) {
-
-		if((result = dmg_bootrom_load(&memory->bootrom, &configuration->bootrom)) != ERROR_SUCCESS) {
-			goto exit;
-		}
+	if((result = dmg_bootrom_load(&memory->bootrom, &configuration->bootrom)) != ERROR_SUCCESS) {
+		goto exit;
 	}
 
 	if((result = dmg_mapper_load(&memory->mapper, &configuration->rom)) != ERROR_SUCCESS) {
