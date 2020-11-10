@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_SAVE_TYPE_H_
-#define DMG_TOOL_UTILITY_SAVE_TYPE_H_
+#ifndef DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_
+#define DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_
 
 #include "../../../src/service/save_type.h"
 #include "../../include/file.h"
@@ -61,6 +61,6 @@ typedef struct {
 	dmg_buffer_t buffer;
 	bool help;
 	bool version;
-} dmg_utility_save_t;
+} dmg_save_info_t;
 
-#endif /* DMG_TOOL_UTILITY_SAVE_TYPE_H_ */
+#endif /* DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_ */

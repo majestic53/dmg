@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_HEADER_TYPE_H_
-#define DMG_TOOL_UTILITY_HEADER_TYPE_H_
+#ifndef DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
+#define DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
 
 #include "../../../src/type/cartridge_type.h"
 #include "../../../src/type/mapper_type.h"
@@ -96,6 +96,6 @@ typedef struct {
 	dmg_buffer_t buffer;
 	bool help;
 	bool version;
-} dmg_utility_header_t;
+} dmg_rom_info_t;
 
-#endif /* DMG_TOOL_UTILITY_HEADER_TYPE_H_ */
+#endif /* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */

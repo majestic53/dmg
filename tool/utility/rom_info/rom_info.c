@@ -16,16 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./header_type.h"
+#include "./rom_info_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-static dmg_utility_header_t g_utility_header = {};
+static dmg_rom_info_t g_rom_info = {};
 
 static int
-dmg_utility_header_file_parse(
+dmg_utility_rom_info_file_parse(
 	__in const dmg_buffer_t *buffer
 	)
 {
@@ -34,11 +34,11 @@ dmg_utility_header_file_parse(
 	int result = EXIT_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
-	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_utility_header.rom, g_utility_header.buffer.length / (float)KBYTE, g_utility_header.buffer.length);
+	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_rom_info.rom, g_rom_info.buffer.length / (float)KBYTE, g_rom_info.buffer.length);
 
 	if(buffer->length <= ADDRESS_HEADER_END) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_utility_header.buffer.length / (float)KBYTE,
-			g_utility_header.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
+		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_rom_info.buffer.length / (float)KBYTE,
+			g_rom_info.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
 		result = EXIT_FAILURE;
 		goto exit;
 	}
@@ -102,7 +102,7 @@ exit:
 }
 
 static int
-dmg_utility_header_parse(
+dmg_utility_rom_info_parse(
 	__in int argc,
 	__in char *argv[]
 	)
@@ -115,13 +115,13 @@ dmg_utility_header_parse(
 
 		switch(option) {
 			case OPTION_HELP:
-				g_utility_header.help = true;
+				g_rom_info.help = true;
 				break;
 			case OPTION_ROM:
-				g_utility_header.rom = optarg;
+				g_rom_info.rom = optarg;
 				break;
 			case OPTION_VERSION:
-				g_utility_header.version = true;
+				g_rom_info.version = true;
 				break;
 			case '?':
 				result = EXIT_FAILURE;
@@ -137,7 +137,7 @@ exit:
 }
 
 static void
-dmg_utility_header_version(
+dmg_utility_rom_info_version(
 	__in FILE *stream,
 	__in bool verbose
 	)
@@ -165,14 +165,14 @@ dmg_utility_header_version(
 }
 
 static void
-dmg_utility_header_usage(
+dmg_utility_rom_info_usage(
 	__in FILE *stream,
 	__in bool verbose
 	)
 {
 
 	if(verbose) {
-		dmg_utility_header_version(stream, verbose);
+		dmg_utility_rom_info_version(stream, verbose);
 		fprintf(stream, "\n");
 	}
 
@@ -196,27 +196,27 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	if((result = dmg_utility_header_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_rom_info_parse(argc, argv)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
-	if(g_utility_header.help) {
-		dmg_utility_header_usage(stdout, true);
-	} else if(g_utility_header.version) {
-		dmg_utility_header_version(stdout, false);
+	if(g_rom_info.help) {
+		dmg_utility_rom_info_usage(stdout, true);
+	} else if(g_rom_info.version) {
+		dmg_utility_rom_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_file_load(&g_utility_header.buffer, g_utility_header.rom)) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_utility_header.rom);
+		if((result = dmg_file_load(&g_rom_info.buffer, g_rom_info.rom)) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 
-		result = dmg_utility_header_file_parse(&g_utility_header.buffer);
+		result = dmg_utility_rom_info_file_parse(&g_rom_info.buffer);
 	}
 
 exit:
-	dmg_file_unload(&g_utility_header.buffer);
-	memset(&g_utility_header, 0, sizeof(g_utility_header));
+	dmg_file_unload(&g_rom_info.buffer);
+	memset(&g_rom_info, 0, sizeof(g_rom_info));
 
 	return result;
 }

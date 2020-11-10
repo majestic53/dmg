@@ -16,16 +16,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./save_type.h"
+#include "./save_info_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-static dmg_utility_save_t g_utility_save = {};
+static dmg_save_info_t g_save_info = {};
 
 static int
-dmg_utility_save_file_parse(
+dmg_utility_save_info_file_parse(
 	__in const dmg_buffer_t *buffer
 	)
 {
@@ -36,16 +36,16 @@ dmg_utility_save_file_parse(
 	const dmg_save_header_t *header;
 	char timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
-	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_utility_save.save, g_utility_save.buffer.length / (float)KBYTE, g_utility_save.buffer.length);
+	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_save_info.save, g_save_info.buffer.length / (float)KBYTE, g_save_info.buffer.length);
 
 	if(buffer->length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_utility_save.buffer.length / (float)KBYTE,
-			g_utility_save.buffer.length, expected / (float)KBYTE, expected);
+		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_save_info.buffer.length / (float)KBYTE,
+			g_save_info.buffer.length, expected / (float)KBYTE, expected);
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
-	header = (const dmg_save_header_t *)g_utility_save.buffer.data;
+	header = (const dmg_save_header_t *)g_save_info.buffer.data;
 
 	if(header->magic != (expected = SAVE_MAGIC)) {
 		fprintf(stdout, "Magic     | MISMATCH (Expecting \"%s\")\n", (char *)&expected);
@@ -87,7 +87,7 @@ exit:
 }
 
 static int
-dmg_utility_save_parse(
+dmg_utility_save_info_parse(
 	__in int argc,
 	__in char *argv[]
 	)
@@ -100,13 +100,13 @@ dmg_utility_save_parse(
 
 		switch(option) {
 			case OPTION_HELP:
-				g_utility_save.help = true;
+				g_save_info.help = true;
 				break;
 			case OPTION_SAVE:
-				g_utility_save.save = optarg;
+				g_save_info.save = optarg;
 				break;
 			case OPTION_VERSION:
-				g_utility_save.version = true;
+				g_save_info.version = true;
 				break;
 			case '?':
 				result = EXIT_FAILURE;
@@ -122,7 +122,7 @@ exit:
 }
 
 static void
-dmg_utility_save_version(
+dmg_utility_save_info_version(
 	__in FILE *stream,
 	__in bool verbose
 	)
@@ -150,14 +150,14 @@ dmg_utility_save_version(
 }
 
 static void
-dmg_utility_save_usage(
+dmg_utility_save_info_usage(
 	__in FILE *stream,
 	__in bool verbose
 	)
 {
 
 	if(verbose) {
-		dmg_utility_save_version(stream, verbose);
+		dmg_utility_save_info_version(stream, verbose);
 		fprintf(stream, "\n");
 	}
 
@@ -181,27 +181,27 @@ main(
 {
 	int result = EXIT_SUCCESS;
 
-	if((result = dmg_utility_save_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_save_info_parse(argc, argv)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
-	if(g_utility_save.help) {
-		dmg_utility_save_usage(stdout, true);
-	} else if(g_utility_save.version) {
-		dmg_utility_save_version(stdout, false);
+	if(g_save_info.help) {
+		dmg_utility_save_info_usage(stdout, true);
+	} else if(g_save_info.version) {
+		dmg_utility_save_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_file_load(&g_utility_save.buffer, g_utility_save.save)) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_utility_save.save);
+		if((result = dmg_file_load(&g_save_info.buffer, g_save_info.save)) != EXIT_SUCCESS) {
+			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 
-		result = dmg_utility_save_file_parse(&g_utility_save.buffer);
+		result = dmg_utility_save_info_file_parse(&g_save_info.buffer);
 	}
 
 exit:
-	dmg_file_unload(&g_utility_save.buffer);
-	memset(&g_utility_save, 0, sizeof(g_utility_save));
+	dmg_file_unload(&g_save_info.buffer);
+	memset(&g_save_info, 0, sizeof(g_save_info));
 
 	return result;
 }
