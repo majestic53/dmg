@@ -29,12 +29,60 @@ dmg_utility_save_file_parse(
 	__in const dmg_buffer_t *buffer
 	)
 {
+	time_t current;
+	uint16_t checksum = 0;
 	int result = EXIT_SUCCESS;
+	uint32_t address, expected;
+	const dmg_save_header_t *header;
+	char timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
 	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_utility_save.save, g_utility_save.buffer.length / (float)KBYTE, g_utility_save.buffer.length);
 
-	// TODO
+	if(buffer->length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
+		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_utility_save.buffer.length / (float)KBYTE,
+			g_utility_save.buffer.length, expected / (float)KBYTE, expected);
+		result = EXIT_FAILURE;
+		goto exit;
+	}
 
+	header = (const dmg_save_header_t *)g_utility_save.buffer.data;
+
+	if(header->magic != (expected = SAVE_MAGIC)) {
+		fprintf(stdout, "Magic     | MISMATCH (Expecting \"%s\")\n", (char *)&expected);
+		result = EXIT_FAILURE;
+	}
+
+	if(header->version != (expected = SAVE_VERSION)) {
+		fprintf(stdout, "Version   | MISMATCH (Expecting %u)\n", expected);
+		result = EXIT_FAILURE;
+	}
+
+	current = header->timestamp;
+	if(!strftime(timestamp, TIMESTAMP_LENGTH_MAX, TIMESTAMP_FORMAT, localtime(&current))) {
+		memcpy(timestamp, TIMESTAMP_MALFORMED, strlen(TIMESTAMP_MALFORMED));
+	}
+
+	fprintf(stdout, "Timestamp | %s\n", timestamp);
+	fprintf(stdout, "Length    | %.02f KB (%u bytes)", header->length / (float)KBYTE, header->length);
+
+	if(header->length != (expected = (buffer->length - (sizeof(*header) + sizeof(checksum))))) {
+		fprintf(stdout, ", MISMATCH (Expecting %.02f KB (%u bytes))\n", expected / (float)KBYTE, expected);
+	} else {
+		fprintf(stdout, "\n");
+	}
+
+	for(address = 0; address < (header->length + sizeof(*header)); ++address) {
+		checksum += ((uint8_t *)buffer->data)[address];
+	}
+
+	if(checksum != (uint16_t)(((uint8_t *)buffer->data)[address] | (((uint8_t *)buffer->data)[address + 1] << CHAR_BIT))) {
+		fprintf(stdout, "Checksum  | MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
+		result = EXIT_FAILURE;
+	}
+
+	// TODO: ADD SUBSYSTEM INFORMATION
+
+exit:
 	return result;
 }
 
@@ -85,7 +133,7 @@ dmg_utility_save_version(
 		fprintf(stream, "%s", DMG);
 	}
 
-	if((version = dmg_version())) {
+	if((version = dmg_version_get())) {
 
 		if(verbose) {
 			fprintf(stream, " ");

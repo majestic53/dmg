@@ -19,6 +19,7 @@
 #ifndef DMG_TOOL_UTILITY_SAVE_TYPE_H_
 #define DMG_TOOL_UTILITY_SAVE_TYPE_H_
 
+#include "../../../src/service/save_type.h"
 #include "../../include/file.h"
 
 #define DMG "DMG-SAVE-INFO"
@@ -29,6 +30,10 @@
 #define OPTION_SAVE 's'
 #define OPTION_VERSION 'v'
 #define OPTIONS "hs:v"
+
+#define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
+#define TIMESTAMP_LENGTH_MAX 32
+#define TIMESTAMP_MALFORMED "Malformed timestamp"
 
 enum {
 	FLAG_HELP = 0,

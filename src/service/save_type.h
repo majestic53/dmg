@@ -27,6 +27,10 @@
 #define SAVE_MAGIC 0x00474d44
 #define SAVE_VERSION SAVE_VERSION_1
 
+#define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
+#define TIMESTAMP_LENGTH_MAX 32
+#define TIMESTAMP_MALFORMED "Malformed timestamp"
+
 typedef struct {
 	uint32_t magic;
 	uint8_t version;
@@ -36,10 +40,6 @@ typedef struct {
 
 #ifndef NDEBUG
 #define KBYTE 1024
-
-#define TIMESTAMP_FORMAT "%Y-%m-%d %H:%M:%S"
-#define TIMESTAMP_LENGTH_MAX 32
-#define TIMESTAMP_MALFORMED "Malformed timestamp"
 
 #define TRACE_SAVE(_LEVEL_, _SAVE_) \
 	if((_LEVEL_) <= (LEVEL)) { \

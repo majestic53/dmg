@@ -118,6 +118,7 @@ dmg_runtime_load(
 	)
 {
 	int result = ERROR_SUCCESS;
+	char title[CARTRIDGE_HEADER_TITLE_LENGTH + 1] = {};
 
 	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime loading ver.%u.%u.%u",
 		dmg_version_get()->major, dmg_version_get()->minor, dmg_version_get()->patch);
@@ -155,7 +156,17 @@ dmg_runtime_load(
 
 	// TODO: LOAD SUBSYSTEMS
 
-	if((result = dmg_service_load(g_configuration, g_runtime.memory.mapper.cartridge.header->title)) != ERROR_SUCCESS) {
+	for(uint32_t address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
+		char value = g_runtime.memory.mapper.cartridge.header->title[address];
+
+		if(!value) {
+			break;
+		}
+
+		title[address] = ((isprint(value) || isspace(value)) ? value : '?');
+	}
+
+	if((result = dmg_service_load(g_configuration, title)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 

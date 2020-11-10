@@ -29,6 +29,7 @@ dmg_utility_header_file_parse(
 	__in const dmg_buffer_t *buffer
 	)
 {
+	uint32_t address;
 	uint16_t checksum = 0;
 	int result = EXIT_SUCCESS;
 	const dmg_cartridge_header_t *header;
@@ -36,25 +37,65 @@ dmg_utility_header_file_parse(
 	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_utility_header.rom, g_utility_header.buffer.length / (float)KBYTE, g_utility_header.buffer.length);
 
 	if(buffer->length <= ADDRESS_HEADER_END) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_utility_header.buffer.length / (float)KBYTE,
-			g_utility_header.buffer.length, buffer->length / (float)KBYTE, buffer->length);
+		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_utility_header.buffer.length / (float)KBYTE,
+			g_utility_header.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
 	header = (const dmg_cartridge_header_t *)&((uint8_t *)buffer->data)[ADDRESS_HEADER_BEGIN];
-	fprintf(stdout, "Title[%zu]\t\"%s\"\n", strlen(header->title), header->title);
-	fprintf(stdout, "Mapper[%u]\t%u (%s)\n", header->mapper, header->mapper, header->mapper < MAPPER_MAX ? MAPPER_STR[header->mapper] : "UNSUPORTED");
-	fprintf(stdout, "Rom[%u]\t\t%zu (%s)\n", header->rom, ROM_BANK[header->rom], (header->rom < ROM_MAX) ? ROM_STR[header->rom] : "UNSUPORTED");
-	fprintf(stdout, "Ram[%u]\t\t%zu (%s)\n", header->ram, RAM_BANK[header->ram], (header->ram < RAM_MAX) ? RAM_STR[header->ram] : "UNSUPORTED");
-	fprintf(stdout, "Checksum[%u]\t%02x (", header->checksum, header->checksum);
+	fprintf(stdout, "Title     | \"");
 
-	for(uint32_t address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
+	for(address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
+		char value = header->title[address];
+
+		if(!value) {
+			break;
+		}
+
+		if(!isprint(value) && !isspace(value)) {
+			fprintf(stdout, "\\%02x", value);
+		} else {
+			fprintf(stdout, "%c", value);
+		}
+	}
+
+	fprintf(stdout, "\"\nMapper    | ");
+
+	if(header->mapper >= MAPPER_MAX) {
+		fprintf(stdout, "UNSUPPORTED\n");
+		result = EXIT_FAILURE;
+	} else {
+		fprintf(stdout, "%s\n", MAPPER_STR[header->mapper]);
+	}
+
+	fprintf(stdout, "Rom       | ");
+
+	if(header->rom >= ROM_MAX) {
+		fprintf(stdout, "UNSUPPORTED\n");
+		result = EXIT_FAILURE;
+	} else {
+		fprintf(stdout, "%s\n", ROM_STR[header->rom]);
+	}
+
+	fprintf(stdout, "Ram       | ");
+
+	if(header->ram >= RAM_MAX) {
+		fprintf(stdout, "UNSUPPORTED\n");
+		result = EXIT_FAILURE;
+	} else {
+		fprintf(stdout, "%s\n", RAM_STR[header->ram]);
+	}
+
+	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
 		checksum = (checksum - ((uint8_t *)buffer->data)[address] - 1);
 	}
 
 	checksum &= UINT8_MAX;
-	fprintf(stdout, "%s)\n", (header->checksum == checksum) ? "MATCH" : "MISMATCH");
+	if(header->checksum != checksum) {
+		fprintf(stdout, "Checksum  | MISMATCH (Expecting %02x)\n", checksum);
+		result = EXIT_FAILURE;
+	}
 
 exit:
 	return result;
@@ -107,7 +148,7 @@ dmg_utility_header_version(
 		fprintf(stream, "%s", DMG);
 	}
 
-	if((version = dmg_version())) {
+	if((version = dmg_version_get())) {
 
 		if(verbose) {
 			fprintf(stream, " ");
@@ -170,10 +211,7 @@ main(
 			goto exit;
 		}
 
-		if((result = dmg_utility_header_file_parse(&g_utility_header.buffer)) != EXIT_SUCCESS) {
-			fprintf(stderr, "%s: Failed to parse file -- %s\n", argv[0], g_utility_header.rom);
-			goto exit;
-		}
+		result = dmg_utility_header_file_parse(&g_utility_header.buffer);
 	}
 
 exit:
