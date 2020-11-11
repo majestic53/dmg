@@ -25,9 +25,52 @@ extern "C" {
 static dmg_save_info_t g_save_info = {};
 
 static int
-dmg_utility_save_info_file_parse(
-	__in const dmg_buffer_t *buffer
+dmg_utility_save_info_file_load(
+	__inout dmg_buffer_t *buffer,
+	__in const char *path
 	)
+{
+	FILE *file = NULL;
+	int length, result = EXIT_SUCCESS;
+
+	if(!(file = fopen(path, "rb"))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	fseek(file, 0, SEEK_END);
+	length = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	if(length <= 0) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(!(buffer->data = (void *)malloc(length))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	buffer->length = length;
+
+exit:
+
+	if(file) {
+		fclose(file);
+		file = NULL;
+	}
+
+	return result;
+}
+
+static int
+dmg_utility_save_info_file_parse(void)
 {
 	time_t current;
 	uint16_t checksum = 0;
@@ -38,7 +81,7 @@ dmg_utility_save_info_file_parse(
 
 	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_save_info.save, g_save_info.buffer.length / (float)KBYTE, g_save_info.buffer.length);
 
-	if(buffer->length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
+	if(g_save_info.buffer.length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
 		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_save_info.buffer.length / (float)KBYTE,
 			g_save_info.buffer.length, expected / (float)KBYTE, expected);
 		result = EXIT_FAILURE;
@@ -48,12 +91,12 @@ dmg_utility_save_info_file_parse(
 	header = (const dmg_save_header_t *)g_save_info.buffer.data;
 
 	if(header->magic != (expected = SAVE_MAGIC)) {
-		fprintf(stdout, "Magic     | MISMATCH (Expecting \"%s\")\n", (char *)&expected);
+		fprintf(stdout, "Magic     MISMATCH (Expecting \"%s\")\n", (char *)&expected);
 		result = EXIT_FAILURE;
 	}
 
 	if(header->version != (expected = SAVE_VERSION)) {
-		fprintf(stdout, "Version   | MISMATCH (Expecting %u)\n", expected);
+		fprintf(stdout, "Version   MISMATCH (Expecting %u)\n", expected);
 		result = EXIT_FAILURE;
 	}
 
@@ -62,28 +105,39 @@ dmg_utility_save_info_file_parse(
 		memcpy(timestamp, TIMESTAMP_MALFORMED, strlen(TIMESTAMP_MALFORMED));
 	}
 
-	fprintf(stdout, "Timestamp | %s\n", timestamp);
-	fprintf(stdout, "Length    | %.02f KB (%u bytes)", header->length / (float)KBYTE, header->length);
+	fprintf(stdout, "Timestamp %s\n", timestamp);
+	fprintf(stdout, "Length    %.02f KB (%u bytes)", header->length / (float)KBYTE, header->length);
 
-	if(header->length != (expected = (buffer->length - (sizeof(*header) + sizeof(checksum))))) {
+	if(header->length != (expected = (g_save_info.buffer.length - (sizeof(*header) + sizeof(checksum))))) {
 		fprintf(stdout, ", MISMATCH (Expecting %.02f KB (%u bytes))\n", expected / (float)KBYTE, expected);
 	} else {
 		fprintf(stdout, "\n");
 	}
 
 	for(address = 0; address < (header->length + sizeof(*header)); ++address) {
-		checksum += ((uint8_t *)buffer->data)[address];
+		checksum += ((uint8_t *)g_save_info.buffer.data)[address];
 	}
 
-	if(checksum != (uint16_t)(((uint8_t *)buffer->data)[address] | (((uint8_t *)buffer->data)[address + 1] << CHAR_BIT))) {
-		fprintf(stdout, "Checksum  | MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
+	if(checksum != (uint16_t)(((uint8_t *)g_save_info.buffer.data)[address] | (((uint8_t *)g_save_info.buffer.data)[address + 1] << CHAR_BIT))) {
+		fprintf(stdout, "Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
 		result = EXIT_FAILURE;
 	}
 
-	// TODO: ADD SUBSYSTEM INFORMATION
-
 exit:
 	return result;
+}
+
+static void
+dmg_utility_save_info_file_unload(
+	__inout dmg_buffer_t *buffer
+	)
+{
+
+	if(buffer->data) {
+		free(buffer->data);
+	}
+
+	memset(buffer, 0, sizeof(*buffer));
 }
 
 static int
@@ -133,7 +187,7 @@ dmg_utility_save_info_version(
 		fprintf(stream, "%s", DMG);
 	}
 
-	if((version = dmg_version_get())) {
+	if((version = dmg_version())) {
 
 		if(verbose) {
 			fprintf(stream, " ");
@@ -191,16 +245,16 @@ main(
 		dmg_utility_save_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_file_load(&g_save_info.buffer, g_save_info.save)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_save_info_file_load(&g_save_info.buffer, g_save_info.save)) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 
-		result = dmg_utility_save_info_file_parse(&g_save_info.buffer);
+		result = dmg_utility_save_info_file_parse();
 	}
 
 exit:
-	dmg_file_unload(&g_save_info.buffer);
+	dmg_utility_save_info_file_unload(&g_save_info.buffer);
 	memset(&g_save_info, 0, sizeof(g_save_info));
 
 	return result;

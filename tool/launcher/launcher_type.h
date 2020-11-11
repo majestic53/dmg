@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_LAUNCHER_TYPE_H_
 #define DMG_TOOL_LAUNCHER_TYPE_H_
 
-#include "../include/file.h"
+#include "../include/common.h"
 
 #define DATA_MASK 1
 #define DATA_SHIFT 1

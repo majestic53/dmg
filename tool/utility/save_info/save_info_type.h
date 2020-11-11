@@ -20,7 +20,7 @@
 #define DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_
 
 #include "../../../src/service/save_type.h"
-#include "../../include/file.h"
+#include "../../include/common.h"
 
 #define DMG "DMG-SAVE-INFO"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
@@ -61,6 +61,6 @@ typedef struct {
 	dmg_buffer_t buffer;
 	bool help;
 	bool version;
-} dmg_save_info_t;
+} __attribute__((packed)) dmg_save_info_t;
 
 #endif /* DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_ */

@@ -19,7 +19,6 @@ DIR_BIN_LIB=../bin/lib/
 DIR_BUILD=../build/
 DIR_BUILD_TOOL=../build/tool/
 DIR_LAUNCHER=./launcher/
-DIR_SRC=./src/
 DIR_UTILITY_ROM_INFO=./utility/rom_info/
 DIR_UTILITY_SAVE_INFO=./utility/save_info/
 
@@ -32,11 +31,8 @@ FLAGS_BIN=
 FLAGS_LIB=-lSDL2 -lSDL2main
 
 LIB=libdmg.a
-LIB_LAUNCHER=libdmg-launcher.a
-LIB_UTILITY_ROM_INFO=libdmg-utility-rom-info.a
-LIB_UTILITY_SAVE_INFO=libdmg-utility-save-info.a
 
-build: clean setup build_tool build_tool_common build_tool_utility archive link
+build: clean setup build_tool build_tool_utility link
 
 clean:
 	rm -rf $(DIR_BUILD_TOOL)
@@ -49,11 +45,6 @@ build_tool: tool_launcher.o
 tool_launcher.o: $(DIR_LAUNCHER)launcher.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_LAUNCHER)launcher.c -o $(DIR_BUILD_TOOL)tool_launcher.o
 
-build_tool_common: tool_common_file.o
-
-tool_common_file.o: $(DIR_SRC)file.c
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)file.c -o $(DIR_BUILD_TOOL)tool_common_file.o
-
 build_tool_utility: tool_utility_rom_info.o tool_utility_save_info.o
 
 tool_utility_rom_info.o: $(DIR_UTILITY_ROM_INFO)rom_info.c
@@ -62,19 +53,11 @@ tool_utility_rom_info.o: $(DIR_UTILITY_ROM_INFO)rom_info.c
 tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_SAVE_INFO)save_info.c -o $(DIR_BUILD_TOOL)tool_utility_save_info.o
 
-archive:
-	@echo ''
-	@echo '--- BUILDING TOOL LIBRARY ------------------'
-	ar rcs $(DIR_BUILD_TOOL)$(LIB_LAUNCHER) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BUILD_TOOL)tool_common_file.o
-	ar rcs $(DIR_BUILD_TOOL)$(LIB_UTILITY_ROM_INFO) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD_TOOL)tool_common_file.o $(DIR_BUILD)common_version.o
-	ar rcs $(DIR_BUILD_TOOL)$(LIB_UTILITY_SAVE_INFO) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD_TOOL)tool_common_file.o $(DIR_BUILD)common_version.o
-	@echo '--- DONE -----------------------------------'
-
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)$(LIB_LAUNCHER) $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)$(LIB_UTILITY_ROM_INFO) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)$(LIB_UTILITY_SAVE_INFO) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

@@ -22,7 +22,7 @@
 #include "../../../src/type/cartridge_type.h"
 #include "../../../src/type/mapper_type.h"
 #include "../../../include/type/cartridge.h"
-#include "../../include/file.h"
+#include "../../include/common.h"
 
 #define DMG "DMG-ROM-INFO"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
@@ -96,6 +96,6 @@ typedef struct {
 	dmg_buffer_t buffer;
 	bool help;
 	bool version;
-} dmg_rom_info_t;
+} __attribute__((packed)) dmg_rom_info_t;
 
 #endif /* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */

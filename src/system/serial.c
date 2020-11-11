@@ -32,7 +32,7 @@ dmg_serial_trace(
 {
 	TRACE_FORMAT(level, "Serial control=%02x [Select=%u, Enable=%x]", serial->control.raw,
 		serial->control.select, serial->control.enable);
-	TRACE_FORMAT(level, "Serial data=%02x", serial->data);
+	TRACE_FORMAT(level, "Serial data=%02x", serial->data.raw);
 }
 
 #endif /* NDEBUG */

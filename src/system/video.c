@@ -327,6 +327,26 @@ dmg_video_export(
 		goto exit;
 	}
 
+	if((result = dmg_service_export_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	for(uint32_t address = 0; address < video->ram.length; ++address) {
 
 		if((result = dmg_service_export_data(file, &((uint8_t *)video->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
@@ -341,18 +361,6 @@ dmg_video_export(
 		}
 	}
 
-	if((result = dmg_service_export_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_export_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_export_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
 	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
 
 		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
@@ -365,14 +373,6 @@ dmg_video_export(
 				}
 			}
 		}
-	}
-
-	if((result = dmg_service_export_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_export_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
-		goto exit;
 	}
 
 	TRACE(LEVEL_INFORMATION, "Video exported");
@@ -419,6 +419,26 @@ dmg_video_import(
 		goto exit;
 	}
 
+	if((result = dmg_service_import_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	for(uint32_t address = 0; address < video->ram.length; ++address) {
 
 		if((result = dmg_service_import_data(file, &((uint8_t *)video->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
@@ -433,18 +453,6 @@ dmg_video_import(
 		}
 	}
 
-	if((result = dmg_service_import_data(file, &video->screen_x, sizeof(video->screen_x))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_import_data(file, &video->screen_y, sizeof(video->screen_y))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_import_data(file, &video->status, sizeof(video->status))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
 	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
 
 		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
@@ -457,14 +465,6 @@ dmg_video_import(
 				}
 			}
 		}
-	}
-
-	if((result = dmg_service_import_data(file, &video->window_x, sizeof(video->window_x))) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_import_data(file, &video->window_y, sizeof(video->window_y))) != ERROR_SUCCESS) {
-		goto exit;
 	}
 
 	TRACE_VIDEO(LEVEL_VERBOSE, video);

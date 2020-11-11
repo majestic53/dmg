@@ -57,7 +57,7 @@ Usage
 
 The project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
 
-For an example, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool) under ```tool/```
+For an example, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/```
 
 #### Runtime Routines
 

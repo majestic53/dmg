@@ -58,8 +58,8 @@ dmg_bootrom_import(
 	}
 
 	if(bootrom->enable && !bootrom->buffer) {
-		result = ERROR_SET(ERROR_INVALID, "Bootrom data is NULL");
-		goto exit;
+		TRACE(LEVEL_WARNING, "Bootrom is NULL");
+		bootrom->enable = false;
 	}
 
 	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom enable=%x", bootrom->enable);

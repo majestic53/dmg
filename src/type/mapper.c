@@ -30,7 +30,11 @@ dmg_mapper_trace(
 	__inout const dmg_mapper_t *mapper
 	)
 {
-	TRACE_FORMAT(level, "Mapper type=%u", mapper->cartridge.header->mapper);
+
+	if(mapper->cartridge.header) {
+		TRACE_FORMAT(level, "Mapper type=%u", mapper->cartridge.header->mapper);
+	}
+
 	TRACE_FORMAT(level, "Mapper rom bank=%u", mapper->rom);
 	TRACE_FORMAT(level, "Mapper rom-swap bank=%u", mapper->rom_swap);
 	TRACE_FORMAT(level, "Mapper ram bank=%u", mapper->ram);

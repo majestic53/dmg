@@ -16,26 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_FILE_H_
-#define DMG_TOOL_FILE_H_
+#ifndef DMG_SERVICE_FILE_TYPE_H_
+#define DMG_SERVICE_FILE_TYPE_H_
 
-#include "./common.h"
+#include "../../include/service.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-int dmg_file_load(
-	__inout dmg_buffer_t *buffer,
-	__in const char *path
-	);
-
-void dmg_file_unload(
-	__inout dmg_buffer_t *buffer
-	);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* DMG_TOOL_FILE_H_ */
+#endif /* DMG_SERVICE_FILE_TYPE_H_ */

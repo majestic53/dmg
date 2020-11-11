@@ -61,7 +61,7 @@ dmg_service_export(
 	if(path) {
 		TRACE_FORMAT(LEVEL_INFORMATION, "Save file exporting: %s", path);
 
-		if(!(file = fopen(path, "wb+"))) {
+		if(!(file = dmg_service_open(path, "wb+"))) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to open save file: %s", path);
 			goto exit;
 		}
@@ -115,7 +115,7 @@ dmg_service_export(
 exit:
 
 	if(file) {
-		fclose(file);
+		dmg_service_close(file);
 		file = NULL;
 	}
 
@@ -156,7 +156,7 @@ dmg_service_import(
 	if(path) {
 		TRACE_FORMAT(LEVEL_INFORMATION, "Save file importing: %s", path);
 
-		if(!(file = fopen(path, "rb"))) {
+		if(!(file = dmg_service_open(path, "rb"))) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Failed to open save file: %s", path);
 			goto exit;
 		}
@@ -225,7 +225,7 @@ exit:
 	dmg_buffer_free(&buffer);
 
 	if(file) {
-		fclose(file);
+		dmg_service_close(file);
 		file = NULL;
 	}
 

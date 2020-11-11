@@ -2944,7 +2944,7 @@ dmg_processor_trace(
 	__inout const dmg_processor_t *processor
 	)
 {
-	TRACE_FORMAT(level, "Processor AF=%04x (A=%02x, F=%02x [%c%c%c%c]) ", processor->af.word, processor->af.high, processor->af.low,
+	TRACE_FORMAT(level, "Processor AF=%04x (A=%02x, F=%02x [%c%c%c%c])", processor->af.word, processor->af.high, processor->af.low,
 		processor->af.flag.carry ? 'C' : '-', processor->af.flag.carry_half ? 'H' : '-',
 		processor->af.flag.subtract ? 'N' : '-', processor->af.flag.zero ? 'Z' : '-');
 	TRACE_FORMAT(level, "Processor BC=%04x (B=%02x, C=%02x)", processor->bc.word, processor->bc.high, processor->bc.low);
@@ -2953,10 +2953,10 @@ dmg_processor_trace(
 	TRACE_FORMAT(level, "Processor PC=%04x", processor->pc.word);
 	TRACE_FORMAT(level, "Processor SP=%04x", processor->sp.word);
 	TRACE_FORMAT(level, "Processor IME=%x", processor->interrupts_enable);
-	TRACE_FORMAT(level, "Processor IE=%02x [%c%c%c%c%c]", processor->interrupt_enable, processor->interrupt_enable.vblank ? 'V' : '-',
+	TRACE_FORMAT(level, "Processor IE=%02x [%c%c%c%c%c]", processor->interrupt_enable.raw, processor->interrupt_enable.vblank ? 'V' : '-',
 		processor->interrupt_enable.lcdc ? 'L' : '-', processor->interrupt_enable.timer ? 'T' : '-',
 		processor->interrupt_enable.serial ? 'S' : '-', processor->interrupt_enable.joypad ? 'J' : '-');
-	TRACE_FORMAT(level, "Processor IF=%02x [%c%c%c%c%c]", processor->interrupt_flag, processor->interrupt_flag.vblank ? 'V' : '-',
+	TRACE_FORMAT(level, "Processor IF=%02x [%c%c%c%c%c]", processor->interrupt_flag.raw, processor->interrupt_flag.vblank ? 'V' : '-',
 		processor->interrupt_flag.lcdc ? 'L' : '-', processor->interrupt_flag.timer ? 'T' : '-',
 		processor->interrupt_flag.serial ? 'S' : '-', processor->interrupt_flag.joypad ? 'J' : '-');
 	TRACE_FORMAT(level, "Processor halt=%x", processor->halt);

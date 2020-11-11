@@ -25,9 +25,52 @@ extern "C" {
 static dmg_rom_info_t g_rom_info = {};
 
 static int
-dmg_utility_rom_info_file_parse(
-	__in const dmg_buffer_t *buffer
+dmg_utility_rom_info_file_load(
+	__inout dmg_buffer_t *buffer,
+	__in const char *path
 	)
+{
+	FILE *file = NULL;
+	int length, result = EXIT_SUCCESS;
+
+	if(!(file = fopen(path, "rb"))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	fseek(file, 0, SEEK_END);
+	length = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	if(length <= 0) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(!(buffer->data = (void *)malloc(length))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	buffer->length = length;
+
+exit:
+
+	if(file) {
+		fclose(file);
+		file = NULL;
+	}
+
+	return result;
+}
+
+static int
+dmg_utility_rom_info_file_parse(void)
 {
 	uint32_t address;
 	uint16_t checksum = 0;
@@ -36,15 +79,15 @@ dmg_utility_rom_info_file_parse(
 
 	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_rom_info.rom, g_rom_info.buffer.length / (float)KBYTE, g_rom_info.buffer.length);
 
-	if(buffer->length <= ADDRESS_HEADER_END) {
+	if(g_rom_info.buffer.length <= ADDRESS_HEADER_END) {
 		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_rom_info.buffer.length / (float)KBYTE,
 			g_rom_info.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
-	header = (const dmg_cartridge_header_t *)&((uint8_t *)buffer->data)[ADDRESS_HEADER_BEGIN];
-	fprintf(stdout, "Title     | \"");
+	header = (const dmg_cartridge_header_t *)&((uint8_t *)g_rom_info.buffer.data)[ADDRESS_HEADER_BEGIN];
+	fprintf(stdout, "Title     \"");
 
 	for(address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
 		char value = header->title[address];
@@ -60,7 +103,7 @@ dmg_utility_rom_info_file_parse(
 		}
 	}
 
-	fprintf(stdout, "\"\nMapper    | ");
+	fprintf(stdout, "\"\nMapper    ");
 
 	if(header->mapper >= MAPPER_MAX) {
 		fprintf(stdout, "UNSUPPORTED\n");
@@ -69,7 +112,7 @@ dmg_utility_rom_info_file_parse(
 		fprintf(stdout, "%s\n", MAPPER_STR[header->mapper]);
 	}
 
-	fprintf(stdout, "Rom       | ");
+	fprintf(stdout, "Rom       ");
 
 	if(header->rom >= ROM_MAX) {
 		fprintf(stdout, "UNSUPPORTED\n");
@@ -78,7 +121,7 @@ dmg_utility_rom_info_file_parse(
 		fprintf(stdout, "%s\n", ROM_STR[header->rom]);
 	}
 
-	fprintf(stdout, "Ram       | ");
+	fprintf(stdout, "Ram       ");
 
 	if(header->ram >= RAM_MAX) {
 		fprintf(stdout, "UNSUPPORTED\n");
@@ -88,17 +131,30 @@ dmg_utility_rom_info_file_parse(
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
-		checksum = (checksum - ((uint8_t *)buffer->data)[address] - 1);
+		checksum = (checksum - ((uint8_t *)g_rom_info.buffer.data)[address] - 1);
 	}
 
 	checksum &= UINT8_MAX;
 	if(header->checksum != checksum) {
-		fprintf(stdout, "Checksum  | MISMATCH (Expecting %02x)\n", checksum);
+		fprintf(stdout, "Checksum  MISMATCH (Expecting %02x)\n", checksum);
 		result = EXIT_FAILURE;
 	}
 
 exit:
 	return result;
+}
+
+static void
+dmg_utility_rom_info_file_unload(
+	__inout dmg_buffer_t *buffer
+	)
+{
+
+	if(buffer->data) {
+		free(buffer->data);
+	}
+
+	memset(buffer, 0, sizeof(*buffer));
 }
 
 static int
@@ -148,7 +204,7 @@ dmg_utility_rom_info_version(
 		fprintf(stream, "%s", DMG);
 	}
 
-	if((version = dmg_version_get())) {
+	if((version = dmg_version())) {
 
 		if(verbose) {
 			fprintf(stream, " ");
@@ -206,16 +262,16 @@ main(
 		dmg_utility_rom_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_file_load(&g_rom_info.buffer, g_rom_info.rom)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_info_file_load(&g_rom_info.buffer, g_rom_info.rom)) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 
-		result = dmg_utility_rom_info_file_parse(&g_rom_info.buffer);
+		result = dmg_utility_rom_info_file_parse();
 	}
 
 exit:
-	dmg_file_unload(&g_rom_info.buffer);
+	dmg_utility_rom_info_file_unload(&g_rom_info.buffer);
 	memset(&g_rom_info, 0, sizeof(g_rom_info));
 
 	return result;

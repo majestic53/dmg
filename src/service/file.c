@@ -16,68 +16,38 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "../include/file.h"
+#include "./file_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int
-dmg_file_load(
-	__inout dmg_buffer_t *buffer,
-	__in const char *path
+void dmg_service_close(
+	__in FILE *file
 	)
 {
-	FILE *file = NULL;
-	int length, result = EXIT_SUCCESS;
-
-	if(!(file = fopen(path, "rb"))) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
-
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if(length <= 0) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
-
-	if(!(buffer->data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
-
-	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
-
-	buffer->length = length;
-
-exit:
 
 	if(file) {
 		fclose(file);
-		file = NULL;
+		TRACE_FORMAT(LEVEL_INFORMATION, "File closed: %p", file);
+	}
+}
+
+FILE *
+dmg_service_open(
+	__in const char *path,
+	__in const char *mode
+	)
+{
+	FILE *result;
+
+	TRACE_FORMAT(LEVEL_INFORMATION, "File opening: %s", path);
+
+	if((result = fopen(path, mode))) {
+		TRACE_FORMAT(LEVEL_INFORMATION, "File opened: %p", result);
 	}
 
 	return result;
-}
-
-void
-dmg_file_unload(
-	__inout dmg_buffer_t *buffer
-	)
-{
-
-	if(buffer->data) {
-		free(buffer->data);
-	}
-
-	memset(buffer, 0, sizeof(*buffer));
 }
 
 #ifdef __cplusplus

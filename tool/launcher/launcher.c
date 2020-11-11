@@ -48,6 +48,64 @@ dmg_launcher_capture(
 }
 
 static int
+dmg_launcher_file_load(
+	__inout dmg_buffer_t *buffer,
+	__in const char *path
+	)
+{
+	FILE *file = NULL;
+	int length, result = EXIT_SUCCESS;
+
+	if(!(file = fopen(path, "rb"))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	fseek(file, 0, SEEK_END);
+	length = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	if(length <= 0) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(!(buffer->data = (void *)malloc(length))) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	buffer->length = length;
+
+exit:
+
+	if(file) {
+		fclose(file);
+		file = NULL;
+	}
+
+	return result;
+}
+
+static void
+dmg_launcher_file_unload(
+	__inout dmg_buffer_t *buffer
+	)
+{
+
+	if(buffer->data) {
+		free(buffer->data);
+	}
+
+	memset(buffer, 0, sizeof(*buffer));
+}
+
+static int
 dmg_launcher_parse(
 	__in int argc,
 	__in char *argv[]
@@ -190,13 +248,13 @@ main(
 
 		if(g_launcher.bootrom) {
 
-			if((result = dmg_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
+			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
 				fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
 				goto exit;
 			}
 		}
 
-		if((result = dmg_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
+		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
 			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
 			goto exit;
 		}
@@ -208,8 +266,8 @@ main(
 	}
 
 exit:
-	dmg_file_unload(&g_launcher.configuration.rom);
-	dmg_file_unload(&g_launcher.configuration.bootrom);
+	dmg_launcher_file_unload(&g_launcher.configuration.rom);
+	dmg_launcher_file_unload(&g_launcher.configuration.bootrom);
 	memset(&g_launcher, 0, sizeof(g_launcher));
 
 	return result;

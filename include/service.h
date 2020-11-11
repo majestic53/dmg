@@ -31,6 +31,10 @@ bool dmg_service_button(
 	__in int button
 	);
 
+void dmg_service_close(
+	__in FILE *file
+	);
+
 bool dmg_service_direction(
 	__in int direction
 	);
@@ -60,6 +64,11 @@ int dmg_service_import_data(
 int dmg_service_load(
 	__in const dmg_t *configuration,
 	__in const char *title
+	);
+
+FILE *dmg_service_open(
+	__in const char *path,
+	__in const char *mode
 	);
 
 void dmg_service_pixel(
