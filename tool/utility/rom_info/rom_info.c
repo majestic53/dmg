@@ -204,7 +204,7 @@ dmg_utility_rom_info_version(
 		fprintf(stream, "%s", DMG);
 	}
 
-	if((version = dmg_version())) {
+	if((version = dmg_version_get())) {
 
 		if(verbose) {
 			fprintf(stream, " ");

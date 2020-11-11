@@ -52,10 +52,7 @@ common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
 common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
 
-build_service: service_file.o service_save.o service_sdl.o
-
-service_file.o: $(DIR_SRC_SERVICE)file.c $(DIR_INCLUDE)service.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)file.c -o $(DIR_BUILD)service_file.o
+build_service: service_save.o service_sdl.o
 
 service_save.o: $(DIR_SRC_SERVICE)save.c $(DIR_INCLUDE)service.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)save.c -o $(DIR_BUILD)service_save.o
@@ -105,7 +102,7 @@ archive:
 	@echo '--- BUILDING LIBRARY -----------------------'
 	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
-		$(DIR_BUILD)service_file.o $(DIR_BUILD)service_save.o $(DIR_BUILD)service_sdl.o \
+		$(DIR_BUILD)service_save.o $(DIR_BUILD)service_sdl.o \
 		$(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o $(DIR_BUILD)system_serial.o \
 			$(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
