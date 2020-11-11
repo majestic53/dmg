@@ -6,8 +6,6 @@ DMG
 About
 =
 
-![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
-
 A GameBoy emulator with support for the following cartridge types:
 
 |Cartridge type|Value|
