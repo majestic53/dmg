@@ -39,9 +39,11 @@ dmg_runtime_export(
 
 	TRACE(LEVEL_INFORMATION, "Runtime exporting");
 
-	// TODO: EXPORT SUBSYSTEMS
-
 	if((result = dmg_joypad_export(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_memory_export(&g_runtime.memory, file)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -61,9 +63,7 @@ dmg_runtime_export(
 		goto exit;
 	}
 
-	if((result = dmg_memory_export(&g_runtime.memory, file)) != ERROR_SUCCESS) {
-		goto exit;
-	}
+	// TODO: EXPORT SUBSYSTEMS
 
 	TRACE(LEVEL_INFORMATION, "Runtime exported");
 
@@ -80,9 +80,11 @@ dmg_runtime_import(
 
 	TRACE(LEVEL_INFORMATION, "Runtime importing");
 
-	// TODO: IMPORT SUBSYSTEMS
-
 	if((result = dmg_joypad_import(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_memory_import(&g_runtime.memory, file)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -102,9 +104,7 @@ dmg_runtime_import(
 		goto exit;
 	}
 
-	if((result = dmg_memory_import(&g_runtime.memory, file)) != ERROR_SUCCESS) {
-		goto exit;
-	}
+	// TODO: IMPORT SUBSYSTEMS
 
 	TRACE(LEVEL_INFORMATION, "Runtime imported");
 
