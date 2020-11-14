@@ -156,7 +156,8 @@ dmg_serial_step(
 	)
 {
 
-	if(serial->control.enable) {
+	if(serial->control.enable
+			&& ((serial->control.select == SELECT_INTERNAL) || ((serial->control.select == SELECT_EXTERNAL) && serial->transfer))) {
 
 		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 			TRACE_SERIAL(LEVEL_VERBOSE, serial);

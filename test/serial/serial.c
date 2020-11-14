@@ -220,28 +220,39 @@ dmg_test_serial_step(void)
 				dmg_serial_step(&g_serial.serial, CYCLE);
 
 				if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
-						|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
-						|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit))
 						|| ASSERT(g_serial.interrupt == false)) {
 					result = EXIT_FAILURE;
 					goto exit;
+				}
+
+				if(control.select == SELECT_INTERNAL) {
+
+					if((control.select == SELECT_INTERNAL) && (ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
+							|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit)))) {
+						result = EXIT_FAILURE;
+						goto exit;
+					}
 				}
 			}
 
 			data.raw = ((g_serial.serial.data.raw << 1) | 1);
 			dmg_serial_step(&g_serial.serial, CYCLE);
 
-			if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
-					|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
+			if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))) {
+				result = EXIT_FAILURE;
+				goto exit;
+			}
+
+			if((control.select == SELECT_INTERNAL) && (ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
 					|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit))
-					|| ASSERT(g_serial.interrupt == (bit == (CHAR_BIT - 1)))) {
+					|| ASSERT(g_serial.interrupt == (bit == (CHAR_BIT - 1))))) {
 				result = EXIT_FAILURE;
 				goto exit;
 			}
 		}
 
-		if(ASSERT(g_serial.serial.control.enable == false)
-				|| ASSERT(g_serial.interrupt == true)) {
+		if((control.select == SELECT_INTERNAL)
+				&& (ASSERT(g_serial.serial.control.enable == false) || ASSERT(g_serial.interrupt == true))) {
 			result = EXIT_FAILURE;
 			goto exit;
 		}

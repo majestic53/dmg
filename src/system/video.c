@@ -108,8 +108,6 @@ dmg_video_render_viewport(
 			dmg_service_pixel(color, x, y);
 		}
 	}
-
-	memset(video->viewport, 0, VIEWPORT_MAX * VIEWPORT_HEIGHT * VIEWPORT_WIDTH);
 }
 
 static const dmg_video_tile_t *
