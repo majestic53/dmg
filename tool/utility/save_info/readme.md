@@ -34,7 +34,7 @@ dmg-save-info [args]
 The following example shows how to launch dmg-save-info with a save file:
 
 ```
-$ ./bin/dmg-save-info -r save.dmg
+$ ./bin/dmg-save-info -s save.dmg
 ```
 
 Trademark
