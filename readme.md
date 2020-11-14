@@ -44,7 +44,7 @@ $ make <BUILD>
 
 #### Examples
 
-The following example shows how to compile the dmg release build using gcc:
+The following example shows how to compile the DMG release build using GCC:
 
 ```
 $ export CC=gcc

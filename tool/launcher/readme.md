@@ -54,43 +54,43 @@ The following color palettes are available:
 
 #### Examples
 
-The following example shows how to launch dmg with a rom file:
+The following example shows how to launch DMG with a ROM file:
 
 ```
 $ ./bin/dmg -r rom.gb
 ```
 
-The following example shows how to launch dmg with a rom and bootrom file:
+The following example shows how to launch DMG with a ROM/BOOTROM file:
 
 ```
 $ ./bin/dmg -r rom.gb -b bootrom.gb
 ```
 
-The following example shows how to launch dmg with the display scaled by 2x:
+The following example shows how to launch DMG with the display scaled by 2x:
 
 ```
 $ ./bin/dmg -r rom.gb -s 2
 ```
 
-The following example shows how to launch dmg with the serial capture enabled:
+The following example shows how to launch DMG with the serial capture enabled:
 
 ```
 $ ./bin/dmg -r rom.gb -c
 ```
 
-The following example shows how to launch dmg with an alternative color palette:
+The following example shows how to launch DMG with an alternative color palette:
 
 ```
 $ ./bin/dmg -r rom.gb -p 1
 ```
 
-The following example shows how to launch dmg and export a save file:
+The following example shows how to launch DMG and export a save file:
 
 ```
 $ ./bin/dmg -r rom.gb -o save.dmg
 ```
 
-The following example shows how to launch dmg and import a save file:
+The following example shows how to launch DMG and import a save file:
 
 ```
 $ ./bin/dmg -r rom.gb -i save.dmg

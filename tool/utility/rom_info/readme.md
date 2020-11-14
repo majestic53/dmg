@@ -31,7 +31,7 @@ dmg-rom-info [args]
 
 #### Examples
 
-The following example shows how to launch dmg-rom-info with a rom file:
+The following example shows how to launch dmg-rom-info with a ROM file:
 
 ```
 $ ./bin/dmg-rom-info -r rom.gb
