@@ -42,6 +42,15 @@ $ make <BUILD>
 |COMPILER|```gcc```, ```clang```    |                                                            |
 |BUILD   |```release```, ```debug```|If no argument is specified, a release build will be created|
 
+#### Examples
+
+The following example shows how to compile the dmg release build using gcc:
+
+```
+$ export CC=gcc
+$ make
+```
+
 Usage
 =
 
