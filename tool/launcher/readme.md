@@ -99,7 +99,7 @@ $ ./bin/dmg -r rom.gb -i save.dmg
 Trademark
 =
 
-Nintendo name/logo and GameBoy are trademarks of Nintendo Co., Ltd.
+Nintendo name/logo are trademarks of Nintendo Co., Ltd.
 
 License
 =

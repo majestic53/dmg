@@ -40,7 +40,7 @@ $ ./bin/dmg-rom-info -r rom.gb
 Trademark
 =
 
-Nintendo name/logo and GameBoy are trademarks of Nintendo Co., Ltd.
+Nintendo name/logo are trademarks of Nintendo Co., Ltd.
 
 License
 =

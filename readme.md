@@ -6,14 +6,7 @@ DMG
 About
 =
 
-A GameBoy emulator with support for the following cartridge types:
-
-|Cartridge type|Value|
-|:-------------|:----|
-|ROM-Only      |0    |
-|MBC1          |1-3  |
-|MBC3          |18-19|
-|MBC5          |25-30|
+A simple GameBoy emulator, written in C.
 
 Table of Contents
 =
@@ -25,7 +18,7 @@ Table of Contents
 Building
 =
 
-__NOTE__: Tested under Linux with the GCC/Clang C compilers. Modification to the makefiles might be required to build with a different OS/compiler.
+__NOTE__: This project was tested under Linux with the GCC/Clang C compilers. Some modifications to the makefiles will be required to build with a different OS/compiler.
 
 ### Preparing to build
 
@@ -44,31 +37,41 @@ $ export CC=<COMPILER>
 $ make <BUILD>
 ```
 
-Where COMPILER corrisponds to either ```clang```, ```gcc``` or the compiler of your choice.
-
-Where BUILD corrisponds to either ```release``` or ```debug```. If no BUILD argument is specified, a release build will be created.
+|Field   |Supported values          |Note                                                              |
+|:-------|:-------------------------|:-----------------------------------------------------------------|
+|COMPILER|```gcc```, ```clang```    |                                                                  |
+|BUILD   |```release```, ```debug```|If no BUILD argument is specified, a release build will be created|
 
 Usage
 =
 
 ### Interface
 
-The project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
+This project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
 
-For an example, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/```
+For an example of how to use this interface, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/launcher```
 
 #### Runtime/Helper Routines
 
-|Name       |Description              |Signature                                   |
-|:----------|:------------------------|:-------------------------------------------|
-|dmg        |Run emulator             |```int dmg(const dmg_t *)```                |
-|dmg_error  |Retrieve emulator error  |```const char *dmg_error(void)```           |
-|dmg_version|Retrieve emulator version|```const dmg_version_t *dmg_version(void)```|
+|Name       |Description                 |Signature                                   |
+|:----------|:---------------------------|:-------------------------------------------|
+|dmg        |Start the emulator          |```int dmg(const dmg_t *)```                |
+|dmg_error  |Retrieve error information  |```const char *dmg_error(void)```           |
+|dmg_version|Retrieve version information|```const dmg_version_t *dmg_version(void)```|
+
+#### Cartridge Support
+
+|Cartridge type|Value|
+|:-------------|:----|
+|ROM-Only      |0    |
+|MBC1          |1-3  |
+|MBC3          |18-19|
+|MBC5          |25-30|
 
 Trademark
 =
 
-Nintendo name/logo and GameBoy are trademarks of Nintendo Co., Ltd.
+Nintendo name/logo are trademarks of Nintendo Co., Ltd.
 
 License
 =
