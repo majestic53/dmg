@@ -19,11 +19,8 @@
 #include "./runtime_type.h"
 
 static uint32_t g_cycle = 0;
-
 static uint32_t g_cycle_last = 0;
-
 static const dmg_t *g_configuration = NULL;
-
 static dmg_runtime_t g_runtime = {};
 
 #ifdef __cplusplus

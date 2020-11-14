@@ -108,6 +108,8 @@ dmg_video_render_viewport(
 			dmg_service_pixel(color, x, y);
 		}
 	}
+
+	memset(video->viewport, 0, VIEWPORT_MAX * VIEWPORT_HEIGHT * VIEWPORT_WIDTH);
 }
 
 static const dmg_video_tile_t *
@@ -146,7 +148,7 @@ dmg_video_scanline_background(
 
 			if(!(px = (x % TILE_WIDTH))) {
 				tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
-								(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 			}
 
 			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
@@ -175,7 +177,7 @@ dmg_video_scanline_window(
 {
 
 	if(video->control.window && (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
-		uint32_t x = 0, y = video->line, py = (y % TILE_HEIGHT);
+		uint32_t x = 0, y = (video->line - video->window_y), py = (y % TILE_HEIGHT);
 		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 

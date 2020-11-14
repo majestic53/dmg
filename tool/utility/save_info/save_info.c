@@ -250,7 +250,11 @@ main(
 			goto exit;
 		}
 
-		result = dmg_utility_save_info_file_parse();
+		if((result = dmg_utility_save_info_file_parse()) != EXIT_SUCCESS) {
+			fprintf(stderr, "\nResult    INVALID\n");
+		} else {
+			fprintf(stdout, "\nResult    VALID\n");
+		}
 	}
 
 exit:
