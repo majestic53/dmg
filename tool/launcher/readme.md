@@ -3,6 +3,11 @@ DMG Launcher
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
 
+About
+=
+
+A launcher for running GameBoy ROMs/BOOTROM binaries, with support for various palettes and more.
+
 Usage
 =
 
@@ -90,3 +95,21 @@ The following example shows how to launch dmg and import a save file:
 ```
 $ ./bin/dmg -r rom.gb -i save.dmg
 ```
+
+Trademark
+=
+
+Nintendo name/logo and GameBoy are trademarks of Nintendo Co., Ltd.
+
+License
+=
+
+DMG is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+DMG is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.

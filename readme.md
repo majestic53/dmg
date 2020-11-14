@@ -57,18 +57,18 @@ The project is implemented in C and exposes a simple API, described in ```includ
 
 For an example, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/```
 
-#### Runtime Routines
-
-|Name|Description |Signature                   |
-|:---|:-----------|:---------------------------|
-|dmg |Run emulator|```int dmg(const dmg_t *)```|
-
-#### Helper Routines
+#### Runtime/Helper Routines
 
 |Name       |Description              |Signature                                   |
 |:----------|:------------------------|:-------------------------------------------|
+|dmg        |Run emulator             |```int dmg(const dmg_t *)```                |
 |dmg_error  |Retrieve emulator error  |```const char *dmg_error(void)```           |
 |dmg_version|Retrieve emulator version|```const dmg_version_t *dmg_version(void)```|
+
+Trademark
+=
+
+Nintendo name/logo and GameBoy are trademarks of Nintendo Co., Ltd.
 
 License
 =
