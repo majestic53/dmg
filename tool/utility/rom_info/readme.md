@@ -4,7 +4,7 @@ DMG Rom Information
 About
 =
 
-A tool for varifying GameBoy ROM file contents
+A tool for varifying GameBoy ROM file contents.
 
 Usage
 =

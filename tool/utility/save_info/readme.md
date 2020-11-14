@@ -4,7 +4,7 @@ DMG Save Information
 About
 =
 
-A tool for varifying GameBoy save file contents
+A tool for varifying GameBoy save file contents.
 
 Usage
 =

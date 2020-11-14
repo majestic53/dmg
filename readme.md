@@ -37,10 +37,10 @@ $ export CC=<COMPILER>
 $ make <BUILD>
 ```
 
-|Field   |Supported values          |Note                                                              |
-|:-------|:-------------------------|:-----------------------------------------------------------------|
-|COMPILER|```gcc```, ```clang```    |                                                                  |
-|BUILD   |```release```, ```debug```|If no BUILD argument is specified, a release build will be created|
+|Field   |Supported values          |Note                                                        |
+|:-------|:-------------------------|:-----------------------------------------------------------|
+|COMPILER|```gcc```, ```clang```    |                                                            |
+|BUILD   |```release```, ```debug```|If no argument is specified, a release build will be created|
 
 Usage
 =
