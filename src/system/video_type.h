@@ -24,6 +24,7 @@
 #include "../../include/service.h"
 
 #define LINE_HBLANK_MAX 144
+#define LINE_SPRITE_MAX 10
 #define LINE_VBLANK_MAX 153
 
 #define POST_BACKGROUND_PALETTE 0xfc
@@ -38,6 +39,8 @@
 
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_BEGIN, ADDRESS_VIDEO_RAM_END)
 #define RAM_SPRITE_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_SPRITE_BEGIN, ADDRESS_VIDEO_RAM_SPRITE_END)
+
+#define SPRITE_MAX 40
 
 #define TILE_HEIGHT 8
 #define TILE_PITCH 32
@@ -69,6 +72,34 @@ static const uint16_t TILE_MAP[] = {
 	0x1800, /* 0x9800 - 0x9bff */
 	0x1c00, /* 0x9c00 - 0x9fff */
 	};
+
+typedef union {
+
+	struct {
+		uint8_t y;
+		uint8_t x;
+		uint8_t id;
+
+		union {
+
+			struct {
+				uint8_t unused : 4;
+				uint8_t palette : 1;
+				uint8_t flip_x : 1;
+				uint8_t flip_y : 1;
+				uint8_t priority : 1;
+			};
+
+			uint8_t flag;
+		};
+	};
+
+	uint32_t raw;
+} __attribute__((packed)) dmg_video_sprite_t;
+
+typedef struct {
+	dmg_video_sprite_t sprite[SPRITE_MAX];
+} __attribute__((packed)) dmg_video_sprite_list_t;
 
 typedef union {
 

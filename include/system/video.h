@@ -21,12 +21,6 @@
 
 #include "../type/buffer.h"
 
-enum {
-	VIEWPORT_BACKGROUND = 0,
-	VIEWPORT_SPRITE,
-	VIEWPORT_MAX,
-};
-
 typedef union {
 
 	struct {
@@ -90,7 +84,7 @@ typedef struct {
 	uint8_t screen_y;
 	dmg_video_status_t status;
 	dmg_video_transfer_t transfer;
-	uint8_t viewport[VIEWPORT_MAX][VIEWPORT_HEIGHT][VIEWPORT_WIDTH];
+	uint8_t viewport[VIEWPORT_HEIGHT][VIEWPORT_WIDTH];
 	uint8_t window_x;
 	uint8_t window_y;
 } __attribute__((packed)) dmg_video_t;

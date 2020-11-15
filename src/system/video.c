@@ -101,11 +101,7 @@ dmg_video_render_viewport(
 	for(uint8_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
 
 		for(uint8_t x = 0; x < VIEWPORT_WIDTH; ++x) {
-			uint8_t color = video->viewport[VIEWPORT_BACKGROUND][y][x];
-
-			// TODO: MIX BACKGROUND AND SPRITE TO FORM FINAL COLOR
-
-			dmg_service_pixel(color, x, y);
+			dmg_service_pixel(video->viewport[y][x], x, y);
 		}
 	}
 }
@@ -150,7 +146,7 @@ dmg_video_scanline_background(
 			}
 
 			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-			video->viewport[VIEWPORT_BACKGROUND][y - video->screen_y][x - video->screen_x] = dmg_video_palette_color(&video->background, value);
+			video->viewport[y - video->screen_y][x - video->screen_x] = dmg_video_palette_color(&video->background, value);
 		}
 	}
 }
@@ -162,9 +158,63 @@ dmg_video_scanline_sprite(
 {
 
 	if(video->control.sprite) {
+		uint32_t count = 0, index, sprite[SPRITE_MAX] = {};
 
-		// TODO: RENDER SPRITE SCANLINE
+		for(index = 0; index < SPRITE_MAX; ++index) {
+			const dmg_video_sprite_t *entry = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
 
+			if((entry->x < 8) || (entry->y < 16)) {
+				continue;
+			}
+
+			if((video->line >= (entry->y - 16)) && (video->line < entry->y)) {
+				sprite[count++] = index;
+			}
+		}
+
+		if(count) {
+
+			// TODO: SORT BY PRIORITY
+
+/*#ifndef UNITTEST
+
+for(index = 0; index < count; ++index) {
+	const dmg_video_sprite_t *entry = (const dmg_video_sprite_t *)&((const dmg_video_sprite_list_t *)video->ram_sprite.data)[sprite[index]];
+
+	uint8_t id = entry->id;
+	if(video->control.sprite_size) {
+		id &= ~1;
+	}
+
+	fprintf(stdout, "[%u] {%02x} (%u, %u), flip=(%x, %x) palette=%x, priority=%x\n", index + 1, id, entry->x, entry->y, entry->flip_x, entry->flip_y,
+		entry->palette, entry->priority);
+}
+
+fprintf(stdout, "\n");
+exit(0);
+#endif*/
+
+			for(index = 0; index < ((count < LINE_SPRITE_MAX) ? count : LINE_SPRITE_MAX); ++index) {
+				const dmg_video_sprite_t *entry = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[sprite[index]];
+
+				uint8_t id = entry->id;
+				if(video->control.sprite_size) {
+					id &= ~1;
+				}
+
+				for(uint32_t x = (entry->x - 8); x < entry->x; ++ x) {
+
+					// TODO: DISPLAY SPRITE[ID] LINE
+
+					if(entry->priority && video->viewport[video->line][x]) {
+						break;
+					}
+
+					video->viewport[video->line][x]
+						= dmg_video_palette_color(entry->palette ? &video->object_1 : &video->object_0, DMG_PALETTE_BLACK);
+				}
+			}
+		}
 	}
 }
 
@@ -190,7 +240,7 @@ dmg_video_scanline_window(
 			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
 
 			if((y + video->window_y) < LINE_HBLANK_MAX) {
-				video->viewport[VIEWPORT_BACKGROUND][y + video->window_y][x + (video->window_x - (TILE_WIDTH - 1))]
+				video->viewport[y + video->window_y][x + (video->window_x - (TILE_WIDTH - 1))]
 					= dmg_video_palette_color(&video->background, value);
 			}
 		}
@@ -361,16 +411,12 @@ dmg_video_export(
 		}
 	}
 
-	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
+	for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
 
-		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
+		for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
 
-			for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
-
-				if((result = dmg_service_export_data(file, &video->viewport[viewport][y][x],
-						sizeof(video->viewport[viewport][y][x]))) != ERROR_SUCCESS) {
-					goto exit;
-				}
+			if((result = dmg_service_export_data(file, &video->viewport[y][x], sizeof(video->viewport[y][x]))) != ERROR_SUCCESS) {
+				goto exit;
 			}
 		}
 	}
@@ -453,16 +499,12 @@ dmg_video_import(
 		}
 	}
 
-	for(uint32_t viewport = 0; viewport < VIEWPORT_MAX; ++viewport) {
+	for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
 
-		for(uint32_t y = 0; y < VIEWPORT_HEIGHT; ++y) {
+		for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
 
-			for(uint32_t x = 0; x < VIEWPORT_WIDTH; ++x) {
-
-				if((result = dmg_service_import_data(file, &video->viewport[viewport][y][x],
-						sizeof(video->viewport[viewport][y][x]))) != ERROR_SUCCESS) {
-					goto exit;
-				}
+			if((result = dmg_service_import_data(file, &video->viewport[y][x], sizeof(video->viewport[y][x]))) != ERROR_SUCCESS) {
+				goto exit;
 			}
 		}
 	}
