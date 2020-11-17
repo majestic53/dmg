@@ -40,13 +40,19 @@
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_BEGIN, ADDRESS_VIDEO_RAM_END)
 #define RAM_SPRITE_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_SPRITE_BEGIN, ADDRESS_VIDEO_RAM_SPRITE_END)
 
+#define SPRITE_DATA 1
+#define SPRITE_MAP 1
 #define SPRITE_MAX 40
+#define SPRITE_OFFSET_X 8
+#define SPRITE_OFFSET_Y 16
 
 #define TILE_HEIGHT 8
 #define TILE_PITCH 32
 #define TILE_WIDTH 8
 
 #define TRANSFER_SCALE 0x0100
+
+#define WINDOW_OFFSET_X 7
 
 enum {
 	MODE_HBLANK = 0,
@@ -56,11 +62,22 @@ enum {
 	MODE_MAX,
 };
 
+enum {
+	SPRITE_SIZE_8 = 0,
+	SPRITE_SIZE_16,
+	SPRITE_SIZE_MAX,
+};
+
 static const uint32_t MODE_CYC[] = {
 	204, /* MODE_HBLANK */
 	456, /* MODE_VBLANK */
 	80, /* MODE_SEARCH */
 	172, /* MODE_TRANSFER */
+	};
+
+static const uint8_t SPRITE_SIZE[] = {
+	8, /* SPRITE_SIZE_8 */
+	16,  /* SPRITE_SIZE_16 */
 	};
 
 static const uint16_t TILE_DATA[] = {
