@@ -19,6 +19,7 @@
 #ifndef DMG_RUNTIME_TYPE_H_
 #define DMG_RUNTIME_TYPE_H_
 
+#include "../include/system/audio.h"
 #include "../include/system/joypad.h"
 #include "../include/system/memory.h"
 #include "../include/system/processor.h"
@@ -29,15 +30,13 @@
 #include "../include/service.h"
 
 typedef struct {
+	dmg_audio_t audio;
 	dmg_joypad_t joypad;
 	dmg_memory_t memory;
 	dmg_processor_t processor;
 	dmg_serial_t serial;
 	dmg_timer_t timer;
 	dmg_video_t video;
-
-	// TODO: ADD SUBSYSTEMS
-
 } __attribute__((packed)) dmg_runtime_t;
 
 #endif /* DMG_RUNTIME_TYPE_H_ */

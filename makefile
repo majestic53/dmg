@@ -25,6 +25,7 @@ DIR_BUILD=./build/
 DIR_BUILD_TEST=./build/test/
 DIR_ROOT=./
 DIR_SRC=./src/
+DIR_TEST_AUDIO=./test/audio/
 DIR_TEST_JOYPAD=./test/joypad/
 DIR_TEST_MEMORY=./test/memory/
 DIR_TEST_PROCESSOR=./test/processor/
@@ -55,6 +56,7 @@ setup:
 build_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_AUDIO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
@@ -66,6 +68,7 @@ build_debug:
 build_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TEST_AUDIO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_RELEASE_TEST)$(LEVEL) build

@@ -139,6 +139,7 @@ dmg_joypad_load(
 	TRACE(LEVEL_INFORMATION, "Joypad loading");
 	joypad->state.raw = POST_STATE;
 	dmg_joypad_poll(joypad);
+	TRACE_JOYPAD(LEVEL_VERBOSE, joypad);
 	TRACE(LEVEL_INFORMATION, "Joypad loaded");
 
 	return result;

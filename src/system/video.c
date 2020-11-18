@@ -218,7 +218,8 @@ dmg_video_scanline_window(
 	)
 {
 
-	if(video->control.window && (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
+	if(video->control.window && (video->window_x >= WINDOW_OFFSET_X) && (video->window_x < VIEWPORT_WIDTH)
+			&& (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
 		uint32_t x = 0, y = (video->line - video->window_y), py = (y % TILE_HEIGHT);
 		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);

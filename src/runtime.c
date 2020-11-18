@@ -36,6 +36,10 @@ dmg_runtime_export(
 
 	TRACE(LEVEL_INFORMATION, "Runtime exporting");
 
+	if((result = dmg_audio_export(&g_runtime.audio, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	if((result = dmg_joypad_export(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
 		goto exit;
 	}
@@ -60,8 +64,6 @@ dmg_runtime_export(
 		goto exit;
 	}
 
-	// TODO: EXPORT SUBSYSTEMS
-
 	TRACE(LEVEL_INFORMATION, "Runtime exported");
 
 exit:
@@ -76,6 +78,10 @@ dmg_runtime_import(
 	int result;
 
 	TRACE(LEVEL_INFORMATION, "Runtime importing");
+
+	if((result = dmg_audio_import(&g_runtime.audio, file)) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	if((result = dmg_joypad_import(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
 		goto exit;
@@ -101,8 +107,6 @@ dmg_runtime_import(
 		goto exit;
 	}
 
-	// TODO: IMPORT SUBSYSTEMS
-
 	TRACE(LEVEL_INFORMATION, "Runtime imported");
 
 exit:
@@ -127,6 +131,10 @@ dmg_runtime_load(
 
 	g_configuration = configuration;
 
+	if((result = dmg_audio_load(&g_runtime.audio, g_configuration)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
 	if((result = dmg_joypad_load(&g_runtime.joypad, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
@@ -150,8 +158,6 @@ dmg_runtime_load(
 	if((result = dmg_video_load(&g_runtime.video, g_configuration)) != ERROR_SUCCESS) {
 		goto exit;
 	}
-
-	// TODO: LOAD SUBSYSTEMS
 
 	for(uint32_t address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
 		char value = g_runtime.memory.mapper.cartridge.header->title[address];
@@ -195,12 +201,10 @@ dmg_runtime_loop(void)
 
 		do {
 			g_cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_audio_step(&g_runtime.audio, g_cycle_last);
 			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
 			dmg_serial_step(&g_runtime.serial, g_cycle_last);
 			dmg_timer_step(&g_runtime.timer, g_cycle_last);
-
-			// TODO: LOOP SUBSYSTEMS
-
 			g_cycle += g_cycle_last;
 		} while(!dmg_video_step(&g_runtime.video, g_cycle_last));
 
@@ -218,15 +222,13 @@ dmg_runtime_unload(void)
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
 	dmg_service_export(dmg_runtime_export, g_configuration->save_out);
 	dmg_service_unload();
-
-	// TODO: UNLOAD SUBSYSTEMS
-
 	dmg_video_unload(&g_runtime.video);
 	dmg_timer_unload(&g_runtime.timer);
 	dmg_serial_unload(&g_runtime.serial);
 	dmg_processor_unload(&g_runtime.processor);
 	dmg_memory_unload(&g_runtime.memory);
 	dmg_joypad_unload(&g_runtime.joypad);
+	dmg_audio_unload(&g_runtime.audio);
 	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
 	memset(&g_runtime, 0, sizeof(g_runtime));
 }
@@ -266,6 +268,27 @@ dmg_runtime_read(
 	uint8_t result = 0;
 
 	switch(address) {
+		case ADDRESS_AUDIO_CONTROL:
+		case ADDRESS_AUDIO_MODE_1_SWEEP:
+		case ADDRESS_AUDIO_MODE_1_LENGTH:
+		case ADDRESS_AUDIO_MODE_1_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_2_LENGTH:
+		case ADDRESS_AUDIO_MODE_2_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_3_ENABLE:
+		case ADDRESS_AUDIO_MODE_3_LENGTH:
+		case ADDRESS_AUDIO_MODE_3_LEVEL:
+		case ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_4_LENGTH:
+		case ADDRESS_AUDIO_MODE_4_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL:
+		case ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE:
+		case ADDRESS_AUDIO_OUTPUT:
+		case ADDRESS_AUDIO_RAM_BEGIN ... ADDRESS_AUDIO_RAM_END:
+		case ADDRESS_AUDIO_STATE:
+			result = dmg_audio_read(&g_runtime.audio, address);
+			break;
 		case ADDRESS_JOYPAD_STATE:
 			result = dmg_joypad_read(&g_runtime.joypad, address);
 			break;
@@ -307,9 +330,6 @@ dmg_runtime_read(
 		case ADDRESS_VIDEO_WINDOW_Y:
 			result = dmg_video_read(&g_runtime.video, address);
 			break;
-
-		// TODO: READ BYTE FROM SUBSYSTEMS
-
 		default:
 			result = UINT8_MAX;
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported read [%04x]->%02x", address, result);
@@ -327,6 +347,30 @@ dmg_runtime_write(
 {
 
 	switch(address) {
+		case ADDRESS_AUDIO_CONTROL:
+		case ADDRESS_AUDIO_MODE_1_SWEEP:
+		case ADDRESS_AUDIO_MODE_1_LENGTH:
+		case ADDRESS_AUDIO_MODE_1_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_1_FREQUENCY_LOW:
+		case ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_2_LENGTH:
+		case ADDRESS_AUDIO_MODE_2_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_2_FREQUENCY_LOW:
+		case ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_3_ENABLE:
+		case ADDRESS_AUDIO_MODE_3_LENGTH:
+		case ADDRESS_AUDIO_MODE_3_LEVEL:
+		case ADDRESS_AUDIO_MODE_3_FREQUENCY_LOW:
+		case ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH:
+		case ADDRESS_AUDIO_MODE_4_LENGTH:
+		case ADDRESS_AUDIO_MODE_4_ENVELOPE:
+		case ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL:
+		case ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE:
+		case ADDRESS_AUDIO_OUTPUT:
+		case ADDRESS_AUDIO_RAM_BEGIN ... ADDRESS_AUDIO_RAM_END:
+		case ADDRESS_AUDIO_STATE:
+			dmg_audio_write(&g_runtime.audio, address, value);
+			break;
 		case ADDRESS_JOYPAD_STATE:
 			dmg_joypad_write(&g_runtime.joypad, address, value);
 			break;
@@ -369,9 +413,6 @@ dmg_runtime_write(
 		case ADDRESS_VIDEO_WINDOW_Y:
 			dmg_video_write(&g_runtime.video, address, value);
 			break;
-
-		// TODO: WRITE BYTE TO SUBSYSTEMS
-
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported write [%04x]<-%02x", address, value);
 			break;
