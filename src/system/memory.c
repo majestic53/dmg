@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "./memory_type.h"
@@ -169,7 +169,11 @@ dmg_memory_read(
 			result = dmg_mapper_read_ram(&memory->mapper, address);
 			break;
 		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
-			TRACE_FORMAT(LEVEL_WARNING, "Unused memory read [%04x]->%02x", address, result);
+			TRACE_FORMAT(LEVEL_VERBOSE, "Unused memory read [%04x]->%02x", address, result);
+			break;
+		case ADDRESS_RAM_WORKING_BANK:
+			result = UINT8_MAX;
+			TRACE_FORMAT(LEVEL_VERBOSE, "CGB WRAM bank read [%04x]->%02x", address, result);
 			break;
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 
@@ -230,7 +234,10 @@ dmg_memory_write(
 			dmg_mapper_write_ram(&memory->mapper, address, value);
 			break;
 		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
-			TRACE_FORMAT(LEVEL_WARNING, "Unused memory write [%04x]<-%02x", address, value);
+			TRACE_FORMAT(LEVEL_VERBOSE, "Unused memory write [%04x]<-%02x", address, value);
+			break;
+		case ADDRESS_RAM_WORKING_BANK:
+			TRACE_FORMAT(LEVEL_VERBOSE, "CGB WRAM bank write [%04x]<-%02x", address, value);
 			break;
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:

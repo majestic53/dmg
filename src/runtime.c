@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "./runtime_type.h"
@@ -301,6 +301,7 @@ dmg_runtime_read(
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
+		case ADDRESS_RAM_WORKING_BANK:
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			result = dmg_memory_read(&g_runtime.memory, address);
@@ -321,6 +322,7 @@ dmg_runtime_read(
 		case ADDRESS_VIDEO_LINE_COINCIDENCE:
 		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
+		case ADDRESS_VIDEO_RAM_BANK:
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 		case ADDRESS_VIDEO_SCREEN_X:
@@ -384,6 +386,7 @@ dmg_runtime_write(
 		case ADDRESS_RAM_HIGH_BEGIN ... ADDRESS_RAM_HIGH_END:
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 		case ADDRESS_RAM_UNUSED_BEGIN ... ADDRESS_RAM_UNUSED_END:
+		case ADDRESS_RAM_WORKING_BANK:
 		case ADDRESS_ROM_BEGIN ... ADDRESS_ROM_END:
 		case ADDRESS_ROM_SWAP_BEGIN ... ADDRESS_ROM_SWAP_END:
 			dmg_memory_write(&g_runtime.memory, address, value);
@@ -403,6 +406,7 @@ dmg_runtime_write(
 		case ADDRESS_VIDEO_LINE_COINCIDENCE:
 		case ADDRESS_VIDEO_OBJECT_PALETTE_0:
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
+		case ADDRESS_VIDEO_RAM_BANK:
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 		case ADDRESS_VIDEO_RAM_SPRITE_BEGIN ... ADDRESS_VIDEO_RAM_SPRITE_END:
 		case ADDRESS_VIDEO_SCREEN_X:

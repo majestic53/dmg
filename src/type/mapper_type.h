@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DMG_TYPE_MAPPER_TYPE_H_
@@ -50,6 +50,16 @@ enum {
 };
 
 #define MBC3_RAM_MASK 0x03
+
+enum {
+	MBC3_MODE_RAM_0 = 0,
+	MBC3_MODE_RAM_7 = 7,
+	MBC3_MODE_RTC_SEC,
+	MBC3_MODE_RTC_MIN,
+	MBC3_MODE_RTC_HOUR,
+	MBC3_MODE_RTC_DAY_LOW,
+	MBC3_MODE_RTC_DAY_HIGH,
+};
 
 #define MBC5_RAM_MASK 0x0f
 #define MBC5_ROM_MASK 0x01ff

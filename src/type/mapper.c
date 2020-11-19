@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "./mapper_type.h"
@@ -43,7 +43,7 @@ dmg_mapper_trace(
 #endif /* NDEBUG */
 
 static void
-dmg_mapper_mbc1_write(
+dmg_mapper_mbc1_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
@@ -64,7 +64,7 @@ dmg_mapper_mbc1_write(
 			mapper->map.mbc1.upper = value;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC1 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC1 write [%u/%u][%04x]<-%02x", mapper->rom, mapper->rom_swap,
 				address, value);
 			break;
 	}
@@ -101,8 +101,58 @@ dmg_mapper_mbc1_write(
 	}
 }
 
+static uint8_t
+dmg_mapper_mbc3_read_ram(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	)
+{
+	//int type;
+	uint8_t result = 0;
+
+	/*switch((type = mapper->mbc3.mode)) {
+		case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:*/
+			result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address);
+			/*break;
+		case MBC3_MODE_RTC_SEC ... MBC3_MODE_RTC_DAY_HIGH:
+
+			// TODO: READ FROM RTC
+
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
+			break;
+	}*/
+
+	return result;
+}
+
 static void
-dmg_mapper_mbc3_write(
+dmg_mapper_mbc3_write_ram(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	)
+{
+	/*int type;
+
+	switch((type = mapper->mbc3.mode)) {
+		case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:*/
+			dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address, value);
+			/*break;
+		case MBC3_MODE_RTC_SEC ... MBC3_MODE_RTC_DAY_HIGH:
+
+			// TODO: WRITE TO RTC
+
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
+			break;
+	}*/
+}
+
+static void
+dmg_mapper_mbc3_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
@@ -110,17 +160,34 @@ dmg_mapper_mbc3_write(
 {
 
 	switch(address) {
+		case ADDRESS_MBC3_LATCH_BEGIN ... ADDRESS_MBC3_LATCH_END:
+
+			// TODO: RTC LATCH
+
+			break;
 		case ADDRESS_MBC3_RAM_ENABLE_BEGIN ... ADDRESS_MBC3_RAM_ENABLE_END:
 			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
 			break;
 		case ADDRESS_MBC3_RAM_BEGIN ... ADDRESS_MBC3_RAM_END:
-			mapper->ram = ((value & MBC3_RAM_MASK) % mapper->cartridge.ram.count);
+
+			switch(value) {
+				case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:
+					mapper->ram = ((value & MBC3_RAM_MASK) % mapper->cartridge.ram.count);
+					//mapper->mbc3.mode = value;
+					break;
+				case MBC3_MODE_RTC_SEC ... MBC3_MODE_RTC_DAY_HIGH:
+					//mapper->mbc3.mode = value;
+					break;
+				default:
+					TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", value);
+					break;
+			}
 			break;
 		case ADDRESS_MBC3_ROM_BEGIN ... ADDRESS_MBC3_ROM_END:
 			mapper->map.mbc3.rom = value;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 write [%u/%u][%04x]<-%02x", mapper->rom, mapper->rom_swap,
 				address, value);
 			break;
 	}
@@ -133,7 +200,7 @@ dmg_mapper_mbc3_write(
 }
 
 static void
-dmg_mapper_mbc5_write(
+dmg_mapper_mbc5_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
@@ -154,7 +221,7 @@ dmg_mapper_mbc5_write(
 			mapper->map.mbc5.upper = value;
 			break;
 		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC5 write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC5 write [%u/%u][%04x]<-%02x", mapper->rom, mapper->rom_swap,
 				address, value);
 			break;
 	}
@@ -286,11 +353,21 @@ dmg_mapper_read_ram(
 	__in uint16_t address
 	)
 {
+	int type;
 	uint8_t result = 0;
 
 	switch(address) {
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
-			result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN);
+
+			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC3_RAM:
+				case MAPPER_MBC3_RAM_BATTERY:
+					result = dmg_mapper_mbc3_read_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN);
+					break;
+				default:
+					result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN);
+					break;
+			}
 			break;
 		default:
 			result = UINT8_MAX;
@@ -344,10 +421,20 @@ dmg_mapper_write_ram(
 	__in uint8_t value
 	)
 {
+	int type;
 
 	switch(address) {
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
-			dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN, value);
+
+			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC3_RAM:
+				case MAPPER_MBC3_RAM_BATTERY:
+					dmg_mapper_mbc3_write_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN, value);
+					break;
+				default:
+					dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address - ADDRESS_RAM_SWAP_BEGIN, value);
+					break;
+			}
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper ram write [%u][%04x]->%02x", mapper->ram, address, value);
@@ -372,11 +459,11 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC1:
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
-			dmg_mapper_mbc1_write(mapper, address, value);
+			dmg_mapper_mbc1_write_rom(mapper, address, value);
 			break;
 		case MAPPER_MBC3_RAM:
 		case MAPPER_MBC3_RAM_BATTERY:
-			dmg_mapper_mbc3_write(mapper, address, value);
+			dmg_mapper_mbc3_write_rom(mapper, address, value);
 			break;
 		case MAPPER_MBC5:
 		case MAPPER_MBC5_RAM:
@@ -384,7 +471,7 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC5_RUMBLE:
 		case MAPPER_MBC5_RUMBLE_RAM:
 		case MAPPER_MBC5_RUMBLE_RAM_BATTERY:
-			dmg_mapper_mbc5_write(mapper, address, value);
+			dmg_mapper_mbc5_write_rom(mapper, address, value);
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper type: %u", type);

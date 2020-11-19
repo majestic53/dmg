@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "./video_type.h"
@@ -92,8 +92,18 @@ dmg_video_palette_color(
 	return result;
 }
 
+static uint8_t
+dmg_video_pixel_color(
+	__in const dmg_video_tile_t *tile,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	return (((tile->line[y].high >> (TILE_WIDTH - x - 1)) & 1) << 1) | ((tile->line[y].low >> (TILE_WIDTH - x - 1)) & 1);
+}
+
 static const dmg_video_tile_t *
-dmg_video_tile_data(
+dmg_video_tile_background(
 	__in const void *ram,
 	__in int map,
 	__in int data,
@@ -113,7 +123,7 @@ dmg_video_tile_data(
 }
 
 static const dmg_video_tile_t *
-dmg_video_tile_data_id(
+dmg_video_tile_sprite(
 	__in const void *ram,
 	__in int map,
 	__in int data,
@@ -135,19 +145,19 @@ dmg_video_scanline_background(
 
 	if(video->control.background) {
 		uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
-		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+		const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 
 		for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
-			uint8_t px, value;
+			uint8_t px;
 
 			if(!(px = (x % TILE_WIDTH))) {
-				tile = dmg_video_tile_data(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+				tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
 						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 			}
 
-			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-			video->viewport[y - video->screen_y][x - video->screen_x] = dmg_video_palette_color(&video->background, value);
+			video->viewport[y - video->screen_y][x - video->screen_x]
+				= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
 		}
 	}
 }
@@ -185,17 +195,13 @@ dmg_video_scanline_sprite(
 					id &= ~1;
 				}
 
-				const dmg_video_tile_t *tile = dmg_video_tile_data_id(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
+				const dmg_video_tile_t *tile = dmg_video_tile_sprite(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
 
 				for(; x < entry->x; ++ x) {
 					uint8_t px, value;
 
 					if(!(px = (x % TILE_WIDTH))) {
-						tile = dmg_video_tile_data_id(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
-					}
-
-					if(entry->priority && video->viewport[y][x]) {
-						break;
+						tile = dmg_video_tile_sprite(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
 					}
 
 					value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
@@ -221,22 +227,20 @@ dmg_video_scanline_window(
 	if(video->control.window && (video->window_x >= WINDOW_OFFSET_X) && (video->window_x < VIEWPORT_WIDTH)
 			&& (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
 		uint32_t x = 0, y = (video->line - video->window_y), py = (y % TILE_HEIGHT);
-		const dmg_video_tile_t *tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+		const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 
 		for(; x < (VIEWPORT_WIDTH - (video->window_x - WINDOW_OFFSET_X)); ++x) {
-			uint8_t px, value;
+			uint8_t px;
 
 			if(!(px = (x % TILE_WIDTH))) {
-				tile = dmg_video_tile_data(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+				tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 			}
 
-			value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-
 			if((y + video->window_y) < LINE_HBLANK_MAX) {
 				video->viewport[y + video->window_y][x + (video->window_x - WINDOW_OFFSET_X)]
-					= dmg_video_palette_color(&video->background, value);
+					= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
 			}
 		}
 	}
@@ -584,6 +588,10 @@ dmg_video_read(
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 			result = video->object_1.raw;
 			break;
+		case ADDRESS_VIDEO_RAM_BANK:
+			result = UINT8_MAX;
+			TRACE_FORMAT(LEVEL_VERBOSE, "CGB VRAM bank read [%04x]->%02x", address, result);
+			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 
 			if(video->control.enable) {
@@ -717,6 +725,9 @@ dmg_video_write(
 			break;
 		case ADDRESS_VIDEO_OBJECT_PALETTE_1:
 			video->object_1.raw = value;
+			break;
+		case ADDRESS_VIDEO_RAM_BANK:
+			TRACE_FORMAT(LEVEL_VERBOSE, "CGB VRAM bank write [%04x]<-%02x", address, value);
 			break;
 		case ADDRESS_VIDEO_RAM_BEGIN ... ADDRESS_VIDEO_RAM_END:
 

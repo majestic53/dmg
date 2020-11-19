@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "./sdl_type.h"
@@ -228,8 +228,8 @@ dmg_service_poll(void)
 
 	g_sdl.frame.end = SDL_GetTicks();
 
-	if((g_sdl.frame.rate = (g_sdl.frame.end - g_sdl.frame.begin)) >= MS_PER_SEC) {
-		g_sdl.frame.rate = (g_sdl.frame.count - ((g_sdl.frame.rate - MS_PER_SEC) / (float)FRAME_PER_SEC));
+	if((g_sdl.frame.rate = (g_sdl.frame.end - g_sdl.frame.begin)) >= MILLISEC_PER_SEC) {
+		g_sdl.frame.rate = (g_sdl.frame.count - ((g_sdl.frame.rate - MILLISEC_PER_SEC) / (float)FRAME_PER_SEC));
 		g_sdl.frame.rate = ((g_sdl.frame.rate > 0.f) ? g_sdl.frame.rate : 0.f);
 #ifndef NDEBUG
 		char title[TITLE_LENGTH_MAX] = {};

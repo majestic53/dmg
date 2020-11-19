@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DMG_SERVICE_SDL_TYPE_H_
@@ -23,9 +23,9 @@
 #include "../../include/service.h"
 
 #define FRAME_PER_SEC 60
-#define FRAME_RATE (MS_PER_SEC / (float)FRAME_PER_SEC)
+#define FRAME_RATE (MILLISEC_PER_SEC / (float)FRAME_PER_SEC)
 
-#define MS_PER_SEC 1000
+#define MILLISEC_PER_SEC 1000
 
 #define PALETTE_MASK_BLUE 0x000000ff
 #define PALETTE_MASK_GREEN 0x0000ff00

@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef DMG_COMMON_DEFINE_H_
@@ -76,6 +76,8 @@
 #define ADDRESS_MBC1_ROM_UPPER_BEGIN 0x4000
 #define ADDRESS_MBC1_ROM_UPPER_END 0x5fff
 
+#define ADDRESS_MBC3_LATCH_BEGIN 0x6000
+#define ADDRESS_MBC3_LATCH_END 0x7fff
 #define ADDRESS_MBC3_RAM_ENABLE_BEGIN 0x0000
 #define ADDRESS_MBC3_RAM_ENABLE_END 0x1fff
 #define ADDRESS_MBC3_RAM_BEGIN 0x4000
@@ -109,6 +111,7 @@
 #define ADDRESS_RAM_SWAP_END 0xbfff
 #define ADDRESS_RAM_UNUSED_BEGIN 0xfea0
 #define ADDRESS_RAM_UNUSED_END 0xfeff
+#define ADDRESS_RAM_WORKING_BANK 0xff70
 
 #define ADDRESS_ROM_BEGIN 0x0000
 #define ADDRESS_ROM_END 0x3fff
@@ -129,6 +132,7 @@
 #define ADDRESS_VIDEO_LINE_COINCIDENCE 0xff45
 #define ADDRESS_VIDEO_OBJECT_PALETTE_0 0xff48
 #define ADDRESS_VIDEO_OBJECT_PALETTE_1 0xff49
+#define ADDRESS_VIDEO_RAM_BANK 0xff4f
 #define ADDRESS_VIDEO_RAM_BEGIN 0x8000
 #define ADDRESS_VIDEO_RAM_END 0x9fff
 #define ADDRESS_VIDEO_RAM_SPRITE_BEGIN 0xfe00
