@@ -25,37 +25,37 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
-dmg_service_display_show(void)
+dmg_sdl_display_show(void)
 {
 	int result = ERROR_SUCCESS;
 
-	if(g_sdl.display.redraw) {
-		g_sdl.display.redraw = false;
+	if(g_sdl.redraw) {
+		g_sdl.redraw = false;
 
-		if(SDL_RenderClear(g_sdl.display.renderer)) {
+		if(SDL_RenderClear(g_sdl.renderer)) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
 
-		if(SDL_UpdateTexture(g_sdl.display.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.display.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
+		if(SDL_UpdateTexture(g_sdl.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
 	}
 
-	if(SDL_RenderCopy(g_sdl.display.renderer, g_sdl.display.texture, NULL, NULL)) {
+	if(SDL_RenderCopy(g_sdl.renderer, g_sdl.texture, NULL, NULL)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	SDL_RenderPresent(g_sdl.display.renderer);
+	SDL_RenderPresent(g_sdl.renderer);
 
 exit:
 	return result;
 }
 
 static int
-dmg_service_display_load(
+dmg_sdl_display_load(
 	__in const dmg_t *configuration,
 	__in const char *title
 	)
@@ -63,55 +63,48 @@ dmg_service_display_load(
 	int result;
 
 	for(int index = 0; index < DMG_PALETTE_MAX; ++index) {
-		g_sdl.display.palette[index].red = ((configuration->palette[index] & PALETTE_MASK_RED) >> PALETTE_SHIFT_RED);
-		g_sdl.display.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
-		g_sdl.display.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
-		g_sdl.display.palette[index].alpha = UINT8_MAX;
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.display.palette[index].raw,
-			g_sdl.display.palette[index].red, g_sdl.display.palette[index].green, g_sdl.display.palette[index].blue);
+		g_sdl.palette[index].red = ((configuration->palette[index] & PALETTE_MASK_RED) >> PALETTE_SHIFT_RED);
+		g_sdl.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
+		g_sdl.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
+		g_sdl.palette[index].alpha = UINT8_MAX;
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.palette[index].raw,
+			g_sdl.palette[index].red, g_sdl.palette[index].green, g_sdl.palette[index].blue);
 	}
 
-	for(uint32_t y = 0; y < WINDOW_HEIGHT; ++y) {
-
-		for(uint32_t x = 0; x < WINDOW_WIDTH; ++x) {
-			g_sdl.display.pixel[y][x].raw = g_sdl.display.palette[DMG_PALETTE_WHITE].raw;
-		}
+	g_sdl.scale = configuration->scale;
+	if(g_sdl.scale < SCALE_MIN) {
+		g_sdl.scale = SCALE_MIN;
+		TRACE_FORMAT(LEVEL_WARNING, "Scale is too small: %u (setting to %u)", configuration->scale, g_sdl.scale);
+	} else if(g_sdl.scale > SCALE_MAX) {
+		g_sdl.scale = SCALE_MAX;
+		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.scale);
 	}
 
-	g_sdl.display.scale = configuration->scale;
-	if(g_sdl.display.scale < SCALE_MIN) {
-		g_sdl.display.scale = SCALE_MIN;
-		TRACE_FORMAT(LEVEL_WARNING, "Scale is too small: %u (setting to %u)", configuration->scale, g_sdl.display.scale);
-	} else if(g_sdl.display.scale > SCALE_MAX) {
-		g_sdl.display.scale = SCALE_MAX;
-		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.display.scale);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL scale=%u", g_sdl.scale);
+
+	if(snprintf(g_sdl.title, sizeof(g_sdl.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
+		memcpy(g_sdl.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "SDL scale=%u", g_sdl.display.scale);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL title[%u]=\"%s\"", strlen(g_sdl.title), g_sdl.title);
 
-	if(snprintf(g_sdl.display.title, sizeof(g_sdl.display.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
-		memcpy(g_sdl.display.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
-	}
-
-	TRACE_FORMAT(LEVEL_VERBOSE, "SDL title[%u]=\"%s\"", strlen(g_sdl.display.title), g_sdl.display.title);
-
-	if(!(g_sdl.display.window = SDL_CreateWindow(g_sdl.display.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			WINDOW_WIDTH * g_sdl.display.scale, WINDOW_HEIGHT * g_sdl.display.scale, SDL_WINDOW_RESIZABLE))) {
+	if(!(g_sdl.window = SDL_CreateWindow(g_sdl.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			WINDOW_WIDTH * g_sdl.scale, WINDOW_HEIGHT * g_sdl.scale, SDL_WINDOW_RESIZABLE))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(!(g_sdl.display.renderer = SDL_CreateRenderer(g_sdl.display.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
+	if(!(g_sdl.renderer = SDL_CreateRenderer(g_sdl.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(SDL_RenderSetLogicalSize(g_sdl.display.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+	if(SDL_RenderSetLogicalSize(g_sdl.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(SDL_SetRenderDrawColor(g_sdl.display.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
+	if(SDL_SetRenderDrawColor(g_sdl.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
 			COLOR_BACKGROUND.alpha)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
@@ -122,64 +115,44 @@ dmg_service_display_load(
 		goto exit;
 	}
 
-	if(!(g_sdl.display.texture = SDL_CreateTexture(g_sdl.display.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+	if(!(g_sdl.texture = SDL_CreateTexture(g_sdl.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
 			WINDOW_WIDTH, WINDOW_HEIGHT))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	result = dmg_service_display_show();
+	result = dmg_sdl_display_show();
 
 exit:
 	return result;
 }
 
 static void
-dmg_service_display_unload(void)
+dmg_sdl_display_unload(void)
 {
-	SDL_DestroyTexture(g_sdl.display.texture);
-	SDL_DestroyRenderer(g_sdl.display.renderer);
-	SDL_DestroyWindow(g_sdl.display.window);
-}
-
-static int
-dmg_service_input_load(
-	__in const dmg_t *configuration
-	)
-{
-	int result = ERROR_SUCCESS;
-
-	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
-		g_sdl.input.button[index] = configuration->button[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL button[%zu]=%u", index, g_sdl.input.button[index]);
-	}
-
-	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
-		g_sdl.input.direction[index] = configuration->direction[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL direction[%zu]=%u", index, g_sdl.input.direction[index]);
-	}
-
-	return result;
+	SDL_DestroyTexture(g_sdl.texture);
+	SDL_DestroyRenderer(g_sdl.renderer);
+	SDL_DestroyWindow(g_sdl.window);
 }
 
 bool
-dmg_service_button(
+dmg_sdl_button(
 	__in int button
 	)
 {
-	return (SDL_GetKeyboardState(NULL)[g_sdl.input.button[button]] > 0);
+	return (SDL_GetKeyboardState(NULL)[button] > 0);
 }
 
 bool
-dmg_service_direction(
+dmg_sdl_direction(
 	__in int direction
 	)
 {
-	return (SDL_GetKeyboardState(NULL)[g_sdl.input.direction[direction]] > 0);
+	return (SDL_GetKeyboardState(NULL)[direction] > 0);
 }
 
 int
-dmg_service_load(
+dmg_sdl_load(
 	__in const dmg_t *configuration,
 	__in const char *title
 	)
@@ -195,11 +168,7 @@ dmg_service_load(
 		goto exit;
 	}
 
-	if((result = dmg_service_display_load(configuration, title)) != ERROR_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_service_input_load(configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_sdl_display_load(configuration, title)) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -210,45 +179,43 @@ exit:
 }
 
 void
-dmg_service_pixel(
+dmg_sdl_pixel(
 	__in uint8_t color,
 	__in uint8_t x,
 	__in uint8_t y
 	)
 {
-	g_sdl.display.redraw = true;
-	g_sdl.display.pixel[y][x].raw = g_sdl.display.palette[color].raw;
+	g_sdl.redraw = true;
+	g_sdl.pixel[y][x].raw = g_sdl.palette[color].raw;
 }
 
 bool
-dmg_service_poll(void)
+dmg_sdl_poll(
+	__in bool complete,
+	__in float rate
+	)
 {
 	bool result = true;
 	SDL_Event event = {};
 
-	g_sdl.frame.end = SDL_GetTicks();
-
-	if((g_sdl.frame.rate = (g_sdl.frame.end - g_sdl.frame.begin)) >= MILLISEC_PER_SEC) {
-		g_sdl.frame.rate = (g_sdl.frame.count - ((g_sdl.frame.rate - MILLISEC_PER_SEC) / (float)FRAME_PER_SEC));
-		g_sdl.frame.rate = ((g_sdl.frame.rate > 0.f) ? g_sdl.frame.rate : 0.f);
 #ifndef NDEBUG
+
+	if(complete) {
 		char title[TITLE_LENGTH_MAX] = {};
 
-		if(snprintf(title, TITLE_LENGTH_MAX, "%s [%.01f fps]", g_sdl.display.title, g_sdl.frame.rate) > 0) {
-			SDL_SetWindowTitle(g_sdl.display.window, title);
+		if(snprintf(title, TITLE_LENGTH_MAX, "%s [%.01f fps]", g_sdl.title, rate) > 0) {
+			SDL_SetWindowTitle(g_sdl.window, title);
 		}
 
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL framerate=%.01f", g_sdl.frame.rate);
-#endif /* NDEBUG */
-		g_sdl.frame.begin = g_sdl.frame.end;
-		g_sdl.frame.count = 0;
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL framerate=%.01f", rate);
 	}
+#endif /* NDEBUG */
 
 	while(SDL_PollEvent(&event)) {
 
 		switch(event.type) {
 			case SDL_WINDOWEVENT:
-				g_sdl.display.redraw = true;
+				g_sdl.redraw = true;
 				break;
 			case SDL_QUIT:
 				result = false;
@@ -264,22 +231,16 @@ exit:
 }
 
 void
-dmg_service_sync(void)
+dmg_sdl_sync(void)
 {
-	dmg_service_display_show();
-
-	if((g_sdl.frame.frequency = (SDL_GetTicks() - g_sdl.frame.end)) < FRAME_RATE) {
-		SDL_Delay(FRAME_RATE - g_sdl.frame.frequency);
-	}
-
-	++g_sdl.frame.count;
+	dmg_sdl_display_show();
 }
 
 void
-dmg_service_unload(void)
+dmg_sdl_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
-	dmg_service_display_unload();
+	dmg_sdl_display_unload();
 	SDL_Quit();
 	TRACE(LEVEL_INFORMATION, "SDL unloaded");
 	memset(&g_sdl, 0, sizeof(g_sdl));

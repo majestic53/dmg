@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_
 #define DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_
 
-#include "../../../src/service/save_type.h"
+#include "../../../src/service_type.h"
 #include "../../include/common.h"
 
 #define DMG "DMG-SAVE-INFO"

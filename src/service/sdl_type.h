@@ -20,12 +20,7 @@
 #define DMG_SERVICE_SDL_TYPE_H_
 
 #include <SDL2/SDL.h>
-#include "../../include/service.h"
-
-#define FRAME_PER_SEC 60
-#define FRAME_RATE (MILLISEC_PER_SEC / (float)FRAME_PER_SEC)
-
-#define MILLISEC_PER_SEC 1000
+#include "../../include/service/sdl.h"
 
 #define PALETTE_MASK_BLUE 0x000000ff
 #define PALETTE_MASK_GREEN 0x0000ff00
@@ -65,25 +60,6 @@ typedef struct {
 	SDL_Texture *texture;
 	char title[TITLE_LENGTH_MAX];
 	SDL_Window *window;
-} dmg_sdl_display_t;
-
-typedef struct {
-	uint32_t begin;
-	uint32_t count;
-	uint32_t end;
-	float frequency;
-	float rate;
-} dmg_sdl_frame_t;
-
-typedef struct {
-	uint32_t button[DMG_BUTTON_MAX];
-	uint32_t direction[DMG_DIRECTION_MAX];
-} dmg_sdl_input_t;
-
-typedef struct {
-	dmg_sdl_display_t display;
-	dmg_sdl_frame_t frame;
-	dmg_sdl_input_t input;
 } dmg_sdl_t;
 
 static const dmg_sdl_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};

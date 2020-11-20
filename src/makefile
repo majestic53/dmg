@@ -33,13 +33,16 @@ LIB=libdmg.a
 
 build: build_base build_common build_service build_system build_type
 
-build_base: base_dmg.o base_runtime.o
+build_base: base_dmg.o base_runtime.o base_service.o
 
 base_dmg.o: $(DIR_SRC)dmg.c $(DIR_INCLUDE)dmg.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)dmg.c -o $(DIR_BUILD)base_dmg.o
 
 base_runtime.o: $(DIR_SRC)runtime.c $(DIR_INCLUDE)runtime.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)runtime.c -o $(DIR_BUILD)base_runtime.o
+
+base_service.o: $(DIR_SRC)service.c $(DIR_INCLUDE)service.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)service.c -o $(DIR_BUILD)base_service.o
 
 build_common: common_error.o common_trace.o common_version.o
 
@@ -52,10 +55,7 @@ common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
 common_version.o: $(DIR_SRC_COMMON)version.c $(DIR_INCLUDE_COMMON)version.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)version.c -o $(DIR_BUILD)common_version.o
 
-build_service: service_save.o service_sdl.o
-
-service_save.o: $(DIR_SRC_SERVICE)save.c $(DIR_INCLUDE)service.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)save.c -o $(DIR_BUILD)service_save.o
+build_service: service_sdl.o
 
 service_sdl.o: $(DIR_SRC_SERVICE)sdl.c $(DIR_INCLUDE)service.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SERVICE)sdl.c -o $(DIR_BUILD)service_sdl.o
@@ -103,9 +103,9 @@ type_mapper.o: $(DIR_SRC_TYPE)mapper.c $(DIR_INCLUDE_TYPE)mapper.h
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
-	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o \
+	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o $(DIR_BUILD)base_service.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
-		$(DIR_BUILD)service_save.o $(DIR_BUILD)service_sdl.o \
+		$(DIR_BUILD)service_sdl.o \
 		$(DIR_BUILD)system_audio.o $(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 			$(DIR_BUILD)system_serial.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \

@@ -16,7 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./save_type.h"
+#include "./service_type.h"
+
+static dmg_service_t g_service = {};
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +27,7 @@ extern "C" {
 #ifndef NDEBUG
 
 static void
-dmg_save_trace(
+dmg_service_save_trace(
 	__in int level,
 	__inout const dmg_save_header_t *header
 	)
@@ -45,6 +47,22 @@ dmg_save_trace(
 }
 
 #endif /* NDEBUG */
+
+bool
+dmg_service_button(
+	__in int button
+	)
+{
+	return dmg_sdl_button(g_service.input.button[button]);
+}
+
+bool
+dmg_service_direction(
+	__in int direction
+	)
+{
+	return dmg_sdl_direction(g_service.input.direction[direction]);
+}
 
 int
 dmg_service_export(
@@ -108,7 +126,7 @@ dmg_service_export(
 		}
 
 		header.length = length;
-		TRACE_SAVE(LEVEL_VERBOSE, &header);
+		TRACE_SERVICE_SAVE(LEVEL_VERBOSE, &header);
 		TRACE(LEVEL_INFORMATION, "Save file exported");
 	}
 
@@ -185,7 +203,7 @@ dmg_service_import(
 
 		expected = ((uint8_t *)buffer.data)[address] | (((uint8_t *)buffer.data)[address + 1] << CHAR_BIT);
 		header = (const dmg_save_header_t *)buffer.data;
-		TRACE_SAVE(LEVEL_VERBOSE, header);
+		TRACE_SERVICE_SAVE(LEVEL_VERBOSE, header);
 
 		if(header->magic != SAVE_MAGIC) {
 			result = ERROR_SET_FORMAT(ERROR_FAILURE, "Save file magic number mismatch: %s (%u != %u)", path,
@@ -248,6 +266,86 @@ dmg_service_import_data(
 
 exit:
 	return result;
+}
+
+int
+dmg_service_load(
+	__in const dmg_t *configuration,
+	__in const char *title
+	)
+{
+	int result;
+
+	TRACE(LEVEL_INFORMATION, "Service loading");
+
+	if((result = dmg_sdl_load(configuration, title)) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
+		g_service.input.button[index] = configuration->button[index];
+		TRACE_FORMAT(LEVEL_VERBOSE, "Service button[%zu]=%u", index, g_service.input.button[index]);
+	}
+
+	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
+		g_service.input.direction[index] = configuration->direction[index];
+		TRACE_FORMAT(LEVEL_VERBOSE, "Service direction[%zu]=%u", index, g_service.input.direction[index]);
+	}
+
+	TRACE(LEVEL_INFORMATION, "Service loaded");
+
+exit:
+	return result;
+}
+
+void
+dmg_service_pixel(
+	__in uint8_t color,
+	__in uint8_t x,
+	__in uint8_t y
+	)
+{
+	dmg_sdl_pixel(color, x, y);
+}
+
+bool
+dmg_service_poll(void)
+{
+	bool complete;
+
+	g_service.frame.end = SDL_GetTicks();
+
+	if((complete = ((g_service.frame.rate = (g_service.frame.end - g_service.frame.begin)) >= MILLISEC_PER_SEC))) {
+		g_service.frame.rate = (g_service.frame.count - ((g_service.frame.rate - MILLISEC_PER_SEC) / (float)FRAME_PER_SEC));
+		g_service.frame.rate = ((g_service.frame.rate > 0.f) ? g_service.frame.rate : 0.f);
+		g_service.frame.begin = g_service.frame.end;
+		g_service.frame.count = 0;
+	}
+
+	return dmg_sdl_poll(complete, g_service.frame.rate);
+}
+
+void
+dmg_service_sync(void)
+{
+	dmg_sdl_sync();
+
+	if((g_service.frame.frequency = (SDL_GetTicks() - g_service.frame.end)) < FRAME_RATE) {
+		SDL_Delay(FRAME_RATE - g_service.frame.frequency);
+	}
+
+	++g_service.frame.count;
+}
+
+void
+dmg_service_unload(void)
+{
+	TRACE(LEVEL_INFORMATION, "Service unloading");
+
+	dmg_sdl_unload();
+	memset(&g_service, 0, sizeof(g_service));
+
+	TRACE(LEVEL_INFORMATION, "Service unloaded");
 }
 
 #ifdef __cplusplus

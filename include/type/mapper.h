@@ -37,14 +37,47 @@ typedef struct {
 	int mode;
 } __attribute__((packed)) dmg_mbc1_t;
 
-typedef union {
+typedef struct {
+	uint8_t second;
+	uint8_t minute;
+	uint8_t hour;
 
-	struct {
-		uint8_t rom : 7;
-		uint8_t unused : 1;
+	union {
+
+		struct {
+			uint8_t lower;
+
+			union {
+
+				struct {
+					uint8_t msb : 1;
+					uint8_t unused : 5;
+					uint8_t halt : 1;
+					uint8_t carry : 1;
+				};
+
+				uint8_t raw;
+			} upper;
+		};
+
+		uint16_t raw;
+	} day;
+} __attribute__((packed)) dmg_mbc3_rtc_t;
+
+typedef struct {
+
+	union {
+
+		struct {
+			uint8_t rom : 7;
+			uint8_t unused : 1;
+		};
+
+		uint8_t raw;
 	};
 
-	uint8_t raw;
+	int mode;
+	dmg_mbc3_rtc_t rtc;
 } __attribute__((packed)) dmg_mbc3_t;
 
 typedef union {

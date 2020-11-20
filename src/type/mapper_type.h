@@ -50,6 +50,7 @@ enum {
 };
 
 #define MBC3_RAM_MASK 0x03
+#define MBC3_RTC_LATCH 0x01
 
 enum {
 	MBC3_MODE_RAM_0 = 0,
