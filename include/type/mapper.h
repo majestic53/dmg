@@ -76,6 +76,7 @@ typedef struct {
 		uint8_t raw;
 	};
 
+	uint8_t latch;
 	int mode;
 	dmg_mbc3_rtc_t rtc;
 } __attribute__((packed)) dmg_mbc3_t;

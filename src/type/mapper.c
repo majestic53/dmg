@@ -107,31 +107,37 @@ dmg_mapper_mbc3_read_ram(
 	__in uint16_t address
 	)
 {
-	int type;
 	uint8_t result = 0;
+	int type = mapper->map.mbc3.mode;
 
-	switch((type = mapper->map.mbc3.mode)) {
-		case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:
-			result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address);
-			break;
-		case MBC3_MODE_RTC_SEC:
-			result = mapper->map.mbc3.rtc.second;
-			break;
-		case MBC3_MODE_RTC_MIN:
-			result = mapper->map.mbc3.rtc.minute;
-			break;
-		case MBC3_MODE_RTC_HOUR:
-			result = mapper->map.mbc3.rtc.hour;
-			break;
-		case MBC3_MODE_RTC_DAY_LOW:
-			result = mapper->map.mbc3.rtc.day.lower;
-			break;
-		case MBC3_MODE_RTC_DAY_HIGH:
-			result = mapper->map.mbc3.rtc.day.upper.raw;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
-			break;
+	if(mapper->cartridge.enable) {
+
+		switch(type) {
+			case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:
+				result = dmg_cartridge_read_ram(&mapper->cartridge, mapper->ram, address);
+				break;
+			case MBC3_MODE_RTC_SEC:
+				result = mapper->map.mbc3.rtc.second;
+				break;
+			case MBC3_MODE_RTC_MIN:
+				result = mapper->map.mbc3.rtc.minute;
+				break;
+			case MBC3_MODE_RTC_HOUR:
+				result = mapper->map.mbc3.rtc.hour;
+				break;
+			case MBC3_MODE_RTC_DAY_LOW:
+				result = mapper->map.mbc3.rtc.day.lower;
+				break;
+			case MBC3_MODE_RTC_DAY_HIGH:
+				result = mapper->map.mbc3.rtc.day.upper.raw;
+				break;
+			default:
+				TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
+				break;
+		}
+	} else {
+		result = UINT8_MAX;
+		TRACE_FORMAT(LEVEL_WARNING, "MBC3 ram disabled [%u][%04x]->%02x", type, address, result);
 	}
 
 	return result;
@@ -144,30 +150,35 @@ dmg_mapper_mbc3_write_ram(
 	__in uint8_t value
 	)
 {
-	int type;
+	int type = mapper->map.mbc3.mode;
 
-	switch((type = mapper->map.mbc3.mode)) {
-		case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:
-			dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address, value);
-			break;
-		case MBC3_MODE_RTC_SEC:
-			mapper->map.mbc3.rtc.second = value;
-			break;
-		case MBC3_MODE_RTC_MIN:
-			mapper->map.mbc3.rtc.minute = value;
-			break;
-		case MBC3_MODE_RTC_HOUR:
-			mapper->map.mbc3.rtc.hour = value;
-			break;
-		case MBC3_MODE_RTC_DAY_LOW:
-			mapper->map.mbc3.rtc.day.lower = value;
-			break;
-		case MBC3_MODE_RTC_DAY_HIGH:
-			mapper->map.mbc3.rtc.day.upper.raw = value;
-			break;
-		default:
-			TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
-			break;
+	if(mapper->cartridge.enable) {
+
+		switch(type) {
+			case MBC3_MODE_RAM_0 ... MBC3_MODE_RAM_7:
+				dmg_cartridge_write_ram(&mapper->cartridge, mapper->ram, address, value);
+				break;
+			case MBC3_MODE_RTC_SEC:
+				mapper->map.mbc3.rtc.second = value;
+				break;
+			case MBC3_MODE_RTC_MIN:
+				mapper->map.mbc3.rtc.minute = value;
+				break;
+			case MBC3_MODE_RTC_HOUR:
+				mapper->map.mbc3.rtc.hour = value;
+				break;
+			case MBC3_MODE_RTC_DAY_LOW:
+				mapper->map.mbc3.rtc.day.lower = value;
+				break;
+			case MBC3_MODE_RTC_DAY_HIGH:
+				mapper->map.mbc3.rtc.day.upper.raw = value;
+				break;
+			default:
+				TRACE_FORMAT(LEVEL_WARNING, "Unsupported MBC3 mode %u", type);
+				break;
+		}
+	} else {
+		TRACE_FORMAT(LEVEL_WARNING, "MBC3 ram disabled [%u][%04x]<-%02x", type, address, value);
 	}
 }
 
@@ -182,7 +193,7 @@ dmg_mapper_mbc3_write_rom(
 	switch(address) {
 		case ADDRESS_MBC3_LATCH_BEGIN ... ADDRESS_MBC3_LATCH_END:
 
-			if((value & MBC3_RTC_LATCH) == MBC3_RTC_LATCH) {
+			if(!mapper->map.mbc3.latch && (value & MBC3_RTC_LATCH) == MBC3_RTC_LATCH) {
 
 				// TODO: LATCH RTC
 
@@ -190,6 +201,8 @@ dmg_mapper_mbc3_write_rom(
 					((mapper->map.mbc3.rtc.day.upper.msb << CHAR_BIT) | mapper->map.mbc3.rtc.day.lower),
 					mapper->map.mbc3.rtc.hour, mapper->map.mbc3.rtc.minute, mapper->map.mbc3.rtc.second);
 			}
+
+			mapper->map.mbc3.latch = value;
 			break;
 		case ADDRESS_MBC3_RAM_ENABLE_BEGIN ... ADDRESS_MBC3_RAM_ENABLE_END:
 			dmg_cartridge_ram_enable(&mapper->cartridge, (value & NIBBLE_MAX) == RAM_ENABLE);
