@@ -1,4 +1,4 @@
-name: Build
+name: Build-Release-Debug
 
 on:
   push:
@@ -7,25 +7,31 @@ on:
     branches: [master]
 
 jobs:
-  build-gcc:
+  Build-GCC:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt-get update
-      - run: sudo apt-get install libsdl2-dev
-      - run: export CC=gcc
-      - run: echo $CC
-      - run: gcc --version
-      - run: make
-      - run: make debug LEVEL=4
-  build-clang:
+      - name: Setup
+        run: sudo apt-get update
+        run: sudo apt-get install libsdl2-dev
+      - name: Build
+        env:
+          CC: gcc
+        run: echo $CC
+        run: gcc --version
+        run: make
+        run: make debug LEVEL=4
+  Build-Clang:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: sudo apt-get update
-      - run: sudo apt-get install clang libsdl2-dev
-      - run: export CC=clang
-      - run: echo $CC
-      - run: clang --version
-      - run: make
-      - run: make debug LEVEL=4
+      - name: Setup
+        run: sudo apt-get update
+        run: sudo apt-get install clang libsdl2-dev
+      - name: Build
+        env:
+          CC: clang
+        run: echo $CC
+        run: clang --version
+        run: make
+        run: make debug LEVEL=4
