@@ -15,6 +15,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsdl2-dev
+        env:
+          CC: gcc
       - name: Dependency Information
         run: |
           echo "CC   --> $CC"
@@ -24,8 +26,6 @@ jobs:
         run: |
           make
           make debug LEVEL=4
-        env:
-          CC: gcc
   clang:
     runs-on: ubuntu-latest
     steps:
@@ -34,6 +34,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsdl2-dev clang
+        env:
+          CC: clang
       - name: Dependency Information
         run: |
           echo "CC    --> $CC"
@@ -43,5 +45,3 @@ jobs:
         run: |
           make
           make debug LEVEL=4
-        env:
-          CC: clang
