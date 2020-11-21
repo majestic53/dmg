@@ -12,6 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - run: sudo apt-get install libsdl2-dev
-      - run: export CC=gcc-10
+      - run: export CC=gcc
+      - run: make
+      - run: make debug LEVEL=4
+  build-clang:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: sudo apt-get install clang libsdl2-dev
+      - run: export CC=clang
       - run: make
       - run: make debug LEVEL=4
