@@ -1,0 +1,17 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  check-bats-version
+    run-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: apt install gcc-10 libsdl2-dev
+      - run: export CC=gcc-10
+      - run: make
+      - run: make debug LEVEL=4
