@@ -16,6 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef SDL
+
 #include "./sdl_type.h"
 
 static dmg_sdl_t g_sdl = {};
@@ -190,26 +192,10 @@ dmg_sdl_pixel(
 }
 
 bool
-dmg_sdl_poll(
-	__in bool complete,
-	__in float rate
-	)
+dmg_sdl_poll(void)
 {
 	bool result = true;
 	SDL_Event event = {};
-
-#ifndef NDEBUG
-
-	if(complete) {
-		char title[TITLE_LENGTH_MAX] = {};
-
-		if(snprintf(title, TITLE_LENGTH_MAX, "%s [%.01f fps]", g_sdl.title, rate) > 0) {
-			SDL_SetWindowTitle(g_sdl.window, title);
-		}
-
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL framerate=%.01f", rate);
-	}
-#endif /* NDEBUG */
 
 	while(SDL_PollEvent(&event)) {
 
@@ -249,3 +235,5 @@ dmg_sdl_unload(void)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* SDL */

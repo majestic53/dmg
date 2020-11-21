@@ -19,15 +19,11 @@
 #ifndef DMG_SERVICE_TYPE_H_
 #define DMG_SERVICE_TYPE_H_
 
-#include <SDL2/SDL.h>
+#ifdef SDL
 #include "../include/service/sdl.h"
+#endif /* SDL */
 #include "../include/type/buffer.h"
 #include "../include/service.h"
-
-#define FRAME_PER_SEC 60
-#define FRAME_RATE (MILLISEC_PER_SEC / (float)FRAME_PER_SEC)
-
-#define MILLISEC_PER_SEC 1000
 
 #define SAVE_VERSION_1 1
 
@@ -46,31 +42,28 @@ typedef struct {
 } __attribute__((packed)) dmg_save_header_t;
 
 typedef struct {
-	uint32_t begin;
-	uint32_t count;
-	uint32_t end;
-	float frequency;
-	float rate;
-} __attribute__((packed)) dmg_service_frame_t;
-
-typedef struct {
 	uint32_t button[DMG_BUTTON_MAX];
 	uint32_t direction[DMG_DIRECTION_MAX];
 } __attribute__((packed)) dmg_service_input_t;
 
 typedef struct {
-	dmg_service_frame_t frame;
 	dmg_service_input_t input;
 } __attribute__((packed)) dmg_service_t;
 
 #ifndef NDEBUG
 #define KBYTE 1024
 
+#define TRACE_SERVICE(_LEVEL_) \
+	if((_LEVEL_) <= (LEVEL)) { \
+		dmg_service_trace(_LEVEL_); \
+	}
+
 #define TRACE_SERVICE_SAVE(_LEVEL_, _SAVE_) \
 	if((_LEVEL_) <= (LEVEL)) { \
 		dmg_service_save_trace(_LEVEL_, _SAVE_); \
 	}
 #else
+#define TRACE_SERVICE(_LEVEL_)
 #define TRACE_SERVICE_SAVE(_LEVEL_, _SAVE_)
 #endif /* NDEBUG */
 

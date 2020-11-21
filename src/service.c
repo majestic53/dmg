@@ -46,6 +46,21 @@ dmg_service_save_trace(
 	TRACE_FORMAT(level, "Save length=%.02f KB (%u bytes)", length / (float)KBYTE, length);
 }
 
+static void
+dmg_service_trace(
+	__in int level
+	)
+{
+
+	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
+		TRACE_FORMAT(LEVEL_VERBOSE, "Service button[%zu]=%u", index, g_service.input.button[index]);
+	}
+
+	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
+		TRACE_FORMAT(LEVEL_VERBOSE, "Service direction[%zu]=%u", index, g_service.input.direction[index]);
+	}
+}
+
 #endif /* NDEBUG */
 
 bool
@@ -53,7 +68,13 @@ dmg_service_button(
 	__in int button
 	)
 {
-	return dmg_sdl_button(g_service.input.button[button]);
+	bool result = false;
+
+#ifdef SDL
+	result = dmg_sdl_button(g_service.input.button[button]);
+#endif /* SDL */
+
+	return result;
 }
 
 bool
@@ -61,7 +82,13 @@ dmg_service_direction(
 	__in int direction
 	)
 {
-	return dmg_sdl_direction(g_service.input.direction[direction]);
+	bool result = false;
+
+#ifdef SDL
+	result = dmg_sdl_direction(g_service.input.direction[direction]);
+#endif /* SDL */
+
+	return result;
 }
 
 int
@@ -274,27 +301,28 @@ dmg_service_load(
 	__in const char *title
 	)
 {
-	int result;
+	int result = ERROR_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Service loading");
 
+#ifdef SDL
+
 	if((result = dmg_sdl_load(configuration, title)) != ERROR_SUCCESS) {
-		goto exit;
+		return result;
 	}
+#endif /* SDL */
 
 	for(int index = 0; index < DMG_BUTTON_MAX; ++index) {
 		g_service.input.button[index] = configuration->button[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "Service button[%zu]=%u", index, g_service.input.button[index]);
 	}
 
 	for(int index = 0; index < DMG_DIRECTION_MAX; ++index) {
 		g_service.input.direction[index] = configuration->direction[index];
-		TRACE_FORMAT(LEVEL_VERBOSE, "Service direction[%zu]=%u", index, g_service.input.direction[index]);
 	}
 
+	TRACE_SERVICE(LEVEL_VERBOSE);
 	TRACE(LEVEL_INFORMATION, "Service loaded");
 
-exit:
 	return result;
 }
 
@@ -305,36 +333,29 @@ dmg_service_pixel(
 	__in uint8_t y
 	)
 {
+#ifdef SDL
 	dmg_sdl_pixel(color, x, y);
+#endif /* SDL */
 }
 
 bool
 dmg_service_poll(void)
 {
-	bool complete;
+	bool result = true;
 
-	g_service.frame.end = SDL_GetTicks();
+#ifdef SDL
+	result = dmg_sdl_poll();
+#endif /* SDL */
 
-	if((complete = ((g_service.frame.rate = (g_service.frame.end - g_service.frame.begin)) >= MILLISEC_PER_SEC))) {
-		g_service.frame.rate = (g_service.frame.count - ((g_service.frame.rate - MILLISEC_PER_SEC) / (float)FRAME_PER_SEC));
-		g_service.frame.rate = ((g_service.frame.rate > 0.f) ? g_service.frame.rate : 0.f);
-		g_service.frame.begin = g_service.frame.end;
-		g_service.frame.count = 0;
-	}
-
-	return dmg_sdl_poll(complete, g_service.frame.rate);
+	return result;
 }
 
 void
 dmg_service_sync(void)
 {
+#ifdef SDL
 	dmg_sdl_sync();
-
-	if((g_service.frame.frequency = (SDL_GetTicks() - g_service.frame.end)) < FRAME_RATE) {
-		SDL_Delay(FRAME_RATE - g_service.frame.frequency);
-	}
-
-	++g_service.frame.count;
+#endif /* SDL */
 }
 
 void
@@ -342,7 +363,9 @@ dmg_service_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Service unloading");
 
+#ifdef SDL
 	dmg_sdl_unload();
+#endif /* SDL */
 	memset(&g_service, 0, sizeof(g_service));
 
 	TRACE(LEVEL_INFORMATION, "Service unloaded");

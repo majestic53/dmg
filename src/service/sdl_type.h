@@ -19,6 +19,8 @@
 #ifndef DMG_SERVICE_SDL_TYPE_H_
 #define DMG_SERVICE_SDL_TYPE_H_
 
+#ifdef SDL
+
 #include <SDL2/SDL.h>
 #include "../../include/service/sdl.h"
 
@@ -63,5 +65,7 @@ typedef struct {
 } dmg_sdl_t;
 
 static const dmg_sdl_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};
+
+#endif /* SDL */
 
 #endif /* DMG_SERVICE_SDL_TYPE_H_ */

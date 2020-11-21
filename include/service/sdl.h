@@ -19,6 +19,8 @@
 #ifndef DMG_SERVICE_SDL_H_
 #define DMG_SERVICE_SDL_H_
 
+#ifdef SDL
+
 #include "../common.h"
 
 #ifdef __cplusplus
@@ -44,10 +46,7 @@ void dmg_sdl_pixel(
 	__in uint8_t y
 	);
 
-bool dmg_sdl_poll(
-	__in bool complete,
-	__in float rate
-	);
+bool dmg_sdl_poll(void);
 
 void dmg_sdl_sync(void);
 
@@ -56,5 +55,7 @@ void dmg_sdl_unload(void);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* SDL */
 
 #endif /* DMG_SERVICE_SDL_H_ */
