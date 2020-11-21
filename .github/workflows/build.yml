@@ -15,17 +15,16 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsdl2-dev
-        env:
-          CC: gcc
       - name: Dependency Information
         run: |
-          echo "CC   --> $CC"
-          echo "gcc  --> `gcc --version | grep gcc | awk '{print $3}'`"
-          echo "sdl2 --> `sdl2-config --version`"
+          echo "gcc `gcc --version | grep gcc | awk '{print $3}'`"
+          echo "sdl2 `sdl2-config --version`"
       - name: Build Test
         run: |
           make
           make debug LEVEL=4
+        env:
+          CC: gcc
   clang:
     runs-on: ubuntu-latest
     steps:
@@ -34,14 +33,13 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install libsdl2-dev clang
-        env:
-          CC: clang
       - name: Dependency Information
         run: |
-          echo "CC    --> $CC"
-          echo "clang --> `clang --version | grep clang | awk '{print $3}'`"
-          echo "sdl2  --> `sdl2-config --version`"
+          echo "clang `clang --version | grep clang | awk '{print $3}'`"
+          echo "sdl2 `sdl2-config --version`"
       - name: Build Test
         run: |
           make
           make debug LEVEL=4
+        env:
+          CC: clang
