@@ -1,4 +1,4 @@
-name: Build-All
+name: build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [master]
 
 jobs:
-  Build-GCC:
+  gcc:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -23,7 +23,7 @@ jobs:
           make debug LEVEL=4
         env:
           CC: gcc
-  Build-Clang:
+  clang:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
