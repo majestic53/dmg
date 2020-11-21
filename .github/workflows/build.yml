@@ -8,7 +8,7 @@ on:
 
 jobs:
   check-bats-version:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - run: apt install gcc-10 libsdl2-dev
