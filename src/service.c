@@ -341,13 +341,9 @@ dmg_service_pixel(
 bool
 dmg_service_poll(void)
 {
-	bool result = true;
-
 #ifdef SDL
-	result = dmg_sdl_poll();
+	return dmg_sdl_poll();
 #endif /* SDL */
-
-	return result;
 }
 
 void

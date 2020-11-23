@@ -122,7 +122,7 @@ dmg_video_tile_background(
 	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
 }
 
-static const dmg_video_tile_t *
+/*static const dmg_video_tile_t *
 dmg_video_tile_sprite(
 	__in const void *ram,
 	__in int map,
@@ -135,7 +135,7 @@ dmg_video_tile_sprite(
 	address = (TILE_DATA[data] + (sizeof(dmg_video_tile_t) * ((uint8_t *)ram)[address]));
 
 	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
-}
+}*/
 
 static void
 dmg_video_scanline_background(
@@ -169,6 +169,54 @@ dmg_video_scanline_sprite(
 {
 
 	if(video->control.sprite) {
+		uint32_t count = 0, index;
+		dmg_video_sprite_screen_list_t list = {};
+
+		for(index = 0; index < SPRITE_MAX; ++index) {
+			const dmg_video_sprite_t *sprite = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
+
+			if((sprite->x >= SPRITE_OFFSET_X)
+					&& (video->line >= (sprite->y - SPRITE_OFFSET_Y))
+					&& (video->line < ((sprite->y - SPRITE_OFFSET_Y) + SPRITE_SIZE[video->control.sprite_size]))) {
+				list.sprite[count].x = (sprite->x - SPRITE_OFFSET_X);
+				list.sprite[count].y = (sprite->y - SPRITE_OFFSET_Y);
+				list.sprite[count].entry = sprite;
+				++count;
+			}
+
+			if(count == LINE_SPRITE_MAX) {
+				break;
+			}
+		}
+
+		if(count) {
+
+			// TODO: SORT BY X-COORD./PRIORITY
+
+			for(index = 0; index < count; ++index) {
+				uint32_t x, y = video->line;
+				dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
+
+				for(x = sprite->x; x < (sprite->x + TILE_WIDTH); ++x) {
+
+					if(x > VIEWPORT_WIDTH) {
+						break;
+					}
+
+					// TODO
+
+					if(sprite->entry->priority && video->viewport[y][x]) {
+						continue;
+					}
+
+					video->viewport[y][x] = dmg_video_palette_color(sprite->entry->palette ? &video->object_1 : &video->object_0,
+									DMG_PALETTE_BLACK);
+				}
+			}
+		}
+	}
+
+	/*if(video->control.sprite) {
 		uint32_t count = 0, index, sprite[SPRITE_MAX] = {};
 
 		for(index = 0; index < SPRITE_MAX; ++index) {
@@ -215,7 +263,7 @@ dmg_video_scanline_sprite(
 				}
 			}
 		}
-	}
+	}*/
 }
 
 static void

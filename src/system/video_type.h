@@ -118,6 +118,16 @@ typedef struct {
 	dmg_video_sprite_t sprite[SPRITE_MAX];
 } __attribute__((packed)) dmg_video_sprite_list_t;
 
+typedef struct {
+	uint8_t x;
+	uint8_t y;
+	const dmg_video_sprite_t *entry;
+} __attribute__((packed)) dmg_video_sprite_screen_t;
+
+typedef struct {
+	dmg_video_sprite_screen_t sprite[SPRITE_MAX];
+} __attribute__((packed)) dmg_video_sprite_screen_list_t;
+
 typedef union {
 
 	struct {
