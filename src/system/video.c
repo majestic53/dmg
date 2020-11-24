@@ -175,9 +175,8 @@ dmg_video_scanline_sprite(
 		for(index = 0; index < SPRITE_MAX; ++index) {
 			const dmg_video_sprite_t *sprite = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
 
-			if((sprite->x >= SPRITE_OFFSET_X)
-					&& (video->line >= (sprite->y - SPRITE_OFFSET_Y))
-					&& (video->line < ((sprite->y - SPRITE_OFFSET_Y) + SPRITE_SIZE[video->control.sprite_size]))) {
+			if((video->line >= (sprite->y - SPRITE_OFFSET_Y))
+					&& (video->line < ((sprite->y - SPRITE_OFFSET_Y) + TILE_HEIGHT))) {
 				list.sprite[count].x = (sprite->x - SPRITE_OFFSET_X);
 				list.sprite[count].y = (sprite->y - SPRITE_OFFSET_Y);
 				list.sprite[count].entry = sprite;
@@ -194,16 +193,24 @@ dmg_video_scanline_sprite(
 			// TODO: SORT BY X-COORD./PRIORITY
 
 			for(index = 0; index < count; ++index) {
-				uint32_t x, y = video->line;
+				uint32_t x, x_begin, x_end, y = video->line;
 				dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
 
-				for(x = sprite->x; x < (sprite->x + TILE_WIDTH); ++x) {
+				if((sprite->x > -TILE_WIDTH) && (sprite->x <= 0)) {
+					x_begin = 0;
+					x_end = (TILE_WIDTH + sprite->x);
+				} else {
+					x_begin = sprite->x;
+					x_end = TILE_WIDTH;
+				}
+
+				for(x = x_begin; x < (x_begin + x_end); ++x) {
 
 					if(x > VIEWPORT_WIDTH) {
 						break;
 					}
 
-					// TODO
+					// TODO: HANDLE FLIP
 
 					if(sprite->entry->priority && video->viewport[y][x]) {
 						continue;
@@ -215,55 +222,6 @@ dmg_video_scanline_sprite(
 			}
 		}
 	}
-
-	/*if(video->control.sprite) {
-		uint32_t count = 0, index, sprite[SPRITE_MAX] = {};
-
-		for(index = 0; index < SPRITE_MAX; ++index) {
-			const dmg_video_sprite_t *entry = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
-
-			if((entry->x < SPRITE_OFFSET_X) || (entry->y < SPRITE_OFFSET_Y)) {
-				continue;
-			}
-
-			if((video->line >= (entry->y - SPRITE_SIZE[video->control.sprite_size])) && (video->line < entry->y)) {
-				sprite[count++] = index;
-			}
-		}
-
-		if(count) {
-
-			// TODO: SORT BY X-COORD./PRIORITY
-
-			for(index = 0; index < ((count < LINE_SPRITE_MAX) ? count : LINE_SPRITE_MAX); ++index) {
-				const dmg_video_sprite_t *entry = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[sprite[index]];
-				uint8_t id = entry->id, x = (entry->x - SPRITE_OFFSET_X), y = (video->line - TILE_WIDTH), py = (y % TILE_HEIGHT);
-
-				if(video->control.sprite_size) {
-					id &= ~1;
-				}
-
-				const dmg_video_tile_t *tile = dmg_video_tile_sprite(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
-
-				for(; x < entry->x; ++ x) {
-					uint8_t px, value;
-
-					if(!(px = (x % TILE_WIDTH))) {
-						tile = dmg_video_tile_sprite(video->ram.data, SPRITE_MAP, SPRITE_DATA, id);
-					}
-
-					value = (((tile->line[py].high >> (TILE_WIDTH - px - 1)) & 1) << 1) | ((tile->line[py].low >> (TILE_WIDTH - px - 1)) & 1);
-					(void)value;
-
-					if(entry->priority && video->viewport[y][x]) {
-						continue;
-					}
-
-					video->viewport[y][x] = dmg_video_palette_color(entry->palette ? &video->object_1 : &video->object_0, DMG_PALETTE_BLACK);
-				}
-			}
-		}
-	}*/
 }
 
 static void

@@ -35,14 +35,6 @@
 #define TIMESTAMP_MALFORMED "Malformed timestamp"
 
 typedef struct {
-	clock_t begin;
-	uint32_t count;
-	clock_t duration;
-	clock_t end;
-	clock_t rate;
-} __attribute__((packed)) dmg_save_frame_t;
-
-typedef struct {
 	uint32_t magic;
 	uint8_t version;
 	uint32_t timestamp;
@@ -55,7 +47,6 @@ typedef struct {
 } __attribute__((packed)) dmg_service_input_t;
 
 typedef struct {
-	dmg_save_frame_t frame;
 	dmg_service_input_t input;
 } __attribute__((packed)) dmg_service_t;
 

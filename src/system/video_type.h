@@ -41,7 +41,7 @@
 #define RAM_SPRITE_WIDTH ADDRESS_WIDTH(ADDRESS_VIDEO_RAM_SPRITE_BEGIN, ADDRESS_VIDEO_RAM_SPRITE_END)
 
 #define SPRITE_DATA 1
-#define SPRITE_MAP 1
+#define SPRITE_MAP 0
 #define SPRITE_MAX 40
 #define SPRITE_OFFSET_X 8
 #define SPRITE_OFFSET_Y 16
@@ -119,8 +119,8 @@ typedef struct {
 } __attribute__((packed)) dmg_video_sprite_list_t;
 
 typedef struct {
-	uint8_t x;
-	uint8_t y;
+	int32_t x;
+	int32_t y;
 	const dmg_video_sprite_t *entry;
 } __attribute__((packed)) dmg_video_sprite_screen_t;
 
