@@ -99,7 +99,7 @@ dmg_video_pixel_color(
 	__in uint8_t y
 	)
 {
-	return (((tile->line[y].high >> (TILE_WIDTH - x - 1)) & 1) << 1) | ((tile->line[y].low >> (TILE_WIDTH - x - 1)) & 1);
+	return ((((tile->line[y].high >> (TILE_WIDTH - x - 1)) & 1) << 1) | ((tile->line[y].low >> (TILE_WIDTH - x - 1)) & 1));
 }
 
 static const dmg_video_tile_t *
@@ -122,20 +122,14 @@ dmg_video_tile_background(
 	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
 }
 
-/*static const dmg_video_tile_t *
+static const dmg_video_tile_t *
 dmg_video_tile_sprite(
 	__in const void *ram,
-	__in int map,
-	__in int data,
 	__in uint8_t id
 	)
 {
-	uint16_t address = (TILE_MAP[map] + id);
-
-	address = (TILE_DATA[data] + (sizeof(dmg_video_tile_t) * ((uint8_t *)ram)[address]));
-
-	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[address]);
-}*/
+	return (const dmg_video_tile_t *)&(((uint8_t *)ram)[TILE_DATA[SPRITE_DATA] + (sizeof(dmg_video_tile_t) * id)]);
+}
 
 static void
 dmg_video_scanline_background(
@@ -193,8 +187,9 @@ dmg_video_scanline_sprite(
 			// TODO: SORT BY X-COORD./PRIORITY
 
 			for(index = 0; index < count; ++index) {
-				uint32_t x, x_begin, x_end, y = video->line;
+				uint32_t x, x_begin, x_end, y = video->line, py = (y % TILE_HEIGHT);
 				dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
+				const dmg_video_tile_t *tile = dmg_video_tile_sprite(video->ram.data, sprite->entry->id);
 
 				if((sprite->x > -TILE_WIDTH) && (sprite->x <= 0)) {
 					x_begin = 0;
@@ -205,6 +200,7 @@ dmg_video_scanline_sprite(
 				}
 
 				for(x = x_begin; x < (x_begin + x_end); ++x) {
+					uint8_t color, px = (x % TILE_WIDTH);
 
 					if(x > VIEWPORT_WIDTH) {
 						break;
@@ -212,12 +208,14 @@ dmg_video_scanline_sprite(
 
 					// TODO: HANDLE FLIP
 
-					if(sprite->entry->priority && video->viewport[y][x]) {
+					color = dmg_video_pixel_color(tile, px, py);
+
+					if((sprite->entry->priority && video->viewport[y][x]) || !color) {
 						continue;
 					}
 
 					video->viewport[y][x] = dmg_video_palette_color(sprite->entry->palette ? &video->object_1 : &video->object_0,
-									DMG_PALETTE_BLACK);
+									color);
 				}
 			}
 		}
