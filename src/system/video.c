@@ -136,23 +136,20 @@ dmg_video_scanline_background(
 	__in dmg_video_t *video
 	)
 {
-
-	if(video->control.background) {
-		uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
-		const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
-							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
-
-		for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
-			uint8_t px;
-
-			if(!(px = (x % TILE_WIDTH))) {
-				tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+	uint32_t x = video->screen_x, y = (video->screen_y + video->line), py = (y % TILE_HEIGHT);
+	const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
 						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
-			}
 
-			video->viewport[y - video->screen_y][x - video->screen_x]
-				= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
+	for(; x < (video->screen_x + VIEWPORT_WIDTH); ++x) {
+		uint8_t px;
+
+		if(!(px = (x % TILE_WIDTH))) {
+			tile = dmg_video_tile_background(video->ram.data, video->control.background_tile_map, video->control.tile_data,
+					(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
 		}
+
+		video->viewport[y - video->screen_y][x - video->screen_x]
+			= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
 	}
 }
 
@@ -161,62 +158,59 @@ dmg_video_scanline_sprite(
 	__in dmg_video_t *video
 	)
 {
+	uint32_t count = 0, index;
+	dmg_video_sprite_screen_list_t list = {};
 
-	if(video->control.sprite) {
-		uint32_t count = 0, index;
-		dmg_video_sprite_screen_list_t list = {};
+	for(index = 0; index < SPRITE_MAX; ++index) {
+		const dmg_video_sprite_t *sprite = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
 
-		for(index = 0; index < SPRITE_MAX; ++index) {
-			const dmg_video_sprite_t *sprite = &((const dmg_video_sprite_list_t *)video->ram_sprite.data)->sprite[index];
-
-			if((video->line >= (sprite->y - SPRITE_OFFSET_Y))
-					&& (video->line < ((sprite->y - SPRITE_OFFSET_Y) + TILE_HEIGHT))) {
-				list.sprite[count].x = (sprite->x - SPRITE_OFFSET_X);
-				list.sprite[count].y = (sprite->y - SPRITE_OFFSET_Y);
-				list.sprite[count].entry = sprite;
-				++count;
-			}
-
-			if(count == LINE_SPRITE_MAX) {
-				break;
-			}
+		if((video->line >= (sprite->y - SPRITE_OFFSET_Y))
+				&& (video->line < ((sprite->y - SPRITE_OFFSET_Y) + SPRITE_SIZE[video->control.sprite_size]))) {
+			list.sprite[count].x = (sprite->x - SPRITE_OFFSET_X);
+			list.sprite[count].y = (sprite->y - SPRITE_OFFSET_Y);
+			list.sprite[count].entry = sprite;
+			++count;
 		}
 
-		if(count) {
+		if(count == LINE_SPRITE_MAX) {
+			break;
+		}
+	}
 
-			// TODO: SORT BY X-COORD./PRIORITY
+	if(count) {
 
-			for(index = 0; index < count; ++index) {
-				uint32_t x, x_begin, x_end, y = video->line, py = (y % TILE_HEIGHT);
-				dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
-				const dmg_video_tile_t *tile = dmg_video_tile_sprite(video->ram.data, sprite->entry->id);
+		// TODO: SORT BY X-COORD./PRIORITY
 
-				if((sprite->x > -TILE_WIDTH) && (sprite->x <= 0)) {
-					x_begin = 0;
-					x_end = (TILE_WIDTH + sprite->x);
-				} else {
-					x_begin = sprite->x;
-					x_end = TILE_WIDTH;
+		for(index = 0; index < count; ++index) {
+			uint32_t x, x_begin, x_end, x_off = 0, y = video->line;
+			dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
+			const dmg_video_tile_t *tile = dmg_video_tile_sprite(video->ram.data, sprite->entry->id);
+
+			if((sprite->x >= -TILE_WIDTH) && (sprite->x < 0)) {
+				x_begin = 0;
+				x_end = (TILE_WIDTH + sprite->x);
+				x_off = (TILE_WIDTH - x_end);
+			} else {
+				x_begin = sprite->x;
+				x_end = TILE_WIDTH;
+			}
+
+			for(x = x_begin; x < (x_begin + x_end); ++x) {
+				uint8_t color;
+
+				if(x > VIEWPORT_WIDTH) {
+					break;
 				}
 
-				for(x = x_begin; x < (x_begin + x_end); ++x) {
-					uint8_t color, px = (x % TILE_WIDTH);
+				// TODO: HANDLE FLIP
 
-					if(x > VIEWPORT_WIDTH) {
-						break;
-					}
-
-					// TODO: HANDLE FLIP
-
-					color = dmg_video_pixel_color(tile, px, py);
-
-					if((sprite->entry->priority && video->viewport[y][x]) || !color) {
-						continue;
-					}
-
-					video->viewport[y][x] = dmg_video_palette_color(sprite->entry->palette ? &video->object_1 : &video->object_0,
-									color);
+				if(!(color = dmg_video_pixel_color(tile, (x + x_off) - x_begin, y - sprite->y))
+						|| (sprite->entry->priority && video->viewport[y][x])) {
+					continue;
 				}
+
+				video->viewport[y][x] = dmg_video_palette_color(sprite->entry->palette ? &video->object_1 : &video->object_0,
+								color);
 			}
 		}
 	}
@@ -227,25 +221,21 @@ dmg_video_scanline_window(
 	__in dmg_video_t *video
 	)
 {
-
-	if(video->control.window && (video->window_x >= WINDOW_OFFSET_X) && (video->window_x < VIEWPORT_WIDTH)
-			&& (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
-		uint32_t x = 0, y = (video->line - video->window_y), py = (y % TILE_HEIGHT);
-		const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
-							(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
-
-		for(; x < (VIEWPORT_WIDTH - (video->window_x - WINDOW_OFFSET_X)); ++x) {
-			uint8_t px;
-
-			if(!(px = (x % TILE_WIDTH))) {
-				tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+	uint32_t x = 0, y = (video->line - video->window_y), py = (y % TILE_HEIGHT);
+	const dmg_video_tile_t *tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
 						(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
-			}
 
-			if((y + video->window_y) < LINE_HBLANK_MAX) {
-				video->viewport[y + video->window_y][x + (video->window_x - WINDOW_OFFSET_X)]
-					= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
-			}
+	for(; x < (VIEWPORT_WIDTH - (video->window_x - WINDOW_OFFSET_X)); ++x) {
+		uint8_t px;
+
+		if(!(px = (x % TILE_WIDTH))) {
+			tile = dmg_video_tile_background(video->ram.data, video->control.window_tile_map, video->control.tile_data,
+					(x / TILE_WIDTH) % TILE_PITCH, (y / TILE_HEIGHT) % TILE_PITCH);
+		}
+
+		if((y + video->window_y) < LINE_HBLANK_MAX) {
+			video->viewport[y + video->window_y][x + (video->window_x - WINDOW_OFFSET_X)]
+				= dmg_video_palette_color(&video->background, dmg_video_pixel_color(tile, px, py));
 		}
 	}
 }
@@ -301,13 +291,24 @@ dmg_video_transfer(
 		dmg_runtime_interrupt(INTERRUPT_LCDC);
 	}
 
-	if(video->control.enable) {
 #ifndef UNITTEST
-		dmg_video_scanline_background(video);
-		dmg_video_scanline_window(video);
-		dmg_video_scanline_sprite(video);
-#endif /* UNITTEST */
+	if(video->control.enable) {
+
+		if(video->control.background) {
+
+			if(video->control.window && (video->window_x >= WINDOW_OFFSET_X) && (video->window_x < VIEWPORT_WIDTH)
+					&& (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
+				dmg_video_scanline_window(video);
+			} else {
+				dmg_video_scanline_background(video);
+			}
+		}
+
+		if(video->control.sprite) {
+			dmg_video_scanline_sprite(video);
+		}
 	}
+#endif /* UNITTEST */
 
 	return false;
 }
@@ -334,6 +335,8 @@ dmg_video_vblank(
 				dmg_service_pixel(video->viewport[y][x], x, y);
 			}
 		}
+
+		memset(video->viewport, 0, sizeof(uint8_t) * VIEWPORT_WIDTH * VIEWPORT_HEIGHT);
 #endif /* UNITTEST */
 	}
 
