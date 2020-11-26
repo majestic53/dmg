@@ -179,8 +179,6 @@ dmg_video_scanline_sprite(
 
 	if(count) {
 
-		// TODO: SORT BY X-COORD./PRIORITY
-
 		for(index = 0; index < count; ++index) {
 			uint32_t x, x_begin, x_end, x_off = 0, y = video->line;
 			dmg_video_sprite_screen_t *sprite = &list.sprite[count - index - 1];
@@ -196,15 +194,21 @@ dmg_video_scanline_sprite(
 			}
 
 			for(x = x_begin; x < (x_begin + x_end); ++x) {
-				uint8_t color;
+				uint8_t color, px = ((x + x_off) - x_begin), py = (y - sprite->y);
 
 				if(x > VIEWPORT_WIDTH) {
 					break;
 				}
 
-				// TODO: HANDLE FLIP
+				if(sprite->entry->flip_x) {
+					px = ((TILE_WIDTH - 1) - px);
+				}
 
-				if(!(color = dmg_video_pixel_color(tile, (x + x_off) - x_begin, y - sprite->y))
+				if(sprite->entry->flip_y) {
+					py = ((SPRITE_SIZE[video->control.sprite_size] - 1) - (y - sprite->y));
+				}
+
+				if(!(color = dmg_video_pixel_color(tile, px, py))
 						|| (sprite->entry->priority && video->viewport[y][x])) {
 					continue;
 				}
@@ -295,12 +299,11 @@ dmg_video_transfer(
 	if(video->control.enable) {
 
 		if(video->control.background) {
+			dmg_video_scanline_background(video);
 
 			if(video->control.window && (video->window_x >= WINDOW_OFFSET_X) && (video->window_x < VIEWPORT_WIDTH)
 					&& (video->window_y < LINE_HBLANK_MAX) && (video->line >= video->window_y)) {
 				dmg_video_scanline_window(video);
-			} else {
-				dmg_video_scanline_background(video);
 			}
 		}
 
