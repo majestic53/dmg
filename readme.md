@@ -74,7 +74,7 @@ For an example of how to use this interface, see the [launcher tool](https://git
 |:-------------|:----|
 |ROM-Only      |0    |
 |MBC1          |1-3  |
-|MBC3          |18-19|
+|MBC3          |15-19|
 |MBC5          |25-30|
 
 Trademark
