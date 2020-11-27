@@ -48,6 +48,10 @@ void dmg_sdl_pixel(
 
 bool dmg_sdl_poll(void);
 
+int dmg_sdl_sample(
+	__in const void *sample
+	);
+
 void dmg_sdl_sync(void);
 
 void dmg_sdl_unload(void);

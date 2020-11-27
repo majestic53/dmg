@@ -59,7 +59,10 @@ static const char *MAPPER_STR[] = {
 	"MBC1", /* MAPPER_MBC1 */
 	"MBC1-RAM", /* MAPPER_MBC1_RAM */
 	"MBC1-RAM-BATTERY", /* MAPPER_MBC1_RAM_BATTERY */
-	"", "", "", "", "", "", "", "", "", "", "", "", "", "",
+	"", "", "", "", "", "", "", "", "", "", "",
+	"MBC3-TIMER-BATTERY", /* MAPPER_MBC3_TIMER_BATTERY */
+	"MBC3-TIMER-RAM-BATTERY", /* MAPPER_MBC3_TIMER_RAM_BATTERY */
+	"MBC3", /* MAPPER_MBC3 */
 	"MBC3-RAM", /* MAPPER_MBC3_RAM */
 	"MBC3-RAM-BATTERY", /* MAPPER_MBC3_RAM_BATTERY */
 	"", "", "", "", "",

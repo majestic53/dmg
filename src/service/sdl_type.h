@@ -24,6 +24,14 @@
 #include <SDL2/SDL.h>
 #include "../../include/service/sdl.h"
 
+#define AUDIO_CHANNELS 1
+#define AUDIO_DIRECTION 0
+#define AUDIO_FREQUENCY 15360
+#define AUDIO_FORMAT AUDIO_U8
+#define AUDIO_PAUSE 1
+#define AUDIO_PLAY 0
+#define AUDIO_SAMPLES 256
+
 #define PALETTE_MASK_BLUE 0x000000ff
 #define PALETTE_MASK_GREEN 0x0000ff00
 #define PALETTE_MASK_RED 0x00ff0000
@@ -54,6 +62,11 @@ typedef union {
 } dmg_sdl_bgra_t;
 
 typedef struct {
+	SDL_AudioDeviceID device;
+	SDL_AudioSpec specification;
+} dmg_sdl_audio_t;
+
+typedef struct {
 	dmg_sdl_bgra_t palette[DMG_PALETTE_MAX];
 	dmg_sdl_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
 	bool redraw;
@@ -62,6 +75,11 @@ typedef struct {
 	SDL_Texture *texture;
 	char title[TITLE_LENGTH_MAX];
 	SDL_Window *window;
+} dmg_sdl_video_t;
+
+typedef struct {
+	dmg_sdl_audio_t audio;
+	dmg_sdl_video_t video;
 } dmg_sdl_t;
 
 static const dmg_sdl_bgra_t COLOR_BACKGROUND = {{ 0x00, 0x00, 0x00, 0x00 }};

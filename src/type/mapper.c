@@ -194,8 +194,14 @@ dmg_mapper_mbc3_write_rom(
 		case ADDRESS_MBC3_LATCH_BEGIN ... ADDRESS_MBC3_LATCH_END:
 
 			if(!mapper->map.mbc3.latch && (value & MBC3_RTC_LATCH) == MBC3_RTC_LATCH) {
+				time_t current = time(NULL);
+				struct tm *local = localtime(&current);
 
-				// TODO: LATCH RTC
+				mapper->map.mbc3.rtc.second = local->tm_sec;
+				mapper->map.mbc3.rtc.minute = local->tm_min;
+				mapper->map.mbc3.rtc.hour = local->tm_hour;
+				mapper->map.mbc3.rtc.day.lower = (local->tm_yday & UINT8_MAX);
+				mapper->map.mbc3.rtc.day.upper.msb = (local->tm_yday > UINT8_MAX);
 
 				TRACE_FORMAT(LEVEL_VERBOSE, "MBC3 rtc latch %u:%u:%u:%u",
 					((mapper->map.mbc3.rtc.day.upper.msb << CHAR_BIT) | mapper->map.mbc3.rtc.day.lower),
@@ -362,6 +368,9 @@ dmg_mapper_load(
 		case MAPPER_MBC1:
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
+		case MAPPER_MBC3_TIMER_BATTERY:
+		case MAPPER_MBC3_TIMER_RAM_BATTERY:
+		case MAPPER_MBC3:
 		case MAPPER_MBC3_RAM:
 		case MAPPER_MBC3_RAM_BATTERY:
 		case MAPPER_MBC5:
@@ -399,6 +408,9 @@ dmg_mapper_read_ram(
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 
 			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC3_TIMER_BATTERY:
+				case MAPPER_MBC3_TIMER_RAM_BATTERY:
+				case MAPPER_MBC3:
 				case MAPPER_MBC3_RAM:
 				case MAPPER_MBC3_RAM_BATTERY:
 					result = dmg_mapper_mbc3_read_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN);
@@ -466,6 +478,9 @@ dmg_mapper_write_ram(
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 
 			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC3_TIMER_BATTERY:
+				case MAPPER_MBC3_TIMER_RAM_BATTERY:
+				case MAPPER_MBC3:
 				case MAPPER_MBC3_RAM:
 				case MAPPER_MBC3_RAM_BATTERY:
 					dmg_mapper_mbc3_write_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN, value);
@@ -500,6 +515,9 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC1_RAM_BATTERY:
 			dmg_mapper_mbc1_write_rom(mapper, address, value);
 			break;
+		case MAPPER_MBC3_TIMER_BATTERY:
+		case MAPPER_MBC3_TIMER_RAM_BATTERY:
+		case MAPPER_MBC3:
 		case MAPPER_MBC3_RAM:
 		case MAPPER_MBC3_RAM_BATTERY:
 			dmg_mapper_mbc3_write_rom(mapper, address, value);

@@ -341,9 +341,27 @@ dmg_service_pixel(
 bool
 dmg_service_poll(void)
 {
+	bool result = true;
+
 #ifdef SDL
-	return dmg_sdl_poll();
+	result = dmg_sdl_poll();
 #endif /* SDL */
+
+	return result;
+}
+
+int
+dmg_service_sample(
+	__in const void *sample
+	)
+{
+	int result = ERROR_SUCCESS;
+
+#ifdef SDL
+	result = dmg_sdl_sample(sample);
+#endif /* SDL */
+
+	return result;
 }
 
 void

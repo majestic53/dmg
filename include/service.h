@@ -70,6 +70,10 @@ void dmg_service_pixel(
 
 bool dmg_service_poll(void);
 
+int dmg_service_sample(
+	__in const void *sample
+	);
+
 void dmg_service_sync(void);
 
 void dmg_service_unload(void);

@@ -105,8 +105,8 @@ dmg_utility_rom_info_file_parse(void)
 
 	fprintf(stdout, "\"\nMapper    ");
 
-	if(header->mapper >= MAPPER_MAX) {
-		fprintf(stdout, "UNSUPPORTED\n");
+	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
+		fprintf(stdout, "UNSUPPORTED (%u)\n", header->mapper);
 		result = EXIT_FAILURE;
 	} else {
 		fprintf(stdout, "%s\n", MAPPER_STR[header->mapper]);

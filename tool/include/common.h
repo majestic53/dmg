@@ -20,6 +20,7 @@
 #define DMG_TOOL_COMMON_H_
 
 #include <SDL2/SDL.h>
+#include <ctype.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stdarg.h>

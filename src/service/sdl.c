@@ -27,30 +27,68 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
-dmg_sdl_display_show(void)
+dmg_sdl_audio_load(void)
 {
 	int result = ERROR_SUCCESS;
+	SDL_AudioSpec specification = {};
 
-	if(g_sdl.redraw) {
-		g_sdl.redraw = false;
+	TRACE(LEVEL_INFORMATION, "SDL audio loading");
 
-		if(SDL_RenderClear(g_sdl.renderer)) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-			goto exit;
-		}
+	specification.freq = AUDIO_FREQUENCY;
+	specification.format = AUDIO_FORMAT;
+	specification.channels = AUDIO_CHANNELS;
+	specification.samples = AUDIO_SAMPLES;
 
-		if(SDL_UpdateTexture(g_sdl.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
-			goto exit;
-		}
-	}
-
-	if(SDL_RenderCopy(g_sdl.renderer, g_sdl.texture, NULL, NULL)) {
+	g_sdl.audio.device = SDL_OpenAudioDevice(NULL, AUDIO_DIRECTION, &specification, &g_sdl.audio.specification, 0);
+	if(!g_sdl.audio.device) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	SDL_RenderPresent(g_sdl.renderer);
+	SDL_PauseAudioDevice(g_sdl.audio.device, AUDIO_PLAY);
+
+	TRACE(LEVEL_INFORMATION, "SDL audio loaded");
+
+exit:
+	return result;
+}
+
+static void
+dmg_sdl_audio_unload(void)
+{
+	TRACE(LEVEL_INFORMATION, "SDL audio unloading");
+
+	SDL_PauseAudioDevice(g_sdl.audio.device, AUDIO_PAUSE);
+	SDL_CloseAudioDevice(g_sdl.audio.device);
+
+	TRACE(LEVEL_INFORMATION, "SDL audio unloaded");
+}
+
+static int
+dmg_sdl_display_show(void)
+{
+	int result = ERROR_SUCCESS;
+
+	if(g_sdl.video.redraw) {
+		g_sdl.video.redraw = false;
+
+		if(SDL_RenderClear(g_sdl.video.renderer)) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+			goto exit;
+		}
+
+		if(SDL_UpdateTexture(g_sdl.video.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.video.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
+			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+			goto exit;
+		}
+	}
+
+	if(SDL_RenderCopy(g_sdl.video.renderer, g_sdl.video.texture, NULL, NULL)) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	SDL_RenderPresent(g_sdl.video.renderer);
 
 exit:
 	return result;
@@ -64,49 +102,51 @@ dmg_sdl_display_load(
 {
 	int result;
 
+	TRACE(LEVEL_INFORMATION, "SDL display loading");
+
 	for(int index = 0; index < DMG_PALETTE_MAX; ++index) {
-		g_sdl.palette[index].red = ((configuration->palette[index] & PALETTE_MASK_RED) >> PALETTE_SHIFT_RED);
-		g_sdl.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
-		g_sdl.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
-		g_sdl.palette[index].alpha = UINT8_MAX;
-		TRACE_FORMAT(LEVEL_VERBOSE, "SDL palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.palette[index].raw,
-			g_sdl.palette[index].red, g_sdl.palette[index].green, g_sdl.palette[index].blue);
+		g_sdl.video.palette[index].red = ((configuration->palette[index] & PALETTE_MASK_RED) >> PALETTE_SHIFT_RED);
+		g_sdl.video.palette[index].green = ((configuration->palette[index] & PALETTE_MASK_GREEN) >> PALETTE_SHIFT_GREEN);
+		g_sdl.video.palette[index].blue = ((configuration->palette[index] & PALETTE_MASK_BLUE) >> PALETTE_SHIFT_BLUE);
+		g_sdl.video.palette[index].alpha = UINT8_MAX;
+		TRACE_FORMAT(LEVEL_VERBOSE, "SDL palette[%i]=%08x (%02x, %02x, %02x)", index, g_sdl.video.palette[index].raw,
+			g_sdl.video.palette[index].red, g_sdl.video.palette[index].green, g_sdl.video.palette[index].blue);
 	}
 
-	g_sdl.scale = configuration->scale;
-	if(g_sdl.scale < SCALE_MIN) {
-		g_sdl.scale = SCALE_MIN;
-		TRACE_FORMAT(LEVEL_WARNING, "Scale is too small: %u (setting to %u)", configuration->scale, g_sdl.scale);
-	} else if(g_sdl.scale > SCALE_MAX) {
-		g_sdl.scale = SCALE_MAX;
-		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.scale);
+	g_sdl.video.scale = configuration->scale;
+	if(g_sdl.video.scale < SCALE_MIN) {
+		g_sdl.video.scale = SCALE_MIN;
+		TRACE_FORMAT(LEVEL_WARNING, "Scale is too small: %u (setting to %u)", configuration->scale, g_sdl.video.scale);
+	} else if(g_sdl.video.scale > SCALE_MAX) {
+		g_sdl.video.scale = SCALE_MAX;
+		TRACE_FORMAT(LEVEL_WARNING, "Scale is too large: %u (setting to %u)", configuration->scale, g_sdl.video.scale);
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "SDL scale=%u", g_sdl.scale);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL scale=%u", g_sdl.video.scale);
 
-	if(snprintf(g_sdl.title, sizeof(g_sdl.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
-		memcpy(g_sdl.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
+	if(snprintf(g_sdl.video.title, sizeof(g_sdl.video.title), "%s -- %s", strlen(title) ? title : TITLE_UNTITLED, TITLE) < 0) {
+		memcpy(g_sdl.video.title, TITLE_UNTITLED, strlen(TITLE_UNTITLED));
 	}
 
-	TRACE_FORMAT(LEVEL_VERBOSE, "SDL title[%u]=\"%s\"", strlen(g_sdl.title), g_sdl.title);
+	TRACE_FORMAT(LEVEL_VERBOSE, "SDL title[%u]=\"%s\"", strlen(g_sdl.video.title), g_sdl.video.title);
 
-	if(!(g_sdl.window = SDL_CreateWindow(g_sdl.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-			WINDOW_WIDTH * g_sdl.scale, WINDOW_HEIGHT * g_sdl.scale, SDL_WINDOW_RESIZABLE))) {
+	if(!(g_sdl.video.window = SDL_CreateWindow(g_sdl.video.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+			WINDOW_WIDTH * g_sdl.video.scale, WINDOW_HEIGHT * g_sdl.video.scale, SDL_WINDOW_RESIZABLE))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(!(g_sdl.renderer = SDL_CreateRenderer(g_sdl.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
+	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(SDL_RenderSetLogicalSize(g_sdl.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
+	if(SDL_RenderSetLogicalSize(g_sdl.video.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if(SDL_SetRenderDrawColor(g_sdl.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
+	if(SDL_SetRenderDrawColor(g_sdl.video.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
 			COLOR_BACKGROUND.alpha)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
@@ -117,12 +157,13 @@ dmg_sdl_display_load(
 		goto exit;
 	}
 
-	if(!(g_sdl.texture = SDL_CreateTexture(g_sdl.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+	if(!(g_sdl.video.texture = SDL_CreateTexture(g_sdl.video.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
 			WINDOW_WIDTH, WINDOW_HEIGHT))) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
+	TRACE(LEVEL_INFORMATION, "SDL display loaded");
 	result = dmg_sdl_display_show();
 
 exit:
@@ -132,9 +173,13 @@ exit:
 static void
 dmg_sdl_display_unload(void)
 {
-	SDL_DestroyTexture(g_sdl.texture);
-	SDL_DestroyRenderer(g_sdl.renderer);
-	SDL_DestroyWindow(g_sdl.window);
+	TRACE(LEVEL_INFORMATION, "SDL display unloading");
+
+	SDL_DestroyTexture(g_sdl.video.texture);
+	SDL_DestroyRenderer(g_sdl.video.renderer);
+	SDL_DestroyWindow(g_sdl.video.window);
+
+	TRACE(LEVEL_INFORMATION, "SDL display unloaded");
 }
 
 bool
@@ -165,8 +210,12 @@ dmg_sdl_load(
 	SDL_GetVersion(&version);
 	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u", version.major, version.minor, version.patch);
 
-	if(SDL_Init(SDL_INIT_VIDEO)) {
+	if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
 		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	if((result = dmg_sdl_audio_load()) != ERROR_SUCCESS) {
 		goto exit;
 	}
 
@@ -187,8 +236,8 @@ dmg_sdl_pixel(
 	__in uint8_t y
 	)
 {
-	g_sdl.redraw = true;
-	g_sdl.pixel[y][x].raw = g_sdl.palette[color].raw;
+	g_sdl.video.redraw = true;
+	g_sdl.video.pixel[y][x].raw = g_sdl.video.palette[color].raw;
 }
 
 bool
@@ -201,7 +250,7 @@ dmg_sdl_poll(void)
 
 		switch(event.type) {
 			case SDL_WINDOWEVENT:
-				g_sdl.redraw = true;
+				g_sdl.video.redraw = true;
 				break;
 			case SDL_QUIT:
 				result = false;
@@ -210,6 +259,22 @@ dmg_sdl_poll(void)
 			default:
 				break;
 		}
+	}
+
+exit:
+	return result;
+}
+
+int
+dmg_sdl_sample(
+	__in const void *sample
+	)
+{
+	int result = ERROR_SUCCESS;
+
+	if(SDL_QueueAudio(g_sdl.audio.device, sample, AUDIO_SAMPLES)) {
+		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		goto exit;
 	}
 
 exit:
@@ -227,6 +292,7 @@ dmg_sdl_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "SDL unloading");
 	dmg_sdl_display_unload();
+	dmg_sdl_audio_unload();
 	SDL_Quit();
 	TRACE(LEVEL_INFORMATION, "SDL unloaded");
 	memset(&g_sdl, 0, sizeof(g_sdl));
