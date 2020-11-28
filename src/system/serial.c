@@ -118,7 +118,7 @@ dmg_serial_load(
 		serial->data.raw = POST_DATA;
 	}
 
-	serial->transfer = configuration->transfer;
+	serial->out = configuration->out;
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial loaded");
 
@@ -156,8 +156,7 @@ dmg_serial_step(
 	)
 {
 
-	if(serial->control.enable
-			&& ((serial->control.select == SELECT_INTERNAL) || ((serial->control.select == SELECT_EXTERNAL) && serial->transfer))) {
+	if(serial->control.enable && (serial->control.select == SELECT_INTERNAL)) {
 
 		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
 			TRACE_SERIAL(LEVEL_VERBOSE, serial);
@@ -168,8 +167,8 @@ dmg_serial_step(
 				serial->cycle %= SELECT_CYC[serial->control.select];
 				in.lsb = true;
 
-				if(serial->transfer) {
-					in.lsb = serial->transfer(serial->data.msb);
+				if(serial->out) {
+					in.lsb = serial->out(serial->data.msb);
 				}
 
 				serial->data.raw = ((serial->data.raw << 1) | in.lsb);
@@ -183,6 +182,28 @@ dmg_serial_step(
 			}
 		}
 	}
+}
+
+dmg_serial_data_t
+dmg_serial_transfer(
+	__inout dmg_serial_t *serial,
+	__in dmg_serial_data_t in
+	)
+{
+	dmg_serial_data_t out = {};
+
+	if(serial->control.enable && (serial->control.select == SELECT_EXTERNAL)) {
+		out.lsb = serial->data.msb;
+		serial->data.raw = ((serial->data.raw << 1) | in.lsb);
+
+		if(!--serial->remaining) {
+			serial->control.enable = false;
+			dmg_runtime_interrupt(INTERRUPT_SERIAL);
+			TRACE(LEVEL_VERBOSE, "Serial transfer complete");
+		}
+	}
+
+	return out;
 }
 
 void

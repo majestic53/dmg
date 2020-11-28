@@ -48,7 +48,7 @@ typedef struct {
 	uint32_t cycle;
 	dmg_serial_data_t data;
 	uint8_t remaining;
-	dmg_serial_transfer transfer;
+	dmg_serial_out out;
 } __attribute__((packed)) dmg_serial_t;
 
 #ifdef __cplusplus
@@ -78,6 +78,11 @@ uint8_t dmg_serial_read(
 void dmg_serial_step(
 	__inout dmg_serial_t *serial,
 	__in uint32_t cycle
+	);
+
+dmg_serial_data_t dmg_serial_transfer(
+	__inout dmg_serial_t *serial,
+	__in dmg_serial_data_t in
 	);
 
 void dmg_serial_unload(

@@ -122,7 +122,7 @@ dmg_launcher_parse(
 				g_launcher.bootrom = optarg;
 				break;
 			case OPTION_CAPTURE:
-				g_launcher.configuration.transfer = dmg_launcher_capture;
+				g_launcher.configuration.out = dmg_launcher_capture;
 				break;
 			case OPTION_HELP:
 				g_launcher.help = true;
@@ -242,8 +242,8 @@ main(
 			g_launcher.configuration.scale = DEFAULT_SCALE;
 		}
 
-		if(!g_launcher.configuration.transfer) {
-			g_launcher.configuration.transfer = DEFAULT_TRANSFER;
+		if(!g_launcher.configuration.out) {
+			g_launcher.configuration.out = DEFAULT_OUT;
 		}
 
 		if(g_launcher.bootrom) {

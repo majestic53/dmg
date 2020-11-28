@@ -26,7 +26,7 @@
 
 #define DEFAULT_PALETTE PALETTE_GREEN
 #define DEFAULT_SCALE 2
-#define DEFAULT_TRANSFER NULL
+#define DEFAULT_OUT NULL
 
 #define DMG "DMG"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"

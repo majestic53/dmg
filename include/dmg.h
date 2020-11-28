@@ -57,7 +57,7 @@ enum {
  * @param Input bit
  * @return Output bit
  */
-typedef unsigned (*dmg_serial_transfer)(unsigned);
+typedef unsigned (*dmg_serial_out)(unsigned);
 
 /**
  * Buffer struct
@@ -89,8 +89,8 @@ typedef struct {
 	dmg_buffer_t bootrom;
 	/* Rom buffer */
 	dmg_buffer_t rom;
-	/* Serial transfer callback */
-	dmg_serial_transfer transfer;
+	/* Serial transfer-out callback */
+	dmg_serial_out out;
 	/* Button key-bindings */
 	unsigned button[DMG_BUTTON_MAX];
 	/* Direction key-bindings */
@@ -121,6 +121,13 @@ int dmg(const dmg_t *);
  * @return Const pointer to error string
  */
 const char *dmg_error(void);
+
+/**
+ * Notify emulator of serial transfer
+ * @param Input bit
+ * @return Output bit
+ */
+unsigned dmg_serial(unsigned);
 
 /**
  * Retrieve emulator version

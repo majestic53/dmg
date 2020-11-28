@@ -69,7 +69,7 @@ dmg_service_import_data(
 }
 
 unsigned
-dmg_transfer(
+dmg_transfer_out(
 	__in unsigned in
 	)
 {
@@ -105,13 +105,13 @@ dmg_test_serial_load(void)
 			|| ASSERT(g_serial.serial.cycle == 0)
 			|| ASSERT(g_serial.serial.data.raw == POST_DATA)
 			|| ASSERT(g_serial.serial.remaining == 0)
-			|| ASSERT(g_serial.serial.transfer == NULL)) {
+			|| ASSERT(g_serial.serial.out == NULL)) {
 		result = EXIT_FAILURE;
 	}
 
 	dmg_test_serial_initialize();
 	g_serial.configuration.bootrom.data = (void *)1;
-	g_serial.configuration.transfer = (dmg_serial_transfer)2;
+	g_serial.configuration.out = (dmg_serial_out)2;
 
 	if(ASSERT_SUCCESS(dmg_serial_load(&g_serial.serial, &g_serial.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;
@@ -121,7 +121,7 @@ dmg_test_serial_load(void)
 			|| ASSERT(g_serial.serial.cycle == 0)
 			|| ASSERT(g_serial.serial.data.raw == 0)
 			|| ASSERT(g_serial.serial.remaining == 0)
-			|| ASSERT(g_serial.serial.transfer == g_serial.configuration.transfer)) {
+			|| ASSERT(g_serial.serial.out == g_serial.configuration.out)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -167,7 +167,7 @@ dmg_test_serial_step(void)
 	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
 
-	for(int select = SELECT_EXTERNAL; select < (SELECT_MAX - 1); ++select) {
+	for(int select = SELECT_INTERNAL; select < (SELECT_MAX - 1); ++select) {
 		dmg_serial_data_t data = {};
 		dmg_serial_control_t control = {};
 
@@ -185,7 +185,7 @@ dmg_test_serial_step(void)
 
 				if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
 						|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == value)
-						|| ASSERT(g_serial.serial.remaining = CHAR_BIT)) {
+						|| ASSERT(g_serial.serial.remaining == CHAR_BIT)) {
 					result = EXIT_FAILURE;
 					goto exit;
 				}
@@ -195,7 +195,7 @@ dmg_test_serial_step(void)
 
 			if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
 					|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == value)
-					|| ASSERT(g_serial.serial.remaining = CHAR_BIT)) {
+					|| ASSERT(g_serial.serial.remaining == CHAR_BIT)) {
 				result = EXIT_FAILURE;
 				goto exit;
 			}
@@ -228,7 +228,7 @@ dmg_test_serial_step(void)
 				if(control.select == SELECT_INTERNAL) {
 
 					if((control.select == SELECT_INTERNAL) && (ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
-							|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit)))) {
+							|| ASSERT(g_serial.serial.remaining == (CHAR_BIT - bit)))) {
 						result = EXIT_FAILURE;
 						goto exit;
 					}
@@ -244,7 +244,7 @@ dmg_test_serial_step(void)
 			}
 
 			if((control.select == SELECT_INTERNAL) && (ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
-					|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit))
+					|| ASSERT(g_serial.serial.remaining == (CHAR_BIT - bit))
 					|| ASSERT(g_serial.interrupt == (bit == (CHAR_BIT - 1))))) {
 				result = EXIT_FAILURE;
 				goto exit;
@@ -258,7 +258,7 @@ dmg_test_serial_step(void)
 		}
 
 		dmg_test_serial_initialize();
-		g_serial.configuration.transfer = dmg_transfer;
+		g_serial.configuration.out = dmg_transfer_out;
 		dmg_serial_load(&g_serial.serial, &g_serial.configuration);
 		data.raw = value;
 		dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_DATA, data.raw);
@@ -273,7 +273,7 @@ dmg_test_serial_step(void)
 
 				if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
 						|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
-						|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit))
+						|| ASSERT(g_serial.serial.remaining == (CHAR_BIT - bit))
 						|| ASSERT(g_serial.interrupt == false)) {
 					result = EXIT_FAILURE;
 					goto exit;
@@ -285,7 +285,7 @@ dmg_test_serial_step(void)
 
 			if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
 					|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data.raw)
-					|| ASSERT(g_serial.serial.remaining = (CHAR_BIT - bit))
+					|| ASSERT(g_serial.serial.remaining == (CHAR_BIT - bit))
 					|| ASSERT(g_serial.interrupt == (bit == (CHAR_BIT - 1)))) {
 				result = EXIT_FAILURE;
 				goto exit;
@@ -297,6 +297,71 @@ dmg_test_serial_step(void)
 			result = EXIT_FAILURE;
 			goto exit;
 		}
+	}
+
+exit:
+	TRACE_TEST(result);
+
+	return result;
+}
+
+int
+dmg_test_serial_transfer(void)
+{
+	uint8_t value = rand();
+	int result = EXIT_SUCCESS;
+	dmg_serial_control_t control = {};
+	dmg_serial_data_t data_out = {}, data_in = {}, in = {}, out = {};
+
+	dmg_test_serial_initialize();
+	dmg_serial_load(&g_serial.serial, &g_serial.configuration);
+	dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_DATA, value);
+	control.enable = false;
+	control.select = SELECT_EXTERNAL;
+	dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_CONTROL, control.raw);
+	in.raw = rand();
+	out.raw = 0;
+
+	out = dmg_serial_transfer(&g_serial.serial, in);
+
+	if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
+			|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == value)
+			|| ASSERT(g_serial.serial.remaining == CHAR_BIT)
+			|| ASSERT(!out.raw)) {
+		result = EXIT_FAILURE;
+		goto exit;
+	}
+
+	dmg_test_serial_initialize();
+	dmg_serial_load(&g_serial.serial, &g_serial.configuration);
+	dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_DATA, value);
+	control.enable = true;
+	control.select = SELECT_EXTERNAL;
+	dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_CONTROL, control.raw);
+	in.raw = rand();
+	out.raw = 0;
+
+	for(uint8_t bit = 0; bit < CHAR_BIT; ++bit) {
+		data_out.raw = dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA);
+		out = dmg_serial_transfer(&g_serial.serial, in);
+		data_in.raw = ((data_out.raw << 1) | in.lsb);
+
+		if(ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_CONTROL) == (g_serial.serial.control.raw & CONTROL_MASK))
+				|| ASSERT(dmg_serial_read(&g_serial.serial, ADDRESS_SERIAL_DATA) == data_in.raw)
+				|| ASSERT(out.lsb == data_out.msb)
+				|| ASSERT(g_serial.serial.remaining == (CHAR_BIT - bit - 1))
+				|| ASSERT(g_serial.interrupt == (bit == (CHAR_BIT - 1)))) {
+			result = EXIT_FAILURE;
+			goto exit;
+		}
+
+		in.raw >>= 1;
+	}
+
+	if(ASSERT(g_serial.serial.control.enable == false)
+			|| ASSERT(g_serial.interrupt == true)) {
+		result = EXIT_FAILURE;
+		goto exit;
 	}
 
 exit:
@@ -318,7 +383,7 @@ dmg_test_serial_unload(void)
 			|| ASSERT(g_serial.serial.cycle == 0)
 			|| ASSERT(g_serial.serial.data.raw == 0)
 			|| ASSERT(g_serial.serial.remaining == 0)
-			|| ASSERT(g_serial.serial.transfer == NULL)) {
+			|| ASSERT(g_serial.serial.out == NULL)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -348,7 +413,7 @@ dmg_test_serial_write(void)
 
 	if(ASSERT(g_serial.serial.control.raw == (control.raw & CONTROL_MASK))
 			|| ASSERT(g_serial.serial.cycle == 0)
-			|| ASSERT(g_serial.serial.remaining = CHAR_BIT)) {
+			|| ASSERT(g_serial.serial.remaining == CHAR_BIT)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -368,6 +433,7 @@ static const dmg_test TEST[] = {
 	dmg_test_serial_load,
 	dmg_test_serial_read,
 	dmg_test_serial_step,
+	dmg_test_serial_transfer,
 	dmg_test_serial_unload,
 	dmg_test_serial_write,
 	};

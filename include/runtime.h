@@ -37,6 +37,10 @@ uint8_t dmg_runtime_read(
 	__in uint16_t address
 	);
 
+unsigned dmg_runtime_serial(
+	__in unsigned in
+	);
+
 void dmg_runtime_write(
 	__in uint16_t address,
 	__in uint8_t value

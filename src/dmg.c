@@ -36,6 +36,14 @@ dmg_error(void)
 	return dmg_error_get();
 }
 
+unsigned
+dmg_serial(
+	__in unsigned in
+	)
+{
+	return dmg_runtime_serial(in);
+}
+
 const dmg_version_t *
 dmg_version(void)
 {

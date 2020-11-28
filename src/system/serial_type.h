@@ -35,7 +35,7 @@ enum {
 };
 
 static const uint32_t SELECT_CYC[] = {
-	8, /* SELECT_EXTERNAL */
+	0, /* SELECT_EXTERNAL */
 	512, /* SELECT_INTERNAL */
 	};
 

@@ -341,6 +341,18 @@ dmg_runtime_read(
 	return result;
 }
 
+unsigned
+dmg_runtime_serial(
+	__in unsigned in
+	)
+{
+	dmg_serial_data_t data = {};
+
+	data.raw = in;
+
+	return dmg_serial_transfer(&g_runtime.serial, data).raw;
+}
+
 void
 dmg_runtime_write(
 	__in uint16_t address,
