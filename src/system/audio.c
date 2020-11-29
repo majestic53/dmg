@@ -46,11 +46,48 @@ dmg_audio_export(
 	TRACE(LEVEL_INFORMATION, "Audio exporting");
 	TRACE_AUDIO(LEVEL_VERBOSE, audio);
 
-	// TODO: EXPORT REGISTERS/RAM TO FILE
+	if((result = dmg_service_export_data(file, &audio->cycle, sizeof(audio->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t address = 0; address < audio->ram.length; ++address) {
+
+		if((result = dmg_service_export_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	if((result = dmg_service_export_data(file, &audio->control, sizeof(audio->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->mode_1, sizeof(audio->mode_1))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->mode_2, sizeof(audio->mode_2))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->mode_3, sizeof(audio->mode_3))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->mode_4, sizeof(audio->mode_4))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->output, sizeof(audio->output))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_export_data(file, &audio->state, sizeof(audio->state))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE(LEVEL_INFORMATION, "Audio exported");
 
-//exit:
+exit:
 	return result;
 }
 
@@ -64,12 +101,49 @@ dmg_audio_import(
 
 	TRACE(LEVEL_INFORMATION, "Audio importing");
 
-	// TODO: IMPORT REGISTERS/RAM FROM FILE
+	if((result = dmg_service_import_data(file, &audio->cycle, sizeof(audio->cycle))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	for(uint32_t address = 0; address < audio->ram.length; ++address) {
+
+		if((result = dmg_service_import_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	if((result = dmg_service_import_data(file, &audio->control, sizeof(audio->control))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->mode_1, sizeof(audio->mode_1))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->mode_2, sizeof(audio->mode_2))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->mode_3, sizeof(audio->mode_3))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->mode_4, sizeof(audio->mode_4))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->output, sizeof(audio->output))) != ERROR_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_service_import_data(file, &audio->state, sizeof(audio->state))) != ERROR_SUCCESS) {
+		goto exit;
+	}
 
 	TRACE_AUDIO(LEVEL_VERBOSE, audio);
 	TRACE(LEVEL_INFORMATION, "Audio imported");
 
-//exit:
+exit:
 	return result;
 }
 
@@ -84,8 +158,24 @@ dmg_audio_load(
 	TRACE(LEVEL_INFORMATION, "Audio loading");
 
 	if(!configuration->bootrom.data) {
-
-		// TODO: SET REGISTER POST VALUES
+		audio->control.raw = POST_CONTROL;
+		audio->mode_1.sweep.raw = POST_MODE_1_SWEEP;
+		audio->mode_1.length.raw = POST_MODE_1_LENGTH;
+		audio->mode_1.envelope.raw = POST_MODE_1_ENVELOPE;
+		audio->mode_1.frequency.high.raw = POST_MODE_1_FREQUENCY_HIGH;
+		audio->mode_2.length.raw = POST_MODE_2_LENGTH;
+		audio->mode_2.envelope.raw = POST_MODE_2_ENVELOPE;
+		audio->mode_2.frequency.high.raw = POST_MODE_2_FREQUENCY_HIGH;
+		audio->mode_3.enable.raw = POST_MODE_3_ENABLE;
+		audio->mode_3.length = POST_MODE_3_LENGTH;
+		audio->mode_3.level.raw = POST_MODE_3_LEVEL;
+		audio->mode_3.frequency.low = POST_MODE_3_FREQUENCY_LOW;
+		audio->mode_4.length.raw = POST_MODE_4_LENGTH;
+		audio->mode_4.envelope.raw = POST_MODE_4_ENVELOPE;
+		audio->mode_4.polynomial.raw = POST_MODE_4_COUNTER_POLYNOMIAL;
+		audio->mode_4.consecutive.raw = POST_MODE_4_COUNTER_CONSECUTIVE;
+		audio->output.raw = POST_OUTPUT;
+		audio->state.raw = POST_STATE;
 	}
 
 	if((result = dmg_buffer_allocate(&audio->ram, RAM_WIDTH, 0)) != ERROR_SUCCESS) {
@@ -109,79 +199,61 @@ dmg_audio_read(
 
 	switch(address) {
 		case ADDRESS_AUDIO_CONTROL:
-
-			// TODO
+			result = audio->control.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_1_SWEEP:
-
-			// TODO
+			result = audio->mode_1.sweep.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_1_LENGTH:
-
-			// TODO
+			result = (audio->mode_1.length.raw & MODE_1_LENGTH_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_1_ENVELOPE:
-
-			// TODO
+			result = audio->mode_1.envelope.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH:
-
-			// TODO
+			result = (audio->mode_1.frequency.high.raw & MODE_1_FREQUENCY_HIGH_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_2_LENGTH:
-
-			// TODO
+			result = (audio->mode_2.length.raw & MODE_2_LENGTH_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_2_ENVELOPE:
-
-			// TODO
+			result = audio->mode_2.envelope.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH:
-
-			// TODO
+			result = (audio->mode_2.frequency.high.raw & MODE_2_FREQUENCY_HIGH_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_3_ENABLE:
-
-			// TODO
+			result = (audio->mode_3.enable.raw & MODE_3_ENABLE_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_3_LENGTH:
-
-			// TODO
+			result = audio->mode_3.length;
 			break;
 		case ADDRESS_AUDIO_MODE_3_LEVEL:
-
-			// TODO
+			result = (audio->mode_3.level.raw & MODE_3_LEVEL_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH:
-
-			// TODO
+			result = (audio->mode_3.frequency.high.raw & MODE_3_FREQUENCY_HIGH_MASK);
 			break;
 		case ADDRESS_AUDIO_MODE_4_LENGTH:
-
-			// TODO
+			result = audio->mode_4.length.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_4_ENVELOPE:
-
-			// TODO
+			result = audio->mode_4.envelope.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL:
-
-			// TODO
+			result = audio->mode_4.polynomial.raw;
 			break;
 		case ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE:
-
-			// TODO
+			result = (audio->mode_4.consecutive.raw & MODE_4_CONSECUTIVE_MASK);
 			break;
 		case ADDRESS_AUDIO_OUTPUT:
-
-			// TODO
+			result = audio->output.raw;
 			break;
 		case ADDRESS_AUDIO_RAM_BEGIN ... ADDRESS_AUDIO_RAM_END:
 			result = ((uint8_t *)audio->ram.data)[address - ADDRESS_AUDIO_RAM_BEGIN];
 			break;
 		case ADDRESS_AUDIO_STATE:
-
-			// TODO
+			result = audio->state.raw;
 			break;
 		default:
 			result = UINT8_MAX;
@@ -199,9 +271,12 @@ dmg_audio_step(
 	)
 {
 
-	for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+	if(audio->state.enable) {
 
-		// TODO: STEP SUBSYSTEM
+		for(uint32_t tick = 0; tick < cycle; tick += CYCLE) {
+
+			// TODO: STEP SUBSYSTEM
+		}
 	}
 }
 
@@ -226,91 +301,70 @@ dmg_audio_write(
 
 	switch(address) {
 		case ADDRESS_AUDIO_CONTROL:
-
-			// TODO
+			audio->control.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_1_SWEEP:
-
-			// TODO
+			audio->mode_1.sweep.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_1_LENGTH:
-
-			// TODO
+			audio->mode_1.length.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_1_ENVELOPE:
-
-			// TODO
+			audio->mode_1.envelope.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_1_FREQUENCY_LOW:
-
-			// TODO
+			audio->mode_1.frequency.low = value;
 			break;
 		case ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH:
-
-			// TODO
+			audio->mode_1.frequency.high.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_2_LENGTH:
-
-			// TODO
+			audio->mode_2.length.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_2_ENVELOPE:
-
-			// TODO
+			audio->mode_2.envelope.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_2_FREQUENCY_LOW:
-
-			// TODO
+			audio->mode_2.frequency.low = value;
 			break;
 		case ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH:
-
-			// TODO
+			audio->mode_2.frequency.high.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_3_ENABLE:
-
-			// TODO
+			audio->mode_3.enable.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_3_LENGTH:
-
-			// TODO
+			audio->mode_3.length = value;
 			break;
 		case ADDRESS_AUDIO_MODE_3_LEVEL:
-
-			// TODO
+			audio->mode_3.level.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_3_FREQUENCY_LOW:
-
-			// TODO
+			audio->mode_3.frequency.low = value;
 			break;
 		case ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH:
-
-			// TODO
+			audio->mode_3.frequency.high.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_4_LENGTH:
-
-			// TODO
+			audio->mode_4.length.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_4_ENVELOPE:
-
-			// TODO
+			audio->mode_4.envelope.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL:
-
-			// TODO
+			audio->mode_4.polynomial.raw = value;
 			break;
 		case ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE:
-
-			// TODO
+			audio->mode_4.consecutive.raw = value;
 			break;
 		case ADDRESS_AUDIO_OUTPUT:
-
-			// TODO
+			audio->output.raw = value;
 			break;
 		case ADDRESS_AUDIO_RAM_BEGIN ... ADDRESS_AUDIO_RAM_END:
 			((uint8_t *)audio->ram.data)[address - ADDRESS_AUDIO_RAM_BEGIN] = value;
 			break;
 		case ADDRESS_AUDIO_STATE:
-
-			// TODO
+			audio->state.raw = value;
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported joypad write [%04x]<-%02x", address, value);

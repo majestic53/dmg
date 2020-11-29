@@ -23,6 +23,14 @@
 typedef struct {
 	dmg_t configuration;
 	dmg_audio_t audio;
+	int export;
+	FILE *export_file;
+	const void *export_data;
+	uint32_t export_length;
+	int import;
+	FILE *import_file;
+	void *import_data;
+	uint32_t import_length;
 } dmg_audio_test_t;
 
 static dmg_audio_test_t g_audio = {};
@@ -47,6 +55,34 @@ dmg_buffer_free(
 	)
 {
 	return;
+}
+
+int
+dmg_service_export_data(
+	__in FILE *file,
+	__in const void *data,
+	__in uint32_t length
+	)
+{
+	g_audio.export_file = file;
+	g_audio.export_data = data;
+	g_audio.export_length = length;
+
+	return g_audio.export;
+}
+
+int
+dmg_service_import_data(
+	__in FILE *file,
+	__in void *data,
+	__in uint32_t length
+	)
+{
+	g_audio.import_file = file;
+	g_audio.import_data = data;
+	g_audio.import_length = length;
+
+	return g_audio.import;
 }
 
 int

@@ -23,6 +23,18 @@
 #include "../../include/runtime.h"
 #include "../../include/service.h"
 
+#define MODE_1_FREQUENCY_HIGH_MASK 0x40
+#define MODE_1_LENGTH_MASK 0xc0
+
+#define MODE_2_FREQUENCY_HIGH_MASK 0x40
+#define MODE_2_LENGTH_MASK 0xc0
+
+#define MODE_3_FREQUENCY_HIGH_MASK 0x40
+#define MODE_3_ENABLE_MASK 0x80
+#define MODE_3_LEVEL_MASK 0x60
+
+#define MODE_4_CONSECUTIVE_MASK 0x40
+
 #define POST_CONTROL 0x77
 #define POST_MODE_1_SWEEP 0x80
 #define POST_MODE_1_LENGTH 0xbf
