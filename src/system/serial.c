@@ -118,7 +118,7 @@ dmg_serial_load(
 		serial->data.raw = POST_DATA;
 	}
 
-	serial->out = configuration->out;
+	serial->out = configuration->serial_out;
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial loaded");
 
@@ -190,10 +190,10 @@ dmg_serial_transfer(
 	__in dmg_serial_data_t in
 	)
 {
-	dmg_serial_data_t out = {};
+	dmg_serial_data_t result = {};
 
 	if(serial->control.enable && (serial->control.select == SELECT_EXTERNAL)) {
-		out.lsb = serial->data.msb;
+		result.lsb = serial->data.msb;
 		serial->data.raw = ((serial->data.raw << 1) | in.lsb);
 
 		if(!--serial->remaining) {
@@ -203,7 +203,7 @@ dmg_serial_transfer(
 		}
 	}
 
-	return out;
+	return result;
 }
 
 void

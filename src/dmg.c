@@ -37,11 +37,11 @@ dmg_error(void)
 }
 
 unsigned
-dmg_serial(
+dmg_serial_in(
 	__in unsigned in
 	)
 {
-	return dmg_runtime_serial(in);
+	return dmg_runtime_serial_in(in);
 }
 
 const dmg_version_t *

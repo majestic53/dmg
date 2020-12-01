@@ -111,7 +111,7 @@ dmg_test_serial_load(void)
 
 	dmg_test_serial_initialize();
 	g_serial.configuration.bootrom.data = (void *)1;
-	g_serial.configuration.out = (dmg_serial_out)2;
+	g_serial.configuration.serial_out = (dmg_serial_out)2;
 
 	if(ASSERT_SUCCESS(dmg_serial_load(&g_serial.serial, &g_serial.configuration)) != EXIT_SUCCESS) {
 		result = EXIT_FAILURE;
@@ -121,7 +121,7 @@ dmg_test_serial_load(void)
 			|| ASSERT(g_serial.serial.cycle == 0)
 			|| ASSERT(g_serial.serial.data.raw == 0)
 			|| ASSERT(g_serial.serial.remaining == 0)
-			|| ASSERT(g_serial.serial.out == g_serial.configuration.out)) {
+			|| ASSERT(g_serial.serial.out == g_serial.configuration.serial_out)) {
 		result = EXIT_FAILURE;
 	}
 
@@ -258,7 +258,7 @@ dmg_test_serial_step(void)
 		}
 
 		dmg_test_serial_initialize();
-		g_serial.configuration.out = dmg_transfer_out;
+		g_serial.configuration.serial_out = dmg_transfer_out;
 		dmg_serial_load(&g_serial.serial, &g_serial.configuration);
 		data.raw = value;
 		dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_DATA, data.raw);

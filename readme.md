@@ -62,12 +62,12 @@ For an example of how to use this interface, see the [launcher tool](https://git
 
 #### Runtime/Helper Routines
 
-|Name       |Description                       |Signature                                   |
-|:----------|:---------------------------------|:-------------------------------------------|
-|dmg        |Start the emulator                |```int dmg(const dmg_t *)```                |
-|dmg_error  |Retrieve error information        |```const char *dmg_error(void)```           |
-|dmg_serial |Notify emulator of serial transfer|```unsigned dmg_serial(unsigned)```         |
-|dmg_version|Retrieve version information      |```const dmg_version_t *dmg_version(void)```|
+|Name         |Description                          |Signature                                   |
+|:------------|:------------------------------------|:-------------------------------------------|
+|dmg          |Start the emulator                   |```int dmg(const dmg_t *)```                |
+|dmg_error    |Retrieve error information           |```const char *dmg_error(void)```           |
+|dmg_serial_in|Notify emulator of serial transfer-in|```unsigned dmg_serial_in(unsigned)```      |
+|dmg_version  |Retrieve version information         |```const dmg_version_t *dmg_version(void)```|
 
 #### Cartridge Support
 

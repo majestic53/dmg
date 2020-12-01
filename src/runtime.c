@@ -342,7 +342,7 @@ dmg_runtime_read(
 }
 
 unsigned
-dmg_runtime_serial(
+dmg_runtime_serial_in(
 	__in unsigned in
 	)
 {

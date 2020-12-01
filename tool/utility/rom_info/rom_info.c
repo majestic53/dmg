@@ -103,7 +103,9 @@ dmg_utility_rom_info_file_parse(void)
 		}
 	}
 
-	fprintf(stdout, "\"\nMapper    ");
+	fprintf(stdout, "\"\nType      %s%s", header->cgb ? "GBC (Gameboy Color" : "GB (Gameboy", header->sgb ? "/SBC support)" : ")");
+	fprintf(stdout, "\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
+	fprintf(stdout, "\nMapper    ");
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
 		fprintf(stdout, "UNSUPPORTED (%u)\n", header->mapper);

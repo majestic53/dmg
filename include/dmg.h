@@ -90,7 +90,7 @@ typedef struct {
 	/* Rom buffer */
 	dmg_buffer_t rom;
 	/* Serial transfer-out callback */
-	dmg_serial_out out;
+	dmg_serial_out serial_out;
 	/* Button key-bindings */
 	unsigned button[DMG_BUTTON_MAX];
 	/* Direction key-bindings */
@@ -123,11 +123,11 @@ int dmg(const dmg_t *);
 const char *dmg_error(void);
 
 /**
- * Notify emulator of serial transfer
+ * Notify emulator of serial transfer-in
  * @param Input bit
  * @return Output bit
  */
-unsigned dmg_serial(unsigned);
+unsigned dmg_serial_in(unsigned);
 
 /**
  * Retrieve emulator version
