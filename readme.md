@@ -60,14 +60,17 @@ This project is implemented in C and exposes a simple API, described in ```inclu
 
 For an example of how to use this interface, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/launcher```
 
-#### Runtime/Helper Routines
+#### Routines
 
-|Name         |Description                          |Signature                                   |
-|:------------|:------------------------------------|:-------------------------------------------|
-|dmg          |Start the emulator                   |```int dmg(const dmg_t *)```                |
-|dmg_error    |Retrieve error information           |```const char *dmg_error(void)```           |
-|dmg_serial_in|Notify emulator of serial transfer-in|```unsigned dmg_serial_in(unsigned)```      |
-|dmg_version  |Retrieve version information         |```const dmg_version_t *dmg_version(void)```|
+|Name         |Description                                         |Signature                                   |
+|:------------|:---------------------------------------------------|:-------------------------------------------|
+|dmg_load     |Load emulator instance                              |```int dmg_load(const dmg_t *)```           |
+|dmg_unload   |Unload emulator instance                            |```void dmg_unload(void)```                 |
+|dmg_run      |Run emulator instance                               |```int dmg_run(void)```                     |
+|dmg_step     |Step emulator instance                              |```int dmg_step(void)```                    |
+|dmg_serial_in|Notify emulator instance of external serial transfer|```unsigned dmg_serial_in(unsigned)```      |
+|dmg_error    |Retrieve emulator instance error                    |```const char *dmg_error(void)```           |
+|dmg_version  |Retrieve emulator instance version                  |```const dmg_version_t *dmg_version(void)```|
 
 #### Cartridge Support
 

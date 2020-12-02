@@ -25,8 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-void
-dmg_mapper_mbc1_write_rom(
+void dmg_mapper_mbc1_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value

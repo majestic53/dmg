@@ -18,16 +18,23 @@
 
 #include "./dmg_type.h"
 
+static bool g_initialized = false;
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 int
-dmg(
+dmg_load(
 	__in const dmg_t *configuration
 	)
 {
-	return (dmg_runtime(configuration) == ERROR_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
+
+	if(!g_initialized) {
+		g_initialized = (dmg_runtime_load(configuration) == ERROR_SUCCESS);
+	}
+
+	return (int)g_initialized;
 }
 
 const char *
@@ -36,12 +43,46 @@ dmg_error(void)
 	return dmg_error_get();
 }
 
+int
+dmg_run(void)
+{
+	bool result = false;
+
+	if(g_initialized) {
+		result = dmg_runtime_run();
+	}
+
+	return (int)result;
+}
+
 unsigned
 dmg_serial_in(
 	__in unsigned in
 	)
 {
-	return dmg_runtime_serial_in(in);
+	return (g_initialized ? dmg_runtime_serial_in(in) : 1);
+}
+
+int
+dmg_step(void)
+{
+	bool result = false;
+
+	if(g_initialized) {
+		result = dmg_runtime_step();
+	}
+
+	return (int)result;
+}
+
+void
+dmg_unload(void)
+{
+
+	if(g_initialized) {
+		g_initialized = false;
+		dmg_runtime_unload();
+	}
 }
 
 const dmg_version_t *

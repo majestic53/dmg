@@ -25,21 +25,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
-uint8_t
-dmg_mapper_mbc3_read_ram(
+uint8_t dmg_mapper_mbc3_read_ram(
 	__in const dmg_mapper_t *mapper,
 	__in uint16_t address
 	);
 
-void
-dmg_mapper_mbc3_write_ram(
+void dmg_mapper_mbc3_write_ram(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
 	);
 
-void
-dmg_mapper_mbc3_write_rom(
+void dmg_mapper_mbc3_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value

@@ -109,28 +109,57 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+/******************************************
+ * Load/Unload Routines
+ *****************************************/
+
 /**
- * Run emulator
+ * Load emulator instance
  * @param Const pointer to configuration struct
- * @return EXIT_SUCCESS on success
+ * @return Emulator status
  */
-int dmg(const dmg_t *);
+int dmg_load(const dmg_t *);
 
 /**
- * Retrieve emulator error
- * @return Const pointer to error string
+ * Unload emulator instance
  */
-const char *dmg_error(void);
+void dmg_unload(void);
+
+/******************************************
+ * Runtime Routines
+ *****************************************/
 
 /**
- * Notify emulator of serial transfer-in
+ * Run emulator instance
+ * @return Emulator status
+ */
+int dmg_run(void);
+
+/**
+ * Step emulator instance
+ * @return Emulator status
+ */
+int dmg_step(void);
+
+/**
+ * Notify emulator instance of external serial transfer
  * @param Input bit
  * @return Output bit
  */
 unsigned dmg_serial_in(unsigned);
 
+/******************************************
+ * Helper Routines
+ *****************************************/
+
 /**
- * Retrieve emulator version
+ * Retrieve emulator instance error
+ * @return Const pointer to error string
+ */
+const char *dmg_error(void);
+
+/**
+ * Retrieve emulator instance version
  * @return Const pointer to version struct
  */
 const dmg_version_t *dmg_version(void);

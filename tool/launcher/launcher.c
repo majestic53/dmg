@@ -259,13 +259,17 @@ main(
 			goto exit;
 		}
 
-		if((result = dmg(&g_launcher.configuration)) != EXIT_SUCCESS) {
+		if(!dmg_load(&g_launcher.configuration)) {
 			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
+			result = EXIT_FAILURE;
 			goto exit;
 		}
+
+		dmg_run();
 	}
 
 exit:
+	dmg_unload();
 	dmg_launcher_file_unload(&g_launcher.configuration.rom);
 	dmg_launcher_file_unload(&g_launcher.configuration.bootrom);
 	memset(&g_launcher, 0, sizeof(g_launcher));

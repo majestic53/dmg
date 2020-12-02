@@ -113,13 +113,24 @@ exit:
 	return result;
 }
 
-static int
+void
+dmg_runtime_interrupt(
+	__in int type
+	)
+{
+	dmg_runtime_write(ADDRESS_PROCESSOR_INTERRUPT_FLAG, dmg_runtime_read(ADDRESS_PROCESSOR_INTERRUPT_FLAG) | (1 << type));
+}
+
+int
 dmg_runtime_load(
 	__in const dmg_t *configuration
 	)
 {
 	int result = ERROR_SUCCESS;
 	char title[CARTRIDGE_HEADER_TITLE_LENGTH + 1] = {};
+
+	TRACE_ENABLE(&g_cycle);
+	ERROR_CLEAR();
 
 	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime loading ver.%u.%u.%u",
 		dmg_version_get()->major, dmg_version_get()->minor, dmg_version_get()->patch);
@@ -181,83 +192,6 @@ dmg_runtime_load(
 
 exit:
 	return result;
-}
-
-static int
-dmg_runtime_loop(void)
-{
-	int result = EXIT_SUCCESS;
-
-	TRACE(LEVEL_INFORMATION, "Runtime loop entry");
-	g_cycle = 0;
-	g_cycle_last = 0;
-
-	for(;;) {
-
-		if(!dmg_service_poll()) {
-			TRACE(LEVEL_INFORMATION, "Runtime loop exiting");
-			break;
-		}
-
-		do {
-			g_cycle_last = dmg_processor_step(&g_runtime.processor);
-			dmg_audio_step(&g_runtime.audio, g_cycle_last);
-			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
-			dmg_serial_step(&g_runtime.serial, g_cycle_last);
-			dmg_timer_step(&g_runtime.timer, g_cycle_last);
-			g_cycle += g_cycle_last;
-		} while(!dmg_video_step(&g_runtime.video, g_cycle_last));
-
-		dmg_service_sync();
-	}
-
-	TRACE(LEVEL_INFORMATION, "Runtime loop exit");
-
-	return result;
-}
-
-static void
-dmg_runtime_unload(void)
-{
-	TRACE(LEVEL_INFORMATION, "Runtime unloading");
-	dmg_service_export(dmg_runtime_export, g_configuration->save_out);
-	dmg_service_unload();
-	dmg_video_unload(&g_runtime.video);
-	dmg_timer_unload(&g_runtime.timer);
-	dmg_serial_unload(&g_runtime.serial);
-	dmg_processor_unload(&g_runtime.processor);
-	dmg_memory_unload(&g_runtime.memory);
-	dmg_joypad_unload(&g_runtime.joypad);
-	dmg_audio_unload(&g_runtime.audio);
-	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
-	memset(&g_runtime, 0, sizeof(g_runtime));
-}
-
-int
-dmg_runtime(
-	__in const dmg_t *configuration
-	)
-{
-	int result;
-
-	TRACE_ENABLE(&g_cycle);
-	ERROR_CLEAR();
-
-	if((result = dmg_runtime_load(configuration)) == ERROR_SUCCESS) {
-		result = dmg_runtime_loop();
-	}
-
-	dmg_runtime_unload();
-
-	return result;
-}
-
-void
-dmg_runtime_interrupt(
-	__in int type
-	)
-{
-	dmg_runtime_write(ADDRESS_PROCESSOR_INTERRUPT_FLAG, dmg_runtime_read(ADDRESS_PROCESSOR_INTERRUPT_FLAG) | (1 << type));
 }
 
 uint8_t
@@ -341,6 +275,35 @@ dmg_runtime_read(
 	return result;
 }
 
+bool
+dmg_runtime_run(void)
+{
+	bool result;
+
+	g_cycle = 0;
+	g_cycle_last = 0;
+
+	for(;;) {
+
+		if(!(result = dmg_service_poll())) {
+			break;
+		}
+
+		do {
+			g_cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_audio_step(&g_runtime.audio, g_cycle_last);
+			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
+			dmg_serial_step(&g_runtime.serial, g_cycle_last);
+			dmg_timer_step(&g_runtime.timer, g_cycle_last);
+			g_cycle += g_cycle_last;
+		} while(!dmg_video_step(&g_runtime.video, g_cycle_last));
+
+		dmg_service_sync();
+	}
+
+	return result;
+}
+
 unsigned
 dmg_runtime_serial_in(
 	__in unsigned in
@@ -351,6 +314,44 @@ dmg_runtime_serial_in(
 	data.raw = in;
 
 	return dmg_serial_transfer(&g_runtime.serial, data).raw;
+}
+
+bool
+dmg_runtime_step(void)
+{
+	bool result;
+
+	if((result = dmg_service_poll())) {
+		g_cycle_last = dmg_processor_step(&g_runtime.processor);
+		dmg_audio_step(&g_runtime.audio, g_cycle_last);
+		dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
+		dmg_serial_step(&g_runtime.serial, g_cycle_last);
+		dmg_timer_step(&g_runtime.timer, g_cycle_last);
+		g_cycle += g_cycle_last;
+
+		if(dmg_video_step(&g_runtime.video, g_cycle_last)) {
+			dmg_service_sync();
+		}
+	}
+
+	return result;
+}
+
+void
+dmg_runtime_unload(void)
+{
+	TRACE(LEVEL_INFORMATION, "Runtime unloading");
+	dmg_service_export(dmg_runtime_export, g_configuration->save_out);
+	dmg_service_unload();
+	dmg_video_unload(&g_runtime.video);
+	dmg_timer_unload(&g_runtime.timer);
+	dmg_serial_unload(&g_runtime.serial);
+	dmg_processor_unload(&g_runtime.processor);
+	dmg_memory_unload(&g_runtime.memory);
+	dmg_joypad_unload(&g_runtime.joypad);
+	dmg_audio_unload(&g_runtime.audio);
+	TRACE(LEVEL_INFORMATION, "Runtime unloaded");
+	memset(&g_runtime, 0, sizeof(g_runtime));
 }
 
 void

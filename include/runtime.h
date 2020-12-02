@@ -25,21 +25,27 @@
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_runtime(
-	__in const dmg_t *configuration
-	);
-
 void dmg_runtime_interrupt(
 	__in int type
+	);
+
+int dmg_runtime_load(
+	__in const dmg_t *configuration
 	);
 
 uint8_t dmg_runtime_read(
 	__in uint16_t address
 	);
 
+bool dmg_runtime_run(void);
+
 unsigned dmg_runtime_serial_in(
 	__in unsigned in
 	);
+
+bool dmg_runtime_step(void);
+
+void dmg_runtime_unload(void);
 
 void dmg_runtime_write(
 	__in uint16_t address,
