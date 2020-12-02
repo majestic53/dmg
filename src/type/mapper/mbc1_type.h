@@ -16,13 +16,21 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_MAPPER_MBC1_TYPE_H_
+#define DMG_TYPE_MAPPER_MBC1_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../../include/type/mapper/mbc1.h"
+#include "../mapper_type.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 70
+#define MBC1_BANK_00 0x00
+#define MBC1_BANK_20 0x20
+#define MBC1_BANK_40 0x40
+#define MBC1_BANK_60 0x60
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+enum {
+	MBC1_MODE_ROM = 0,
+	MBC1_MODE_RAM,
+	MBC1_MODE_MAX,
+};
+
+#endif /* DMG_TYPE_MAPPER_MBC1_TYPE_H_ */

@@ -21,17 +21,19 @@ DIR_INCLUDE=../include/
 DIR_INCLUDE_COMMON=../include/common/
 DIR_INCLUDE_SYSTEM=../include/system/
 DIR_INCLUDE_TYPE=../include/type/
+DIR_INCLUDE_TYPE_MAPPER=../include/type/mapper/
 DIR_SRC=./
 DIR_SRC_COMMON=./common/
 DIR_SRC_SERVICE=./service/
 DIR_SRC_SYSTEM=./system/
 DIR_SRC_TYPE=./type/
+DIR_SRC_TYPE_MAPPER=./type/mapper/
 
 FLAGS=-march=native -std=c11 -Wall -Werror
 
 LIB=libdmg.a
 
-build: build_base build_common build_service build_system build_type
+build: build_base build_common build_service build_system build_type build_type_mapper
 
 build_base: base_dmg.o base_runtime.o base_service.o
 
@@ -100,6 +102,17 @@ type_cartridge.o: $(DIR_SRC_TYPE)cartridge.c $(DIR_INCLUDE_TYPE)cartridge.h
 type_mapper.o: $(DIR_SRC_TYPE)mapper.c $(DIR_INCLUDE_TYPE)mapper.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)mapper.c -o $(DIR_BUILD)type_mapper.o
 
+build_type_mapper: type_mapper_mbc1.o type_mapper_mbc3.o type_mapper_mbc5.o
+
+type_mapper_mbc1.o: $(DIR_SRC_TYPE_MAPPER)mbc1.c $(DIR_INCLUDE_TYPE_MAPPER)mbc1.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc1.c -o $(DIR_BUILD)type_mapper_mbc1.o
+
+type_mapper_mbc3.o: $(DIR_SRC_TYPE_MAPPER)mbc3.c $(DIR_INCLUDE_TYPE_MAPPER)mbc3.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc3.c -o $(DIR_BUILD)type_mapper_mbc3.o
+
+type_mapper_mbc5.o: $(DIR_SRC_TYPE_MAPPER)mbc5.c $(DIR_INCLUDE_TYPE_MAPPER)mbc5.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc5.c -o $(DIR_BUILD)type_mapper_mbc5.o
+
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
@@ -109,7 +122,8 @@ archive:
 		$(DIR_BUILD)system_audio.o $(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 			$(DIR_BUILD)system_serial.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
-			$(DIR_BUILD)type_mapper.o
+			$(DIR_BUILD)type_mapper.o \
+		$(DIR_BUILD)type_mapper_mbc1.o $(DIR_BUILD)type_mapper_mbc3.o $(DIR_BUILD)type_mapper_mbc5.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

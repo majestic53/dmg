@@ -19,6 +19,9 @@
 #ifndef DMG_TYPE_MAPPER_TYPE_H_
 #define DMG_TYPE_MAPPER_TYPE_H_
 
+#include "../../include/type/mapper/mbc1.h"
+#include "../../include/type/mapper/mbc3.h"
+#include "../../include/type/mapper/mbc5.h"
 #include "../../include/type/mapper.h"
 #include "../../include/service.h"
 
@@ -40,33 +43,6 @@ enum {
 	MAPPER_MBC5_RUMBLE_RAM_BATTERY,
 	MAPPER_MAX,
 };
-
-#define MBC1_BANK_00 0x00
-#define MBC1_BANK_20 0x20
-#define MBC1_BANK_40 0x40
-#define MBC1_BANK_60 0x60
-
-enum {
-	MBC1_MODE_ROM = 0,
-	MBC1_MODE_RAM,
-	MBC1_MODE_MAX,
-};
-
-#define MBC3_RAM_MASK 0x03
-#define MBC3_RTC_LATCH 0x01
-
-enum {
-	MBC3_MODE_RAM_0 = 0,
-	MBC3_MODE_RAM_7 = 7,
-	MBC3_MODE_RTC_SEC,
-	MBC3_MODE_RTC_MIN,
-	MBC3_MODE_RTC_HOUR,
-	MBC3_MODE_RTC_DAY_LOW,
-	MBC3_MODE_RTC_DAY_HIGH,
-};
-
-#define MBC5_RAM_MASK 0x0f
-#define MBC5_ROM_MASK 0x01ff
 
 #define RAM_ENABLE 0x0a
 

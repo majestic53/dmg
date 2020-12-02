@@ -16,13 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_MAPPER_MBC5_TYPE_H_
+#define DMG_TYPE_MAPPER_MBC5_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../../include/type/mapper/mbc5.h"
+#include "../mapper_type.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 70
+#define MBC5_RAM_MASK 0x0f
+#define MBC5_ROM_MASK 0x01ff
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_TYPE_MAPPER_MBC5_TYPE_H_ */

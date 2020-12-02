@@ -16,13 +16,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_MAPPER_MBC3_TYPE_H_
+#define DMG_TYPE_MAPPER_MBC3_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../../include/type/mapper/mbc3.h"
+#include "../mapper_type.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 70
+#define MBC3_RAM_MASK 0x03
+#define MBC3_RTC_LATCH 0x01
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+enum {
+	MBC3_MODE_RAM_0 = 0,
+	MBC3_MODE_RAM_7 = 7,
+	MBC3_MODE_RTC_SEC,
+	MBC3_MODE_RTC_MIN,
+	MBC3_MODE_RTC_HOUR,
+	MBC3_MODE_RTC_DAY_LOW,
+	MBC3_MODE_RTC_DAY_HIGH,
+};
+
+#endif /* DMG_TYPE_MAPPER_MBC3_TYPE_H_ */
