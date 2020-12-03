@@ -32,6 +32,8 @@ dmg_load(
 
 	if(!g_initialized) {
 		g_initialized = (dmg_runtime_load(configuration) == ERROR_SUCCESS);
+	} else {
+		ERROR_SET(ERROR_INVALID, "DMG reinitialized");
 	}
 
 	return (int)g_initialized;
@@ -50,6 +52,8 @@ dmg_run(void)
 
 	if(g_initialized) {
 		result = dmg_runtime_run();
+	} else {
+		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
 	}
 
 	return (int)result;
@@ -70,6 +74,8 @@ dmg_step(void)
 
 	if(g_initialized) {
 		result = dmg_runtime_step();
+	} else {
+		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
 	}
 
 	return (int)result;
