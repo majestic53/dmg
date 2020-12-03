@@ -177,7 +177,7 @@ void dmg_unload(void);
  *****************************************/
 
 /**
- * Send action request to emulator instance
+ * Send emulator instance action request
  * @param Const pointer to action request struct
  * @param Pointer to action response struct
  * @return Emulator status
