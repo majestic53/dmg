@@ -20,6 +20,15 @@
 #define DMG_H_
 
 /**
+ * Action enum
+ */
+enum {
+	/* Notify emulator instance of external serial transfer */
+	DMG_ACTION_SERIAL_IN = 0,
+	DMG_ACTION_MAX,
+};
+
+/**
  * Button key enum
  */
 enum {
@@ -60,6 +69,18 @@ enum {
 typedef unsigned (*dmg_serial_out)(unsigned);
 
 /**
+ * Action struct
+ */
+typedef struct {
+	/* Action id */
+	uint8_t id;
+	/* Action type */
+	uint8_t type;
+	/* Action data length */
+	uint8_t length;
+} __attribute__((packed)) dmg_action_t;
+
+/**
  * Buffer struct
  */
 typedef struct {
@@ -68,6 +89,32 @@ typedef struct {
 	/* Data length */
 	unsigned length;
 } __attribute__((packed)) dmg_buffer_t;
+
+/**
+ * Action request struct
+ */
+typedef struct {
+	/* Action header */
+	dmg_action_t action;
+
+	/* Action data */
+	union {
+		uint8_t u8;
+	} data;
+} __attribute__((packed)) dmg_request_t;
+
+/**
+ * Action response struct
+ */
+typedef struct {
+	/* Action header */
+	dmg_action_t action;
+
+	/* Action data */
+	union {
+		uint8_t u8;
+	} data;
+} __attribute__((packed)) dmg_response_t;
 
 /**
  * Version struct
@@ -130,6 +177,14 @@ void dmg_unload(void);
  *****************************************/
 
 /**
+ * Send action request to emulator instance
+ * @param Const pointer to action request struct
+ * @param Pointer to action response struct
+ * @return Emulator status
+ */
+int dmg_action(const dmg_request_t *, dmg_response_t *);
+
+/**
  * Run emulator instance
  * @return Emulator status
  */
@@ -140,13 +195,6 @@ int dmg_run(void);
  * @return Emulator status
  */
 int dmg_step(void);
-
-/**
- * Notify emulator instance of external serial transfer
- * @param Input bit
- * @return Output bit
- */
-unsigned dmg_serial_in(unsigned);
 
 /******************************************
  * Helper Routines

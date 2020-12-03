@@ -24,6 +24,52 @@ static bool g_initialized = false;
 extern "C" {
 #endif /* __cplusplus */
 
+static bool
+dmg_action_serial_in(
+	__in const dmg_request_t *request,
+	__in dmg_response_t *response
+	)
+{
+	response->data.u8 = dmg_runtime_serial_in(request->data.u8);
+	response->action.length = sizeof(request->data.u8);
+
+	return true;
+}
+
+static const dmg_action_hdlr ACTION_HANDLER[] = {
+	dmg_action_serial_in, /* DMG_ACTION_SERIAL_IN */
+	};
+
+int
+dmg_action(
+	__in const dmg_request_t *request,
+	__in dmg_response_t *response
+	)
+{
+	bool result = true;
+
+	if(g_initialized) {
+
+		if(request->action.type >= DMG_ACTION_MAX) {
+			ERROR_SET_FORMAT(ERROR_INVALID, "Unsupported action [%u]->%u", request->action.id, request->action.type);
+			result = false;
+		}
+
+		memset(response, 0, sizeof(*response));
+		result = ACTION_HANDLER[request->action.type](request, response);
+	} else {
+		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
+		result = false;
+	}
+
+	if(result) {
+		response->action.id = request->action.id;
+		response->action.type = request->action.type;
+	}
+
+	return (int)result;
+}
+
 int
 dmg_load(
 	__in const dmg_t *configuration
@@ -57,14 +103,6 @@ dmg_run(void)
 	}
 
 	return (int)result;
-}
-
-unsigned
-dmg_serial_in(
-	__in unsigned in
-	)
-{
-	return (g_initialized ? dmg_runtime_serial_in(in) : 1);
 }
 
 int

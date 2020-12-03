@@ -62,15 +62,15 @@ For an example of how to use this interface, see the [launcher tool](https://git
 
 #### Routines
 
-|Name         |Description                                         |Signature                                   |
-|:------------|:---------------------------------------------------|:-------------------------------------------|
-|dmg_load     |Load emulator instance                              |```int dmg_load(const dmg_t *)```           |
-|dmg_unload   |Unload emulator instance                            |```void dmg_unload(void)```                 |
-|dmg_run      |Run emulator instance                               |```int dmg_run(void)```                     |
-|dmg_step     |Step emulator instance                              |```int dmg_step(void)```                    |
-|dmg_serial_in|Notify emulator instance of external serial transfer|```unsigned dmg_serial_in(unsigned)```      |
-|dmg_error    |Retrieve emulator instance error                    |```const char *dmg_error(void)```           |
-|dmg_version  |Retrieve emulator instance version                  |```const dmg_version_t *dmg_version(void)```|
+|Name       |Description                             |Signature                                                    |
+|:----------|:---------------------------------------|:------------------------------------------------------------|
+|dmg_load   |Load emulator instance                  |```int dmg_load(const dmg_t *)```                            |
+|dmg_unload |Unload emulator instance                |```void dmg_unload(void)```                                  |
+|dmg_action |Send action request to emulator instance|```int dmg_action(const dmg_request_t *, dmg_response_t *)```|
+|dmg_run    |Run emulator instance                   |```int dmg_run(void)```                                      |
+|dmg_step   |Step emulator instance                  |```int dmg_step(void)```                                     |
+|dmg_error  |Retrieve emulator instance error        |```const char *dmg_error(void)```                            |
+|dmg_version|Retrieve emulator instance version      |```const dmg_version_t *dmg_version(void)```                 |
 
 #### Cartridge Support
 

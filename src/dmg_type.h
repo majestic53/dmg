@@ -21,4 +21,9 @@
 
 #include "../include/runtime.h"
 
+typedef bool (*dmg_action_hdlr)(
+	__in const dmg_request_t *request,
+	__in dmg_response_t *response
+	);
+
 #endif /* DMG_TYPE_H_ */
