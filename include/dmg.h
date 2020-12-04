@@ -23,7 +23,7 @@
  * Action enum
  */
 enum {
-	/* Notify emulator instance of external serial transfer */
+	/* Serial transfer-in event */
 	DMG_ACTION_SERIAL_IN = 0,
 	DMG_ACTION_MAX,
 };
@@ -62,7 +62,18 @@ enum {
 };
 
 /**
- * Serial transfer callback
+ * Status enum
+ */
+enum {
+	DMG_SUCCESS = 0,
+	DMG_FAILURE,
+	DMG_INVALID,
+	/* Event-specific status */
+	DMG_BREAKPOINT = -1,
+};
+
+/**
+ * Serial transfer-out event handler
  * @param Input bit
  * @return Output bit
  */
@@ -78,6 +89,11 @@ typedef struct {
 	uint8_t type;
 	/* Action data length */
 	uint8_t length;
+
+	/* Action data */
+	union {
+		uint8_t u8;
+	} data;
 } __attribute__((packed)) dmg_action_t;
 
 /**
@@ -89,32 +105,6 @@ typedef struct {
 	/* Data length */
 	unsigned length;
 } __attribute__((packed)) dmg_buffer_t;
-
-/**
- * Action request struct
- */
-typedef struct {
-	/* Action header */
-	dmg_action_t action;
-
-	/* Action data */
-	union {
-		uint8_t u8;
-	} data;
-} __attribute__((packed)) dmg_request_t;
-
-/**
- * Action response struct
- */
-typedef struct {
-	/* Action header */
-	dmg_action_t action;
-
-	/* Action data */
-	union {
-		uint8_t u8;
-	} data;
-} __attribute__((packed)) dmg_response_t;
 
 /**
  * Version struct
@@ -147,9 +137,9 @@ typedef struct {
 	/* Display scale */
 	unsigned scale;
 	/* Input save file path */
-	char *save_in;
+	const char *save_in;
 	/* Output save file path */
-	char *save_out;
+	const char *save_out;
 } __attribute__((packed)) dmg_t;
 
 #ifdef __cplusplus
@@ -182,19 +172,24 @@ void dmg_unload(void);
  * @param Pointer to action response struct
  * @return Emulator status
  */
-int dmg_action(const dmg_request_t *, dmg_response_t *);
+int dmg_action(const dmg_action_t *, dmg_action_t *);
 
 /**
  * Run emulator instance
+ * @param Const pointer to breakpoint addresses
+ * @param Breakpoint address count
  * @return Emulator status
  */
-int dmg_run(void);
+int dmg_run(const unsigned short *, unsigned);
 
 /**
  * Step emulator instance
+ * @param Instruction count
+ * @param Const pointer to breakpoint addresses
+ * @param Breakpoint address count
  * @return Emulator status
  */
-int dmg_step(void);
+int dmg_step(unsigned, const unsigned short *, unsigned);
 
 /******************************************
  * Helper Routines

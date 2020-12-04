@@ -34,6 +34,7 @@
 
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
+#define OPTION_DEBUG 'd'
 #define OPTION_HELP 'h'
 #define OPTION_INPUT 'i'
 #define OPTION_OUTPUT 'o'
@@ -41,11 +42,12 @@
 #define OPTION_ROM 'r'
 #define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:chi:o:p:r:s:v"
+#define OPTIONS "b:cdhi:o:p:r:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
 	FLAG_CAPTURE,
+	FLAG_DEBUG,
 	FLAG_HELP,
 	FLAG_INPUT,
 	FLAG_OUTPUT,
@@ -59,6 +61,7 @@ enum {
 static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
 	"-c", /* FLAG_CAPTURE */
+	"-d", /* FLAG_DEBUG */
 	"-h", /* FLAG_HELP */
 	"-i", /* FLAG_INPUT */
 	"-o", /* FLAG_OUTPUT */
@@ -72,6 +75,7 @@ static const char *FLAG_STR[] = {
 static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
 	"Enable serial capture", /* FLAG_CAPTURE */
+	"Enable debug prompt", /* FLAG_DEBUG */
 	"Display help information", /* FLAG_HELP */
 	"Specify input save file path", /* FLAG_INPUT */
 	"Specify output save file path", /* FLAG_OUTPUT */
@@ -92,6 +96,7 @@ typedef struct {
 	const char *bootrom;
 	const char *rom;
 	dmg_launcher_capture_t capture;
+	bool debug;
 	bool help;
 	long palette;
 	bool version;

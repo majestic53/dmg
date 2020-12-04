@@ -24,16 +24,16 @@ static bool g_initialized = false;
 extern "C" {
 #endif /* __cplusplus */
 
-static bool
+static int
 dmg_action_serial_in(
-	__in const dmg_request_t *request,
-	__in dmg_response_t *response
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
 	)
 {
 	response->data.u8 = dmg_runtime_serial_in(request->data.u8);
-	response->action.length = sizeof(request->data.u8);
+	response->length = sizeof(request->data.u8);
 
-	return true;
+	return DMG_SUCCESS;
 }
 
 static const dmg_action_hdlr ACTION_HANDLER[] = {
@@ -42,32 +42,31 @@ static const dmg_action_hdlr ACTION_HANDLER[] = {
 
 int
 dmg_action(
-	__in const dmg_request_t *request,
-	__in dmg_response_t *response
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
 	)
 {
-	bool result = true;
+	int result;
 
-	if(g_initialized) {
-
-		if(request->action.type >= DMG_ACTION_MAX) {
-			ERROR_SET_FORMAT(ERROR_INVALID, "Unsupported action [%u]->%u", request->action.id, request->action.type);
-			result = false;
-		}
-
-		memset(response, 0, sizeof(*response));
-		result = ACTION_HANDLER[request->action.type](request, response);
-	} else {
-		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
-		result = false;
+	if(!g_initialized) {
+		ERROR_SET(ERROR_FAILURE, "Uninitialized");
+		result = DMG_FAILURE;
+		goto exit;
+	} else if(request->type >= DMG_ACTION_MAX) {
+		ERROR_SET_FORMAT(ERROR_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
+		result = DMG_INVALID;
+		goto exit;
 	}
 
-	if(result) {
-		response->action.id = request->action.id;
-		response->action.type = request->action.type;
+	memset(response, 0, sizeof(*response));
+
+	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_SUCCESS) {
+		response->id = request->id;
+		response->type = request->type;
 	}
 
-	return (int)result;
+exit:
+	return result;
 }
 
 int
@@ -75,14 +74,18 @@ dmg_load(
 	__in const dmg_t *configuration
 	)
 {
+	int result = DMG_SUCCESS;
 
-	if(!g_initialized) {
-		g_initialized = (dmg_runtime_load(configuration) == ERROR_SUCCESS);
-	} else {
-		ERROR_SET(ERROR_INVALID, "DMG reinitialized");
+	if(g_initialized) {
+		ERROR_SET(ERROR_FAILURE, "Reinitialized");
+		result = DMG_FAILURE;
+		goto exit;
 	}
 
-	return (int)g_initialized;
+	g_initialized = (dmg_runtime_load(configuration) == ERROR_SUCCESS);
+
+exit:
+	return result;
 }
 
 const char *
@@ -92,31 +95,56 @@ dmg_error(void)
 }
 
 int
-dmg_run(void)
+dmg_run(
+	__in const unsigned short *breakpoint,
+	__in unsigned count
+	)
 {
-	bool result = false;
+	int result = DMG_SUCCESS;
 
-	if(g_initialized) {
-		result = dmg_runtime_run();
-	} else {
-		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
+	if(!g_initialized) {
+		ERROR_SET(ERROR_FAILURE, "Uninitialized");
+		result = DMG_FAILURE;
+		goto exit;
+	} else if(!breakpoint && count) {
+		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
+		result = DMG_INVALID;
+		goto exit;
 	}
 
-	return (int)result;
+	result = ((dmg_runtime_run(breakpoint, count) == ERROR_SUCCESS) ? DMG_SUCCESS : DMG_BREAKPOINT);
+
+exit:
+	return result;
 }
 
 int
-dmg_step(void)
+dmg_step(
+	__in unsigned instructions,
+	__in const unsigned short *breakpoint,
+	__in unsigned count
+	)
 {
-	bool result = false;
+	int result = DMG_SUCCESS;
 
-	if(g_initialized) {
-		result = dmg_runtime_step();
-	} else {
-		ERROR_SET(ERROR_INVALID, "DMG uninitialized");
+	if(!g_initialized) {
+		ERROR_SET(ERROR_FAILURE, "Uninitialized");
+		result = DMG_FAILURE;
+		goto exit;
+	} else if(!instructions) {
+		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: instructions=%u", instructions);
+		result = DMG_INVALID;
+		goto exit;
+	} else if(!breakpoint && count) {
+		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
+		result = DMG_INVALID;
+		goto exit;
 	}
 
-	return (int)result;
+	result = ((dmg_runtime_step(instructions, breakpoint, count) == ERROR_SUCCESS) ? DMG_SUCCESS : DMG_BREAKPOINT);
+
+exit:
+	return result;
 }
 
 void

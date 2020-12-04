@@ -275,21 +275,34 @@ dmg_runtime_read(
 	return result;
 }
 
-bool
-dmg_runtime_run(void)
+int
+dmg_runtime_run(
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
+	)
 {
-	bool result;
+	int result = ERROR_SUCCESS;
 
 	g_cycle = 0;
 	g_cycle_last = 0;
 
 	for(;;) {
 
-		if(!(result = dmg_service_poll())) {
+		if(!dmg_service_poll()) {
 			break;
 		}
 
 		do {
+
+			for(uint32_t index = 0; index < count; ++index) {
+
+				if(g_runtime.processor.pc.word == breakpoint[index]) {
+					TRACE_FORMAT(LEVEL_WARNING, "Breakpoint [%04x]", breakpoint[index]);
+					result = ERROR_FAILURE;
+					goto exit;
+				}
+			}
+
 			g_cycle_last = dmg_processor_step(&g_runtime.processor);
 			dmg_audio_step(&g_runtime.audio, g_cycle_last);
 			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
@@ -301,6 +314,7 @@ dmg_runtime_run(void)
 		dmg_service_sync();
 	}
 
+exit:
 	return result;
 }
 
@@ -316,24 +330,42 @@ dmg_runtime_serial_in(
 	return dmg_serial_transfer(&g_runtime.serial, data).raw;
 }
 
-bool
-dmg_runtime_step(void)
+int
+dmg_runtime_step(
+	__in uint32_t instructions,
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
+	)
 {
-	bool result;
+	int result = ERROR_SUCCESS;
 
-	if((result = dmg_service_poll())) {
-		g_cycle_last = dmg_processor_step(&g_runtime.processor);
-		dmg_audio_step(&g_runtime.audio, g_cycle_last);
-		dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
-		dmg_serial_step(&g_runtime.serial, g_cycle_last);
-		dmg_timer_step(&g_runtime.timer, g_cycle_last);
-		g_cycle += g_cycle_last;
+	for(uint32_t instruction = 0; instruction < instructions; ++instruction) {
 
-		if(dmg_video_step(&g_runtime.video, g_cycle_last)) {
-			dmg_service_sync();
+		if(dmg_service_poll()) {
+
+			for(uint32_t index = 0; index < count; ++index) {
+
+				if(g_runtime.processor.pc.word == breakpoint[index]) {
+					TRACE_FORMAT(LEVEL_WARNING, "Breakpoint [%04x]", breakpoint[index]);
+					result = ERROR_FAILURE;
+					goto exit;
+				}
+			}
+
+			g_cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_audio_step(&g_runtime.audio, g_cycle_last);
+			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
+			dmg_serial_step(&g_runtime.serial, g_cycle_last);
+			dmg_timer_step(&g_runtime.timer, g_cycle_last);
+			g_cycle += g_cycle_last;
+
+			if(dmg_video_step(&g_runtime.video, g_cycle_last)) {
+				dmg_service_sync();
+			}
 		}
 	}
 
+exit:
 	return result;
 }
 

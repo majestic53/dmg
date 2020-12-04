@@ -28,6 +28,7 @@ dmg [args]
 
 -b	Specify bootrom binary
 -c	Enable serial capture
+-d	Enable debug prompt
 -h	Display help information
 -i	Specify input save file path
 -o	Specify output save file path
@@ -66,22 +67,22 @@ The following example shows how to launch DMG with a ROM/BOOTROM file:
 $ ./bin/dmg -r rom.gb -b bootrom.gb
 ```
 
-The following example shows how to launch DMG with the display scaled by 2x:
-
-```
-$ ./bin/dmg -r rom.gb -s 2
-```
-
 The following example shows how to launch DMG with the serial capture enabled:
 
 ```
 $ ./bin/dmg -r rom.gb -c
 ```
 
-The following example shows how to launch DMG with an alternative color palette:
+The following example shows how to launch DMG with the debug prompt enabled:
 
 ```
-$ ./bin/dmg -r rom.gb -p 1
+$ ./bin/dmg -r rom.gb -d
+```
+
+The following example shows how to launch DMG and import a save file:
+
+```
+$ ./bin/dmg -r rom.gb -i save.dmg
 ```
 
 The following example shows how to launch DMG and export a save file:
@@ -90,10 +91,16 @@ The following example shows how to launch DMG and export a save file:
 $ ./bin/dmg -r rom.gb -o save.dmg
 ```
 
-The following example shows how to launch DMG and import a save file:
+The following example shows how to launch DMG with an alternative color palette:
 
 ```
-$ ./bin/dmg -r rom.gb -i save.dmg
+$ ./bin/dmg -r rom.gb -p 1
+```
+
+The following example shows how to launch DMG with the display scaled by 2x:
+
+```
+$ ./bin/dmg -r rom.gb -s 2
 ```
 
 Trademark

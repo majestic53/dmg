@@ -48,6 +48,16 @@ dmg_launcher_capture(
 }
 
 static int
+dmg_launcher_debug(void)
+{
+	int result = EXIT_SUCCESS;
+
+	// TODO: DEBUG PROMPT
+
+	return result;
+}
+
+static int
 dmg_launcher_file_load(
 	__inout dmg_buffer_t *buffer,
 	__in const char *path
@@ -123,6 +133,9 @@ dmg_launcher_parse(
 				break;
 			case OPTION_CAPTURE:
 				g_launcher.configuration.serial_out = dmg_launcher_capture;
+				break;
+			case OPTION_DEBUG:
+				g_launcher.debug = true;
 				break;
 			case OPTION_HELP:
 				g_launcher.help = true;
@@ -259,13 +272,17 @@ main(
 			goto exit;
 		}
 
-		if(!dmg_load(&g_launcher.configuration)) {
+		if((result = ((dmg_load(&g_launcher.configuration) == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
 			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
 			result = EXIT_FAILURE;
 			goto exit;
 		}
 
-		dmg_run();
+		if(g_launcher.debug) {
+			result = ((dmg_launcher_debug() == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
+		} else {
+			result = ((dmg_run(NULL, 0) == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
+		}
 	}
 
 exit:

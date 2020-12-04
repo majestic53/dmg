@@ -37,13 +37,20 @@ uint8_t dmg_runtime_read(
 	__in uint16_t address
 	);
 
-bool dmg_runtime_run(void);
+int dmg_runtime_run(
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
+	);
 
 unsigned dmg_runtime_serial_in(
 	__in unsigned in
 	);
 
-bool dmg_runtime_step(void);
+int dmg_runtime_step(
+	__in uint32_t instructions,
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
+	);
 
 void dmg_runtime_unload(void);
 
