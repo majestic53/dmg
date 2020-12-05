@@ -36,31 +36,31 @@ dmg_runtime_export(
 
 	TRACE(LEVEL_INFORMATION, "Runtime exporting");
 
-	if((result = dmg_audio_export(&g_runtime.audio, file)) != ERROR_SUCCESS) {
+	if((result = dmg_audio_export(&g_runtime.audio, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_joypad_export(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
+	if((result = dmg_joypad_export(&g_runtime.joypad, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_export(&g_runtime.memory, file)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_export(&g_runtime.memory, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_export(&g_runtime.processor, file)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_export(&g_runtime.processor, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_export(&g_runtime.serial, file)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_export(&g_runtime.serial, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_export(&g_runtime.timer, file)) != ERROR_SUCCESS) {
+	if((result = dmg_timer_export(&g_runtime.timer, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_export(&g_runtime.video, file)) != ERROR_SUCCESS) {
+	if((result = dmg_video_export(&g_runtime.video, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -79,31 +79,31 @@ dmg_runtime_import(
 
 	TRACE(LEVEL_INFORMATION, "Runtime importing");
 
-	if((result = dmg_audio_import(&g_runtime.audio, file)) != ERROR_SUCCESS) {
+	if((result = dmg_audio_import(&g_runtime.audio, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_joypad_import(&g_runtime.joypad, file)) != ERROR_SUCCESS) {
+	if((result = dmg_joypad_import(&g_runtime.joypad, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_import(&g_runtime.memory, file)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_import(&g_runtime.memory, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_import(&g_runtime.processor, file)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_import(&g_runtime.processor, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_import(&g_runtime.serial, file)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_import(&g_runtime.serial, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_import(&g_runtime.timer, file)) != ERROR_SUCCESS) {
+	if((result = dmg_timer_import(&g_runtime.timer, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_import(&g_runtime.video, file)) != ERROR_SUCCESS) {
+	if((result = dmg_video_import(&g_runtime.video, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -126,7 +126,7 @@ dmg_runtime_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	char title[CARTRIDGE_HEADER_TITLE_LENGTH + 1] = {};
 
 	TRACE_ENABLE(&g_cycle);
@@ -136,37 +136,37 @@ dmg_runtime_load(
 		dmg_version_get()->major, dmg_version_get()->minor, dmg_version_get()->patch);
 
 	if(!configuration) {
-		result = ERROR_SET(ERROR_INVALID, "Configuration is NULL");
+		result = ERROR_SET(DMG_STATUS_INVALID, "Configuration is NULL");
 		goto exit;
 	}
 
 	g_configuration = configuration;
 
-	if((result = dmg_audio_load(&g_runtime.audio, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_audio_load(&g_runtime.audio, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_joypad_load(&g_runtime.joypad, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_joypad_load(&g_runtime.joypad, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_load(&g_runtime.processor, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_processor_load(&g_runtime.processor, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_load(&g_runtime.serial, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_serial_load(&g_runtime.serial, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_load(&g_runtime.timer, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_timer_load(&g_runtime.timer, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_load(&g_runtime.video, g_configuration)) != ERROR_SUCCESS) {
+	if((result = dmg_video_load(&g_runtime.video, g_configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -180,11 +180,11 @@ dmg_runtime_load(
 		title[address] = ((isprint(value) || isspace(value)) ? value : '?');
 	}
 
-	if((result = dmg_service_load(g_configuration, title)) != ERROR_SUCCESS) {
+	if((result = dmg_service_load(g_configuration, title)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import(dmg_runtime_import, g_configuration->save_in)) != ERROR_SUCCESS) {
+	if((result = dmg_service_import(dmg_runtime_import, g_configuration->save_in)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -281,7 +281,7 @@ dmg_runtime_run(
 	__in uint32_t count
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	g_cycle = 0;
 	g_cycle_last = 0;
@@ -298,7 +298,7 @@ dmg_runtime_run(
 
 				if(g_runtime.processor.pc.word == breakpoint[index]) {
 					TRACE_FORMAT(LEVEL_WARNING, "Breakpoint [%04x]", breakpoint[index]);
-					result = ERROR_FAILURE;
+					result = DMG_STATUS_BREAKPOINT;
 					goto exit;
 				}
 			}
@@ -337,7 +337,7 @@ dmg_runtime_step(
 	__in uint32_t count
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	for(uint32_t instruction = 0; instruction < instructions; ++instruction) {
 
@@ -347,7 +347,7 @@ dmg_runtime_step(
 
 				if(g_runtime.processor.pc.word == breakpoint[index]) {
 					TRACE_FORMAT(LEVEL_WARNING, "Breakpoint [%04x]", breakpoint[index]);
-					result = ERROR_FAILURE;
+					result = DMG_STATUS_BREAKPOINT;
 					goto exit;
 				}
 			}

@@ -33,6 +33,11 @@
 #define OPTION_VERSION 'v'
 #define OPTIONS "hr:v"
 
+#define CGB_SUPPORT 0x80
+#define CGB_SUPPORT_ONLY 0xc0
+
+#define SGB_SUPPORT 0x03
+
 enum {
 	FLAG_HELP = 0,
 	FLAG_ROM,
@@ -59,7 +64,13 @@ static const char *MAPPER_STR[] = {
 	"MBC1", /* MAPPER_MBC1 */
 	"MBC1-RAM", /* MAPPER_MBC1_RAM */
 	"MBC1-RAM-BATTERY", /* MAPPER_MBC1_RAM_BATTERY */
-	"", "", "", "", "", "", "", "", "", "", "",
+	"",
+	"MBC2", /* MAPPER_MBC2 */
+	"MBC2-BATTERY", /* MAPPER_MBC2_BATTERY */
+	"",
+	"ROM-RAM", /* MAPPER_ROM_RAM */
+	"ROM-RAM-BATTERY", /* MAPPER_ROM_RAM_BATTERY */
+	"", "", "", "", "",
 	"MBC3-TIMER-BATTERY", /* MAPPER_MBC3_TIMER_BATTERY */
 	"MBC3-TIMER-RAM-BATTERY", /* MAPPER_MBC3_TIMER_RAM_BATTERY */
 	"MBC3", /* MAPPER_MBC3 */

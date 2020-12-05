@@ -38,21 +38,6 @@ dmg [args]
 -v	Display version information
 ```
 
-#### Palettes
-
-The following color palettes are available:
-
-|Id|Palette    |                                                                                          |                                                                                                    |
-|:-|:----------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
-|0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |![Grey Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_grey_demo.png)              |
-|1 |Green      |![Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green.png)            |![Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_demo.png)            |
-|2 |Olive-Green|![Olive-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive.png)|![Olive-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive_demo.png)|
-|3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |![LCD-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd_demo.png)    |
-|4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |![Teal Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_teal_demo.png)              |
-|5 |Blue       |![Blue](https://github.com/majestic53/dmg/blob/master/docs/palette_blue.png)              |![Blue Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_blue_demo.png)              |
-|6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |![Purple Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_purple_demo.png)          |
-|7 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |![Red Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_red_demo.png)                |
-
 #### Examples
 
 The following example shows how to launch DMG with a ROM file:
@@ -102,6 +87,21 @@ The following example shows how to launch DMG with the display scaled by 2x:
 ```
 $ ./bin/dmg -r rom.gb -s 2
 ```
+
+#### Palettes
+
+The following color palettes are available:
+
+|Id|Palette    |                                                                                          |                                                                                                    |
+|:-|:----------|:-----------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------|
+|0 |Grey       |![Grey](https://github.com/majestic53/dmg/blob/master/docs/palette_grey.png)              |![Grey Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_grey_demo.png)              |
+|1 |Green      |![Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green.png)            |![Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_demo.png)            |
+|2 |Olive-Green|![Olive-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive.png)|![Olive-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_olive_demo.png)|
+|3 |LCD-Green  |![LCD-Green](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd.png)    |![LCD-Green Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_green_lcd_demo.png)    |
+|4 |Teal       |![Teal](https://github.com/majestic53/dmg/blob/master/docs/palette_teal.png)              |![Teal Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_teal_demo.png)              |
+|5 |Blue       |![Blue](https://github.com/majestic53/dmg/blob/master/docs/palette_blue.png)              |![Blue Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_blue_demo.png)              |
+|6 |Purple     |![Purple](https://github.com/majestic53/dmg/blob/master/docs/palette_purple.png)          |![Purple Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_purple_demo.png)          |
+|7 |Red        |![Red](https://github.com/majestic53/dmg/blob/master/docs/palette_red.png)                |![Red Demo](https://github.com/majestic53/dmg/blob/master/docs/palette_red_demo.png)                |
 
 Trademark
 =

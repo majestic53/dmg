@@ -46,7 +46,7 @@ dmg_buffer_allocate(
 	__in uint8_t value
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 void

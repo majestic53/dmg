@@ -272,16 +272,16 @@ main(
 			goto exit;
 		}
 
-		if((result = ((dmg_load(&g_launcher.configuration) == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
+		if((result = ((dmg_load(&g_launcher.configuration) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
 			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
 			result = EXIT_FAILURE;
 			goto exit;
 		}
 
 		if(g_launcher.debug) {
-			result = ((dmg_launcher_debug() == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
+			result = dmg_launcher_debug();
 		} else {
-			result = ((dmg_run(NULL, 0) == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
+			result = ((dmg_run(NULL, 0) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
 		}
 	}
 

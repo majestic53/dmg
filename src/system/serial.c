@@ -43,24 +43,24 @@ dmg_serial_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Serial exporting");
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 
-	if((result = dmg_service_export_data(file, &serial->control, sizeof(serial->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &serial->control, sizeof(serial->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &serial->cycle, sizeof(serial->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &serial->cycle, sizeof(serial->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &serial->data, sizeof(serial->data))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &serial->data, sizeof(serial->data))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &serial->remaining, sizeof(serial->remaining))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &serial->remaining, sizeof(serial->remaining))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -76,23 +76,23 @@ dmg_serial_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Serial importing");
 
-	if((result = dmg_service_import_data(file, &serial->control, sizeof(serial->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &serial->control, sizeof(serial->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &serial->cycle, sizeof(serial->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &serial->cycle, sizeof(serial->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &serial->data, sizeof(serial->data))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &serial->data, sizeof(serial->data))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &serial->remaining, sizeof(serial->remaining))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &serial->remaining, sizeof(serial->remaining))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -109,8 +109,6 @@ dmg_serial_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
-
 	TRACE(LEVEL_INFORMATION, "Serial loading");
 
 	if(!configuration->bootrom.data) {
@@ -122,7 +120,7 @@ dmg_serial_load(
 	TRACE_SERIAL(LEVEL_VERBOSE, serial);
 	TRACE(LEVEL_INFORMATION, "Serial loaded");
 
-	return result;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t

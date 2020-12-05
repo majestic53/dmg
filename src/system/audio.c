@@ -41,47 +41,47 @@ dmg_audio_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Audio exporting");
 	TRACE_AUDIO(LEVEL_VERBOSE, audio);
 
-	if((result = dmg_service_export_data(file, &audio->cycle, sizeof(audio->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->cycle, sizeof(audio->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(uint32_t address = 0; address < audio->ram.length; ++address) {
 
-		if((result = dmg_service_export_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_export_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
 
-	if((result = dmg_service_export_data(file, &audio->control, sizeof(audio->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->control, sizeof(audio->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->mode_1, sizeof(audio->mode_1))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->mode_1, sizeof(audio->mode_1))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->mode_2, sizeof(audio->mode_2))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->mode_2, sizeof(audio->mode_2))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->mode_3, sizeof(audio->mode_3))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->mode_3, sizeof(audio->mode_3))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->mode_4, sizeof(audio->mode_4))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->mode_4, sizeof(audio->mode_4))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->output, sizeof(audio->output))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->output, sizeof(audio->output))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &audio->state, sizeof(audio->state))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &audio->state, sizeof(audio->state))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -97,46 +97,46 @@ dmg_audio_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Audio importing");
 
-	if((result = dmg_service_import_data(file, &audio->cycle, sizeof(audio->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->cycle, sizeof(audio->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(uint32_t address = 0; address < audio->ram.length; ++address) {
 
-		if((result = dmg_service_import_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_import_data(file, &((uint8_t *)audio->ram.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
 
-	if((result = dmg_service_import_data(file, &audio->control, sizeof(audio->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->control, sizeof(audio->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->mode_1, sizeof(audio->mode_1))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->mode_1, sizeof(audio->mode_1))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->mode_2, sizeof(audio->mode_2))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->mode_2, sizeof(audio->mode_2))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->mode_3, sizeof(audio->mode_3))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->mode_3, sizeof(audio->mode_3))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->mode_4, sizeof(audio->mode_4))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->mode_4, sizeof(audio->mode_4))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->output, sizeof(audio->output))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->output, sizeof(audio->output))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &audio->state, sizeof(audio->state))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &audio->state, sizeof(audio->state))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -153,7 +153,7 @@ dmg_audio_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Audio loading");
 
@@ -178,7 +178,7 @@ dmg_audio_load(
 		audio->state.raw = POST_STATE;
 	}
 
-	if((result = dmg_buffer_allocate(&audio->ram, RAM_WIDTH, 0)) != ERROR_SUCCESS) {
+	if((result = dmg_buffer_allocate(&audio->ram, RAM_WIDTH, 0)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 

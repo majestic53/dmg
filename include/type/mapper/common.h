@@ -38,6 +38,19 @@ typedef struct {
 } __attribute__((packed)) dmg_mbc1_t;
 
 typedef struct {
+
+	union {
+
+		struct {
+			uint8_t bank : 4;
+			uint8_t unused : 4;
+		};
+
+		uint8_t raw;
+	};
+} __attribute__((packed)) dmg_mbc2_t;
+
+typedef struct {
 	uint8_t second;
 	uint8_t minute;
 	uint8_t hour;
@@ -96,6 +109,7 @@ typedef struct {
 
 	union {
 		dmg_mbc1_t mbc1;
+		dmg_mbc2_t mbc2;
 		dmg_mbc3_t mbc3;
 		dmg_mbc5_t mbc5;
 	} map;

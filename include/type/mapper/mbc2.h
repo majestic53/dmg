@@ -16,13 +16,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TYPE_MAPPER_MBC2_H_
+#define DMG_TYPE_MAPPER_MBC2_H_
 
-#include "../../include/common.h"
+#include "../mapper.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 73
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+uint8_t dmg_mapper_mbc2_read_ram(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	);
+
+void dmg_mapper_mbc2_write_ram(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	);
+
+void dmg_mapper_mbc2_write_rom(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TYPE_MAPPER_MBC2_H_ */

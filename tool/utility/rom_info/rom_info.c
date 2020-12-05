@@ -103,7 +103,24 @@ dmg_utility_rom_info_file_parse(void)
 		}
 	}
 
-	fprintf(stdout, "\"\nType      %s%s", header->cgb ? "GBC (Gameboy Color" : "GB (Gameboy", header->sgb ? "/SBC support)" : ")");
+	fprintf(stdout, "\"\nType      "); //header->cgb ? "GBC (Gameboy Color" : "GB (Gameboy", header->sgb ? "/SBC support)" : ")");
+
+	switch(header->cgb) {
+		case CGB_SUPPORT:
+			fprintf(stdout, "GB/GBC (Gameboy/Gameboy Color)");
+			break;
+		case CGB_SUPPORT_ONLY:
+			fprintf(stdout, "GBC Only (Gameboy Color)");
+			break;
+		default:
+			fprintf(stdout, "GB (Gameboy)");
+			break;
+	}
+
+	if(header->sgb == SGB_SUPPORT) {
+		fprintf(stdout, ", SBC (Super Gameboy)");
+	}
+
 	fprintf(stdout, "\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
 	fprintf(stdout, "\nMapper    ");
 

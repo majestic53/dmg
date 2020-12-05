@@ -45,28 +45,28 @@ dmg_timer_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Timer exporting");
 	TRACE_TIMER(LEVEL_VERBOSE, timer);
 
-	if((result = dmg_service_export_data(file, &timer->control, sizeof(timer->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &timer->control, sizeof(timer->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &timer->counter, sizeof(timer->counter))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &timer->counter, sizeof(timer->counter))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &timer->cycle, sizeof(timer->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &timer->cycle, sizeof(timer->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &timer->divider, sizeof(timer->divider))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &timer->divider, sizeof(timer->divider))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &timer->modulo, sizeof(timer->modulo))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &timer->modulo, sizeof(timer->modulo))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -82,27 +82,27 @@ dmg_timer_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Timer importing");
 
-	if((result = dmg_service_import_data(file, &timer->control, sizeof(timer->control))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &timer->control, sizeof(timer->control))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &timer->counter, sizeof(timer->counter))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &timer->counter, sizeof(timer->counter))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &timer->cycle, sizeof(timer->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &timer->cycle, sizeof(timer->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &timer->divider, sizeof(timer->divider))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &timer->divider, sizeof(timer->divider))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &timer->modulo, sizeof(timer->modulo))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &timer->modulo, sizeof(timer->modulo))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -119,8 +119,6 @@ dmg_timer_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
-
 	TRACE(LEVEL_INFORMATION, "Timer loading");
 
 	if(!configuration->bootrom.data) {
@@ -133,7 +131,7 @@ dmg_timer_load(
 	TRACE_TIMER(LEVEL_VERBOSE, timer);
 	TRACE(LEVEL_INFORMATION, "Timer loaded");
 
-	return result;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t

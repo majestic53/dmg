@@ -53,7 +53,7 @@ dmg_bootrom_export(
 	__in FILE *file
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 int
@@ -62,7 +62,7 @@ dmg_bootrom_import(
 	__in FILE *file
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 int
@@ -73,7 +73,7 @@ dmg_bootrom_load(
 {
 	g_memory.bootrom = true;
 
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t
@@ -113,7 +113,7 @@ dmg_buffer_allocate(
 	__in uint8_t value
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 void
@@ -130,7 +130,7 @@ dmg_mapper_export(
 	__in FILE *file
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 int
@@ -139,7 +139,7 @@ dmg_mapper_import(
 	__in FILE *file
 	)
 {
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 int
@@ -150,7 +150,7 @@ dmg_mapper_load(
 {
 	g_memory.mapper = true;
 
-	return ERROR_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t

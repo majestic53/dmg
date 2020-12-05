@@ -65,11 +65,12 @@ enum {
  * Status enum
  */
 enum {
-	DMG_SUCCESS = 0,
-	DMG_FAILURE,
-	DMG_INVALID,
+	DMG_STATUS_SUCCESS = 0,
+	DMG_STATUS_FAILURE,
+	DMG_STATUS_INVALID,
+	DMG_STATUS_MAX,
 	/* Event-specific status */
-	DMG_BREAKPOINT = -1,
+	DMG_STATUS_BREAKPOINT = -1,
 };
 
 /**

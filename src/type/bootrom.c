@@ -28,12 +28,12 @@ dmg_bootrom_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Bootrom exporting");
 	TRACE_FORMAT(LEVEL_VERBOSE, "Bootrom enable=%x", bootrom->enable);
 
-	if((result = dmg_service_export_data(file, &bootrom->enable, sizeof(bootrom->enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &bootrom->enable, sizeof(bootrom->enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -49,11 +49,11 @@ dmg_bootrom_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Bootrom importing");
 
-	if((result = dmg_service_import_data(file, &bootrom->enable, sizeof(bootrom->enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &bootrom->enable, sizeof(bootrom->enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -76,20 +76,20 @@ dmg_bootrom_validate(
 {
 	uint32_t address;
 	uint16_t checksum = 0;
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(!buffer) {
-		result = ERROR_SET(ERROR_INVALID, "Bootrom is NULL");
+		result = ERROR_SET(DMG_STATUS_INVALID, "Bootrom is NULL");
 		goto exit;
 	}
 
 	if(!buffer->data) {
-		result = ERROR_SET(ERROR_INVALID, "Bootrom data is NULL");
+		result = ERROR_SET(DMG_STATUS_INVALID, "Bootrom data is NULL");
 		goto exit;
 	}
 
 	if(buffer->length != BOOTROM_WIDTH) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Bootrom length mismatch: %u (expecting %u)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Bootrom length mismatch: %u (expecting %u)",
 				buffer->length, BOOTROM_WIDTH);
 		goto exit;
 	}
@@ -99,7 +99,7 @@ dmg_bootrom_validate(
 	}
 
 	if(checksum != BOOTROM_CHECKSUM) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Bootrom checksum mismatch: %04x (expecting %04x)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Bootrom checksum mismatch: %04x (expecting %04x)",
 				checksum, BOOTROM_CHECKSUM);
 		goto exit;
 	}
@@ -116,13 +116,13 @@ dmg_bootrom_load(
 	__in const dmg_buffer_t *buffer
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Bootrom loading");
 
 	if(buffer->data) {
 
-		if((result = dmg_bootrom_validate(buffer)) != ERROR_SUCCESS) {
+		if((result = dmg_bootrom_validate(buffer)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 

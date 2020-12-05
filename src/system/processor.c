@@ -3130,56 +3130,56 @@ dmg_processor_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Processor exporting");
 	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 
-	if((result = dmg_service_export_data(file, &processor->af, sizeof(processor->af))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->af, sizeof(processor->af))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->bc, sizeof(processor->bc))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->bc, sizeof(processor->bc))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->de, sizeof(processor->de))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->de, sizeof(processor->de))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->hl, sizeof(processor->hl))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->hl, sizeof(processor->hl))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->interrupts_enable, sizeof(processor->interrupts_enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->interrupts_enable, sizeof(processor->interrupts_enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->interrupts_enable_state, sizeof(processor->interrupts_enable_state))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->interrupts_enable_state, sizeof(processor->interrupts_enable_state))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->interrupt_enable, sizeof(processor->interrupt_enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->interrupt_enable, sizeof(processor->interrupt_enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->interrupt_flag, sizeof(processor->interrupt_flag))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->interrupt_flag, sizeof(processor->interrupt_flag))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->halt, sizeof(processor->halt))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->halt, sizeof(processor->halt))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->pc, sizeof(processor->pc))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->pc, sizeof(processor->pc))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->sp, sizeof(processor->sp))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->sp, sizeof(processor->sp))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &processor->stop, sizeof(processor->stop))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &processor->stop, sizeof(processor->stop))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3195,55 +3195,55 @@ dmg_processor_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Processor importing");
 
-	if((result = dmg_service_import_data(file, &processor->af, sizeof(processor->af))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->af, sizeof(processor->af))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->bc, sizeof(processor->bc))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->bc, sizeof(processor->bc))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->de, sizeof(processor->de))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->de, sizeof(processor->de))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->hl, sizeof(processor->hl))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->hl, sizeof(processor->hl))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->interrupts_enable, sizeof(processor->interrupts_enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->interrupts_enable, sizeof(processor->interrupts_enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->interrupts_enable_state, sizeof(processor->interrupts_enable_state))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->interrupts_enable_state, sizeof(processor->interrupts_enable_state))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->interrupt_enable, sizeof(processor->interrupt_enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->interrupt_enable, sizeof(processor->interrupt_enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->interrupt_flag, sizeof(processor->interrupt_flag))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->interrupt_flag, sizeof(processor->interrupt_flag))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->halt, sizeof(processor->halt))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->halt, sizeof(processor->halt))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->pc, sizeof(processor->pc))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->pc, sizeof(processor->pc))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->sp, sizeof(processor->sp))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->sp, sizeof(processor->sp))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &processor->stop, sizeof(processor->stop))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &processor->stop, sizeof(processor->stop))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3260,8 +3260,6 @@ dmg_processor_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
-
 	TRACE(LEVEL_INFORMATION, "Processor loading");
 
 	if(!configuration->bootrom.data) {
@@ -3277,7 +3275,7 @@ dmg_processor_load(
 	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 	TRACE(LEVEL_INFORMATION, "Processor loaded");
 
-	return result;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t

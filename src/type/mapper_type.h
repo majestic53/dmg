@@ -20,6 +20,7 @@
 #define DMG_TYPE_MAPPER_TYPE_H_
 
 #include "../../include/type/mapper/mbc1.h"
+#include "../../include/type/mapper/mbc2.h"
 #include "../../include/type/mapper/mbc3.h"
 #include "../../include/type/mapper/mbc5.h"
 #include "../../include/type/mapper.h"
@@ -30,6 +31,10 @@ enum {
 	MAPPER_MBC1,
 	MAPPER_MBC1_RAM,
 	MAPPER_MBC1_RAM_BATTERY,
+	MAPPER_MBC2 = 0x05,
+	MAPPER_MBC2_BATTERY,
+	MAPPER_ROM_RAM = 0x08,
+	MAPPER_ROM_RAM_BATTERY,
 	MAPPER_MBC3_TIMER_BATTERY = 0x0f,
 	MAPPER_MBC3_TIMER_RAM_BATTERY,
 	MAPPER_MBC3,

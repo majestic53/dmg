@@ -48,28 +48,28 @@ dmg_mapper_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Mapper exporting");
 	TRACE_MAPPER(LEVEL_VERBOSE, mapper);
 
-	if((result = dmg_service_export_data(file, &mapper->map, sizeof(mapper->map))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &mapper->map, sizeof(mapper->map))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_cartridge_export(&mapper->cartridge, file)) != ERROR_SUCCESS) {
+	if((result = dmg_cartridge_export(&mapper->cartridge, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &mapper->ram, sizeof(mapper->ram))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &mapper->ram, sizeof(mapper->ram))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &mapper->rom, sizeof(mapper->rom))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &mapper->rom, sizeof(mapper->rom))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -85,27 +85,27 @@ dmg_mapper_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Mapper importing");
 
-	if((result = dmg_service_import_data(file, &mapper->map, sizeof(mapper->map))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &mapper->map, sizeof(mapper->map))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_cartridge_import(&mapper->cartridge, file)) != ERROR_SUCCESS) {
+	if((result = dmg_cartridge_import(&mapper->cartridge, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &mapper->ram, sizeof(mapper->ram))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &mapper->ram, sizeof(mapper->ram))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &mapper->rom, sizeof(mapper->rom))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &mapper->rom, sizeof(mapper->rom))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &mapper->rom_swap, sizeof(mapper->rom_swap))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -126,7 +126,7 @@ dmg_mapper_load(
 
 	TRACE(LEVEL_INFORMATION, "Mapper loading");
 
-	if((result = dmg_cartridge_load(&mapper->cartridge, buffer)) != ERROR_SUCCESS) {
+	if((result = dmg_cartridge_load(&mapper->cartridge, buffer)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -135,6 +135,10 @@ dmg_mapper_load(
 		case MAPPER_MBC1:
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
+		case MAPPER_MBC2:
+		case MAPPER_MBC2_BATTERY:
+		case MAPPER_ROM_RAM:
+		case MAPPER_ROM_RAM_BATTERY:
 		case MAPPER_MBC3_TIMER_BATTERY:
 		case MAPPER_MBC3_TIMER_RAM_BATTERY:
 		case MAPPER_MBC3:
@@ -151,7 +155,7 @@ dmg_mapper_load(
 			mapper->rom_swap = (mapper->rom + 1);
 			break;
 		default:
-			result = ERROR_SET_FORMAT(ERROR_INVALID, "Unsupported mapper type: %u", type);
+			result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Unsupported mapper type: %u", type);
 			goto exit;
 	}
 
@@ -175,6 +179,10 @@ dmg_mapper_read_ram(
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 
 			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC2:
+				case MAPPER_MBC2_BATTERY:
+					result = dmg_mapper_mbc2_read_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN);
+					break;
 				case MAPPER_MBC3_TIMER_BATTERY:
 				case MAPPER_MBC3_TIMER_RAM_BATTERY:
 				case MAPPER_MBC3:
@@ -245,6 +253,10 @@ dmg_mapper_write_ram(
 		case ADDRESS_RAM_SWAP_BEGIN ... ADDRESS_RAM_SWAP_END:
 
 			switch((type = mapper->cartridge.header->mapper)) {
+				case MAPPER_MBC2:
+				case MAPPER_MBC2_BATTERY:
+					dmg_mapper_mbc2_write_ram(mapper, address - ADDRESS_RAM_SWAP_BEGIN, value);
+					break;
 				case MAPPER_MBC3_TIMER_BATTERY:
 				case MAPPER_MBC3_TIMER_RAM_BATTERY:
 				case MAPPER_MBC3:
@@ -274,6 +286,8 @@ dmg_mapper_write_rom(
 
 	switch((type = mapper->cartridge.header->mapper)) {
 		case MAPPER_ROM_ONLY:
+		case MAPPER_ROM_RAM:
+		case MAPPER_ROM_RAM_BATTERY:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported mapper rom write [%u/%u][%04x]->%02x", mapper->rom, mapper->rom_swap,
 				address, value);
 			break;
@@ -281,6 +295,10 @@ dmg_mapper_write_rom(
 		case MAPPER_MBC1_RAM:
 		case MAPPER_MBC1_RAM_BATTERY:
 			dmg_mapper_mbc1_write_rom(mapper, address, value);
+			break;
+		case MAPPER_MBC2:
+		case MAPPER_MBC2_BATTERY:
+			dmg_mapper_mbc2_write_rom(mapper, address, value);
 			break;
 		case MAPPER_MBC3_TIMER_BATTERY:
 		case MAPPER_MBC3_TIMER_RAM_BATTERY:

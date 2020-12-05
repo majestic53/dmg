@@ -44,7 +44,7 @@ dmg_error_set(
 
 	memset(&g_error, 0, sizeof(g_error));
 
-	if(error != ERROR_SUCCESS) {
+	if(error != DMG_STATUS_SUCCESS) {
 		char message[ERROR_LENGTH_MAX / 2] = {};
 
 		if(format) {

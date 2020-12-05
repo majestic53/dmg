@@ -29,7 +29,7 @@ extern "C" {
 static int
 dmg_sdl_audio_load(void)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	SDL_AudioSpec specification = {};
 
 	TRACE(LEVEL_INFORMATION, "SDL audio loading");
@@ -41,7 +41,7 @@ dmg_sdl_audio_load(void)
 
 	g_sdl.audio.device = SDL_OpenAudioDevice(NULL, AUDIO_DIRECTION, &specification, &g_sdl.audio.specification, 0);
 	if(!g_sdl.audio.device) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
@@ -67,24 +67,24 @@ dmg_sdl_audio_unload(void)
 static int
 dmg_sdl_display_show(void)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(g_sdl.video.redraw) {
 		g_sdl.video.redraw = false;
 
 		if(SDL_RenderClear(g_sdl.video.renderer)) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
 
 		if(SDL_UpdateTexture(g_sdl.video.texture, NULL, (dmg_sdl_bgra_t *)g_sdl.video.pixel, WINDOW_WIDTH * sizeof(dmg_sdl_bgra_t))) {
-			result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
 	}
 
 	if(SDL_RenderCopy(g_sdl.video.renderer, g_sdl.video.texture, NULL, NULL)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
@@ -132,34 +132,34 @@ dmg_sdl_display_load(
 
 	if(!(g_sdl.video.window = SDL_CreateWindow(g_sdl.video.title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 			WINDOW_WIDTH * g_sdl.video.scale, WINDOW_HEIGHT * g_sdl.video.scale, SDL_WINDOW_RESIZABLE))) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
 	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
 	if(SDL_RenderSetLogicalSize(g_sdl.video.renderer, WINDOW_WIDTH, WINDOW_HEIGHT)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
 	if(SDL_SetRenderDrawColor(g_sdl.video.renderer, COLOR_BACKGROUND.red, COLOR_BACKGROUND.green, COLOR_BACKGROUND.blue,
 			COLOR_BACKGROUND.alpha)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
 	if(SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL_FALSE) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
 	if(!(g_sdl.video.texture = SDL_CreateTexture(g_sdl.video.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
 			WINDOW_WIDTH, WINDOW_HEIGHT))) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
@@ -211,15 +211,15 @@ dmg_sdl_load(
 	TRACE_FORMAT(LEVEL_INFORMATION, "SDL loading ver.%u.%u.%u", version.major, version.minor, version.patch);
 
 	if(SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 
-	if((result = dmg_sdl_audio_load()) != ERROR_SUCCESS) {
+	if((result = dmg_sdl_audio_load()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_sdl_display_load(configuration, title)) != ERROR_SUCCESS) {
+	if((result = dmg_sdl_display_load(configuration, title)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -270,10 +270,10 @@ dmg_sdl_sample(
 	__in const void *sample
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(SDL_QueueAudio(g_sdl.audio.device, sample, AUDIO_SAMPLES)) {
-		result = ERROR_SET_FORMAT(ERROR_FAILURE, "%s", SDL_GetError());
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
 

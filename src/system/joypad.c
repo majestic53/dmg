@@ -84,16 +84,16 @@ dmg_joypad_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Joypad exporting");
 	TRACE_JOYPAD(LEVEL_VERBOSE, joypad);
 
-	if((result = dmg_service_export_data(file, &joypad->cycle, sizeof(joypad->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &joypad->cycle, sizeof(joypad->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &joypad->state, sizeof(dmg_joypad_state_t))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &joypad->state, sizeof(dmg_joypad_state_t))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -109,15 +109,15 @@ dmg_joypad_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Joypad importing");
 
-	if((result = dmg_service_import_data(file, &joypad->cycle, sizeof(joypad->cycle))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &joypad->cycle, sizeof(joypad->cycle))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import_data(file, &joypad->state, sizeof(dmg_joypad_state_t))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &joypad->state, sizeof(dmg_joypad_state_t))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -134,15 +134,13 @@ dmg_joypad_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = ERROR_SUCCESS;
-
 	TRACE(LEVEL_INFORMATION, "Joypad loading");
 	joypad->state.raw = POST_STATE;
 	dmg_joypad_poll(joypad);
 	TRACE_JOYPAD(LEVEL_VERBOSE, joypad);
 	TRACE(LEVEL_INFORMATION, "Joypad loaded");
 
-	return result;
+	return DMG_STATUS_SUCCESS;
 }
 
 uint8_t

@@ -33,7 +33,7 @@ dmg_action_serial_in(
 	response->data.u8 = dmg_runtime_serial_in(request->data.u8);
 	response->length = sizeof(request->data.u8);
 
-	return DMG_SUCCESS;
+	return DMG_STATUS_SUCCESS;
 }
 
 static const dmg_action_hdlr ACTION_HANDLER[] = {
@@ -49,18 +49,16 @@ dmg_action(
 	int result;
 
 	if(!g_initialized) {
-		ERROR_SET(ERROR_FAILURE, "Uninitialized");
-		result = DMG_FAILURE;
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
 		goto exit;
 	} else if(request->type >= DMG_ACTION_MAX) {
-		ERROR_SET_FORMAT(ERROR_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
-		result = DMG_INVALID;
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
 		goto exit;
 	}
 
 	memset(response, 0, sizeof(*response));
 
-	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_SUCCESS) {
+	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_STATUS_SUCCESS) {
 		response->id = request->id;
 		response->type = request->type;
 	}
@@ -74,15 +72,14 @@ dmg_load(
 	__in const dmg_t *configuration
 	)
 {
-	int result = DMG_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(g_initialized) {
-		ERROR_SET(ERROR_FAILURE, "Reinitialized");
-		result = DMG_FAILURE;
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Reinitialized");
 		goto exit;
 	}
 
-	g_initialized = (dmg_runtime_load(configuration) == ERROR_SUCCESS);
+	g_initialized = ((result = dmg_runtime_load(configuration)) == DMG_STATUS_SUCCESS);
 
 exit:
 	return result;
@@ -100,19 +97,17 @@ dmg_run(
 	__in unsigned count
 	)
 {
-	int result = DMG_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(!g_initialized) {
-		ERROR_SET(ERROR_FAILURE, "Uninitialized");
-		result = DMG_FAILURE;
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
 		goto exit;
 	} else if(!breakpoint && count) {
-		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
-		result = DMG_INVALID;
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
 		goto exit;
 	}
 
-	result = ((dmg_runtime_run(breakpoint, count) == ERROR_SUCCESS) ? DMG_SUCCESS : DMG_BREAKPOINT);
+	result = dmg_runtime_run(breakpoint, count);
 
 exit:
 	return result;
@@ -125,23 +120,20 @@ dmg_step(
 	__in unsigned count
 	)
 {
-	int result = DMG_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(!g_initialized) {
-		ERROR_SET(ERROR_FAILURE, "Uninitialized");
-		result = DMG_FAILURE;
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
 		goto exit;
 	} else if(!instructions) {
-		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: instructions=%u", instructions);
-		result = DMG_INVALID;
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: instructions=%u", instructions);
 		goto exit;
 	} else if(!breakpoint && count) {
-		ERROR_SET_FORMAT(ERROR_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
-		result = DMG_INVALID;
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
 		goto exit;
 	}
 
-	result = ((dmg_runtime_step(instructions, breakpoint, count) == ERROR_SUCCESS) ? DMG_SUCCESS : DMG_BREAKPOINT);
+	result = dmg_runtime_step(instructions, breakpoint, count);
 
 exit:
 	return result;

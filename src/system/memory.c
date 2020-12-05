@@ -42,29 +42,29 @@ dmg_memory_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Memory exporting");
 	TRACE_MEMORY(LEVEL_VERBOSE, memory);
 
-	if((result = dmg_bootrom_export(&memory->bootrom, file)) != ERROR_SUCCESS) {
+	if((result = dmg_bootrom_export(&memory->bootrom, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_mapper_export(&memory->mapper, file)) != ERROR_SUCCESS) {
+	if((result = dmg_mapper_export(&memory->mapper, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(uint32_t address = 0; address < memory->ram.length; ++address) {
 
-		if((result = dmg_service_export_data(file, &((uint8_t *)memory->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_export_data(file, &((uint8_t *)memory->ram.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
 
 	for(uint32_t address = 0; address < memory->ram_high.length; ++address) {
 
-		if((result = dmg_service_export_data(file, &((uint8_t *)memory->ram_high.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_export_data(file, &((uint8_t *)memory->ram_high.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -81,28 +81,28 @@ dmg_memory_import(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Memory importing");
 
-	if((result = dmg_bootrom_import(&memory->bootrom, file)) != ERROR_SUCCESS) {
+	if((result = dmg_bootrom_import(&memory->bootrom, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_mapper_import(&memory->mapper, file)) != ERROR_SUCCESS) {
+	if((result = dmg_mapper_import(&memory->mapper, file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(uint32_t address = 0; address < memory->ram.length; ++address) {
 
-		if((result = dmg_service_import_data(file, &((uint8_t *)memory->ram.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_import_data(file, &((uint8_t *)memory->ram.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
 
 	for(uint32_t address = 0; address < memory->ram_high.length; ++address) {
 
-		if((result = dmg_service_import_data(file, &((uint8_t *)memory->ram_high.data)[address], sizeof(uint8_t))) != ERROR_SUCCESS) {
+		if((result = dmg_service_import_data(file, &((uint8_t *)memory->ram_high.data)[address], sizeof(uint8_t))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -124,19 +124,19 @@ dmg_memory_load(
 
 	TRACE(LEVEL_INFORMATION, "Memory loading");
 
-	if((result = dmg_bootrom_load(&memory->bootrom, &configuration->bootrom)) != ERROR_SUCCESS) {
+	if((result = dmg_bootrom_load(&memory->bootrom, &configuration->bootrom)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_mapper_load(&memory->mapper, &configuration->rom)) != ERROR_SUCCESS) {
+	if((result = dmg_mapper_load(&memory->mapper, &configuration->rom)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_buffer_allocate(&memory->ram, RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
+	if((result = dmg_buffer_allocate(&memory->ram, RAM_WIDTH, UINT8_MAX)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_buffer_allocate(&memory->ram_high, RAM_HIGH_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
+	if((result = dmg_buffer_allocate(&memory->ram_high, RAM_HIGH_WIDTH, UINT8_MAX)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 

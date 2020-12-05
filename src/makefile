@@ -102,10 +102,13 @@ type_cartridge.o: $(DIR_SRC_TYPE)cartridge.c $(DIR_INCLUDE_TYPE)cartridge.h
 type_mapper.o: $(DIR_SRC_TYPE)mapper.c $(DIR_INCLUDE_TYPE)mapper.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE)mapper.c -o $(DIR_BUILD)type_mapper.o
 
-build_type_mapper: type_mapper_mbc1.o type_mapper_mbc3.o type_mapper_mbc5.o
+build_type_mapper: type_mapper_mbc1.o type_mapper_mbc2.o type_mapper_mbc3.o type_mapper_mbc5.o
 
 type_mapper_mbc1.o: $(DIR_SRC_TYPE_MAPPER)mbc1.c $(DIR_INCLUDE_TYPE_MAPPER)mbc1.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc1.c -o $(DIR_BUILD)type_mapper_mbc1.o
+
+type_mapper_mbc2.o: $(DIR_SRC_TYPE_MAPPER)mbc2.c $(DIR_INCLUDE_TYPE_MAPPER)mbc2.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc2.c -o $(DIR_BUILD)type_mapper_mbc2.o
 
 type_mapper_mbc3.o: $(DIR_SRC_TYPE_MAPPER)mbc3.c $(DIR_INCLUDE_TYPE_MAPPER)mbc3.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_TYPE_MAPPER)mbc3.c -o $(DIR_BUILD)type_mapper_mbc3.o
@@ -123,7 +126,7 @@ archive:
 			$(DIR_BUILD)system_serial.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
 			$(DIR_BUILD)type_mapper.o \
-		$(DIR_BUILD)type_mapper_mbc1.o $(DIR_BUILD)type_mapper_mbc3.o $(DIR_BUILD)type_mapper_mbc5.o
+		$(DIR_BUILD)type_mapper_mbc1.o $(DIR_BUILD)type_mapper_mbc2.o $(DIR_BUILD)type_mapper_mbc3.o $(DIR_BUILD)type_mapper_mbc5.o
 	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

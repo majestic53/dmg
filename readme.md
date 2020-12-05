@@ -74,12 +74,13 @@ For an example of how to use this interface, see the [launcher tool](https://git
 
 #### Cartridge Support
 
-|Cartridge type|Value|
-|:-------------|:----|
-|ROM-Only      |0    |
-|MBC1          |1-3  |
-|MBC3          |15-19|
-|MBC5          |25-30|
+|Cartridge type|Value |
+|:-------------|:-----|
+|ROM-Only      |0, 8-9|
+|MBC1          |1-3   |
+|MBC2          |5-6   |
+|MBC3          |15-19 |
+|MBC5          |25-30 |
 
 Trademark
 =

@@ -31,21 +31,21 @@ dmg_cartridge_validate(
 {
 	uint16_t checksum = 0;
 	uint32_t address, length;
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
 	if(!buffer) {
-		result = ERROR_SET(ERROR_INVALID, "Cartridge is NULL");
+		result = ERROR_SET(DMG_STATUS_INVALID, "Cartridge is NULL");
 		goto exit;
 	}
 
 	if(!buffer->data) {
-		result = ERROR_SET(ERROR_INVALID, "Cartridge data is NULL");
+		result = ERROR_SET(DMG_STATUS_INVALID, "Cartridge data is NULL");
 		goto exit;
 	}
 
 	if(buffer->length < ROM_WIDTH) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge length mismatch: %u (expecting >= %u)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge length mismatch: %u (expecting >= %u)",
 				buffer->length, ROM_WIDTH);
 		goto exit;
 	}
@@ -58,7 +58,7 @@ dmg_cartridge_validate(
 	}
 
 	if((checksum &= UINT8_MAX) != header->checksum) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge checksum mismatch: %02x (expecting %02x)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge checksum mismatch: %02x (expecting %02x)",
 				checksum, header->checksum);
 		goto exit;
 	}
@@ -66,7 +66,7 @@ dmg_cartridge_validate(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge checksum=%02x", checksum);
 
 	if(header->rom >= ROM_MAX) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge rom type unsupported: %u (expecting < %u)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge rom type unsupported: %u (expecting < %u)",
 				header->rom, ROM_MAX);
 		goto exit;
 	}
@@ -75,13 +75,13 @@ dmg_cartridge_validate(
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge rom banks=%u", *rom);
 
 	if((length = (ROM_WIDTH * *rom)) != buffer->length) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge length mismatch: %u (expecting %u)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge length mismatch: %u (expecting %u)",
 				buffer->length, length);
 		goto exit;
 	}
 
 	if(header->ram >= RAM_MAX) {
-		result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge ram type unsupported: %u (expecting < %u)",
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge ram type unsupported: %u (expecting < %u)",
 				header->ram, RAM_MAX);
 		goto exit;
 	}
@@ -99,17 +99,17 @@ dmg_cartridge_export(
 	__in FILE *file
 	)
 {
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Cartridge exporting");
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge enable=%x", cartridge->enable);
 	TRACE_FORMAT(LEVEL_VERBOSE, "Cartridge ram[%u]", cartridge->ram.count);
 
-	if((result = dmg_service_export_data(file, &cartridge->header->checksum, sizeof(cartridge->header->checksum))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &cartridge->header->checksum, sizeof(cartridge->header->checksum))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_export_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_export_data(file, &cartridge->enable, sizeof(cartridge->enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -118,7 +118,7 @@ dmg_cartridge_export(
 		for(uint32_t address = 0; address < cartridge->ram.buffer[bank].length; ++address) {
 
 			if((result = dmg_service_export_data(file, &((uint8_t *)cartridge->ram.buffer[bank].data)[address], sizeof(uint8_t)))
-					!= ERROR_SUCCESS) {
+					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -137,25 +137,25 @@ dmg_cartridge_import(
 	)
 {
 	uint8_t checksum;
-	int result = ERROR_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	TRACE(LEVEL_INFORMATION, "Cartridge importing");
 
-	if((result = dmg_service_import_data(file, &checksum, sizeof(checksum))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &checksum, sizeof(checksum))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(cartridge->header) {
 
 		if(checksum != cartridge->header->checksum) {
-			result = ERROR_SET_FORMAT(ERROR_INVALID, "Cartridge checksum mismatch: %02x != %02x", checksum, cartridge->header->checksum);
+			result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Cartridge checksum mismatch: %02x != %02x", checksum, cartridge->header->checksum);
 			goto exit;
 		}
 	} else {
 		TRACE(LEVEL_WARNING, "Cartridge header is NULL");
 	}
 
-	if((result = dmg_service_import_data(file, &cartridge->enable, sizeof(cartridge->enable))) != ERROR_SUCCESS) {
+	if((result = dmg_service_import_data(file, &cartridge->enable, sizeof(cartridge->enable))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -164,7 +164,7 @@ dmg_cartridge_import(
 		for(uint32_t address = 0; address < cartridge->ram.buffer[bank].length; ++address) {
 
 			if((result = dmg_service_import_data(file, &((uint8_t *)cartridge->ram.buffer[bank].data)[address], sizeof(uint8_t)))
-					!= ERROR_SUCCESS) {
+					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -189,13 +189,13 @@ dmg_cartridge_load(
 
 	TRACE(LEVEL_INFORMATION, "Cartridge loading");
 
-	if((result = dmg_cartridge_validate(buffer, &rom, &ram)) != ERROR_SUCCESS) {
+	if((result = dmg_cartridge_validate(buffer, &rom, &ram)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	cartridge->header = (const dmg_cartridge_header_t *)&(((uint8_t *)buffer->data)[ADDRESS_HEADER_BEGIN]);
 
-	if((result = dmg_bank_allocate(&cartridge->rom, rom)) != ERROR_SUCCESS) {
+	if((result = dmg_bank_allocate(&cartridge->rom, rom)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -206,13 +206,13 @@ dmg_cartridge_load(
 			cartridge->rom.buffer[index].data);
 	}
 
-	if((result = dmg_bank_allocate(&cartridge->ram, ram)) != ERROR_SUCCESS) {
+	if((result = dmg_bank_allocate(&cartridge->ram, ram)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(index = 0; index < cartridge->ram.count; ++index) {
 
-		if((result = dmg_buffer_allocate(&cartridge->ram.buffer[index], RAM_WIDTH, UINT8_MAX)) != ERROR_SUCCESS) {
+		if((result = dmg_buffer_allocate(&cartridge->ram.buffer[index], RAM_WIDTH, UINT8_MAX)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
