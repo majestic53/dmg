@@ -25,6 +25,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_runtime_action(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	);
+
 void dmg_runtime_interrupt(
 	__in int type
 	);

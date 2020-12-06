@@ -88,6 +88,16 @@ The following example shows how to launch DMG with the display scaled by 2x:
 $ ./bin/dmg -r rom.gb -s 2
 ```
 
+#### Debug Prompt
+
+The following commands are available:
+
+```
+q	Exit debug prompt
+h	Display help information
+v	Display version information
+```
+
 #### Palettes
 
 The following color palettes are available:

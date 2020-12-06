@@ -23,8 +23,12 @@
  * Action enum
  */
 enum {
+	/* No action */
+	DMG_ACTION_NOP = 0,
+	/* Rrtrieve cycle */
+	DMG_ACTION_CYCLE,
 	/* Serial transfer-in event */
-	DMG_ACTION_SERIAL_IN = 0,
+	DMG_ACTION_SERIAL_IN,
 	DMG_ACTION_MAX,
 };
 
@@ -93,7 +97,9 @@ typedef struct {
 
 	/* Action data */
 	union {
-		uint8_t u8;
+		uint8_t byte;
+		uint16_t word;
+		uint32_t dword;
 	} data;
 } __attribute__((packed)) dmg_action_t;
 

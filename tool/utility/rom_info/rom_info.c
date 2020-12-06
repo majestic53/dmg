@@ -103,14 +103,15 @@ dmg_utility_rom_info_file_parse(void)
 		}
 	}
 
-	fprintf(stdout, "\"\nType      "); //header->cgb ? "GBC (Gameboy Color" : "GB (Gameboy", header->sgb ? "/SBC support)" : ")");
+	fprintf(stdout, "\"\nType      ");
 
 	switch(header->cgb) {
 		case CGB_SUPPORT:
 			fprintf(stdout, "GB/GBC (Gameboy/Gameboy Color)");
 			break;
 		case CGB_SUPPORT_ONLY:
-			fprintf(stdout, "GBC Only (Gameboy Color)");
+			fprintf(stdout, "GBC Only (Gameboy Color Only)");
+			result = EXIT_FAILURE;
 			break;
 		default:
 			fprintf(stdout, "GB (Gameboy)");
@@ -287,9 +288,11 @@ main(
 		}
 
 		if((result = dmg_utility_rom_info_file_parse()) != EXIT_SUCCESS) {
-			fprintf(stderr, "\nResult    INVALID\n");
+			LEVEL_COLOR(stderr, LEVEL_ERROR);
+			fprintf(stderr, "\nUNSUPPORTED\n");
+			LEVEL_COLOR(stderr, LEVEL_NONE);
 		} else {
-			fprintf(stdout, "\nResult    VALID\n");
+			fprintf(stderr, "\nSUPPORTED\n");
 		}
 	}
 

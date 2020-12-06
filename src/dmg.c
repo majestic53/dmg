@@ -24,22 +24,6 @@ static bool g_initialized = false;
 extern "C" {
 #endif /* __cplusplus */
 
-static int
-dmg_action_serial_in(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	response->data.u8 = dmg_runtime_serial_in(request->data.u8);
-	response->length = sizeof(request->data.u8);
-
-	return DMG_STATUS_SUCCESS;
-}
-
-static const dmg_action_hdlr ACTION_HANDLER[] = {
-	dmg_action_serial_in, /* DMG_ACTION_SERIAL_IN */
-	};
-
 int
 dmg_action(
 	__in const dmg_action_t *request,
@@ -51,17 +35,9 @@ dmg_action(
 	if(!g_initialized) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
 		goto exit;
-	} else if(request->type >= DMG_ACTION_MAX) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
-		goto exit;
 	}
 
-	memset(response, 0, sizeof(*response));
-
-	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_STATUS_SUCCESS) {
-		response->id = request->id;
-		response->type = request->type;
-	}
+	result = dmg_runtime_action(request, response);
 
 exit:
 	return result;
@@ -102,9 +78,6 @@ dmg_run(
 	if(!g_initialized) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
 		goto exit;
-	} else if(!breakpoint && count) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
-		goto exit;
 	}
 
 	result = dmg_runtime_run(breakpoint, count);
@@ -124,12 +97,6 @@ dmg_step(
 
 	if(!g_initialized) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Uninitialized");
-		goto exit;
-	} else if(!instructions) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: instructions=%u", instructions);
-		goto exit;
-	} else if(!breakpoint && count) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
 		goto exit;
 	}
 

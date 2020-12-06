@@ -19,8 +19,11 @@
 #ifndef DMG_TOOL_COMMON_H_
 #define DMG_TOOL_COMMON_H_
 
+#include <readline/history.h>
+#include <readline/readline.h>
 #include <SDL2/SDL.h>
 #include <ctype.h>
+#include <errno.h>
 #include <getopt.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -28,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/common/define.h"
 #include "../../include/dmg.h"
 
 #ifndef __in
@@ -41,5 +45,22 @@
 #endif /* __out */
 
 #define KBYTE 1024
+
+#ifdef COLOR
+
+static const char *LEVEL_STR[] = {
+	"\x1b[0m", /* LEVEL_NONE */
+	"\x1b[91m", /* LEVEL_ERROR */
+	"\x1b[93m", /* LEVEL_WARNING */
+	"\x1b[94m", /* LEVEL_INFORMATION */
+	"\x1b[90m", /* LEVEL_VERBOSE */
+	"", /* LEVEL_MAX */
+	};
+
+#define LEVEL_COLOR(_STREAM_, _LEVEL_) \
+	fprintf(_STREAM_, "%s", LEVEL_STR[_LEVEL_])
+#else
+#define LEVEL_COLOR(_STREAM_, _LEVEL_)
+#endif /* COLOR */
 
 #endif /* DMG_TOOL_COMMON_H_ */

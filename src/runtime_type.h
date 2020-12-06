@@ -39,4 +39,9 @@ typedef struct {
 	dmg_video_t video;
 } __attribute__((packed)) dmg_runtime_t;
 
+typedef int (*dmg_runtime_action_hdlr)(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	);
+
 #endif /* DMG_RUNTIME_TYPE_H_ */

@@ -26,6 +26,7 @@ The following libraries are required to build this project:
 
 ```
 libsdl2
+libreadline
 ```
 
 ### Building

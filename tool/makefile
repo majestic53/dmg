@@ -28,7 +28,7 @@ BIN_UTILITY_SAVE_INFO=dmg-save-info
 
 FLAGS=-march=native -std=c11 -Wall -Werror
 FLAGS_BIN=
-FLAGS_LIB=-lSDL2 -lSDL2main
+FLAGS_LIB=-lreadline -lSDL2 -lSDL2main
 
 LIB=libdmg.a
 

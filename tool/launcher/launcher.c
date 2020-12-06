@@ -24,6 +24,34 @@ extern "C" {
 
 static dmg_launcher_t g_launcher = {};
 
+static void
+dmg_launcher_version(
+	__in FILE *stream,
+	__in bool verbose
+	)
+{
+	const dmg_version_t *version;
+
+	if(verbose) {
+		fprintf(stream, "%s", DMG);
+	}
+
+	if((version = dmg_version())) {
+
+		if(verbose) {
+			fprintf(stream, " ");
+		}
+
+		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
+	} else {
+		fprintf(stream, "\n");
+	}
+
+	if(verbose) {
+		fprintf(stream, "%s\n", DMG_NOTICE);
+	}
+}
+
 static unsigned
 dmg_launcher_capture(
 	__in unsigned in
@@ -47,13 +75,149 @@ dmg_launcher_capture(
 	return UINT8_MAX;
 }
 
-static int
-dmg_launcher_debug(void)
+static void
+dmg_launcher_debug_help(void)
 {
-	int result = EXIT_SUCCESS;
 
-	// TODO: DEBUG PROMPT
+	for(int debug = 0; debug < DEBUG_MAX; ++debug) {
+		fprintf(stdout, "%c\t%s\n", DEBUG_CHAR[debug], DEBUG_DESCRIPTION_STR[debug]);
+	}
+}
 
+static void
+dmg_launcher_debug_version(void)
+{
+	dmg_launcher_version(stdout, false);
+}
+
+static const dmg_launcher_debug_hdlr DEBUG_HANDLER[] = {
+	NULL, /* DEBUG_EXIT */
+	dmg_launcher_debug_help, /* DEBUG_HELP */
+	dmg_launcher_debug_version, /* DEBUG_VERSION */
+	};
+
+static int
+dmg_launcher_debug_header(void)
+{
+	int result;
+	char cmd[CMD_MAX] = {};
+
+	LEVEL_COLOR(stdout, LEVEL_INFORMATION);
+	dmg_launcher_version(stdout, true);
+	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
+	fprintf(stdout, "\n");
+	strcat(cmd, CMD_ROM_INFO);
+	strcat(cmd, g_launcher.rom);
+
+	if((result = system(cmd)) != EXIT_SUCCESS) {
+		goto exit;
+	}
+
+	if(g_launcher.configuration.save_in) {
+		fprintf(stdout, "\n");
+		memset(cmd, 0, sizeof(cmd));
+		strcat(cmd, CMD_SAVE_INFO);
+		strcat(cmd, g_launcher.configuration.save_in);
+
+		if((result = system(cmd)) != EXIT_SUCCESS) {
+			goto exit;
+		}
+	}
+
+exit:
+	LEVEL_COLOR(stdout, LEVEL_NONE);
+
+	return result;
+}
+
+static int
+dmg_launcher_debug_prompt(
+	__in char *prompt,
+	__in uint32_t length
+	)
+{
+	int result;
+	dmg_action_t request = {}, response = {};
+
+	request.type = DMG_ACTION_CYCLE;
+
+	if((result = dmg_action(&request, &response)) != EXIT_SUCCESS) {
+		goto exit;
+	}
+
+#ifdef COLOR
+	snprintf(prompt, length, "%s%s%u%s%s", LEVEL_STR[LEVEL_INFORMATION], PROMPT_PREFIX, response.data.word, PROMPT_POSTFIX,
+			LEVEL_STR[LEVEL_NONE]);
+#else
+	snprintf(prompt, length, "%s%u%s", PROMPT_PREFIX, response.data.word, PROMPT_POSTFIX);
+#endif /* COLOR */
+
+exit:
+	return result;
+}
+
+static int
+dmg_launcher_debug(
+	__in const char *argument
+	)
+{
+	int result;
+	bool complete = false;
+
+	stifle_history(HISTORY_MAX);
+
+	if((result = dmg_launcher_debug_header()) != EXIT_SUCCESS) {
+		goto exit;
+	}
+
+	while(!complete) {
+		char *input, prompt[PROMPT_MAX] = {};
+
+		if((result = dmg_launcher_debug_prompt(prompt, PROMPT_MAX)) != EXIT_SUCCESS) {
+			goto exit;
+		}
+
+		if((input = readline(prompt))) {
+
+			if(strlen(input)) {
+				int debug = 0;
+
+				for(; debug < DEBUG_MAX; ++debug) {
+
+					if(input[0] == DEBUG_CHAR[debug]) {
+						break;
+					}
+				}
+
+				if(debug >= DEBUG_MAX) {
+					LEVEL_COLOR(stderr, LEVEL_WARNING);
+					fprintf(stderr, "Unsupported command: %s\n", input);
+					LEVEL_COLOR(stderr, LEVEL_NONE);
+					continue;
+				}
+
+				add_history(input);
+
+				switch(debug) {
+					case DEBUG_EXIT:
+						complete = true;
+						break;
+					case DEBUG_HELP ... DEBUG_VERSION:
+						DEBUG_HANDLER[debug]();
+						break;
+					default:
+						LEVEL_COLOR(stderr, LEVEL_WARNING);
+						fprintf(stderr, "Unsupported command type: %i\n", debug);
+						LEVEL_COLOR(stderr, LEVEL_NONE);
+						break;
+				}
+			}
+
+			free(input);
+		}
+	}
+
+exit:
 	return result;
 }
 
@@ -172,34 +336,6 @@ exit:
 }
 
 static void
-dmg_launcher_version(
-	__in FILE *stream,
-	__in bool verbose
-	)
-{
-	const dmg_version_t *version;
-
-	if(verbose) {
-		fprintf(stream, "%s", DMG);
-	}
-
-	if((version = dmg_version())) {
-
-		if(verbose) {
-			fprintf(stream, " ");
-		}
-
-		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
-	} else {
-		fprintf(stream, "\n");
-	}
-
-	if(verbose) {
-		fprintf(stream, "%s\n", DMG_NOTICE);
-	}
-}
-
-static void
 dmg_launcher_usage(
 	__in FILE *stream,
 	__in bool verbose
@@ -279,7 +415,7 @@ main(
 		}
 
 		if(g_launcher.debug) {
-			result = dmg_launcher_debug();
+			result = dmg_launcher_debug(argv[0]);
 		} else {
 			result = ((dmg_run(NULL, 0) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
 		}

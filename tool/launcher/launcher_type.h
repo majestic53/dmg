@@ -21,6 +21,10 @@
 
 #include "../include/common.h"
 
+#define CMD_MAX 1024
+#define CMD_ROM_INFO "./bin/dmg-rom-info -r "
+#define CMD_SAVE_INFO "./bin/dmg-save-info -s "
+
 #define DATA_MASK 1
 #define DATA_SHIFT 1
 
@@ -31,6 +35,8 @@
 #define DMG "DMG"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
 #define DMG_USAGE "dmg [args]"
+
+#define HISTORY_MAX 10
 
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
@@ -43,6 +49,31 @@
 #define OPTION_SCALE 's'
 #define OPTION_VERSION 'v'
 #define OPTIONS "b:cdhi:o:p:r:s:v"
+
+#define PROMPT_MAX 128
+#define PROMPT_PREFIX "\n("
+#define PROMPT_POSTFIX ") "
+
+enum {
+	DEBUG_EXIT = 0,
+	DEBUG_HELP,
+	DEBUG_VERSION,
+	DEBUG_MAX,
+};
+
+static const char DEBUG_CHAR[] = {
+	'q', /* DEBUG_EXIT */
+	'h', /* DEBUG_HELP */
+	'v', /* DEBUG_VERSION */
+	'\0', /* DEBUG_MAX */
+	};
+
+static const char *DEBUG_DESCRIPTION_STR[] = {
+	"Exit debug prompt", /* DEBUG_EXIT */
+	"Display help information", /* DEBUG_HELP */
+	"Display version information", /* DEBUG_VERSION */
+	"", /* DEBUG_MAX */
+	};
 
 enum {
 	FLAG_BOOTROM = 0,
@@ -85,6 +116,8 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
+
+typedef void (*dmg_launcher_debug_hdlr)(void);
 
 typedef struct {
 	uint8_t data;

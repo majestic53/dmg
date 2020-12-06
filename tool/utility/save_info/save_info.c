@@ -251,9 +251,11 @@ main(
 		}
 
 		if((result = dmg_utility_save_info_file_parse()) != EXIT_SUCCESS) {
-			fprintf(stderr, "\nResult    INVALID\n");
+			LEVEL_COLOR(stderr, LEVEL_ERROR);
+			fprintf(stderr, "\nINVALID\n");
+			LEVEL_COLOR(stderr, LEVEL_NONE);
 		} else {
-			fprintf(stdout, "\nResult    VALID\n");
+			fprintf(stdout, "\nVALID\n");
 		}
 	}
 

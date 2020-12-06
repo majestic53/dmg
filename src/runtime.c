@@ -28,6 +28,45 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
+dmg_runtime_action_cycle(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+	response->data.dword = g_cycle;
+	response->length = sizeof(request->data.dword);
+
+	return DMG_STATUS_SUCCESS;
+}
+
+static int
+dmg_runtime_action_nop(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+	return DMG_STATUS_SUCCESS;
+}
+
+static int
+dmg_runtime_action_serial_in(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+	response->data.byte = dmg_runtime_serial_in(request->data.byte);
+	response->length = sizeof(request->data.byte);
+
+	return DMG_STATUS_SUCCESS;
+}
+
+static const dmg_runtime_action_hdlr ACTION_HANDLER[] = {
+	dmg_runtime_action_nop, /* DMG_ACTION_NOP */
+	dmg_runtime_action_cycle, /* DMG_ACTION_CYCLE */
+	dmg_runtime_action_serial_in, /* DMG_ACTION_SERIAL_IN */
+	};
+
+static int
 dmg_runtime_export(
 	__in FILE *file
 	)
@@ -108,6 +147,40 @@ dmg_runtime_import(
 	}
 
 	TRACE(LEVEL_INFORMATION, "Runtime imported");
+
+exit:
+	return result;
+}
+
+int
+dmg_runtime_action(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+	int result;
+
+	if(!request) {
+		result = ERROR_SET(DMG_STATUS_INVALID, "Request is NULL");
+		goto exit;
+	}
+
+	if(request->type >= DMG_ACTION_MAX) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
+		goto exit;
+	}
+
+	if(!response) {
+		result = ERROR_SET(DMG_STATUS_INVALID, "Response is NULL");
+		goto exit;
+	}
+
+	memset(response, 0, sizeof(*response));
+
+	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_STATUS_SUCCESS) {
+		response->id = request->id;
+		response->type = request->type;
+	}
 
 exit:
 	return result;
@@ -283,6 +356,11 @@ dmg_runtime_run(
 {
 	int result = DMG_STATUS_SUCCESS;
 
+	if(!breakpoint && count) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
+		goto exit;
+	}
+
 	g_cycle = 0;
 	g_cycle_last = 0;
 
@@ -338,6 +416,16 @@ dmg_runtime_step(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+
+	if(!instructions) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Invalid parameter: instructions=%u", instructions);
+		goto exit;
+	}
+
+	if(!breakpoint && count) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid parameter: breakpoint[%u]=%p", count, breakpoint);
+		goto exit;
+	}
 
 	for(uint32_t instruction = 0; instruction < instructions; ++instruction) {
 
