@@ -110,7 +110,7 @@ dmg_launcher_debug_run(
 		}
 
 		fprintf(stdout, " }\n");
-		LEVEL_COLOR(stderr, LEVEL_NONE);
+		LEVEL_COLOR(stdout, LEVEL_NONE);
 	}
 
 	return dmg_run(breakpoint, count);
@@ -148,7 +148,7 @@ dmg_launcher_debug_step(
 		fprintf(stdout, " }\n");
 	}
 
-	LEVEL_COLOR(stderr, LEVEL_NONE);
+	LEVEL_COLOR(stdout, LEVEL_NONE);
 	result = dmg_step(instruction, breakpoint, count);
 
 	return result;
