@@ -75,51 +75,139 @@ dmg_launcher_capture(
 	return UINT8_MAX;
 }
 
-static void
-dmg_launcher_debug_help(void)
+static int
+dmg_launcher_debug_help(
+	__in const char *argument[],
+	__in uint32_t count
+	)
 {
 
 	for(int debug = 0; debug < DEBUG_MAX; ++debug) {
 		fprintf(stdout, "%c\t%s\n", DEBUG_CHAR[debug], DEBUG_DESCRIPTION_STR[debug]);
 	}
+
+	return DMG_STATUS_SUCCESS;
 }
 
-static void
-dmg_launcher_debug_version(void)
+static int
+dmg_launcher_debug_run(
+	__in const char *argument[],
+	__in uint32_t count
+	)
+{
+	uint16_t breakpoint[ARGUMENT_MAX] = {};
+
+	for(uint32_t index = 0; index < count; ++index) {
+		breakpoint[index] = strtoul(argument[index], NULL, 16);
+	}
+
+	if(count) {
+		LEVEL_COLOR(stdout, LEVEL_VERBOSE);
+		fprintf(stdout, "Breakpoint[%u]: {", count);
+
+		for(uint32_t index = 0; index < count; ++index) {
+			fprintf(stdout, " %04x", breakpoint[index]);
+		}
+
+		fprintf(stdout, " }\n");
+		LEVEL_COLOR(stderr, LEVEL_NONE);
+	}
+
+	return dmg_run(breakpoint, count);
+}
+
+static int
+dmg_launcher_debug_step(
+	__in const char *argument[],
+	__in uint32_t count
+	)
+{
+	int result;
+	uint16_t breakpoint[ARGUMENT_MAX] = {}, instruction = 1;
+
+	if(count >= 1) {
+		instruction = strtoul(argument[0], NULL, 10);
+
+		for(uint32_t index = 1; index < count; ++index) {
+			breakpoint[index - 1] = strtoul(argument[index], NULL, 16);
+		}
+
+		--count;
+	}
+
+	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
+	fprintf(stdout, "Instructions: %u\n", instruction);
+
+	if(count) {
+		fprintf(stdout, "Breakpoint[%u]: {", count);
+
+		for(uint32_t index = 0; index < count; ++index) {
+			fprintf(stdout, " %04x", breakpoint[index]);
+		}
+
+		fprintf(stdout, " }\n");
+	}
+
+	LEVEL_COLOR(stderr, LEVEL_NONE);
+	result = dmg_step(instruction, breakpoint, count);
+
+	return result;
+}
+
+static int
+dmg_launcher_debug_version(
+	__in const char *argument[],
+	__in uint32_t count
+	)
 {
 	dmg_launcher_version(stdout, false);
+
+	return DMG_STATUS_SUCCESS;
 }
 
 static const dmg_launcher_debug_hdlr DEBUG_HANDLER[] = {
 	NULL, /* DEBUG_EXIT */
 	dmg_launcher_debug_help, /* DEBUG_HELP */
+	dmg_launcher_debug_run,/* DEBUG_RUN */
+	dmg_launcher_debug_step, /* DEBUG_STEP */
 	dmg_launcher_debug_version, /* DEBUG_VERSION */
 	};
 
 static int
-dmg_launcher_debug_header(void)
+dmg_launcher_debug_header(
+	__in const char *path
+	)
 {
 	int result;
-	char cmd[CMD_MAX] = {};
+	char *path_end, path_full[PATH_MAX] = {};
+
+	if((path_end = strrchr(path, '/'))) {
+		memcpy(path_full, path, (path_end - path) + 1);
+	}
 
 	LEVEL_COLOR(stdout, LEVEL_INFORMATION);
 	dmg_launcher_version(stdout, true);
 	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
 	fprintf(stdout, "\n");
-	strcat(cmd, CMD_ROM_INFO);
-	strcat(cmd, g_launcher.rom);
+	strcat(path_full, PATH_ROM_INFO);
+	strcat(path_full, g_launcher.rom);
 
-	if((result = system(cmd)) != EXIT_SUCCESS) {
+	if((result = system(path_full)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
 	if(g_launcher.configuration.save_in) {
 		fprintf(stdout, "\n");
-		memset(cmd, 0, sizeof(cmd));
-		strcat(cmd, CMD_SAVE_INFO);
-		strcat(cmd, g_launcher.configuration.save_in);
+		memset(path_full, 0, sizeof(path_full));
 
-		if((result = system(cmd)) != EXIT_SUCCESS) {
+		if((path_end = strrchr(path, '/'))) {
+			memcpy(path_full, path, (path_end - path) + 1);
+		}
+
+		strcat(path_full, PATH_SAVE_INFO);
+		strcat(path_full, g_launcher.configuration.save_in);
+
+		if((result = system(path_full)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -158,7 +246,7 @@ exit:
 
 static int
 dmg_launcher_debug(
-	__in const char *argument
+	__in const char *path
 	)
 {
 	int result;
@@ -166,7 +254,7 @@ dmg_launcher_debug(
 
 	stifle_history(HISTORY_MAX);
 
-	if((result = dmg_launcher_debug_header()) != EXIT_SUCCESS) {
+	if((result = dmg_launcher_debug_header(path)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
@@ -181,6 +269,10 @@ dmg_launcher_debug(
 
 			if(strlen(input)) {
 				int debug = 0;
+				bool first = true;
+				uint32_t count = 0;
+				dmg_action_t request = {}, response = {};
+				const char *argument[ARGUMENT_MAX] = {}, *next;
 
 				for(; debug < DEBUG_MAX; ++debug) {
 
@@ -190,29 +282,69 @@ dmg_launcher_debug(
 				}
 
 				if(debug >= DEBUG_MAX) {
-					LEVEL_COLOR(stderr, LEVEL_WARNING);
+					LEVEL_COLOR(stderr, LEVEL_ERROR);
 					fprintf(stderr, "Unsupported command: %s\n", input);
 					LEVEL_COLOR(stderr, LEVEL_NONE);
-					continue;
+					goto cleanup;
 				}
 
 				add_history(input);
+				next = strtok(input, " ");
+
+				while(next) {
+
+					if(count >= ARGUMENT_MAX) {
+						LEVEL_COLOR(stderr, LEVEL_ERROR);
+						fprintf(stderr, "Too many arguments: %u\n", count + 1);
+						LEVEL_COLOR(stderr, LEVEL_NONE);
+						goto cleanup;
+					}
+
+					if(!first) {
+						argument[count++] = next;
+					}
+
+					next = strtok(NULL, " ");
+					first = false;
+				}
 
 				switch(debug) {
 					case DEBUG_EXIT:
 						complete = true;
 						break;
 					case DEBUG_HELP ... DEBUG_VERSION:
-						DEBUG_HANDLER[debug]();
+
+						switch(DEBUG_HANDLER[debug](argument, count)) {
+							case DMG_STATUS_SUCCESS:
+								break;
+							case DMG_STATUS_BREAKPOINT:
+								LEVEL_COLOR(stdout, LEVEL_WARNING);
+								request.type = DMG_ACTION_PROGRAM_COUNTER;
+
+								if(dmg_action(&request, &response) == EXIT_SUCCESS) {
+									fprintf(stdout, "Breakpoint: %04x\n", response.data.word);
+								} else {
+									fprintf(stdout, "Breakpoint\n");
+								}
+
+								LEVEL_COLOR(stdout, LEVEL_NONE);
+								break;
+							default:
+								LEVEL_COLOR(stderr, LEVEL_ERROR);
+								fprintf(stderr, "Command failed: %s\n", input);
+								LEVEL_COLOR(stderr, LEVEL_NONE);
+								break;
+						}
 						break;
 					default:
-						LEVEL_COLOR(stderr, LEVEL_WARNING);
+						LEVEL_COLOR(stderr, LEVEL_ERROR);
 						fprintf(stderr, "Unsupported command type: %i\n", debug);
 						LEVEL_COLOR(stderr, LEVEL_NONE);
 						break;
 				}
 			}
 
+cleanup:
 			free(input);
 		}
 	}

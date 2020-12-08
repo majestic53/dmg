@@ -95,7 +95,23 @@ The following commands are available:
 ```
 q	Exit debug prompt
 h	Display help information
+r	Run emulator until breakpoint
+s	Step emulator through instructions
 v	Display version information
+```
+
+#### Examples
+
+The following example shows how to run the emulator with a breakpoint at address ```0x0100``` and ```0x0200```:
+
+```
+(DMG) r 100 200
+```
+
+The following example shows how to step the emulator through 10 instructions, with a breakpoint at address ```0x0100```:
+
+```
+(DMG) s 10 100
 ```
 
 #### Palettes

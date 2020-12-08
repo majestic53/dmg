@@ -21,9 +21,11 @@
 
 #include "../include/common.h"
 
-#define CMD_MAX 1024
-#define CMD_ROM_INFO "./bin/dmg-rom-info -r "
-#define CMD_SAVE_INFO "./bin/dmg-save-info -s "
+#define ARGUMENT_MAX 10
+
+#define PATH_MAX 1024
+#define PATH_ROM_INFO "dmg-rom-info -r "
+#define PATH_SAVE_INFO "dmg-save-info -s "
 
 #define DATA_MASK 1
 #define DATA_SHIFT 1
@@ -57,6 +59,8 @@
 enum {
 	DEBUG_EXIT = 0,
 	DEBUG_HELP,
+	DEBUG_RUN,
+	DEBUG_STEP,
 	DEBUG_VERSION,
 	DEBUG_MAX,
 };
@@ -64,6 +68,8 @@ enum {
 static const char DEBUG_CHAR[] = {
 	'q', /* DEBUG_EXIT */
 	'h', /* DEBUG_HELP */
+	'r', /* DEBUG_RUN */
+	's', /* DEBUG_STEP */
 	'v', /* DEBUG_VERSION */
 	'\0', /* DEBUG_MAX */
 	};
@@ -71,6 +77,8 @@ static const char DEBUG_CHAR[] = {
 static const char *DEBUG_DESCRIPTION_STR[] = {
 	"Exit debug prompt", /* DEBUG_EXIT */
 	"Display help information", /* DEBUG_HELP */
+	"Run emulator until breakpoint", /* DEBUG_RUN */
+	"Step emulator through instructions", /* DEBUG_STEP */
 	"Display version information", /* DEBUG_VERSION */
 	"", /* DEBUG_MAX */
 	};
@@ -117,7 +125,10 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"", /* FLAG_MAX */
 	};
 
-typedef void (*dmg_launcher_debug_hdlr)(void);
+typedef int (*dmg_launcher_debug_hdlr)(
+	__in const char *argument[],
+	__in uint32_t count
+	);
 
 typedef struct {
 	uint8_t data;

@@ -49,6 +49,18 @@ dmg_runtime_action_nop(
 }
 
 static int
+dmg_runtime_action_program_counter(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+	response->data.word = g_runtime.processor.pc.word;
+	response->length = sizeof(request->data.word);
+
+	return DMG_STATUS_SUCCESS;
+}
+
+static int
 dmg_runtime_action_serial_in(
 	__in const dmg_action_t *request,
 	__in dmg_action_t *response
@@ -63,6 +75,7 @@ dmg_runtime_action_serial_in(
 static const dmg_runtime_action_hdlr ACTION_HANDLER[] = {
 	dmg_runtime_action_nop, /* DMG_ACTION_NOP */
 	dmg_runtime_action_cycle, /* DMG_ACTION_CYCLE */
+	dmg_runtime_action_program_counter, /* DMG_ACTION_PROGRAM_COUNTER */
 	dmg_runtime_action_serial_in, /* DMG_ACTION_SERIAL_IN */
 	};
 
@@ -176,11 +189,9 @@ dmg_runtime_action(
 	}
 
 	memset(response, 0, sizeof(*response));
-
-	if((result = ACTION_HANDLER[request->type](request, response)) == DMG_STATUS_SUCCESS) {
-		response->id = request->id;
-		response->type = request->type;
-	}
+	response->id = request->id;
+	response->type = request->type;
+	result = ACTION_HANDLER[request->type](request, response);
 
 exit:
 	return result;

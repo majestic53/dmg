@@ -25,8 +25,10 @@
 enum {
 	/* No action */
 	DMG_ACTION_NOP = 0,
-	/* Rrtrieve cycle */
+	/* Retrieve cycle count */
 	DMG_ACTION_CYCLE,
+	/* Retrieve program counter */
+	DMG_ACTION_PROGRAM_COUNTER,
 	/* Serial transfer-in event */
 	DMG_ACTION_SERIAL_IN,
 	DMG_ACTION_MAX,
