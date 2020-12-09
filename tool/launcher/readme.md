@@ -6,7 +6,7 @@ DMG Launcher
 About
 =
 
-A launcher for running GameBoy ROMs/BOOTROM binaries, with support for various palettes and more.
+A launcher for running GameBoy ROM/BOOTROM binaries, with support for various palettes and more.
 
 Usage
 =
@@ -95,9 +95,11 @@ The following commands are available:
 ```
 q	Exit debug prompt
 h	Display help information
-r	Run emulator until breakpoint
+r	Read byte(s) from address
+c	Run emulator until breakpoint
 s	Step emulator through instructions
 v	Display version information
+w	Write byte(s) to address
 ```
 
 #### Examples
@@ -105,13 +107,36 @@ v	Display version information
 The following example shows how to run the emulator with a breakpoint at address ```0x0100``` and ```0x0200```:
 
 ```
-(DMG) r 100 200
+(DMG) c 100 200
 ```
 
 The following example shows how to step the emulator through 10 instructions, with a breakpoint at address ```0x0100```:
 
 ```
 (DMG) s 10 100
+```
+The following example shows how to read from address ```0xa000```:
+
+```
+(DMG) r a000
+```
+
+The following example shows how to read from address ```0xa000-0xa20```:
+
+```
+(DMG) r a000 20
+```
+
+The following example shows how to write ```0xcc``` to address ```0xa000```:
+
+```
+(DMG) w a000 cc
+```
+
+The following example shows how to write ```0xcc``` to address ```0xa000-0xa020```:
+
+```
+(DMG) w a000 cc 20
 ```
 
 #### Palettes

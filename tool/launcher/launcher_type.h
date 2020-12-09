@@ -22,6 +22,11 @@
 #include "../include/common.h"
 
 #define ARGUMENT_MAX 10
+#define ARGUMENT_READ 1
+#define ARGUMENT_READ_WIDTH 16
+#define ARGUMENT_WRITE 2
+
+#define CHARACTER_FILL '.'
 
 #define PATH_MAX 1024
 #define PATH_ROM_INFO "dmg-rom-info -r "
@@ -59,27 +64,33 @@
 enum {
 	DEBUG_EXIT = 0,
 	DEBUG_HELP,
+	DEBUG_READ,
 	DEBUG_RUN,
 	DEBUG_STEP,
 	DEBUG_VERSION,
+	DEBUG_WRITE,
 	DEBUG_MAX,
 };
 
 static const char DEBUG_CHAR[] = {
 	'q', /* DEBUG_EXIT */
 	'h', /* DEBUG_HELP */
-	'r', /* DEBUG_RUN */
+	'r', /* DEBUG_READ */
+	'c', /* DEBUG_RUN */
 	's', /* DEBUG_STEP */
 	'v', /* DEBUG_VERSION */
+	'w', /* DEBUG_WRITE */
 	'\0', /* DEBUG_MAX */
 	};
 
 static const char *DEBUG_DESCRIPTION_STR[] = {
 	"Exit debug prompt", /* DEBUG_EXIT */
 	"Display help information", /* DEBUG_HELP */
+	"Read byte(s) from address", /* DEBUG_READ */
 	"Run emulator until breakpoint", /* DEBUG_RUN */
 	"Step emulator through instructions", /* DEBUG_STEP */
 	"Display version information", /* DEBUG_VERSION */
+	"Write byte(s) to address", /* DEBUG_WRITE */
 	"", /* DEBUG_MAX */
 	};
 

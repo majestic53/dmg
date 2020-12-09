@@ -90,6 +90,81 @@ dmg_launcher_debug_help(
 }
 
 static int
+dmg_launcher_debug_read(
+	__in const char *argument[],
+	__in uint32_t count
+	)
+{
+	uint16_t address, offset = 1;
+	int result = DMG_STATUS_SUCCESS;
+	char str[ARGUMENT_READ_WIDTH + 1] = {};
+	dmg_action_t request = {}, response = {};
+
+	switch(count) {
+		case (ARGUMENT_READ + 1):
+			offset = strtoul(argument[1], NULL, 16);
+		case ARGUMENT_READ:
+			address = strtoul(argument[0], NULL, 16);
+			break;
+		default:
+			result = DMG_STATUS_INVALID;
+			goto exit;
+	}
+
+	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
+	fprintf(stdout, "Address: %04x\n", address);
+	fprintf(stdout, "Offset: %04x\n", offset);
+	LEVEL_COLOR(stdout, LEVEL_NONE);
+	request.type = DMG_ACTION_READ;
+	count = 0;
+
+	for(uint32_t index = address; index < (address + offset); ++index) {
+		request.address = (index % (UINT16_MAX + 1));
+
+		if(count == ARGUMENT_READ_WIDTH) {
+			count = 0;
+		}
+
+		if(!count) {
+			LEVEL_COLOR(stdout, LEVEL_NONE);
+
+			if(strlen(str)) {
+				fprintf(stdout, "\t%s", str);
+				memset(str, 0, sizeof(str));
+			}
+
+			fprintf(stdout, "\n%04x |", request.address);
+			LEVEL_COLOR(stdout, LEVEL_NONE);
+		}
+
+		if((result = dmg_action(&request, &response)) == DMG_STATUS_SUCCESS) {
+			str[count] = ((isprint((char)response.data.byte) && !isspace((char)response.data.byte))
+					? response.data.byte : CHARACTER_FILL);
+			LEVEL_COLOR(stdout, LEVEL_NONE);
+			fprintf(stdout, " %02x", response.data.byte);
+			LEVEL_COLOR(stdout, LEVEL_NONE);
+		}
+
+		++count;
+	}
+
+	if(offset) {
+		LEVEL_COLOR(stdout, LEVEL_NONE);
+
+		if(strlen(str)) {
+			fprintf(stdout, "\t%s", str);
+			memset(str, 0, sizeof(str));
+		}
+
+		fprintf(stdout, "\n");
+		LEVEL_COLOR(stdout, LEVEL_NONE);
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_launcher_debug_run(
 	__in const char *argument[],
 	__in uint32_t count
@@ -165,12 +240,54 @@ dmg_launcher_debug_version(
 	return DMG_STATUS_SUCCESS;
 }
 
+static int
+dmg_launcher_debug_write(
+	__in const char *argument[],
+	__in uint32_t count
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_action_t request = {}, response = {};
+
+	switch(count) {
+		case (ARGUMENT_WRITE + 1):
+			count = strtoul(argument[2], NULL, 16);
+			break;
+		case ARGUMENT_WRITE:
+			count = 1;
+			break;
+		default:
+			result = DMG_STATUS_INVALID;
+			goto exit;
+	}
+
+	request.address = strtoul(argument[0], NULL, 16);
+	request.data.byte = strtoul(argument[1], NULL, 16);
+
+	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
+	fprintf(stdout, "Address: %04x\n", request.address);
+	fprintf(stdout, "Value: %02x\n", request.data.byte);
+	fprintf(stdout, "Count: %04x\n", count);
+	LEVEL_COLOR(stdout, LEVEL_NONE);
+	request.type = DMG_ACTION_WRITE;
+
+	for(uint32_t index = 0; index < count; ++index) {
+		result = dmg_action(&request, &response);
+		++request.address;
+	}
+
+exit:
+	return result;
+}
+
 static const dmg_launcher_debug_hdlr DEBUG_HANDLER[] = {
 	NULL, /* DEBUG_EXIT */
 	dmg_launcher_debug_help, /* DEBUG_HELP */
+	dmg_launcher_debug_read, /* DEBUG_READ */
 	dmg_launcher_debug_run,/* DEBUG_RUN */
 	dmg_launcher_debug_step, /* DEBUG_STEP */
 	dmg_launcher_debug_version, /* DEBUG_VERSION */
+	dmg_launcher_debug_write, /* DEBUG_WRITE */
 	};
 
 static int
@@ -312,7 +429,7 @@ dmg_launcher_debug(
 					case DEBUG_EXIT:
 						complete = true;
 						break;
-					case DEBUG_HELP ... DEBUG_VERSION:
+					case (DEBUG_EXIT + 1) ... (DEBUG_MAX - 1):
 
 						switch(DEBUG_HANDLER[debug](argument, count)) {
 							case DMG_STATUS_SUCCESS:

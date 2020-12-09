@@ -29,8 +29,12 @@ enum {
 	DMG_ACTION_CYCLE,
 	/* Retrieve program counter */
 	DMG_ACTION_PROGRAM_COUNTER,
-	/* Serial transfer-in event */
+	/* Read byte */
+	DMG_ACTION_READ,
+	/* Serial transfer-in */
 	DMG_ACTION_SERIAL_IN,
+	/* Write byte */
+	DMG_ACTION_WRITE,
 	DMG_ACTION_MAX,
 };
 
@@ -96,6 +100,8 @@ typedef struct {
 	uint8_t type;
 	/* Action data length */
 	uint8_t length;
+	/* Action address */
+	uint16_t address;
 
 	/* Action data */
 	union {
