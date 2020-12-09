@@ -121,7 +121,7 @@ The following example shows how to read from address ```0xa000```:
 (DMG) r a000
 ```
 
-The following example shows how to read from address ```0xa000-0xa20```:
+The following example shows how to read from address ```0xa000-0xa01f```:
 
 ```
 (DMG) r a000 20
@@ -133,7 +133,7 @@ The following example shows how to write ```0xcc``` to address ```0xa000```:
 (DMG) w a000 cc
 ```
 
-The following example shows how to write ```0xcc``` to address ```0xa000-0xa020```:
+The following example shows how to write ```0xcc``` to address ```0xa000-0xa01f```:
 
 ```
 (DMG) w a000 cc 20
