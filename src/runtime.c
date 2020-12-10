@@ -54,6 +54,7 @@ dmg_runtime_action_read(
 	__in dmg_action_t *response
 	)
 {
+	int result = DMG_STATUS_SUCCESS;
 
 	if(request->data.dword > UINT16_MAX) {
 
@@ -135,14 +136,16 @@ dmg_runtime_action_read(
 				response->length = sizeof(request->data.byte);
 				break;
 			default:
-				break;
+				result = DMG_STATUS_INVALID;
+				goto exit;
 		}
 	} else {
 		response->data.byte = dmg_runtime_read(request->address);
 		response->length = sizeof(request->data.byte);
 	}
 
-	return DMG_STATUS_SUCCESS;
+exit:
+	return result;
 }
 
 static int
@@ -163,6 +166,7 @@ dmg_runtime_action_write(
 	__in dmg_action_t *response
 	)
 {
+	int result = DMG_STATUS_SUCCESS;
 
 	if(request->data.dword > UINT16_MAX) {
 
@@ -225,13 +229,15 @@ dmg_runtime_action_write(
 				g_runtime.processor.stop = response->data.byte;
 				break;
 			default:
-				break;
+				result = DMG_STATUS_INVALID;
+				goto exit;
 		}
 	} else {
 		dmg_runtime_write(request->address, request->data.byte);
 	}
 
-	return DMG_STATUS_SUCCESS;
+exit:
+	return result;
 }
 
 static const dmg_runtime_action_hdlr ACTION_HANDLER[] = {
