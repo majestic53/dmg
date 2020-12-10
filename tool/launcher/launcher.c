@@ -299,10 +299,8 @@ dmg_launcher_debug_header(
 	fprintf(stdout, "\n");
 	strcat(path_full, PATH_ROM_INFO);
 	strcat(path_full, g_launcher.rom);
-
-	if((result = system(path_full)) != EXIT_SUCCESS) {
-		goto exit;
-	}
+	LEVEL_COLOR(stderr, LEVEL_VERBOSE);
+	result = system(path_full);
 
 	if(g_launcher.configuration.save_in) {
 		fprintf(stdout, "\n");
@@ -314,13 +312,9 @@ dmg_launcher_debug_header(
 
 		strcat(path_full, PATH_SAVE_INFO);
 		strcat(path_full, g_launcher.configuration.save_in);
-
-		if((result = system(path_full)) != EXIT_SUCCESS) {
-			goto exit;
-		}
+		result = system(path_full);
 	}
 
-exit:
 	LEVEL_COLOR(stdout, LEVEL_NONE);
 
 	return result;
@@ -361,10 +355,7 @@ dmg_launcher_debug(
 	bool complete = false;
 
 	stifle_history(HISTORY_MAX);
-
-	if((result = dmg_launcher_debug_header(path)) != EXIT_SUCCESS) {
-		goto exit;
-	}
+	dmg_launcher_debug_header(path);
 
 	while(!complete) {
 		char *input, prompt[PROMPT_MAX] = {};
