@@ -126,7 +126,6 @@ dmg_launcher_debug_read(
 		}
 
 		if(!count) {
-			LEVEL_COLOR(stdout, LEVEL_NONE);
 
 			if(strlen(str)) {
 				fprintf(stdout, "\t%s", str);
@@ -134,22 +133,18 @@ dmg_launcher_debug_read(
 			}
 
 			fprintf(stdout, "\n%04x |", request.address);
-			LEVEL_COLOR(stdout, LEVEL_NONE);
 		}
 
 		if((result = dmg_action(&request, &response)) == DMG_STATUS_SUCCESS) {
 			str[count] = ((isprint((char)response.data.byte) && !isspace((char)response.data.byte))
 					? response.data.byte : CHARACTER_FILL);
-			LEVEL_COLOR(stdout, LEVEL_NONE);
 			fprintf(stdout, " %02x", response.data.byte);
-			LEVEL_COLOR(stdout, LEVEL_NONE);
 		}
 
 		++count;
 	}
 
 	if(offset) {
-		LEVEL_COLOR(stdout, LEVEL_NONE);
 
 		if(strlen(str)) {
 			fprintf(stdout, "\t%s", str);
@@ -157,7 +152,6 @@ dmg_launcher_debug_read(
 		}
 
 		fprintf(stdout, "\n");
-		LEVEL_COLOR(stdout, LEVEL_NONE);
 	}
 
 exit:
@@ -197,7 +191,6 @@ dmg_launcher_debug_step(
 	__in uint32_t count
 	)
 {
-	int result;
 	uint16_t breakpoint[ARGUMENT_MAX] = {}, instruction = 1;
 
 	if(count >= 1) {
@@ -224,9 +217,8 @@ dmg_launcher_debug_step(
 	}
 
 	LEVEL_COLOR(stdout, LEVEL_NONE);
-	result = dmg_step(instruction, breakpoint, count);
 
-	return result;
+	return dmg_step(instruction, breakpoint, count);
 }
 
 static int
@@ -263,7 +255,6 @@ dmg_launcher_debug_write(
 
 	request.address = strtoul(argument[0], NULL, 16);
 	request.data.byte = strtoul(argument[1], NULL, 16);
-
 	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
 	fprintf(stdout, "Address: %04x\n", request.address);
 	fprintf(stdout, "Value: %02x\n", request.data.byte);
@@ -346,7 +337,7 @@ dmg_launcher_debug_prompt(
 
 	request.type = DMG_ACTION_CYCLE;
 
-	if((result = dmg_action(&request, &response)) != EXIT_SUCCESS) {
+	if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -378,7 +369,7 @@ dmg_launcher_debug(
 	while(!complete) {
 		char *input, prompt[PROMPT_MAX] = {};
 
-		if((result = dmg_launcher_debug_prompt(prompt, PROMPT_MAX)) != EXIT_SUCCESS) {
+		if((result = dmg_launcher_debug_prompt(prompt, PROMPT_MAX)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -436,9 +427,11 @@ dmg_launcher_debug(
 								break;
 							case DMG_STATUS_BREAKPOINT:
 								LEVEL_COLOR(stdout, LEVEL_WARNING);
-								request.type = DMG_ACTION_PROGRAM_COUNTER;
+								request.type = DMG_ACTION_READ;
+								request.address = DMG_REGISTER_PC;
+								request.data.dword = UINT32_MAX;
 
-								if(dmg_action(&request, &response) == EXIT_SUCCESS) {
+								if(dmg_action(&request, &response) == DMG_STATUS_SUCCESS) {
 									fprintf(stdout, "Breakpoint: %04x\n", response.data.word);
 								} else {
 									fprintf(stdout, "Breakpoint\n");
@@ -664,7 +657,7 @@ main(
 		}
 
 		if(g_launcher.debug) {
-			result = dmg_launcher_debug(argv[0]);
+			result = ((dmg_launcher_debug(argv[0]) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
 		} else {
 			result = ((dmg_run(NULL, 0) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
 		}
