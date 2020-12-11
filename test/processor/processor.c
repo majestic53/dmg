@@ -184,6 +184,127 @@ dmg_test_processor_read(void)
 }
 
 int
+dmg_test_processor_read_register(void)
+{
+	int result = EXIT_SUCCESS;
+	dmg_action_t request = {}, response = {};
+
+	request.type = DMG_ACTION_READ;
+	request.data.dword = UINT32_MAX;
+
+	for(request.address = DMG_REGISTER_PROCESSOR_A; request.address <= DMG_REGISTER_PROCESSOR_STOP; ++request.address) {
+		uint16_t value = rand();
+		uint32_t length = sizeof(uint8_t);
+
+		dmg_test_processor_initialize();
+
+		switch(request.address) {
+			case DMG_REGISTER_PROCESSOR_A:
+				value &= UINT8_MAX;
+				g_processor.processor.af.high = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_AF:
+				g_processor.processor.af.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_B:
+				value &= UINT8_MAX;
+				g_processor.processor.bc.high = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_BC:
+				g_processor.processor.bc.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_C:
+				value &= UINT8_MAX;
+				g_processor.processor.bc.low = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_D:
+				value &= UINT8_MAX;
+				g_processor.processor.de.high = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_DE:
+				g_processor.processor.de.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_E:
+				value &= UINT8_MAX;
+				g_processor.processor.de.low = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_F:
+				value &= UINT8_MAX;
+				g_processor.processor.af.low = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_H:
+				value &= UINT8_MAX;
+				g_processor.processor.hl.high = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_HALT:
+				value &= true;
+				g_processor.processor.halt = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_HL:
+				g_processor.processor.hl.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_IE:
+				value &= UINT8_MAX;
+				g_processor.processor.interrupt_enable.raw = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_IF:
+				value &= UINT8_MAX;
+				g_processor.processor.interrupt_flag.raw = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_IME:
+				value &= true;
+				g_processor.processor.interrupts_enable = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_L:
+				value &= UINT8_MAX;
+				g_processor.processor.hl.low = value;
+				break;
+			case DMG_REGISTER_PROCESSOR_PC:
+				g_processor.processor.pc.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_SP:
+				g_processor.processor.sp.word = value;
+				length = sizeof(uint16_t);
+				break;
+			case DMG_REGISTER_PROCESSOR_STOP:
+				value &= true;
+				g_processor.processor.stop = value;
+				break;
+			default:
+				break;
+		}
+
+		memset(&response, 0, sizeof(response));
+		dmg_processor_read_register(&g_processor.processor, &request, &response);
+
+		if(ASSERT(response.length == length)) {
+			result = EXIT_FAILURE;
+			break;
+		}
+
+		if(length <= sizeof(uint8_t)) {
+
+			if(ASSERT(response.data.byte == value)) {
+				result = EXIT_FAILURE;
+				break;
+			}
+		} else if(ASSERT(response.data.word == value)) {
+			result = EXIT_FAILURE;
+			break;
+		}
+	}
+
+	TRACE_TEST(result);
+
+	return result;
+}
+
+int
 dmg_test_processor_step(void)
 {
 	int result = EXIT_SUCCESS;
@@ -295,12 +416,149 @@ dmg_test_processor_write(void)
 	return result;
 }
 
+int
+dmg_test_processor_write_register(void)
+{
+	int result = EXIT_SUCCESS;
+	dmg_action_t request = {}, response = {};
+
+	request.type = DMG_ACTION_WRITE;
+
+	for(request.address = DMG_REGISTER_PROCESSOR_A; request.address <= DMG_REGISTER_PROCESSOR_STOP; ++request.address) {
+		uint16_t expected = rand(), value = 0;
+
+		request.data.dword = UINT32_MAX;
+
+		switch(request.address) {
+			case DMG_REGISTER_PROCESSOR_A:
+			case DMG_REGISTER_PROCESSOR_B:
+			case DMG_REGISTER_PROCESSOR_C:
+			case DMG_REGISTER_PROCESSOR_D:
+			case DMG_REGISTER_PROCESSOR_E:
+			case DMG_REGISTER_PROCESSOR_F:
+			case DMG_REGISTER_PROCESSOR_H:
+			case DMG_REGISTER_PROCESSOR_IE:
+			case DMG_REGISTER_PROCESSOR_IF:
+			case DMG_REGISTER_PROCESSOR_L:
+				request.data.byte = expected;
+				break;
+			case DMG_REGISTER_PROCESSOR_HALT:
+			case DMG_REGISTER_PROCESSOR_IME:
+			case DMG_REGISTER_PROCESSOR_STOP:
+				request.data.byte = (expected % 2);
+				break;
+			case DMG_REGISTER_PROCESSOR_AF:
+			case DMG_REGISTER_PROCESSOR_BC:
+			case DMG_REGISTER_PROCESSOR_DE:
+			case DMG_REGISTER_PROCESSOR_HL:
+			case DMG_REGISTER_PROCESSOR_PC:
+			case DMG_REGISTER_PROCESSOR_SP:
+				request.data.word = expected;
+				break;
+			default:
+				break;
+		}
+
+		dmg_test_processor_initialize();
+		dmg_processor_write_register(&g_processor.processor, &request, &response);
+
+		switch(request.address) {
+			case DMG_REGISTER_PROCESSOR_A:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.af.high;
+				break;
+			case DMG_REGISTER_PROCESSOR_AF:
+				value = g_processor.processor.af.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_B:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.bc.high;
+				break;
+			case DMG_REGISTER_PROCESSOR_BC:
+				value = g_processor.processor.bc.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_C:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.bc.low;
+				break;
+			case DMG_REGISTER_PROCESSOR_D:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.de.high;
+				break;
+			case DMG_REGISTER_PROCESSOR_DE:
+				value = g_processor.processor.de.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_E:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.de.low;
+				break;
+			case DMG_REGISTER_PROCESSOR_F:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.af.low;
+				break;
+			case DMG_REGISTER_PROCESSOR_H:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.hl.high;
+				break;
+			case DMG_REGISTER_PROCESSOR_HALT:
+				expected &= true;
+				value = g_processor.processor.halt;
+				break;
+			case DMG_REGISTER_PROCESSOR_HL:
+				value = g_processor.processor.hl.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_IE:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.interrupt_enable.raw;
+				break;
+			case DMG_REGISTER_PROCESSOR_IF:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.interrupt_flag.raw;
+				break;
+			case DMG_REGISTER_PROCESSOR_IME:
+				expected &= true;
+				value = g_processor.processor.interrupts_enable;
+				break;
+			case DMG_REGISTER_PROCESSOR_L:
+				expected &= UINT8_MAX;
+				value = g_processor.processor.hl.low;
+				break;
+			case DMG_REGISTER_PROCESSOR_PC:
+				value = g_processor.processor.pc.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_SP:
+				value = g_processor.processor.sp.word;
+				break;
+			case DMG_REGISTER_PROCESSOR_STOP:
+				expected &= true;
+				value = g_processor.processor.stop;
+				break;
+			default:
+				break;
+		}
+
+		if(ASSERT(value == expected)) {
+
+fprintf(stdout, "%u %04x %04x\n", request.address, value, expected);
+
+			result = EXIT_FAILURE;
+			break;
+		}
+	}
+
+	TRACE_TEST(result);
+
+	return result;
+}
+
 static const dmg_test TEST[] = {
 	dmg_test_processor_load,
 	dmg_test_processor_read,
+	dmg_test_processor_read_register,
 	dmg_test_processor_step,
 	dmg_test_processor_unload,
 	dmg_test_processor_write,
+	dmg_test_processor_write_register,
 	};
 
 int

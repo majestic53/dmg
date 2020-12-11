@@ -64,6 +64,7 @@
 enum {
 	DEBUG_EXIT = 0,
 	DEBUG_HELP,
+	DEBUG_PROCESSOR,
 	DEBUG_READ,
 	DEBUG_RUN,
 	DEBUG_STEP,
@@ -72,9 +73,21 @@ enum {
 	DEBUG_MAX,
 };
 
+enum {
+	DEBUG_READ_ADDRESS = 0,
+	DEBUG_READ_OFFSET,
+};
+
+enum {
+	DEBUG_WRITE_ADDRESS = 0,
+	DEBUG_WRITE_VALUE,
+	DEBUG_WRITE_OFFSET,
+};
+
 static const char DEBUG_CHAR[] = {
 	'q', /* DEBUG_EXIT */
 	'h', /* DEBUG_HELP */
+	'p', /* DEBUG_PROCESSOR */
 	'r', /* DEBUG_READ */
 	'c', /* DEBUG_RUN */
 	's', /* DEBUG_STEP */
@@ -86,11 +99,12 @@ static const char DEBUG_CHAR[] = {
 static const char *DEBUG_DESCRIPTION_STR[] = {
 	"Exit debug prompt", /* DEBUG_EXIT */
 	"Display help information", /* DEBUG_HELP */
-	"Read byte(s) from address", /* DEBUG_READ */
+	"Display processor information", /* DEBUG_PROCESSOR */
+	"Read byte(s) from address/register", /* DEBUG_READ */
 	"Run emulator until breakpoint", /* DEBUG_RUN */
 	"Step emulator through instructions", /* DEBUG_STEP */
 	"Display version information", /* DEBUG_VERSION */
-	"Write byte(s) to address", /* DEBUG_WRITE */
+	"Write byte(s) to address/register", /* DEBUG_WRITE */
 	"", /* DEBUG_MAX */
 	};
 
@@ -134,6 +148,31 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify display scale", /* FLAG_SCALE */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
+	};
+
+#define REGISTER_DELIMITER "$"
+
+static const char *REGISTER_STR[] = {
+	REGISTER_DELIMITER "a", /* DMG_REGISTER_PROCESSOR_A */
+	REGISTER_DELIMITER "af", /* DMG_REGISTER_PROCESSOR_AF */
+	REGISTER_DELIMITER "b", /* DMG_REGISTER_PROCESSOR_B */
+	REGISTER_DELIMITER "bc", /* DMG_REGISTER_PROCESSOR_BC */
+	REGISTER_DELIMITER "c", /* DMG_REGISTER_PROCESSOR_C */
+	REGISTER_DELIMITER "d", /* DMG_REGISTER_PROCESSOR_D */
+	REGISTER_DELIMITER "de", /* DMG_REGISTER_PROCESSOR_DE */
+	REGISTER_DELIMITER "e", /* DMG_REGISTER_PROCESSOR_E */
+	REGISTER_DELIMITER "f", /* DMG_REGISTER_PROCESSOR_F */
+	REGISTER_DELIMITER "h", /* DMG_REGISTER_PROCESSOR_H */
+	REGISTER_DELIMITER "halt", /* DMG_REGISTER_PROCESSOR_HALT */
+	REGISTER_DELIMITER "hl", /* DMG_REGISTER_PROCESSOR_HL */
+	REGISTER_DELIMITER "ie", /* DMG_REGISTER_PROCESSOR_IE */
+	REGISTER_DELIMITER "if", /* DMG_REGISTER_PROCESSOR_IF */
+	REGISTER_DELIMITER "ime", /* DMG_REGISTER_PROCESSOR_IME */
+	REGISTER_DELIMITER "l", /* DMG_REGISTER_PROCESSOR_L */
+	REGISTER_DELIMITER "pc", /* DMG_REGISTER_PROCESSOR_PC */
+	REGISTER_DELIMITER "sp", /* DMG_REGISTER_PROCESSOR_SP */
+	REGISTER_DELIMITER "stop", /* DMG_REGISTER_PROCESSOR_STOP */
+	REGISTER_DELIMITER "", /* DMG_REGISTER_MAX */
 	};
 
 typedef int (*dmg_launcher_debug_hdlr)(

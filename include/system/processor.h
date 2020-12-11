@@ -123,6 +123,12 @@ uint8_t dmg_processor_read(
 	__in uint16_t address
 	);
 
+void dmg_processor_read_register(
+	__in const dmg_processor_t *processor,
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	);
+
 uint32_t dmg_processor_step(
 	__inout dmg_processor_t *processor
 	);
@@ -135,6 +141,12 @@ void dmg_processor_write(
 	__inout dmg_processor_t *processor,
 	__in uint16_t address,
 	__in uint8_t value
+	);
+
+void dmg_processor_write_register(
+	__in dmg_processor_t *processor,
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
 	);
 
 #ifdef __cplusplus

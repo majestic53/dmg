@@ -59,83 +59,11 @@ dmg_runtime_action_read(
 	if(request->data.dword > UINT16_MAX) {
 
 		switch(request->address) {
-			case DMG_REGISTER_A:
-				response->data.byte = g_runtime.processor.af.high;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_AF:
-				response->data.word = g_runtime.processor.af.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_B:
-				response->data.byte = g_runtime.processor.bc.high;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_BC:
-				response->data.word = g_runtime.processor.bc.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_C:
-				response->data.byte = g_runtime.processor.bc.low;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_D:
-				response->data.byte = g_runtime.processor.de.high;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_DE:
-				response->data.word = g_runtime.processor.de.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_E:
-				response->data.byte = g_runtime.processor.de.low;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_F:
-				response->data.byte = g_runtime.processor.af.low;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_H:
-				response->data.byte = g_runtime.processor.hl.high;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_HALT:
-				response->data.byte = g_runtime.processor.halt;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_HL:
-				response->data.word = g_runtime.processor.hl.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_IE:
-				response->data.byte = g_runtime.processor.interrupt_enable.raw;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_IF:
-				response->data.byte = g_runtime.processor.interrupt_flag.raw;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_IME:
-				response->data.byte = g_runtime.processor.interrupts_enable_state;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_L:
-				response->data.byte = g_runtime.processor.hl.low;
-				response->length = sizeof(request->data.byte);
-				break;
-			case DMG_REGISTER_PC:
-				response->data.word = g_runtime.processor.pc.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_SP:
-				response->data.word = g_runtime.processor.sp.word;
-				response->length = sizeof(request->data.word);
-				break;
-			case DMG_REGISTER_STOP:
-				response->data.byte = g_runtime.processor.stop;
-				response->length = sizeof(request->data.byte);
+			case DMG_REGISTER_PROCESSOR_A ... DMG_REGISTER_PROCESSOR_STOP:
+				dmg_processor_read_register(&g_runtime.processor, request, response);
 				break;
 			default:
+				TRACE_FORMAT(LEVEL_WARNING, "Unsupported register read %04x", request->address);
 				result = DMG_STATUS_INVALID;
 				goto exit;
 		}
@@ -171,64 +99,11 @@ dmg_runtime_action_write(
 	if(request->data.dword > UINT16_MAX) {
 
 		switch(request->address) {
-			case DMG_REGISTER_A:
-				g_runtime.processor.af.high = response->data.byte;
-				break;
-			case DMG_REGISTER_AF:
-				g_runtime.processor.af.word = response->data.word;
-				break;
-			case DMG_REGISTER_B:
-				g_runtime.processor.bc.high = response->data.byte;
-				break;
-			case DMG_REGISTER_BC:
-				g_runtime.processor.bc.word = response->data.word;
-				break;
-			case DMG_REGISTER_C:
-				g_runtime.processor.bc.low = response->data.byte;
-				break;
-			case DMG_REGISTER_D:
-				g_runtime.processor.de.high = response->data.byte;
-				break;
-			case DMG_REGISTER_DE:
-				g_runtime.processor.de.word = response->data.word;
-				break;
-			case DMG_REGISTER_E:
-				g_runtime.processor.de.low = response->data.byte;
-				break;
-			case DMG_REGISTER_F:
-				g_runtime.processor.af.low = response->data.byte;
-				break;
-			case DMG_REGISTER_H:
-				g_runtime.processor.hl.high = response->data.byte;
-				break;
-			case DMG_REGISTER_HALT:
-				g_runtime.processor.halt = response->data.byte;
-				break;
-			case DMG_REGISTER_HL:
-				g_runtime.processor.hl.word = response->data.word;
-				break;
-			case DMG_REGISTER_IE:
-				g_runtime.processor.interrupt_enable.raw = response->data.byte;
-				break;
-			case DMG_REGISTER_IF:
-				g_runtime.processor.interrupt_flag.raw = response->data.byte;
-				break;
-			case DMG_REGISTER_IME:
-				g_runtime.processor.interrupts_enable_state = response->data.byte;
-				break;
-			case DMG_REGISTER_L:
-				g_runtime.processor.hl.low = response->data.byte;
-				break;
-			case DMG_REGISTER_PC:
-				g_runtime.processor.pc.word = response->data.word;
-				break;
-			case DMG_REGISTER_SP:
-				g_runtime.processor.sp.word = response->data.word;
-				break;
-			case DMG_REGISTER_STOP:
-				g_runtime.processor.stop = response->data.byte;
+			case DMG_REGISTER_PROCESSOR_A ... DMG_REGISTER_PROCESSOR_STOP:
+				dmg_processor_write_register(&g_runtime.processor, request, response);
 				break;
 			default:
+				TRACE_FORMAT(LEVEL_WARNING, "Unsupported register write %04x", request->address);
 				result = DMG_STATUS_INVALID;
 				goto exit;
 		}

@@ -95,11 +95,12 @@ The following commands are available:
 ```
 q	Exit debug prompt
 h	Display help information
-r	Read byte(s) from address
+p	Display processor information
+r	Read byte(s) from address/register
 c	Run emulator until breakpoint
 s	Step emulator through instructions
 v	Display version information
-w	Write byte(s) to address
+w	Write byte(s) to address/register
 ```
 
 #### Examples

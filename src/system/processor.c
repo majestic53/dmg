@@ -3302,6 +3302,97 @@ dmg_processor_read(
 	return result;
 }
 
+void
+dmg_processor_read_register(
+	__in const dmg_processor_t *processor,
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+
+	switch(request->address) {
+		case DMG_REGISTER_PROCESSOR_A:
+			response->data.byte = processor->af.high;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_AF:
+			response->data.word = processor->af.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_B:
+			response->data.byte = processor->bc.high;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_BC:
+			response->data.word = processor->bc.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_C:
+			response->data.byte = processor->bc.low;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_D:
+			response->data.byte = processor->de.high;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_DE:
+			response->data.word = processor->de.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_E:
+			response->data.byte = processor->de.low;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_F:
+			response->data.byte = processor->af.low;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_H:
+			response->data.byte = processor->hl.high;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_HALT:
+			response->data.byte = processor->halt;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_HL:
+			response->data.word = processor->hl.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_IE:
+			response->data.byte = processor->interrupt_enable.raw;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_IF:
+			response->data.byte = processor->interrupt_flag.raw;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_IME:
+			response->data.byte = processor->interrupts_enable;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_L:
+			response->data.byte = processor->hl.low;
+			response->length = sizeof(request->data.byte);
+			break;
+		case DMG_REGISTER_PROCESSOR_PC:
+			response->data.word = processor->pc.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_SP:
+			response->data.word = processor->sp.word;
+			response->length = sizeof(request->data.word);
+			break;
+		case DMG_REGISTER_PROCESSOR_STOP:
+			response->data.byte = processor->stop;
+			response->length = sizeof(request->data.byte);
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor register read %04x", request->address);
+			break;
+	}
+}
+
 uint32_t
 dmg_processor_step(
 	__inout dmg_processor_t *processor
@@ -3342,6 +3433,78 @@ dmg_processor_write(
 			break;
 		default:
 			TRACE_FORMAT(LEVEL_WARNING, "Unsupported processor write [%04x]<-%02x", address, value);
+			break;
+	}
+}
+
+void
+dmg_processor_write_register(
+	__in dmg_processor_t *processor,
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response
+	)
+{
+
+	switch(request->address) {
+		case DMG_REGISTER_PROCESSOR_A:
+			processor->af.high = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_AF:
+			processor->af.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_B:
+			processor->bc.high = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_BC:
+			processor->bc.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_C:
+			processor->bc.low = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_D:
+			processor->de.high = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_DE:
+			processor->de.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_E:
+			processor->de.low = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_F:
+			processor->af.low = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_H:
+			processor->hl.high = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_HALT:
+			processor->halt = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_HL:
+			processor->hl.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_IE:
+			processor->interrupt_enable.raw = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_IF:
+			processor->interrupt_flag.raw = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_IME:
+			processor->interrupts_enable = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_L:
+			processor->hl.low = request->data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_PC:
+			processor->pc.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_SP:
+			processor->sp.word = request->data.word;
+			break;
+		case DMG_REGISTER_PROCESSOR_STOP:
+			processor->stop = request->data.byte;
+			break;
+		default:
+			TRACE_FORMAT(LEVEL_WARNING, "Unsupported procesor register write %04x", request->address);
 			break;
 	}
 }
