@@ -76,6 +76,128 @@ dmg_launcher_capture(
 }
 
 static int
+dmg_launcher_debug_register(
+	__in const char *argument
+	)
+{
+	int result;
+
+	for(result = DMG_REGISTER_PROCESSOR_A; result < DMG_REGISTER_MAX; ++result) {
+
+		if(!strcmp(REGISTER_STR[result], argument)) {
+			break;
+		}
+	}
+
+	return result;
+}
+
+static int
+dmg_launcher_debug_disassemble_data(
+	__in uint16_t address,
+	__in uint16_t offset
+	)
+{
+	fprintf(stdout, "[%04x+%u] -- %u instructions\n\n", address, offset, offset);
+
+	// TODO: DISASEMBLE FROM INSTRUCTION[ADDRESS] - INSTRUCTION[ADDRESS] + OFFSET
+	return DMG_STATUS_SUCCESS;
+	// ---
+}
+
+static int
+dmg_launcher_debug_disassemble_register(
+	__in uint16_t address,
+	__in uint16_t offset
+	)
+{
+	int result;
+	dmg_action_t request = {}, response = {};
+
+	request.type = DMG_ACTION_READ;
+	request.address = address;
+	request.data.dword = UINT32_MAX;
+
+	if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	switch(address) {
+		case DMG_REGISTER_PROCESSOR_A:
+		case DMG_REGISTER_PROCESSOR_B:
+		case DMG_REGISTER_PROCESSOR_C:
+		case DMG_REGISTER_PROCESSOR_D:
+		case DMG_REGISTER_PROCESSOR_E:
+		case DMG_REGISTER_PROCESSOR_F:
+		case DMG_REGISTER_PROCESSOR_H:
+		case DMG_REGISTER_PROCESSOR_HALT:
+		case DMG_REGISTER_PROCESSOR_IE:
+		case DMG_REGISTER_PROCESSOR_IF:
+		case DMG_REGISTER_PROCESSOR_IME:
+		case DMG_REGISTER_PROCESSOR_L:
+		case DMG_REGISTER_PROCESSOR_STOP:
+			address = response.data.byte;
+			break;
+		case DMG_REGISTER_PROCESSOR_AF:
+		case DMG_REGISTER_PROCESSOR_BC:
+		case DMG_REGISTER_PROCESSOR_DE:
+		case DMG_REGISTER_PROCESSOR_HL:
+		case DMG_REGISTER_PROCESSOR_PC:
+		case DMG_REGISTER_PROCESSOR_SP:
+			address = response.data.word;
+			break;
+		default:
+			result = DMG_STATUS_INVALID;
+			goto exit;
+	}
+
+	result = dmg_launcher_debug_disassemble_data(address, offset);
+
+exit:
+	return result;
+}
+
+static int
+dmg_launcher_debug_disassemble(
+	__in const char *argument[],
+	__in uint32_t count
+	)
+{
+	int result;
+	bool register_read = false;
+	uint16_t address = 0, offset = 1;
+
+	for(uint32_t index = 0; index < count; ++index) {
+
+		switch(index) {
+			case DEBUG_READ_ADDRESS:
+
+				if((address = dmg_launcher_debug_register(argument[0])) < DMG_REGISTER_MAX) {
+					register_read = true;
+				} else {
+					address = strtoul(argument[0], NULL, 16);
+				}
+				break;
+			case DEBUG_READ_OFFSET:
+				offset = strtoul(argument[1], NULL, 16);
+				break;
+			default:
+				result = DMG_STATUS_INVALID;
+				goto exit;
+		}
+	}
+
+	if(register_read) {
+		result = dmg_launcher_debug_disassemble_register(address, offset);
+	} else {
+		result = dmg_launcher_debug_disassemble_data(address, offset);
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_launcher_debug_help(
 	__in const char *argument[],
 	__in uint32_t count
@@ -97,45 +219,40 @@ exit:
 }
 
 static int
-dmg_launcher_debug_register(
-	__in const char *argument
-	)
-{
-	int result;
-
-	for(result = DMG_REGISTER_PROCESSOR_A; result < DMG_REGISTER_MAX; ++result) {
-
-		if(!strcmp(REGISTER_STR[result], argument)) {
-			break;
-		}
-	}
-
-	return result;
-}
-
-static int
 dmg_launcher_debug_read_data(
 	__in uint16_t address,
 	__in uint16_t offset
 	)
 {
+	uint32_t index;
 	int result = DMG_STATUS_SUCCESS;
 	char str[ARGUMENT_READ_WIDTH + 1] = {};
 	dmg_action_t request = {}, response = {};
 
 	request.type = DMG_ACTION_READ;
 
-	for(uint32_t count = 0, index = address; index < (address + offset); ++index) {
-		request.address = (index % (UINT16_MAX + 1));
+	if(offset > 1) {
+		fprintf(stdout, "[%04x-%04x] -- %.02f KB (%u bytes)\n\n      ", address, (address + offset - 1) % UINT16_MAX,
+			offset / (float)KBYTE, offset);
 
-		if(count == ARGUMENT_READ_WIDTH) {
-			count = 0;
+		for(index = address; index < (address + ARGUMENT_READ_WIDTH); ++index) {
+			fprintf(stdout, " %02x", index % ARGUMENT_READ_WIDTH);
 		}
 
-		if(!count) {
+		fprintf(stdout, "\n      ");
+
+		for(index = 0; index < ARGUMENT_READ_WIDTH; ++index) {
+			fprintf(stdout, " --");
+		}
+	}
+
+	for(uint32_t count = 0, index = address; index < (address + offset); count %= ARGUMENT_READ_WIDTH, ++index) {
+		request.address = (index % (UINT16_MAX + 1));
+
+		if((offset > 1) && !count) {
 
 			if(strlen(str)) {
-				fprintf(stdout, "\t%s", str);
+				fprintf(stdout, "   %s", str);
 				memset(str, 0, sizeof(str));
 			}
 
@@ -146,20 +263,26 @@ dmg_launcher_debug_read_data(
 			goto exit;
 		}
 
-		fprintf(stdout, " %02x", response.data.byte);
+		if(offset > 1) {
+			fprintf(stdout, " ");
+		}
+
+		fprintf(stdout, "%02x", response.data.byte);
 		str[count++] = ((isprint((char)response.data.byte) && !isspace((char)response.data.byte))
 				? response.data.byte : CHARACTER_FILL);
 	}
 
-	if(offset) {
+	if(offset > 1 && strlen(str)) {
 
-		if(strlen(str)) {
-			fprintf(stdout, "\t%s", str);
-			memset(str, 0, sizeof(str));
+		for(index = 0; index < ((ARGUMENT_READ_WIDTH - (request.address % ARGUMENT_READ_WIDTH)) + (address % ARGUMENT_READ_WIDTH)); ++index) {
+			fprintf(stdout, "   ");
 		}
 
-		fprintf(stdout, "\n");
+		fprintf(stdout, "%s", str);
+		memset(str, 0, sizeof(str));
 	}
+
+	fprintf(stdout, "\n");
 
 exit:
 	return result;
@@ -181,8 +304,6 @@ dmg_launcher_debug_read_register(
 		goto exit;
 	}
 
-	fprintf(stdout, "%s |", REGISTER_STR[address]);
-
 	switch(address) {
 		case DMG_REGISTER_PROCESSOR_A:
 		case DMG_REGISTER_PROCESSOR_B:
@@ -194,7 +315,21 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_IE:
 		case DMG_REGISTER_PROCESSOR_IF:
 		case DMG_REGISTER_PROCESSOR_L:
-			fprintf(stdout, " %02x\n", response.data.byte);
+			fprintf(stdout, "%02x", response.data.byte);
+
+			switch(address) {
+				case DMG_REGISTER_PROCESSOR_IE:
+				case DMG_REGISTER_PROCESSOR_IF:
+					fprintf(stdout, "     [%c%c%c%c%c]",
+						response.data.interrupt.vblank ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_VBLANK] : PROCESSOR_DELIMITER,
+						response.data.interrupt.lcdc ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_LCDC] : PROCESSOR_DELIMITER,
+						response.data.interrupt.timer ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_TIMER] : PROCESSOR_DELIMITER,
+						response.data.interrupt.serial ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_SERIAL] : PROCESSOR_DELIMITER,
+						response.data.interrupt.joypad ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_JOYPAD] : PROCESSOR_DELIMITER);
+					break;
+				default:
+					break;
+			}
 			break;
 		case DMG_REGISTER_PROCESSOR_AF:
 		case DMG_REGISTER_PROCESSOR_BC:
@@ -202,17 +337,59 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_HL:
 		case DMG_REGISTER_PROCESSOR_PC:
 		case DMG_REGISTER_PROCESSOR_SP:
-			fprintf(stdout, " %04x\n", response.data.word);
+			fprintf(stdout, "%04x", response.data.word);
+
+			switch(address) {
+				case DMG_REGISTER_PROCESSOR_AF:
+					fprintf(stdout, "   %s=%02x, %s=%02x [%c%c%c%c]",
+						REGISTER_STR[DMG_REGISTER_PROCESSOR_A], response.data.high,
+						REGISTER_STR[DMG_REGISTER_PROCESSOR_F], response.data.low,
+						response.data.flag.carry ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_CARRY] : PROCESSOR_DELIMITER,
+						response.data.flag.carry_half ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_CARRY_HALF] : PROCESSOR_DELIMITER,
+						response.data.flag.subtract ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_SUBTRACT] : PROCESSOR_DELIMITER,
+						response.data.flag.zero ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_ZERO] : PROCESSOR_DELIMITER);
+					break;
+				case DMG_REGISTER_PROCESSOR_BC:
+					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_B], response.data.high,
+						REGISTER_STR[DMG_REGISTER_PROCESSOR_C], response.data.low);
+					break;
+				case DMG_REGISTER_PROCESSOR_DE:
+					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_D], response.data.high,
+						REGISTER_STR[DMG_REGISTER_PROCESSOR_E], response.data.low);
+					break;
+				case DMG_REGISTER_PROCESSOR_HL:
+					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_H], response.data.high,
+						REGISTER_STR[DMG_REGISTER_PROCESSOR_L], response.data.low);
+					break;
+				default:
+					break;
+			}
 			break;
 		case DMG_REGISTER_PROCESSOR_HALT:
 		case DMG_REGISTER_PROCESSOR_IME:
 		case DMG_REGISTER_PROCESSOR_STOP:
-			fprintf(stdout, " %x\n", response.data.byte);
+			fprintf(stdout, "%x", response.data.byte);
+
+			switch(address) {
+				case DMG_REGISTER_PROCESSOR_HALT:
+					fprintf(stdout, "      %s", response.data.byte ? "Halted" : "Running");
+					break;
+				case DMG_REGISTER_PROCESSOR_IME:
+					fprintf(stdout, "      %s", response.data.byte ? "Enabled" : "Disabled");
+					break;
+				case DMG_REGISTER_PROCESSOR_STOP:
+					fprintf(stdout, "      %s", response.data.byte ? "Stopped" : "Running");
+					break;
+				default:
+					break;
+			}
 			break;
 		default:
 			result = DMG_STATUS_INVALID;
 			break;
 	}
+
+	fprintf(stdout, "\n");
 
 exit:
 	return result;
@@ -231,45 +408,67 @@ dmg_launcher_debug_processor(
 		goto exit;
 	}
 
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_PC]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_PC)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_SP]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_SP)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_AF]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_AF)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_BC]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_BC)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_DE]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_DE)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HL]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_HL)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
+	fprintf(stdout, "%s  | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IME]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IME)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IE]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IE)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IF]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IF)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
+	fprintf(stdout, "%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HALT]);
+
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_HALT)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	fprintf(stdout, "%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_STOP]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_STOP)) != DMG_STATUS_SUCCESS) {
 		goto exit;
@@ -474,6 +673,7 @@ exit:
 
 static const dmg_launcher_debug_hdlr DEBUG_HANDLER[] = {
 	NULL, /* DEBUG_EXIT */
+	dmg_launcher_debug_disassemble, /* DEBUG_DISASSEMBLE */
 	dmg_launcher_debug_help, /* DEBUG_HELP */
 	dmg_launcher_debug_processor, /* DEBUG_PROCESSOR */
 	dmg_launcher_debug_read, /* DEBUG_READ */

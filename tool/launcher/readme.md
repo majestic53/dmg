@@ -94,6 +94,7 @@ The following commands are available:
 
 ```
 q	Exit debug prompt
+z	Disassemble instruction(s) at address
 h	Display help information
 p	Display processor information
 r	Read byte(s) from address/register
@@ -150,6 +151,18 @@ The following example shows how to write ```0xaabb``` to register ```$pc```:
 
 ```
 (DMG) w $pc aabb
+```
+
+The following example shows how to disassemble ```3``` instructions at address ```0x0100```:
+
+```
+(DMG) z 100 3
+```
+
+The following example shows how to disassemble the instruction at ```$pc```:
+
+```
+(DMG) z $pc
 ```
 
 #### Palettes

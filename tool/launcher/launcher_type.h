@@ -63,6 +63,7 @@
 
 enum {
 	DEBUG_EXIT = 0,
+	DEBUG_DISASSEMBLE,
 	DEBUG_HELP,
 	DEBUG_PROCESSOR,
 	DEBUG_READ,
@@ -86,6 +87,7 @@ enum {
 
 static const char DEBUG_CHAR[] = {
 	'q', /* DEBUG_EXIT */
+	'z', /* DEBUG_DISASSEMBLE */
 	'h', /* DEBUG_HELP */
 	'p', /* DEBUG_PROCESSOR */
 	'r', /* DEBUG_READ */
@@ -98,6 +100,7 @@ static const char DEBUG_CHAR[] = {
 
 static const char *DEBUG_DESCRIPTION_STR[] = {
 	"Exit debug prompt", /* DEBUG_EXIT */
+	"Disassemble instruction(s) at address", /* DEBUG_DISASSEMBLE */
 	"Display help information", /* DEBUG_HELP */
 	"Display processor information", /* DEBUG_PROCESSOR */
 	"Read byte(s) from address/register", /* DEBUG_READ */
@@ -148,6 +151,50 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify display scale", /* FLAG_SCALE */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
+	};
+
+#define PROCESSOR_DELIMITER '-'
+
+enum {
+	PROCESSOR_FLAG_UNUSED_0 = 0,
+	PROCESSOR_FLAG_UNUSED_1,
+	PROCESSOR_FLAG_UNUSED_2,
+	PROCESSOR_FLAG_UNUSED_3,
+	PROCESSOR_FLAG_CARRY,
+	PROCESSOR_FLAG_CARRY_HALF,
+	PROCESSOR_FLAG_SUBTRACT,
+	PROCESSOR_FLAG_ZERO,
+	PROCESSOR_FLAG_MAX,
+};
+
+static const char PROCESSOR_FLAG_CHAR[] = {
+	'\0', /* PROCESSOR_FLAG_UNUSED_0 */
+	'\0', /* PROCESSOR_FLAG_UNUSED_1 */
+	'\0', /* PROCESSOR_FLAG_UNUSED_2 */
+	'\0', /* PROCESSOR_FLAG_UNUSED_3 */
+	'C', /* PROCESSOR_FLAG_CARRY */
+	'H', /* PROCESSOR_FLAG_CARRY_HALF */
+	'N', /* PROCESSOR_FLAG_SUBTRACT */
+	'Z', /* PROCESSOR_FLAG_ZERO */
+	'\0', /* PROCESSOR_FLAG_MAX */
+	};
+
+enum {
+	PROCESSOR_INTERRUPT_VBLANK = 0,
+	PROCESSOR_INTERRUPT_LCDC,
+	PROCESSOR_INTERRUPT_TIMER,
+	PROCESSOR_INTERRUPT_SERIAL,
+	PROCESSOR_INTERRUPT_JOYPAD,
+	PROCESSOR_INTERRUPT_MAX,
+};
+
+static const char PROCESSOR_INTERRUPT_CHAR[] = {
+	'V', /* PROCESSOR_INTERRUPT_VBLANK */
+	'L', /* PROCESSOR_INTERRUPT_LCDC */
+	'T', /* PROCESSOR_INTERRUPT_TIMER */
+	'S', /* PROCESSOR_INTERRUPT_SERIAL */
+	'J', /* PROCESSOR_INTERRUPT_JOYPAD */
+	'\0', /* PROCESSOR_INTERRUPT_MAX */
 	};
 
 #define REGISTER_DELIMITER "$"

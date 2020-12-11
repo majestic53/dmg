@@ -129,8 +129,39 @@ typedef struct {
 
 	/* Action data */
 	union {
-		uint8_t byte;
-		uint16_t word;
+
+		union {
+
+			struct {
+				uint8_t unused : 4;
+				uint8_t carry : 1;
+				uint8_t carry_half : 1;
+				uint8_t subtract : 1;
+				uint8_t zero : 1;
+			} flag;
+
+			struct {
+				uint8_t vblank : 1;
+				uint8_t lcdc : 1;
+				uint8_t timer : 1;
+				uint8_t serial : 1;
+				uint8_t joypad : 1;
+				uint8_t unused : 3;
+			} interrupt;
+
+			uint8_t byte;
+		};
+
+		union {
+
+			struct {
+				uint8_t low;
+				uint8_t high;
+			};
+
+			uint16_t word;
+		};
+
 		uint32_t dword;
 	} data;
 } __attribute__((packed)) dmg_action_t;
