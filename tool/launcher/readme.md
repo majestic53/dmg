@@ -128,6 +128,12 @@ The following example shows how to read from address ```0xa000-0xa01f```:
 (DMG) r a000 20
 ```
 
+The following example shows how to read from register ```$pc```:
+
+```
+(DMG) r $pc
+```
+
 The following example shows how to write ```0xcc``` to address ```0xa000```:
 
 ```
@@ -138,6 +144,12 @@ The following example shows how to write ```0xcc``` to address ```0xa000-0xa01f`
 
 ```
 (DMG) w a000 cc 20
+```
+
+The following example shows how to write ```0xaabb``` to register ```$pc```:
+
+```
+(DMG) w $pc aabb
 ```
 
 #### Palettes
