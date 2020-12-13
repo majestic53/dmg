@@ -47,6 +47,11 @@
 
 #define KBYTE 1024
 
+#define COMMENT_DELIMITER ';'
+
+#define PATH_DELIMITER '/'
+#define PATH_MAX 1024
+
 #ifdef COLOR
 
 static const char *LEVEL_STR[] = {

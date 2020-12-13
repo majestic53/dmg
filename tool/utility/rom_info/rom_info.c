@@ -25,15 +25,12 @@ extern "C" {
 static dmg_rom_info_t g_rom_info = {};
 
 static int
-dmg_utility_rom_info_file_load(
-	__inout dmg_buffer_t *buffer,
-	__in const char *path
-	)
+dmg_utility_rom_info_file_load(void)
 {
 	FILE *file = NULL;
 	int length, result = EXIT_SUCCESS;
 
-	if(!(file = fopen(path, "rb"))) {
+	if(!(file = fopen(g_rom_info.rom, "rb"))) {
 		result = EXIT_FAILURE;
 		goto exit;
 	}
@@ -47,17 +44,17 @@ dmg_utility_rom_info_file_load(
 		goto exit;
 	}
 
-	if(!(buffer->data = (void *)malloc(length))) {
+	if(!(g_rom_info.buffer.data = (void *)malloc(length))) {
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
-	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
+	if(fread(g_rom_info.buffer.data, sizeof(uint8_t), length, file) != length) {
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
-	buffer->length = length;
+	g_rom_info.buffer.length = length;
 
 exit:
 
@@ -165,16 +162,14 @@ exit:
 }
 
 static void
-dmg_utility_rom_info_file_unload(
-	__inout dmg_buffer_t *buffer
-	)
+dmg_utility_rom_info_file_unload(void)
 {
 
-	if(buffer->data) {
-		free(buffer->data);
+	if(g_rom_info.buffer.data) {
+		free(g_rom_info.buffer.data);
 	}
 
-	memset(buffer, 0, sizeof(*buffer));
+	memset(&g_rom_info.buffer, 0, sizeof(g_rom_info.buffer));
 }
 
 static int
@@ -282,22 +277,23 @@ main(
 		dmg_utility_rom_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_rom_info_file_load(&g_rom_info.buffer, g_rom_info.rom)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_info_file_load()) != EXIT_SUCCESS) {
+			LEVEL_COLOR(stderr, LEVEL_ERROR);
 			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
+			LEVEL_COLOR(stderr, LEVEL_NONE);
 			goto exit;
 		}
 
 		if((result = dmg_utility_rom_info_file_parse()) != EXIT_SUCCESS) {
 			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "\nUNSUPPORTED\n");
+			fprintf(stderr, "%s: Failed to parse file -- %s\n", argv[0], g_rom_info.rom);
 			LEVEL_COLOR(stderr, LEVEL_NONE);
-		} else {
-			fprintf(stderr, "\nSUPPORTED\n");
+			goto exit;
 		}
 	}
 
 exit:
-	dmg_utility_rom_info_file_unload(&g_rom_info.buffer);
+	dmg_utility_rom_info_file_unload();
 	memset(&g_rom_info, 0, sizeof(g_rom_info));
 
 	return result;

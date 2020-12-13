@@ -416,9 +416,6 @@ dmg_runtime_run(
 		goto exit;
 	}
 
-	g_cycle = 0;
-	g_cycle_last = 0;
-
 	for(;;) {
 
 		if(!dmg_service_poll()) {

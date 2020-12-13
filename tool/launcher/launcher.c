@@ -403,7 +403,7 @@ dmg_launcher_debug_read_data(
 
 	if(offset > 1 && strlen(str)) {
 
-		for(index = 0; index < ((ARGUMENT_READ_WIDTH - (request.address % ARGUMENT_READ_WIDTH)) + (address % ARGUMENT_READ_WIDTH)); ++index) {
+		for(index = 0; index < (ARGUMENT_READ_WIDTH - ((request.address - address) % ARGUMENT_READ_WIDTH)); ++index) {
 			fprintf(stdout, "   ");
 		}
 
@@ -806,7 +806,7 @@ dmg_launcher_debug_header(
 	int result;
 	char *path_end, path_full[PATH_MAX] = {};
 
-	if((path_end = strrchr(path, '/'))) {
+	if((path_end = strrchr(path, PATH_DELIMITER))) {
 		memcpy(path_full, path, (path_end - path) + 1);
 	}
 
@@ -1148,18 +1148,24 @@ main(
 		if(g_launcher.bootrom) {
 
 			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
+				LEVEL_COLOR(stderr, LEVEL_ERROR);
 				fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
+				LEVEL_COLOR(stderr, LEVEL_NONE);
 				goto exit;
 			}
 		}
 
 		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
+			LEVEL_COLOR(stderr, LEVEL_ERROR);
 			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
+			LEVEL_COLOR(stderr, LEVEL_NONE);
 			goto exit;
 		}
 
 		if((result = ((dmg_load(&g_launcher.configuration) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
+			LEVEL_COLOR(stderr, LEVEL_ERROR);
 			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
+			LEVEL_COLOR(stderr, LEVEL_NONE);
 			result = EXIT_FAILURE;
 			goto exit;
 		}
