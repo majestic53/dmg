@@ -39,7 +39,8 @@ test_system_processor.o: $(DIR_SRC_SYSTEM)processor.c
 link:
 	@echo ''
 	@echo '--- BUILDING PROCESSOR TEST ----------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_processor.o $(DIR_BUILD_TEST)test_system_processor.o $(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TEST)test_processor.o $(DIR_BUILD_TEST)test_system_processor.o $(DIR_BUILD)system_processor_instruction.o \
+		$(DIR_BUILD)common_trace.o $(FLAGS_LIB) -o $(DIR_BUILD_TEST)$(BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 

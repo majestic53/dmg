@@ -98,11 +98,140 @@ dmg_launcher_debug_disassemble_data(
 	__in uint16_t offset
 	)
 {
-	fprintf(stdout, "[%04x+%u] -- %u instructions\n\n", address, offset, offset);
+	int result;
+	uint32_t index;
+	dmg_action_t request = {}, response = {};
 
-	// TODO: DISASEMBLE FROM INSTRUCTION[ADDRESS] - INSTRUCTION[ADDRESS] + OFFSET
-	return DMG_STATUS_SUCCESS;
-	// ---
+	request.type = DMG_ACTION_READ;
+	request.address = address;
+
+	for(index = 0; index < offset; ++index) {
+		uint8_t opcode;
+		bool extended = false;
+
+		if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		++request.address;
+
+		if((extended = ((opcode = response.data.byte) == INSTRUCTION_EXTENDED_PREFIX))) {
+
+			if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			++request.address;
+			opcode = response.data.byte;
+		}
+
+		request.address += dmg_processor_instruction(opcode, extended)->operand;
+	}
+
+	fprintf(stdout, "[%04x+%04x] -- %u instructions\n\n", address, request.address - 1, offset);
+	request.address = address;
+
+	for(index = 0; index < offset; ++index) {
+		const char *format;
+		bool extended = false;
+		uint8_t opcode, operand[2] = {};
+		const dmg_processor_instruction_t *instruction;
+
+		if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		++request.address;
+
+		if((extended = ((opcode = response.data.byte) == INSTRUCTION_EXTENDED_PREFIX))) {
+
+			if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			++request.address;
+			opcode = response.data.byte;
+		}
+
+		format = dmg_processor_instruction_string(opcode, extended);
+
+		switch((instruction = dmg_processor_instruction(opcode, extended))->operand) {
+			case OPERAND_BYTE:
+
+				if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+
+				++request.address;
+				operand[0] = response.data.byte;
+
+				if(extended) {
+					fprintf(stdout, "%04x | %02x %02x %02x     ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
+						operand[0]);
+				} else {
+					fprintf(stdout, "%04x | %02x %02x        ", address, opcode, operand[0]);
+				}
+
+				switch(instruction->opcode) {
+					case INSTRUCTION_ADD_SP_I8:
+					case INSTRUCTION_LD_HL_SP_I8:
+						fprintf(stdout, format, operand[0], operand[0]);
+						break;
+					case INSTRUCTION_JR_C_I8:
+					case INSTRUCTION_JR_NC_I8:
+					case INSTRUCTION_JR_NZ_I8:
+					case INSTRUCTION_JR_I8:
+					case INSTRUCTION_JR_Z_I8:
+						fprintf(stdout, format, operand[0], operand[0], request.address + (int8_t)operand[0]);
+						break;
+					default:
+						fprintf(stdout, format, operand[0]);
+						break;
+				}
+				break;
+			case OPERAND_WORD:
+
+				if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+
+				++request.address;
+				operand[0] = response.data.byte;
+
+				if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+
+				++request.address;
+				operand[1] = response.data.byte;
+
+				if(extended) {
+					fprintf(stdout, "%04x | %02x %02x %02x %02x   ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
+						operand[0], operand[1]);
+				} else {
+					fprintf(stdout, "%04x | %02x %02x %02x     ", address, opcode, operand[0], operand[1]);
+				}
+
+				fprintf(stdout, format, (operand[1] << CHAR_BIT) | operand[0]);
+				break;
+			default:
+
+				if(extended) {
+					fprintf(stdout, "%04x | %02x %02x        ", address, INSTRUCTION_EXTENDED_PREFIX, opcode);
+				} else {
+					fprintf(stdout, "%04x | %02x           ", address, opcode);
+				}
+
+				fprintf(stdout, "%s", format);
+				break;
+		}
+
+		fprintf(stdout, "\n");
+		address = request.address;
+	}
+
+exit:
+	return result;
 }
 
 static int
@@ -369,20 +498,6 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_IME:
 		case DMG_REGISTER_PROCESSOR_STOP:
 			fprintf(stdout, "%x", response.data.byte);
-
-			switch(address) {
-				case DMG_REGISTER_PROCESSOR_HALT:
-					fprintf(stdout, "      %s", response.data.byte ? "Halted" : "Running");
-					break;
-				case DMG_REGISTER_PROCESSOR_IME:
-					fprintf(stdout, "      %s", response.data.byte ? "Enabled" : "Disabled");
-					break;
-				case DMG_REGISTER_PROCESSOR_STOP:
-					fprintf(stdout, "      %s", response.data.byte ? "Stopped" : "Running");
-					break;
-				default:
-					break;
-			}
 			break;
 		default:
 			result = DMG_STATUS_INVALID;
@@ -408,18 +523,6 @@ dmg_launcher_debug_processor(
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_PC]);
-
-	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_PC)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_SP]);
-
-	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_SP)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
 	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_AF]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_AF)) != DMG_STATUS_SUCCESS) {
@@ -441,6 +544,18 @@ dmg_launcher_debug_processor(
 	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HL]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_HL)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_PC]);
+
+	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_PC)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_SP]);
+
+	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_SP)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 

@@ -16,13 +16,30 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#include "./instruction_type.h"
 
-#include "../../include/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 1
-#define VERSION_PATCH 79
+const dmg_processor_instruction_t *
+dmg_processor_instruction(
+	__in uint8_t opcode,
+	__in bool extended
+	)
+{
+	return (extended ? &INSTRUCTION_EXTENDED[opcode] : &INSTRUCTION[opcode]);
+}
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+const char *
+dmg_processor_instruction_string(
+	__in uint8_t opcode,
+	__in bool extended
+	)
+{
+	return (extended ? INSTRUCTION_EXTENDED_STR[opcode] : INSTRUCTION_STR[opcode]);
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

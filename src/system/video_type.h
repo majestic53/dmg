@@ -141,7 +141,7 @@ typedef struct {
 	dmg_video_tile_line_t line[TILE_HEIGHT];
 } __attribute__((packed)) dmg_video_tile_t;
 
-typedef bool (*dmg_mode)(
+typedef bool (*dmg_video_mode_hdlr)(
 	__in dmg_video_t *video
 	);
 

@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "../../include/system/processor/instruction.h"
 #include "../../include/common/define.h"
 #include "../../include/dmg.h"
 

@@ -346,7 +346,7 @@ dmg_video_vblank(
 	return false;
 }
 
-static const dmg_mode MODE_HANDLER[] = {
+static const dmg_video_mode_hdlr MODE_HANDLER[] = {
 	dmg_video_hblank, /* MODE_HBLANK */
 	dmg_video_vblank, /* MODE_VBLANK */
 	dmg_video_search, /* MODE_SEARCH */

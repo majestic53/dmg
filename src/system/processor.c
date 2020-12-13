@@ -1488,7 +1488,7 @@ dmg_processor_instruction_xor(
 	return instruction->cycle;
 }
 
-static const dmg_processor_instruction INSTRUCTION_HANDLER[] = {
+static const dmg_processor_instruction_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_processor_instruction_nop, /* 0x00 */
 	dmg_processor_instruction_ld,
 	dmg_processor_instruction_ld,
@@ -2677,7 +2677,7 @@ dmg_processor_instruction_extended_swap(
 	return instruction->cycle;
 }
 
-static const dmg_processor_instruction INSTRUCTION_EXTENDED_HANDLER[] = {
+static const dmg_processor_instruction_hdlr INSTRUCTION_EXTENDED_HANDLER[] = {
 	dmg_processor_instruction_extended_rlc, /* 0x00 */
 	dmg_processor_instruction_extended_rlc,
 	dmg_processor_instruction_extended_rlc,
@@ -2974,7 +2974,7 @@ dmg_processor_trace_instruction(
 	__in const dmg_processor_register_t *operand
 	)
 {
-	const char *format = (extended ? INSTRUCTION_EXTENDED_STR[instruction->opcode] : INSTRUCTION_STR[instruction->opcode]);
+	const char *format = dmg_processor_instruction_string(instruction->opcode, extended);
 
 	switch(instruction->operand) {
 		case OPERAND_BYTE:
@@ -3046,17 +3046,17 @@ dmg_processor_execute(
 		bool extended;
 		uint8_t opcode;
 		dmg_processor_register_t operand = {};
-		const dmg_processor_instruction *handler;
+		const dmg_processor_instruction_hdlr *handler;
 		const dmg_processor_instruction_t *instruction;
 
 		if((extended = ((opcode = dmg_processor_fetch(processor)) == INSTRUCTION_EXTENDED_PREFIX))) {
 			opcode = dmg_processor_fetch(processor);
-			instruction = &INSTRUCTION_EXTENDED[opcode];
 			handler = &INSTRUCTION_EXTENDED_HANDLER[opcode];
 		} else {
-			instruction = &INSTRUCTION[opcode];
 			handler = &INSTRUCTION_HANDLER[opcode];
 		}
+
+		instruction = dmg_processor_instruction(opcode, extended);
 
 		switch(instruction->operand) {
 			case OPERAND_BYTE:
@@ -3090,6 +3090,8 @@ dmg_processor_execute(
 	} else {
 		result += CYCLE_IDLE;
 	}
+
+	TRACE_PROCESSOR(LEVEL_VERBOSE, processor);
 
 	return result;
 }

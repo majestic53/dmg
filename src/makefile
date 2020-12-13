@@ -20,12 +20,14 @@ DIR_BUILD=../build/
 DIR_INCLUDE=../include/
 DIR_INCLUDE_COMMON=../include/common/
 DIR_INCLUDE_SYSTEM=../include/system/
+DIR_INCLUDE_SYSTEM_PROCESSOR=../include/system/processor/
 DIR_INCLUDE_TYPE=../include/type/
 DIR_INCLUDE_TYPE_MAPPER=../include/type/mapper/
 DIR_SRC=./
 DIR_SRC_COMMON=./common/
 DIR_SRC_SERVICE=./service/
 DIR_SRC_SYSTEM=./system/
+DIR_SRC_SYSTEM_PROCESSOR=./system/processor/
 DIR_SRC_TYPE=./type/
 DIR_SRC_TYPE_MAPPER=./type/mapper/
 
@@ -33,7 +35,7 @@ FLAGS=-march=native -std=c11 -Wall -Werror
 
 LIB=libdmg.a
 
-build: build_base build_common build_service build_system build_type build_type_mapper
+build: build_base build_common build_service build_system build_system_processor build_type build_type_mapper
 
 build_base: base_dmg.o base_runtime.o base_service.o
 
@@ -85,6 +87,11 @@ system_timer.o: $(DIR_SRC_SYSTEM)timer.c $(DIR_INCLUDE_SYSTEM)timer.h
 system_video.o: $(DIR_SRC_SYSTEM)video.c $(DIR_INCLUDE_SYSTEM)video.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM)video.c -o $(DIR_BUILD)system_video.o
 
+build_system_processor: system_processor_instruction.o
+
+system_processor_instruction.o: $(DIR_SRC_SYSTEM_PROCESSOR)instruction.c $(DIR_INCLUDE_SYSTEM_PROCESSOR)instruction.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_SYSTEM_PROCESSOR)instruction.c -o $(DIR_BUILD)system_processor_instruction.o
+
 build_type: type_bank.o type_bootrom.o type_buffer.o type_cartridge.o type_mapper.o
 
 type_bank.o: $(DIR_SRC_TYPE)bank.c $(DIR_INCLUDE_TYPE)bank.h
@@ -124,6 +131,7 @@ archive:
 		$(DIR_BUILD)service_sdl.o \
 		$(DIR_BUILD)system_audio.o $(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 			$(DIR_BUILD)system_serial.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
+		$(DIR_BUILD)system_processor_instruction.o \
 		$(DIR_BUILD)type_bank.o $(DIR_BUILD)type_bootrom.o $(DIR_BUILD)type_buffer.o $(DIR_BUILD)type_cartridge.o \
 			$(DIR_BUILD)type_mapper.o \
 		$(DIR_BUILD)type_mapper_mbc1.o $(DIR_BUILD)type_mapper_mbc2.o $(DIR_BUILD)type_mapper_mbc3.o $(DIR_BUILD)type_mapper_mbc5.o
