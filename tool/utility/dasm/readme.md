@@ -25,7 +25,7 @@ The following arguments are available:
 dmg-dasm [args]
 
 -h	Display help information
--o	Specify an output file
+-o	Specify output file
 -r	Specify rom file
 -v	Display version information
 ```

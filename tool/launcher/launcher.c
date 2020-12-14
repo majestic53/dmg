@@ -128,7 +128,7 @@ dmg_launcher_debug_disassemble_data(
 		request.address += dmg_processor_instruction(opcode, extended)->operand;
 	}
 
-	fprintf(stdout, "[%04x+%04x] -- %u instructions\n\n", address, request.address - 1, offset);
+	fprintf(stdout, "[%04x-%04x] -- %u instructions\n\n", address, request.address - 1, offset);
 	request.address = address;
 
 	for(index = 0; index < offset; ++index) {

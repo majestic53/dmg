@@ -59,7 +59,7 @@ static const char *FLAG_STR[] = {
 
 static const char *FLAG_DESCRIPTION_STR[] = {
 	"Display help information", /* FLAG_HELP */
-	"Specify an output file", /* FLAG_OUTPUT */
+	"Specify output file", /* FLAG_OUTPUT */
 	"Specify rom file", /* FLAG_ROM */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */

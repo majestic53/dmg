@@ -8,6 +8,26 @@ About
 
 A simple GameBoy emulator, written in C.
 
+### Features supported
+
+* All LR35902 instructions
+* Hardware peripherals (joypad/serial/timer)
+* Common cartridge types:
+
+#### Cartridge support
+
+|Cartridge type|Value |
+|:-------------|:-----|
+|ROM-Only      |0, 8-9|
+|MBC1          |1-3   |
+|MBC2          |5-6   |
+|MBC3          |15-19 |
+|MBC5          |25-30 |
+
+### Features not supported
+
+* Audio playback
+
 Table of Contents
 =
 
@@ -72,16 +92,6 @@ For an example of how to use this interface, see the [launcher tool](https://git
 |dmg_step   |Step emulator instance               |```int dmg_step(unsigned, const unsigned short *, unsigned)```|
 |dmg_error  |Retrieve emulator instance error     |```const char *dmg_error(void)```                             |
 |dmg_version|Retrieve emulator instance version   |```const dmg_version_t *dmg_version(void)```                  |
-
-#### Cartridge Support
-
-|Cartridge type|Value |
-|:-------------|:-----|
-|ROM-Only      |0, 8-9|
-|MBC1          |1-3   |
-|MBC2          |5-6   |
-|MBC3          |15-19 |
-|MBC5          |25-30 |
 
 Trademark
 =

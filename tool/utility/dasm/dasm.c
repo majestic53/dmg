@@ -51,6 +51,7 @@ static int
 dmg_utility_dasm_file_disassemble_comment(void)
 {
 	uint32_t address;
+	uint16_t checksum = 0;
 	int result = EXIT_SUCCESS;
 	const dmg_version_t *version;
 	const dmg_cartridge_header_t *header;
@@ -123,6 +124,15 @@ dmg_utility_dasm_file_disassemble_comment(void)
 		result = EXIT_FAILURE;
 	} else {
 		fprintf(g_dasm.file, "%s\n\n", RAM_STR[header->ram]);
+	}
+
+	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
+		checksum = (checksum - ((uint8_t *)g_dasm.buffer.data)[address] - 1);
+	}
+
+	checksum &= UINT8_MAX;
+	if(header->checksum != checksum) {
+		fprintf(stdout, "%c Checksum  MISMATCH (Expecting %02x)\n", COMMENT_DELIMITER, checksum);
 	}
 
 	return result;
