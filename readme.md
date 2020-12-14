@@ -10,7 +10,7 @@ A simple GameBoy emulator, written in C.
 
 ### Features supported
 
-* All LR35902 instructions
+* All processor instructions
 * Hardware peripherals (joypad/serial/timer)
 * Common cartridge types:
 
