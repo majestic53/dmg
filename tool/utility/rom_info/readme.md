@@ -4,7 +4,7 @@ DMG Rom Information
 About
 =
 
-A tool for varifying GameBoy ROM file contents.
+A tool for varifying GameBoy rom file contents.
 
 Usage
 =
@@ -31,7 +31,7 @@ dmg-rom-info [args]
 
 #### Examples
 
-The following example shows how to launch dmg-rom-info with a ROM file:
+The following example shows how to launch dmg-rom-info with a rom file:
 
 ```
 $ ./bin/dmg-rom-info -r rom.gb

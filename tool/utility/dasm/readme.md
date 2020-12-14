@@ -4,7 +4,7 @@ DMG Disassembler
 About
 =
 
-A tool for disassembling GameBoy ROM files.
+A tool for disassembling GameBoy rom files.
 
 Usage
 =
@@ -32,13 +32,13 @@ dmg-dasm [args]
 
 #### Examples
 
-The following example shows how to launch dmg-dasm with a ROM file:
+The following example shows how to launch dmg-dasm with a rom file:
 
 ```
 $ ./bin/dmg-dasm -r rom.gb
 ```
 
-The following example shows how to launch dmg-dasm with a ROM file and output to a specified file:
+The following example shows how to launch dmg-dasm with a rom file and output to a specified file:
 
 ```
 $ ./bin/dmg-dasm -r rom.gb -o path/to/output/file.s

@@ -1,4 +1,4 @@
-DMG Launcher
+dmg Launcher
 =
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
@@ -6,7 +6,7 @@ DMG Launcher
 About
 =
 
-A launcher for running GameBoy ROM/BOOTROM binaries, with support for various palettes and more.
+A launcher for running GameBoy rom/bootrom binaries, with support for various palettes and more.
 
 Usage
 =
@@ -40,49 +40,49 @@ dmg [args]
 
 #### Examples
 
-The following example shows how to launch DMG with a ROM file:
+The following example shows how to launch dmg with a rom file:
 
 ```
 $ ./bin/dmg -r rom.gb
 ```
 
-The following example shows how to launch DMG with a ROM/BOOTROM file:
+The following example shows how to launch dmg with a rom/bootrom file:
 
 ```
 $ ./bin/dmg -r rom.gb -b bootrom.gb
 ```
 
-The following example shows how to launch DMG with the serial capture enabled:
+The following example shows how to launch dmg with the serial capture enabled:
 
 ```
 $ ./bin/dmg -r rom.gb -c
 ```
 
-The following example shows how to launch DMG with the debug prompt enabled:
+The following example shows how to launch dmg with the debug prompt enabled:
 
 ```
 $ ./bin/dmg -r rom.gb -d
 ```
 
-The following example shows how to launch DMG and import a save file:
+The following example shows how to launch dmg and import a save file:
 
 ```
 $ ./bin/dmg -r rom.gb -i save.dmg
 ```
 
-The following example shows how to launch DMG and export a save file:
+The following example shows how to launch dmg and export a save file:
 
 ```
 $ ./bin/dmg -r rom.gb -o save.dmg
 ```
 
-The following example shows how to launch DMG with an alternative color palette:
+The following example shows how to launch dmg with an alternative color palette:
 
 ```
 $ ./bin/dmg -r rom.gb -p 1
 ```
 
-The following example shows how to launch DMG with the display scaled by 2x:
+The following example shows how to launch dmg with the display scaled by 2x:
 
 ```
 $ ./bin/dmg -r rom.gb -s 2
@@ -109,60 +109,60 @@ w	Write byte(s) to address/register
 The following example shows how to run the emulator with a breakpoint at address ```0x0100``` and ```0x0200```:
 
 ```
-(DMG) c 100 200
+(0) c 100 200
 ```
 
 The following example shows how to step the emulator through 10 instructions, with a breakpoint at address ```0x0100```:
 
 ```
-(DMG) s 10 100
+(0) s 10 100
 ```
 The following example shows how to read from address ```0xa000```:
 
 ```
-(DMG) r a000
+(0) r a000
 ```
 
 The following example shows how to read from address ```0xa000-0xa01f```:
 
 ```
-(DMG) r a000 20
+(0) r a000 20
 ```
 
 The following example shows how to read from register ```$pc```:
 
 ```
-(DMG) r $pc
+(0) r $pc
 ```
 
 The following example shows how to write ```0xcc``` to address ```0xa000```:
 
 ```
-(DMG) w a000 cc
+(0) w a000 cc
 ```
 
 The following example shows how to write ```0xcc``` to address ```0xa000-0xa01f```:
 
 ```
-(DMG) w a000 cc 20
+(0) w a000 cc 20
 ```
 
 The following example shows how to write ```0xaabb``` to register ```$pc```:
 
 ```
-(DMG) w $pc aabb
+(0) w $pc aabb
 ```
 
 The following example shows how to disassemble ```3``` instructions at address ```0x0100```:
 
 ```
-(DMG) z 100 3
+(0) z 100 3
 ```
 
 The following example shows how to disassemble the instruction at ```$pc```:
 
 ```
-(DMG) z $pc
+(0) z $pc
 ```
 
 #### Palettes
