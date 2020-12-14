@@ -14,8 +14,6 @@ A simple GameBoy emulator, written in C.
 * Hardware peripherals (joypad/serial/timer)
 * Common cartridge types:
 
-#### Cartridge support
-
 |Cartridge type|Value |
 |:-------------|:-----|
 |ROM-Only      |0, 8-9|
