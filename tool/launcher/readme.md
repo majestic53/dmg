@@ -1,4 +1,4 @@
-dmg Launcher
+DMG Launcher
 =
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)

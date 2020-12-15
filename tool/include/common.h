@@ -47,7 +47,9 @@
 
 #define KBYTE 1024
 
-#define COMMENT_DELIMITER ';'
+#define CHARACTER_FILL '.'
+
+#define COMMENT_PREFIX ';'
 
 #define PATH_DELIMITER '/'
 #define PATH_MAX 1024

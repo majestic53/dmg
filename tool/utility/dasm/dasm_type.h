@@ -120,4 +120,60 @@ typedef struct {
 	bool version;
 } __attribute__((packed)) dmg_dasm_t;
 
+#define DIRECTIVE_DELIMITER "."
+#define HEADER_WIDTH 16
+#define LABEL_PREFIX ":"
+
+enum {
+	DIRECTIVE_BANK = 0,
+	DIRECTIVE_DATA,
+	DIRECTIVE_ORIGIN,
+	DIRECTIVE_MAX,
+};
+
+static const char *DIRECTIVE_STR[] = {
+	DIRECTIVE_DELIMITER "bank", /* DIRECTIVE_BANK */
+	DIRECTIVE_DELIMITER "db", /* DIRECTIVE_DATA */
+	DIRECTIVE_DELIMITER "org", /* DIRECTIVE_ORIGIN */
+	"", /* DIRECTIVE_MAX */
+};
+
+#define VECTOR_WIDTH 8
+
+enum {
+	VECTOR_RST_00 = 0,
+	VECTOR_RST_08,
+	VECTOR_RST_10,
+	VECTOR_RST_18,
+	VECTOR_RST_20,
+	VECTOR_RST_28,
+	VECTOR_RST_30,
+	VECTOR_RST_38,
+	VECTOR_VBLANK,
+	VECTOR_LCDC,
+	VECTOR_TIMER,
+	VECTOR_SERIAL,
+	VECTOR_JOYPAD,
+	VECTOR_MAX,
+};
+
+static const char *VECTOR_STR[] = {
+	"vec_rst_00" LABEL_PREFIX, /* VECTOR_RST_00 */
+	"vec_rst_08" LABEL_PREFIX, /* VECTOR_RST_08 */
+	"vec_rst_10" LABEL_PREFIX, /* VECTOR_RST_10 */
+	"vec_rst_18" LABEL_PREFIX, /* VECTOR_RST_18 */
+	"vec_rst_20" LABEL_PREFIX, /* VECTOR_RST_20 */
+	"vec_rst_28" LABEL_PREFIX, /* VECTOR_RST_28 */
+	"vec_rst_30" LABEL_PREFIX, /* VECTOR_RST_30 */
+	"vec_rst_38" LABEL_PREFIX, /* VECTOR_RST_38 */
+	"vec_vblank" LABEL_PREFIX, /* VECTOR_VBLANK */
+	"vec_lcdc" LABEL_PREFIX, /* VECTOR_LCDC */
+	"vec_timer" LABEL_PREFIX, /* VECTOR_TIMER */
+	"vec_serial" LABEL_PREFIX, /* VECTOR_SERIAL */
+	"vec_joypad" LABEL_PREFIX, /* VECTOR_JOYPAD */
+	"", /* VECTOR_MAX */
+	};
+
+#define BANK_WIDTH ADDRESS_WIDTH(ADDRESS_ROM_BEGIN, ADDRESS_ROM_END)
+
 #endif /* DMG_TOOL_UTILITY_DASM_TYPE_H_ */

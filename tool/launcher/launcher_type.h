@@ -26,8 +26,6 @@
 #define ARGUMENT_READ_WIDTH 16
 #define ARGUMENT_WRITE 2
 
-#define CHARACTER_FILL '.'
-
 #define PATH_ROM_INFO "dmg-rom-info -r "
 #define PATH_SAVE_INFO "dmg-save-info -s "
 

@@ -62,7 +62,8 @@ link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD)common_version.o -o $(DIR_BIN)$(BIN_UTILITY_DASM) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD)common_version.o $(DIR_BUILD)system_processor_instruction.o \
+		-o $(DIR_BIN)$(BIN_UTILITY_DASM) $(FLAGS_BIN)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD)common_version.o -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD)common_version.o -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
 	@echo '--- DONE -----------------------------------'
