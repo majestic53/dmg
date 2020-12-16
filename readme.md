@@ -24,16 +24,14 @@ A simple GameBoy emulator, written in C.
 
 ### Features not supported
 
-* Audio playback
+* Audio
 
-Table of Contents
+Latest Release
 =
 
-1. [Building](https://github.com/majestic53/dmg#building) -- How to build the project
-2. [Usage](https://github.com/majestic53/dmg#usage) -- How to use the project
-3. [License](https://github.com/majestic53/dmg#license) -- Project license
+The latest release can be found here: [v0.2-alpha](https://github.com/majestic53/dmg/releases/tag/v0.2-alpha)
 
-Building
+Building from Source
 =
 
 __NOTE__: This project was tested under Linux with the GCC/Clang C compilers. Some modifications to the makefiles will be required to build with a different OS/compiler.
@@ -72,8 +70,6 @@ $ make
 
 Usage
 =
-
-### Interface
 
 This project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
 
