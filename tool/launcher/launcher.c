@@ -95,7 +95,8 @@ dmg_launcher_debug_register(
 static int
 dmg_launcher_debug_disassemble_data(
 	__in uint16_t address,
-	__in uint16_t offset
+	__in uint16_t offset,
+	__in bool verbose
 	)
 {
 	int result;
@@ -128,7 +129,10 @@ dmg_launcher_debug_disassemble_data(
 		request.address += dmg_processor_instruction(opcode, extended)->operand;
 	}
 
-	fprintf(stdout, "[%04x-%04x] -- %u instructions\n\n", address, request.address - 1, offset);
+	if(verbose) {
+		fprintf(stdout, "[%04x-%04x] -- %u instructions\n\n", address, request.address - 1, offset);
+	}
+
 	request.address = address;
 
 	for(index = 0; index < offset; ++index) {
@@ -237,7 +241,8 @@ exit:
 static int
 dmg_launcher_debug_disassemble_register(
 	__in uint16_t address,
-	__in uint16_t offset
+	__in uint16_t offset,
+	__in bool verbose
 	)
 {
 	int result;
@@ -280,7 +285,7 @@ dmg_launcher_debug_disassemble_register(
 			goto exit;
 	}
 
-	result = dmg_launcher_debug_disassemble_data(address, offset);
+	result = dmg_launcher_debug_disassemble_data(address, offset, verbose);
 
 exit:
 	return result;
@@ -317,9 +322,9 @@ dmg_launcher_debug_disassemble(
 	}
 
 	if(register_read) {
-		result = dmg_launcher_debug_disassemble_register(address, offset);
+		result = dmg_launcher_debug_disassemble_register(address, offset, true);
 	} else {
-		result = dmg_launcher_debug_disassemble_data(address, offset);
+		result = dmg_launcher_debug_disassemble_data(address, offset, true);
 	}
 
 exit:
@@ -660,6 +665,7 @@ dmg_launcher_debug_step(
 	__in uint32_t count
 	)
 {
+	int result;
 	uint16_t breakpoint[ARGUMENT_MAX] = {}, instruction = 1;
 
 	if(count >= 1) {
@@ -672,7 +678,11 @@ dmg_launcher_debug_step(
 		--count;
 	}
 
-	return dmg_step(instruction, breakpoint, count);
+	if((result = dmg_step(instruction, breakpoint, count)) == DMG_STATUS_SUCCESS) {
+		dmg_launcher_debug_disassemble_register(DMG_REGISTER_PROCESSOR_PC, 1, false);
+	}
+
+	return result;
 }
 
 static int
@@ -871,6 +881,7 @@ dmg_launcher_debug(
 	int result;
 	bool complete = false;
 
+	using_history();
 	stifle_history(HISTORY_MAX);
 	dmg_launcher_debug_header(path);
 
@@ -882,92 +893,104 @@ dmg_launcher_debug(
 		}
 
 		if((input = readline(prompt))) {
+			int debug = 0;
+			uint32_t count = 0;
+			bool first = true, from_history = false;
+			dmg_action_t request = {}, response = {};
+			const char *argument[ARGUMENT_MAX] = {}, *next;
 
-			if(strlen(input)) {
-				int debug = 0;
-				bool first = true;
-				uint32_t count = 0;
-				dmg_action_t request = {}, response = {};
-				const char *argument[ARGUMENT_MAX] = {}, *next;
+			if((from_history = !strlen(input))) {
+				HIST_ENTRY *previous;
 
-				for(; debug < DEBUG_MAX; ++debug) {
-
-					if(input[0] == DEBUG_CHAR[debug]) {
-						break;
-					}
+				if(!(previous = history_get(where_history()))) {
+					goto cleanup;
 				}
 
-				if(debug >= DEBUG_MAX) {
+				input = previous->line;
+			}
+
+			for(; debug < DEBUG_MAX; ++debug) {
+
+				if(input[0] == DEBUG_CHAR[debug]) {
+					break;
+				}
+			}
+
+			if(debug >= DEBUG_MAX) {
+				LEVEL_COLOR(stderr, LEVEL_ERROR);
+				fprintf(stderr, "Unsupported command: %s\n", input);
+				LEVEL_COLOR(stderr, LEVEL_NONE);
+				goto cleanup;
+			}
+
+			add_history(input);
+			next = strtok(input, " ");
+
+			while(next) {
+
+				if(count >= ARGUMENT_MAX) {
 					LEVEL_COLOR(stderr, LEVEL_ERROR);
-					fprintf(stderr, "Unsupported command: %s\n", input);
+					fprintf(stderr, "Too many arguments: %u\n", count + 1);
 					LEVEL_COLOR(stderr, LEVEL_NONE);
 					goto cleanup;
 				}
 
-				add_history(input);
-				next = strtok(input, " ");
-
-				while(next) {
-
-					if(count >= ARGUMENT_MAX) {
-						LEVEL_COLOR(stderr, LEVEL_ERROR);
-						fprintf(stderr, "Too many arguments: %u\n", count + 1);
-						LEVEL_COLOR(stderr, LEVEL_NONE);
-						goto cleanup;
-					}
-
-					if(!first) {
-						argument[count++] = next;
-					}
-
-					next = strtok(NULL, " ");
-					first = false;
+				if(!first) {
+					argument[count++] = next;
 				}
 
-				switch(debug) {
-					case DEBUG_EXIT:
-						complete = true;
-						break;
-					case (DEBUG_EXIT + 1) ... (DEBUG_MAX - 1):
+				next = strtok(NULL, " ");
+				first = false;
+			}
 
-						switch(DEBUG_HANDLER[debug](argument, count)) {
-							case DMG_STATUS_SUCCESS:
-								break;
-							case DMG_STATUS_BREAKPOINT:
-								LEVEL_COLOR(stdout, LEVEL_WARNING);
-								request.type = DMG_ACTION_READ;
-								request.address = DMG_REGISTER_PROCESSOR_PC;
-								request.data.dword = UINT32_MAX;
+			switch(debug) {
+				case DEBUG_EXIT:
+					complete = true;
+					break;
+				case (DEBUG_EXIT + 1) ... (DEBUG_MAX - 1):
 
-								if(dmg_action(&request, &response) == DMG_STATUS_SUCCESS) {
-									fprintf(stdout, "Breakpoint: %04x\n", response.data.word);
-								} else {
-									fprintf(stdout, "Breakpoint\n");
-								}
+					switch(DEBUG_HANDLER[debug](argument, count)) {
+						case DMG_STATUS_SUCCESS:
+							break;
+						case DMG_STATUS_BREAKPOINT:
+							LEVEL_COLOR(stdout, LEVEL_WARNING);
+							request.type = DMG_ACTION_READ;
+							request.address = DMG_REGISTER_PROCESSOR_PC;
+							request.data.dword = UINT32_MAX;
 
-								LEVEL_COLOR(stdout, LEVEL_NONE);
-								break;
-							default:
-								LEVEL_COLOR(stderr, LEVEL_ERROR);
-								fprintf(stderr, "Command failed: %s\n", input);
-								LEVEL_COLOR(stderr, LEVEL_NONE);
-								break;
-						}
-						break;
-					default:
-						LEVEL_COLOR(stderr, LEVEL_ERROR);
-						fprintf(stderr, "Unsupported command type: %i\n", debug);
-						LEVEL_COLOR(stderr, LEVEL_NONE);
-						break;
-				}
+							if(dmg_action(&request, &response) == DMG_STATUS_SUCCESS) {
+								fprintf(stdout, "Breakpoint: %04x\n", response.data.word);
+							} else {
+								fprintf(stdout, "Breakpoint\n");
+							}
+
+							LEVEL_COLOR(stdout, LEVEL_NONE);
+							break;
+						default:
+							LEVEL_COLOR(stderr, LEVEL_ERROR);
+							fprintf(stderr, "Command failed: %s\n", input);
+							LEVEL_COLOR(stderr, LEVEL_NONE);
+							break;
+					}
+					break;
+				default:
+					LEVEL_COLOR(stderr, LEVEL_ERROR);
+					fprintf(stderr, "Unsupported command type: %i\n", debug);
+					LEVEL_COLOR(stderr, LEVEL_NONE);
+					break;
 			}
 
 cleanup:
-			free(input);
+
+			if(!from_history && input) {
+				free(input);
+			}
 		}
 	}
 
 exit:
+	clear_history();
+
 	return result;
 }
 

@@ -31,7 +31,7 @@ DIR_SRC_SYSTEM_PROCESSOR=./system/processor/
 DIR_SRC_TYPE=./type/
 DIR_SRC_TYPE_MAPPER=./type/mapper/
 
-FLAGS=-march=native -std=c11 -Wall -Werror
+FLAGS=-std=c11 -Wall -Werror
 
 LIB=libdmg.a
 

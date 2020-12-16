@@ -22,7 +22,7 @@ DIR_SRC_SYSTEM=../../src/system/
 
 BIN=test-memory
 
-FLAGS=-march=native -std=c11 -Wall -Werror
+FLAGS=-std=c11 -Wall -Werror
 FLAGS_BIN=
 FLAGS_LIB=-lSDL2 -lSDL2main
 

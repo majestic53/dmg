@@ -28,7 +28,7 @@ BIN_UTILITY_DASM=dmg-dasm
 BIN_UTILITY_ROM_INFO=dmg-rom-info
 BIN_UTILITY_SAVE_INFO=dmg-save-info
 
-FLAGS=-march=native -std=c11 -Wall -Werror
+FLAGS=-std=c11 -Wall -Werror
 FLAGS_BIN=
 FLAGS_LIB=-lreadline -lSDL2 -lSDL2main
 

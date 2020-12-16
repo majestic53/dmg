@@ -135,7 +135,7 @@ dmg_utility_dasm_disassemble_header(
 		if(!(address % HEADER_WIDTH)) {
 
 			if(strlen(str)) {
-				fprintf(g_dasm.file, "   %s", str);
+				fprintf(g_dasm.file, "   %c%s", COMMENT_PREFIX, str);
 				memset(str, 0, sizeof(str));
 				count = 0;
 			}
@@ -149,7 +149,7 @@ dmg_utility_dasm_disassemble_header(
 	}
 
 	if(strlen(str)) {
-		fprintf(g_dasm.file, "   %s", str);
+		fprintf(g_dasm.file, "   %c%s", COMMENT_PREFIX, str);
 		memset(str, 0, sizeof(str));
 	}
 
