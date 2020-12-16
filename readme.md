@@ -3,9 +3,6 @@ DMG
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions)
 
-About
-=
-
 A simple GameBoy emulator, written in C.
 
 ### Features supported
@@ -68,7 +65,7 @@ $ export CC=gcc
 $ make
 ```
 
-Usage
+Using the Library
 =
 
 This project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:

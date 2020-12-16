@@ -1,15 +1,10 @@
 DMG Save Information
 =
 
-About
-=
-
 A tool for varifying GameBoy save file contents.
 
-Usage
+Interface
 =
-
-### Interface
 
 Launch from the project root directory:
 

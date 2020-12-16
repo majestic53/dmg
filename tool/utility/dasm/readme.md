@@ -1,15 +1,10 @@
 DMG Disassembler
 =
 
-About
-=
-
 A tool for disassembling GameBoy rom files.
 
-Usage
+Interface
 =
-
-### Interface
 
 Launch from the project root directory:
 

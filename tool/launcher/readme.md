@@ -3,15 +3,10 @@ DMG Launcher
 
 ![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
 
-About
-=
-
 A launcher for running GameBoy rom/bootrom binaries, with support for various palettes and more.
 
-Usage
+Interface
 =
-
-### Interface
 
 Launch from the project root directory:
 

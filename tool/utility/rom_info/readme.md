@@ -1,15 +1,10 @@
 DMG Rom Information
 =
 
-About
-=
-
 A tool for varifying GameBoy rom file contents.
 
-Usage
+Interface
 =
-
-### Interface
 
 Launch from the project root directory:
 
