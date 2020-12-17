@@ -16,31 +16,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_BANK_H_
-#define DMG_TYPE_BANK_H_
+#ifndef DMG_COMMON_MAPPER_MBC1_H_
+#define DMG_COMMON_MAPPER_MBC1_H_
 
-#include "./buffer.h"
-
-typedef struct {
-	dmg_buffer_t *buffer;
-	uint32_t count;
-} __attribute__((packed)) dmg_bank_t;
+#include "../mapper.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_bank_allocate(
-	__inout dmg_bank_t *bank,
-	__in uint32_t count
-	);
-
-void dmg_bank_free(
-	__inout dmg_bank_t *bank
+void dmg_mapper_mbc1_write_rom(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
 	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TYPE_BANK_H_ */
+#endif /* DMG_COMMON_MAPPER_MBC1_H_ */

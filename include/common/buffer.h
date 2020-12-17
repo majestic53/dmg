@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_BUFFER_H_
-#define DMG_TYPE_BUFFER_H_
+#ifndef DMG_COMMON_BUFFER_H_
+#define DMG_COMMON_BUFFER_H_
 
 #include "../common.h"
 
@@ -39,4 +39,4 @@ void dmg_buffer_free(
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TYPE_BUFFER_H_ */
+#endif /* DMG_COMMON_BUFFER_H_ */

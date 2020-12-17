@@ -19,9 +19,9 @@
 #ifndef DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
 #define DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
 
-#include "../../../src/type/cartridge_type.h"
-#include "../../../src/type/mapper_type.h"
-#include "../../../include/type/cartridge.h"
+#include "../../../src/common/cartridge_type.h"
+#include "../../../src/common/mapper_type.h"
+#include "../../../include/common/cartridge.h"
 #include "../../include/common.h"
 
 #define DMG "DMG-ROM-INFO"

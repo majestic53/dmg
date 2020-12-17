@@ -16,52 +16,46 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_H_
-#define DMG_TYPE_MAPPER_H_
+#ifndef DMG_COMMON_BOOTROM_H_
+#define DMG_COMMON_BOOTROM_H_
 
-#include "./mapper/common.h"
+#include "../common.h"
+
+typedef struct {
+	const dmg_buffer_t *buffer;
+	bool enable;
+} __attribute__((packed)) dmg_bootrom_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_mapper_export(
-	__in const dmg_mapper_t *mapper,
+int dmg_bootrom_export(
+	__in const dmg_bootrom_t *bootrom,
 	__in FILE *file
 	);
 
-int dmg_mapper_import(
-	__inout dmg_mapper_t *mapper,
+int dmg_bootrom_import(
+	__inout dmg_bootrom_t *bootrom,
 	__in FILE *file
 	);
 
-int dmg_mapper_load(
-	__inout dmg_mapper_t *mapper,
+int dmg_bootrom_load(
+	__inout dmg_bootrom_t *bootrom,
 	__in const dmg_buffer_t *buffer
 	);
 
-uint8_t dmg_mapper_read_ram(
-	__in const dmg_mapper_t *mapper,
+uint8_t dmg_bootrom_read(
+	__in const dmg_bootrom_t *bootrom,
 	__in uint16_t address
 	);
 
-uint8_t dmg_mapper_read_rom(
-	__in const dmg_mapper_t *mapper,
-	__in uint16_t address
+void dmg_bootrom_unload(
+	__inout dmg_bootrom_t *bootrom
 	);
 
-void dmg_mapper_unload(
-	__inout dmg_mapper_t *mapper
-	);
-
-void dmg_mapper_write_ram(
-	__inout dmg_mapper_t *mapper,
-	__in uint16_t address,
-	__in uint8_t value
-	);
-
-void dmg_mapper_write_rom(
-	__inout dmg_mapper_t *mapper,
+void dmg_bootrom_write(
+	__inout dmg_bootrom_t *bootrom,
 	__in uint16_t address,
 	__in uint8_t value
 	);
@@ -70,4 +64,4 @@ void dmg_mapper_write_rom(
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TYPE_MAPPER_H_ */
+#endif /* DMG_COMMON_BOOTROM_H_ */

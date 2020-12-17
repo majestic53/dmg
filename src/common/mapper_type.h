@@ -16,14 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_TYPE_H_
-#define DMG_TYPE_MAPPER_TYPE_H_
+#ifndef DMG_COMMON_MAPPER_TYPE_H_
+#define DMG_COMMON_MAPPER_TYPE_H_
 
-#include "../../include/type/mapper/mbc1.h"
-#include "../../include/type/mapper/mbc2.h"
-#include "../../include/type/mapper/mbc3.h"
-#include "../../include/type/mapper/mbc5.h"
-#include "../../include/type/mapper.h"
+#include "../../include/common/mapper/mbc1.h"
+#include "../../include/common/mapper/mbc2.h"
+#include "../../include/common/mapper/mbc3.h"
+#include "../../include/common/mapper/mbc5.h"
+#include "../../include/common/mapper.h"
 #include "../../include/service.h"
 
 enum {
@@ -60,4 +60,4 @@ enum {
 #define TRACE_MAPPER(_LEVEL_, _MAPPER_)
 #endif /* NDEBUG */
 
-#endif /* DMG_TYPE_MAPPER_TYPE_H_ */
+#endif /* DMG_COMMON_MAPPER_TYPE_H_ */

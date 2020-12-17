@@ -16,21 +16,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_MBC1_TYPE_H_
-#define DMG_TYPE_MAPPER_MBC1_TYPE_H_
+#ifndef DMG_COMMON_MAPPER_MBC2_TYPE_H_
+#define DMG_COMMON_MAPPER_MBC2_TYPE_H_
 
-#include "../../../include/type/mapper/mbc1.h"
+#include "../../../include/common/mapper/mbc2.h"
+#include "../../../include/system/processor.h"
 #include "../mapper_type.h"
 
-#define MBC1_BANK_00 0x00
-#define MBC1_BANK_20 0x20
-#define MBC1_BANK_40 0x40
-#define MBC1_BANK_60 0x60
+#define MBC2_RAM_BEGIN 0x0000
+#define MBC2_RAM_END 0x01ff
+#define MBC2_RAM_MASK 0xf0
 
-enum {
-	MBC1_MODE_ROM = 0,
-	MBC1_MODE_RAM,
-	MBC1_MODE_MAX,
-};
+#define MBC2_RAM_WIDTH ADDRESS_WIDTH(MBC2_RAM_BEGIN, MBC2_RAM_END)
 
-#endif /* DMG_TYPE_MAPPER_MBC1_TYPE_H_ */
+#endif /* DMG_COMMON_MAPPER_MBC2_TYPE_H_ */

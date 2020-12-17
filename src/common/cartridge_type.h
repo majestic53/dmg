@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_CARTRIDGE_TYPE_H_
-#define DMG_TYPE_CARTRIDGE_TYPE_H_
+#ifndef DMG_COMMON_CARTRIDGE_TYPE_H_
+#define DMG_COMMON_CARTRIDGE_TYPE_H_
 
-#include "../../include/type/cartridge.h"
+#include "../../include/common/cartridge.h"
 #include "../../include/service.h"
 
 #define RAM_WIDTH ADDRESS_WIDTH(ADDRESS_RAM_BEGIN, ADDRESS_RAM_END)
@@ -69,4 +69,4 @@ static const size_t ROM_BANK[] = {
 	0, /* ROM_MAX */
 	};
 
-#endif /* DMG_TYPE_CARTRIDGE_TYPE_H_ */
+#endif /* DMG_COMMON_CARTRIDGE_TYPE_H_ */

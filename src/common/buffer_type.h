@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_BANK_TYPE_H_
-#define DMG_TYPE_BANK_TYPE_H_
+#ifndef DMG_COMMON_BUFFER_TYPE_H_
+#define DMG_COMMON_BUFFER_TYPE_H_
 
-#include "../../include/type/bank.h"
+#include "../../include/common/buffer.h"
 
-#endif /* DMG_TYPE_BANK_TYPE_H_ */
+#endif /* DMG_COMMON_BUFFER_TYPE_H_ */

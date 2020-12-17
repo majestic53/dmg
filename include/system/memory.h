@@ -19,8 +19,8 @@
 #ifndef DMG_SYSTEM_MEMORY_H_
 #define DMG_SYSTEM_MEMORY_H_
 
-#include "../type/bootrom.h"
-#include "../type/mapper.h"
+#include "../common/bootrom.h"
+#include "../common/mapper.h"
 
 typedef struct {
 	dmg_bootrom_t bootrom;

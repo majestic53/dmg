@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_COMMON_H_
-#define DMG_TYPE_MAPPER_COMMON_H_
+#ifndef DMG_COMMON_MAPPER_COMMON_H_
+#define DMG_COMMON_MAPPER_COMMON_H_
 
 #include "../cartridge.h"
 
@@ -120,4 +120,4 @@ typedef struct {
 	uint32_t rom_swap;
 } __attribute__((packed)) dmg_mapper_t;
 
-#endif /* DMG_TYPE_MAPPER_COMMON_H_ */
+#endif /* DMG_COMMON_MAPPER_COMMON_H_ */

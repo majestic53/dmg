@@ -16,17 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_MBC2_TYPE_H_
-#define DMG_TYPE_MAPPER_MBC2_TYPE_H_
+#ifndef DMG_COMMON_BOOTROM_TYPE_H_
+#define DMG_COMMON_BOOTROM_TYPE_H_
 
-#include "../../../include/system/processor.h"
-#include "../../../include/type/mapper/mbc2.h"
-#include "../mapper_type.h"
+#include "../../include/common/bootrom.h"
+#include "../../include/service.h"
 
-#define MBC2_RAM_BEGIN 0x0000
-#define MBC2_RAM_END 0x01ff
-#define MBC2_RAM_MASK 0xf0
+#define BOOTROM_CHECKSUM 0x626e
+#define BOOTROM_WIDTH ADDRESS_WIDTH(ADDRESS_BOOTROM_BEGIN, ADDRESS_BOOTROM_END)
 
-#define MBC2_RAM_WIDTH ADDRESS_WIDTH(MBC2_RAM_BEGIN, MBC2_RAM_END)
-
-#endif /* DMG_TYPE_MAPPER_MBC2_TYPE_H_ */
+#endif /* DMG_COMMON_BOOTROM_TYPE_H_ */

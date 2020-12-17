@@ -130,7 +130,8 @@ dmg_launcher_debug_disassemble_data(
 	}
 
 	if(verbose) {
-		fprintf(stdout, "[%04x-%04x] -- %u instructions\n\n", address, request.address - 1, offset);
+		fprintf(stdout, "[%04x-%04x] -- %.02f KB (%u bytes), %u instructions\n\n", address, request.address - 1,
+			(request.address - address) / (float)KBYTE, (uint32_t)(request.address - address), offset);
 	}
 
 	request.address = address;
@@ -882,7 +883,6 @@ dmg_launcher_debug(
 	bool complete = false;
 
 	using_history();
-	stifle_history(HISTORY_MAX);
 	dmg_launcher_debug_header(path);
 
 	while(!complete) {

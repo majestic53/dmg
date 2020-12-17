@@ -40,8 +40,6 @@
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
 #define DMG_USAGE "dmg [args]"
 
-#define HISTORY_MAX 10
-
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
 #define OPTION_DEBUG 'd'

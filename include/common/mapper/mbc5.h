@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_MBC1_H_
-#define DMG_TYPE_MAPPER_MBC1_H_
+#ifndef DMG_COMMON_MAPPER_MBC5_H_
+#define DMG_COMMON_MAPPER_MBC5_H_
 
 #include "../mapper.h"
 
@@ -25,7 +25,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-void dmg_mapper_mbc1_write_rom(
+void dmg_mapper_mbc5_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
@@ -35,4 +35,4 @@ void dmg_mapper_mbc1_write_rom(
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TYPE_MAPPER_MBC1_H_ */
+#endif /* DMG_COMMON_MAPPER_MBC5_H_ */

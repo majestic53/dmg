@@ -22,7 +22,7 @@
 #ifdef SDL
 #include "../include/service/sdl.h"
 #endif /* SDL */
-#include "../include/type/buffer.h"
+#include "../include/common/buffer.h"
 #include "../include/service.h"
 
 #define SAVE_VERSION_1 1

@@ -16,16 +16,51 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TYPE_MAPPER_MBC5_H_
-#define DMG_TYPE_MAPPER_MBC5_H_
+#ifndef DMG_COMMON_MAPPER_H_
+#define DMG_COMMON_MAPPER_H_
 
-#include "../mapper.h"
+#include "./mapper/common.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-void dmg_mapper_mbc5_write_rom(
+int dmg_mapper_export(
+	__in const dmg_mapper_t *mapper,
+	__in FILE *file
+	);
+
+int dmg_mapper_import(
+	__inout dmg_mapper_t *mapper,
+	__in FILE *file
+	);
+
+int dmg_mapper_load(
+	__inout dmg_mapper_t *mapper,
+	__in const dmg_buffer_t *buffer
+	);
+
+uint8_t dmg_mapper_read_ram(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	);
+
+uint8_t dmg_mapper_read_rom(
+	__in const dmg_mapper_t *mapper,
+	__in uint16_t address
+	);
+
+void dmg_mapper_unload(
+	__inout dmg_mapper_t *mapper
+	);
+
+void dmg_mapper_write_ram(
+	__inout dmg_mapper_t *mapper,
+	__in uint16_t address,
+	__in uint8_t value
+	);
+
+void dmg_mapper_write_rom(
 	__inout dmg_mapper_t *mapper,
 	__in uint16_t address,
 	__in uint8_t value
@@ -35,4 +70,4 @@ void dmg_mapper_mbc5_write_rom(
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TYPE_MAPPER_MBC5_H_ */
+#endif /* DMG_COMMON_MAPPER_H_ */
