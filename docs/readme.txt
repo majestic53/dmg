@@ -1,7 +1,11 @@
-DMG
-===
+DMG 0.2.2-alpha
+Copyright (C) 2020 David Jolly
+==============================
 
 A simple GameBoy emulator, written in C.
+
+Source: https://github.com/majestic53/dmg.git
+
 
 Using the Library
 =================
@@ -18,8 +22,12 @@ This project is implemented in C and exposes a simple API, described in include/
 |dmg_error  |Retrieve emulator instance error     |const char *dmg_error(void)                             |
 |dmg_version|Retrieve emulator instance version   |const dmg_version_t *dmg_version(void)                  |
 
+
 Using the Tools
 ===============
+
+Launcher
+--------
 
 dmg [args]
 
@@ -34,6 +42,11 @@ dmg [args]
 -s	Specify display scale
 -v	Display version information
 
+For details see: https://github.com/majestic53/dmg/blob/master/tool/launcher/readme.md
+
+Utilities
+---------
+
 dmg-dasm [args]
 
 -h	Display help information
@@ -41,11 +54,15 @@ dmg-dasm [args]
 -r	Specify rom file
 -v	Display version information
 
+For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/dasm/readme.md
+
 dmg-rom-info [args]
 
 -h	Display help information
 -r	Specify rom file
 -v	Display version information
+
+For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/rom_info/readme.md
 
 dmg-save-info [args]
 
@@ -53,10 +70,14 @@ dmg-save-info [args]
 -s	Specify save file
 -v	Display version information
 
+For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/save_info/readme.md
+
+
 Trademark
 =========
 
 Nintendo name/logo are trademarks of Nintendo Co., Ltd.
+
 
 License
 =======
