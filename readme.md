@@ -26,7 +26,7 @@ A simple GameBoy emulator, written in C.
 Latest Release
 =
 
-The latest release can be found here: [v0.2.1-alpha](https://github.com/majestic53/dmg/releases/tag/v0.2.1-alpha)
+The latest release can be found here: [v0.2.2-alpha](https://github.com/majestic53/dmg/releases/tag/v0.2.2-alpha)
 
 Building from Source
 =
