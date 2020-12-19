@@ -16,13 +16,27 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_TRACE_TYPE_H_
+#define DMG_TOOL_TRACE_TYPE_H_
 
-#include "../../include/common.h"
+#include "../include/common.h"
+#include "../include/trace.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 3
+#ifdef COLOR
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+static const char *LEVEL_STR[] = {
+	"\x1b[0m", /* LEVEL_NONE */
+	"\x1b[91m", /* LEVEL_ERROR */
+	"\x1b[93m", /* LEVEL_WARNING */
+	"\x1b[94m", /* LEVEL_INFORMATION */
+	"\x1b[90m", /* LEVEL_VERBOSE */
+	"", /* LEVEL_MAX */
+	};
+
+#define LEVEL_COLOR(_STREAM_, _LEVEL_) \
+	fprintf(_STREAM_, "%s", LEVEL_STR[_LEVEL_])
+#else
+#define LEVEL_COLOR(_STREAM_, _LEVEL_)
+#endif /* COLOR */
+
+#endif /* DMG_TOOL_TRACE_TYPE_H_ */

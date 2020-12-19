@@ -74,17 +74,17 @@ dmg_utility_rom_info_file_parse(void)
 	int result = EXIT_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
-	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_rom_info.rom, g_rom_info.buffer.length / (float)KBYTE, g_rom_info.buffer.length);
+	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_rom_info.rom, g_rom_info.buffer.length / (float)KBYTE, g_rom_info.buffer.length);
 
 	if(g_rom_info.buffer.length <= ADDRESS_HEADER_END) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_rom_info.buffer.length / (float)KBYTE,
+		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_rom_info.buffer.length / (float)KBYTE,
 			g_rom_info.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
 	header = (const dmg_cartridge_header_t *)&((uint8_t *)g_rom_info.buffer.data)[ADDRESS_HEADER_BEGIN];
-	fprintf(stdout, "Title     \"");
+	TRACE_TOOL_MESSAGE("%s", "Title     \"");
 
 	for(address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
 		char value = header->title[address];
@@ -94,57 +94,57 @@ dmg_utility_rom_info_file_parse(void)
 		}
 
 		if(!isprint(value) && !isspace(value)) {
-			fprintf(stdout, "\\%02x", value);
+			TRACE_TOOL_MESSAGE("\\%02x", value);
 		} else {
-			fprintf(stdout, "%c", value);
+			TRACE_TOOL_MESSAGE("%c", value);
 		}
 	}
 
-	fprintf(stdout, "\"\nType      ");
+	TRACE_TOOL_MESSAGE("%s", "\"\nType      ");
 
 	switch(header->cgb) {
 		case CGB_SUPPORT:
-			fprintf(stdout, "GB/GBC (Gameboy/Gameboy Color)");
+			TRACE_TOOL_MESSAGE("%s", "GB/GBC (Gameboy/Gameboy Color)");
 			break;
 		case CGB_SUPPORT_ONLY:
-			fprintf(stdout, "GBC Only (Gameboy Color Only)");
+			TRACE_TOOL_MESSAGE("%s", "GBC Only (Gameboy Color Only)");
 			result = EXIT_FAILURE;
 			break;
 		default:
-			fprintf(stdout, "GB (Gameboy)");
+			TRACE_TOOL_MESSAGE("%s", "GB (Gameboy)");
 			break;
 	}
 
 	if(header->sgb == SGB_SUPPORT) {
-		fprintf(stdout, ", SBC (Super Gameboy)");
+		TRACE_TOOL_MESSAGE("%s", ", SBC (Super Gameboy)");
 	}
 
-	fprintf(stdout, "\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
-	fprintf(stdout, "\nMapper    ");
+	TRACE_TOOL_MESSAGE("\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
+	TRACE_TOOL_MESSAGE("%s", "\nMapper    ");
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
-		fprintf(stdout, "UNSUPPORTED (%u)\n", header->mapper);
+		TRACE_TOOL_MESSAGE("UNSUPPORTED (%u)\n", header->mapper);
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(stdout, "%s\n", MAPPER_STR[header->mapper]);
+		TRACE_TOOL_MESSAGE("%s\n", MAPPER_STR[header->mapper]);
 	}
 
-	fprintf(stdout, "Rom       ");
+	TRACE_TOOL_MESSAGE("%s", "Rom       ");
 
 	if(header->rom >= ROM_MAX) {
-		fprintf(stdout, "UNSUPPORTED\n");
+		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(stdout, "%s\n", ROM_STR[header->rom]);
+		TRACE_TOOL_MESSAGE("%s\n", ROM_STR[header->rom]);
 	}
 
-	fprintf(stdout, "Ram       ");
+	TRACE_TOOL_MESSAGE("%s", "Ram       ");
 
 	if(header->ram >= RAM_MAX) {
-		fprintf(stdout, "UNSUPPORTED\n");
+		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(stdout, "%s\n", RAM_STR[header->ram]);
+		TRACE_TOOL_MESSAGE("%s\n", RAM_STR[header->ram]);
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
@@ -153,7 +153,7 @@ dmg_utility_rom_info_file_parse(void)
 
 	checksum &= UINT8_MAX;
 	if(header->checksum != checksum) {
-		fprintf(stdout, "Checksum  MISMATCH (Expecting %02x)\n", checksum);
+		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %02x)\n", checksum);
 		result = EXIT_FAILURE;
 	}
 
@@ -216,22 +216,22 @@ dmg_utility_rom_info_version(
 	const dmg_version_t *version;
 
 	if(verbose) {
-		fprintf(stream, "%s", DMG);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
 	}
 
 	if((version = dmg_version_get())) {
 
 		if(verbose) {
-			fprintf(stream, " ");
+			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
 		}
 
-		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
+		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u\n", version->major, version->minor, version->patch);
 	} else {
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
 	if(verbose) {
-		fprintf(stream, "%s\n", DMG_NOTICE);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
 	}
 }
 
@@ -244,18 +244,18 @@ dmg_utility_rom_info_usage(
 
 	if(verbose) {
 		dmg_utility_rom_info_version(stream, verbose);
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
-	fprintf(stream, "%s\n", DMG_USAGE);
+	TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_USAGE);
 
 	if(verbose) {
 
 		for(int flag = 0; flag < FLAG_MAX; ++flag) {
-			fprintf(stream, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
+			TRACE_TOOL(stream, LEVEL_NONE, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
 		}
 
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 }
 
@@ -278,16 +278,12 @@ main(
 	} else {
 
 		if((result = dmg_utility_rom_info_file_load()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 
 		if((result = dmg_utility_rom_info_file_parse()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to parse file -- %s\n", argv[0], g_rom_info.rom);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Unsupported file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 	}

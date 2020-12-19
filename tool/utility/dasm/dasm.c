@@ -34,16 +34,16 @@ dmg_utility_dasm_disassemble_comment(void)
 	const dmg_cartridge_header_t *header;
 
 	if((version = dmg_version_get())) {
-		fprintf(g_dasm.file, "%c%s %u.%u.%u\n", COMMENT_PREFIX, DMG, version->major, version->minor, version->patch);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%s %u.%u.%u\n", COMMENT_PREFIX, DMG, version->major, version->minor, version->patch);
 	} else {
-		fprintf(g_dasm.file, "\n");
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 	}
 
-	fprintf(g_dasm.file, "%c%s\n\n%c%s -- %.02f KB (%u bytes)\n\n", COMMENT_PREFIX, DMG_NOTICE, COMMENT_PREFIX, g_dasm.rom,
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%s\n\n%c%s -- %.02f KB (%u bytes)\n\n", COMMENT_PREFIX, DMG_NOTICE, COMMENT_PREFIX, g_dasm.rom,
 		g_dasm.buffer.length / (float)KBYTE, g_dasm.buffer.length);
 
 	header = (const dmg_cartridge_header_t *)&((uint8_t *)g_dasm.buffer.data)[ADDRESS_HEADER_BEGIN];
-	fprintf(g_dasm.file, "%cTitle     \"", COMMENT_PREFIX);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cTitle     \"", COMMENT_PREFIX);
 
 	for(address = 0; address < CARTRIDGE_HEADER_TITLE_LENGTH; ++address) {
 		char value = header->title[address];
@@ -53,54 +53,54 @@ dmg_utility_dasm_disassemble_comment(void)
 		}
 
 		if(!isprint(value) && !isspace(value)) {
-			fprintf(g_dasm.file, "\\%02x", value);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\\%02x", value);
 		} else {
-			fprintf(g_dasm.file, "%c", value);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c", value);
 		}
 	}
 
-	fprintf(g_dasm.file, "\"\n%cType      ", COMMENT_PREFIX);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\"\n%cType      ", COMMENT_PREFIX);
 
 	switch(header->cgb) {
 		case CGB_SUPPORT:
-			fprintf(g_dasm.file, "GB/GBC (Gameboy/Gameboy Color)");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "GB/GBC (Gameboy/Gameboy Color)");
 			break;
 		case CGB_SUPPORT_ONLY:
-			fprintf(g_dasm.file, "GBC Only (Gameboy Color Only)");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "GBC Only (Gameboy Color Only)");
 			result = EXIT_FAILURE;
 			break;
 		default:
-			fprintf(g_dasm.file, "GB (Gameboy)");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "GB (Gameboy)");
 			break;
 	}
 
 	if(header->sgb == SGB_SUPPORT) {
-		fprintf(g_dasm.file, ", SBC (Super Gameboy)");
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", ", SBC (Super Gameboy)");
 	}
 
-	fprintf(g_dasm.file, "\n%cRegion    %s", COMMENT_PREFIX, header->destination ? "U (International)" : "JP (Japan)");
-	fprintf(g_dasm.file, "\n%cMapper    ", COMMENT_PREFIX);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cRegion    %s", COMMENT_PREFIX, header->destination ? "U (International)" : "JP (Japan)");
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cMapper    ", COMMENT_PREFIX);
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(g_dasm.file, "%s\n", MAPPER_STR[header->mapper]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", MAPPER_STR[header->mapper]);
 	}
 
-	fprintf(g_dasm.file, "%cRom       ", COMMENT_PREFIX);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRom       ", COMMENT_PREFIX);
 
 	if(header->rom >= ROM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(g_dasm.file, "%s\n", ROM_STR[header->rom]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", ROM_STR[header->rom]);
 	}
 
-	fprintf(g_dasm.file, "%cRam       ", COMMENT_PREFIX);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRam       ", COMMENT_PREFIX);
 
 	if(header->ram >= RAM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		fprintf(g_dasm.file, "%s\n\n", RAM_STR[header->ram]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", RAM_STR[header->ram]);
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
@@ -109,7 +109,7 @@ dmg_utility_dasm_disassemble_comment(void)
 
 	checksum &= UINT8_MAX;
 	if(header->checksum != checksum) {
-		fprintf(stdout, "%cChecksum  MISMATCH (Expecting %02x)\n", COMMENT_PREFIX, checksum);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cChecksum  MISMATCH (Expecting %02x)\n", COMMENT_PREFIX, checksum);
 	}
 
 	return result;
@@ -124,7 +124,7 @@ dmg_utility_dasm_disassemble_header(
 	char str[HEADER_WIDTH + 1] = {};
 	const dmg_cartridge_header_t *header;
 
-	fprintf(g_dasm.file, "%cHeader [%04x-%04x]", COMMENT_PREFIX, ADDRESS_HEADER_BEGIN, ADDRESS_HEADER_END);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cHeader [%04x-%04x]", COMMENT_PREFIX, ADDRESS_HEADER_BEGIN, ADDRESS_HEADER_END);
 
 	header = (const dmg_cartridge_header_t *)&((uint8_t *)g_dasm.buffer.data)[ADDRESS_HEADER_BEGIN];
 	*banks = ROM_BANK[header->rom];
@@ -135,25 +135,25 @@ dmg_utility_dasm_disassemble_header(
 		if(!(address % HEADER_WIDTH)) {
 
 			if(strlen(str)) {
-				fprintf(g_dasm.file, "   %c%s", COMMENT_PREFIX, str);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s", COMMENT_PREFIX, str);
 				memset(str, 0, sizeof(str));
 				count = 0;
 			}
 
-			fprintf(g_dasm.file, "\n%s", DIRECTIVE_STR[DIRECTIVE_DATA]);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s", dmg_tool_directive_string(DIRECTIVE_DATA));
 		}
 
 		value = ((uint8_t *)g_dasm.buffer.data)[address];
-		fprintf(g_dasm.file, " %02x", value);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, " %02x", value);
 		str[count++] = ((isprint((char)value) && !isspace((char)value)) ? value : CHARACTER_FILL);
 	}
 
 	if(strlen(str)) {
-		fprintf(g_dasm.file, "   %c%s", COMMENT_PREFIX, str);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s", COMMENT_PREFIX, str);
 		memset(str, 0, sizeof(str));
 	}
 
-	fprintf(g_dasm.file, "\n\n");
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n\n");
 
 	return result;
 }
@@ -170,71 +170,54 @@ dmg_utility_dasm_disassemble_instruction(
 	uint16_t base = ((bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN) + *address);
 	int result = EXIT_SUCCESS;
 	uint8_t opcode, operand[2] = {};
-	const dmg_processor_instruction_t *instruction;
+	const dmg_tool_instruction_t *instruction;
 
 	if((extended = ((opcode = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++]) == INSTRUCTION_EXTENDED_PREFIX))) {
 		opcode = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 	}
 
-	format = dmg_processor_instruction_string(opcode, extended);
-	fprintf(g_dasm.file, "\t\t");
+	format = dmg_tool_instruction_string(opcode, extended);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t\t");
 
-	switch((instruction = dmg_processor_instruction(opcode, extended))->operand) {
+	switch((instruction = dmg_tool_instruction(opcode, extended))->operand) {
 		case OPERAND_BYTE:
 			operand[0] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 
 			if(extended) {
-				fprintf(g_dasm.file, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
 					operand[0]);
 			} else {
-				fprintf(g_dasm.file, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0]);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0]);
 			}
 
-			fprintf(g_dasm.file, "\t");
-
-			switch(instruction->opcode) {
-				case INSTRUCTION_ADD_SP_I8:
-				case INSTRUCTION_LD_HL_SP_I8:
-					fprintf(g_dasm.file, format, operand[0], operand[0]);
-					break;
-				case INSTRUCTION_JR_C_I8:
-				case INSTRUCTION_JR_NC_I8:
-				case INSTRUCTION_JR_NZ_I8:
-				case INSTRUCTION_JR_I8:
-				case INSTRUCTION_JR_Z_I8:
-					fprintf(g_dasm.file, format, operand[0], operand[0], base + (int8_t)operand[0]);
-					break;
-				default:
-					fprintf(g_dasm.file, format, operand[0]);
-					break;
-			}
-
-			fprintf(g_dasm.file, "\n");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, operand[0]);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 			break;
 		case OPERAND_WORD:
 			operand[0] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 			operand[1] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 
 			if(extended) {
-				fprintf(g_dasm.file, "%c%04x {%02x %02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
 					operand[0], operand[1]);
 			} else {
-				fprintf(g_dasm.file, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0], operand[1]);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0], operand[1]);
 			}
 
-			fprintf(g_dasm.file, "\t");
-			fprintf(g_dasm.file, format, (operand[1] << CHAR_BIT) | operand[0]);
-			fprintf(g_dasm.file, "\n");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, (operand[1] << CHAR_BIT) | operand[0]);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 			break;
 		default:
 
 			if(extended) {
-				fprintf(g_dasm.file, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode);
 			} else {
-				fprintf(g_dasm.file, "%c%04x {%02x}\n", COMMENT_PREFIX, base, opcode);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x}\n", COMMENT_PREFIX, base, opcode);
 			}
 
-			fprintf(g_dasm.file, "\t%s\n", format);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t%s\n", format);
 			break;
 	}
 
@@ -246,12 +229,12 @@ dmg_utility_dasm_disassemble_vectors(void)
 {
 	int result = EXIT_SUCCESS;
 
-	fprintf(g_dasm.file, "%cVector table [%04x-%04x]", COMMENT_PREFIX, ADDRESS_VECTOR_BEGIN, ADDRESS_HEADER_BEGIN - 1);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cVector table [%04x-%04x]", COMMENT_PREFIX, ADDRESS_VECTOR_BEGIN, ADDRESS_HEADER_BEGIN - 1);
 
 	for(uint16_t address = ADDRESS_VECTOR_BEGIN; address < ADDRESS_HEADER_BEGIN;) {
 
 		if(!(address % VECTOR_WIDTH) && (address <= ADDRESS_VECTOR_END)) {
-			fprintf(g_dasm.file, "\n%s\n", VECTOR_STR[address / VECTOR_WIDTH]);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n", dmg_tool_vector_string(address / VECTOR_WIDTH));
 		}
 
 		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0)) != EXIT_SUCCESS) {
@@ -259,7 +242,7 @@ dmg_utility_dasm_disassemble_vectors(void)
 		}
 	}
 
-	fprintf(g_dasm.file, "\n");
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 
 exit:
 	return result;
@@ -275,8 +258,8 @@ dmg_utility_dasm_disassemble_bank(
 	int result = EXIT_SUCCESS;
 	uint32_t origin = (bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN);
 
-	fprintf(g_dasm.file, "%cBank #%u\n%s %x\n%s %04x\n\n", COMMENT_PREFIX, bank,
-		DIRECTIVE_STR[DIRECTIVE_BANK], bank, DIRECTIVE_STR[DIRECTIVE_ORIGIN], origin);
+	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cBank #%u\n%s %x\n%s %04x\n\n", COMMENT_PREFIX, bank,
+		dmg_tool_directive_string(DIRECTIVE_BANK), bank, dmg_tool_directive_string(DIRECTIVE_ORIGIN), origin);
 
 	if(!bank) {
 
@@ -322,10 +305,10 @@ dmg_utility_dasm_file_disassemble(void)
 	int result = EXIT_SUCCESS;
 	uint32_t bank = 0, banks, length = 0;
 
-	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_dasm.rom, g_dasm.buffer.length / (float)KBYTE, g_dasm.buffer.length);
+	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_dasm.rom, g_dasm.buffer.length / (float)KBYTE, g_dasm.buffer.length);
 
 	if(g_dasm.buffer.length <= ADDRESS_HEADER_END) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_dasm.buffer.length / (float)KBYTE,
+		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_dasm.buffer.length / (float)KBYTE,
 			g_dasm.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
 		result = EXIT_FAILURE;
 		goto exit;
@@ -335,34 +318,28 @@ dmg_utility_dasm_file_disassemble(void)
 		goto exit;
 	}
 
-	LEVEL_COLOR(stdout, LEVEL_NONE);
-	fprintf(stdout, "Parsing bank[%02x]...      ", bank);
+	TRACE_TOOL_MESSAGE("Parsing bank[%02x]...      ", bank);
 
 	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
-	LEVEL_COLOR(stdout, LEVEL_INFORMATION);
-	fprintf(stdout, "[Done]\n");
-	LEVEL_COLOR(stdout, LEVEL_NONE);
+	TRACE_TOOL_MESSAGE("%s", "[Done]\n");
 
 	for(bank = 1; bank < banks; ++bank) {
-		LEVEL_COLOR(stdout, LEVEL_NONE);
-		fprintf(stdout, "Parsing bank[%02x]...      ", bank);
+		TRACE_TOOL_MESSAGE("Parsing bank[%02x]...      ", bank);
 
 		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 
-		LEVEL_COLOR(stdout, LEVEL_INFORMATION);
-		fprintf(stdout, "[Done]\n");
-		LEVEL_COLOR(stdout, LEVEL_NONE);
+		TRACE_TOOL_MESSAGE("%s", "[Done]\n");
 	}
 
 	fseek(g_dasm.file, 0, SEEK_END);
 	length = ftell(g_dasm.file);
 	fseek(g_dasm.file, 0, SEEK_SET);
-	fprintf(stdout, "\n%s -- %.02f KB (%u bytes)\n", g_dasm.output, length / (float)KBYTE, length);
+	TRACE_TOOL_MESSAGE("\n%s -- %.02f KB (%u bytes)\n", g_dasm.output, length / (float)KBYTE, length);
 
 exit:
 	return result;
@@ -497,22 +474,22 @@ dmg_utility_dasm_version(
 	const dmg_version_t *version;
 
 	if(verbose) {
-		fprintf(stream, "%s", DMG);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
 	}
 
 	if((version = dmg_version_get())) {
 
 		if(verbose) {
-			fprintf(stream, " ");
+			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
 		}
 
-		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
+		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u\n", version->major, version->minor, version->patch);
 	} else {
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
 	if(verbose) {
-		fprintf(stream, "%s\n", DMG_NOTICE);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
 	}
 }
 
@@ -525,18 +502,18 @@ dmg_utility_dasm_usage(
 
 	if(verbose) {
 		dmg_utility_dasm_version(stream, verbose);
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
-	fprintf(stream, "%s\n", DMG_USAGE);
+	TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_USAGE);
 
 	if(verbose) {
 
 		for(int flag = 0; flag < FLAG_MAX; ++flag) {
-			fprintf(stream, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
+			TRACE_TOOL(stream, LEVEL_NONE, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
 		}
 
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 }
 
@@ -559,23 +536,17 @@ main(
 	} else {
 
 		if((result = dmg_utility_dasm_file_load()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_dasm.rom);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}
 
 		if((result = dmg_utility_dasm_file_open(argv[0])) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to open file -- %s\n", argv[0], g_dasm.output);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to open file -- %s\n", argv[0], g_dasm.output);
 			goto exit;
 		}
 
 		if((result = dmg_utility_dasm_file_disassemble()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to disassemble file -- %s\n", argv[0], g_dasm.rom);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to disassemble file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}
 	}

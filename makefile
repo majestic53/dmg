@@ -23,6 +23,7 @@ DIR_BIN_INCLUDE=./bin/include/
 DIR_BIN_LIB=./bin/lib/
 DIR_BUILD=./build/
 DIR_BUILD_TEST=./build/test/
+DIR_BUILD_TOOL=./build/tool/
 DIR_ROOT=./
 DIR_SRC=./src/
 DIR_TEST_AUDIO=./test/audio/
@@ -33,6 +34,7 @@ DIR_TEST_SERIAL=./test/serial/
 DIR_TEST_TIMER=./test/timer/
 DIR_TEST_VIDEO=./test/video/
 DIR_TOOL=./tool/
+DIR_TOOL_SRC=./tool/src/
 
 SERVICE=SDL
 
@@ -54,6 +56,7 @@ setup:
 	mkdir -p $(DIR_BIN_LIB)
 	mkdir -p $(DIR_BUILD)
 	mkdir -p $(DIR_BUILD_TEST)
+	mkdir -p $(DIR_BUILD_TOOL)
 
 build_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
@@ -65,6 +68,8 @@ build_debug:
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make archive
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
 
 build_release:
@@ -77,6 +82,8 @@ build_release:
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make $(BUILD_RELEASE)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make archive
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
 
 analyze:

@@ -16,13 +16,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_SYNTAX_H_
+#define DMG_TOOL_SYNTAX_H_
 
-#include "../../include/common.h"
+#include "../../include/system/processor/instruction.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 3
+typedef struct {
+	uint8_t opcode;
+	uint8_t operand;
+} dmg_tool_instruction_t;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+const char *dmg_tool_directive_string(
+	__in int type
+	);
+
+const dmg_tool_instruction_t *dmg_tool_instruction(
+	__in uint8_t opcode,
+	__in bool extended
+	);
+
+const char *dmg_tool_instruction_string(
+	__in uint8_t opcode,
+	__in bool extended
+	);
+
+const char *dmg_tool_vector_string(
+	__in int type
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_SYNTAX_H_ */

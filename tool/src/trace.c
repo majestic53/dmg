@@ -16,13 +16,47 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#include "./trace_type.h"
 
-#include "../../include/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 3
+void
+dmg_tool_trace(
+	__in FILE *stream,
+	__in int level,
+	__in const char *format,
+	...
+	)
+{
+	fprintf(stream, "%s", dmg_tool_trace_level_string(level));
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+	if(format) {
+		va_list arguments;
+
+		va_start(arguments, format);
+		vfprintf(stream, format, arguments);
+		va_end(arguments);
+	}
+
+	if(level != LEVEL_MAX) {
+		fprintf(stream, "%s", dmg_tool_trace_level_string(LEVEL_NONE));
+	}
+}
+
+const char *
+dmg_tool_trace_level_string(
+	__in int level
+	)
+{
+#ifndef COLOR
+	level = LEVEL_MAX;
+#endif /* COLOR */
+
+	return LEVEL_STR[level];
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

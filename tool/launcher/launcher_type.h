@@ -19,6 +19,7 @@
 #ifndef DMG_TOOL_LAUNCHER_TYPE_H_
 #define DMG_TOOL_LAUNCHER_TYPE_H_
 
+#include "../../include/system/processor/instruction.h"
 #include "../include/common.h"
 
 #define ARGUMENT_MAX 10

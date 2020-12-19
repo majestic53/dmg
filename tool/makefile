@@ -33,14 +33,11 @@ FLAGS_BIN=
 FLAGS_LIB=-lreadline -lSDL2 -lSDL2main
 
 LIB=libdmg.a
+LIB_TOOL=libdmg_tool.a
 
-build: clean setup build_tool build_tool_utility link
+SHA256=sha256sum
 
-clean:
-	rm -rf $(DIR_BUILD_TOOL)
-
-setup:
-	mkdir -p $(DIR_BUILD_TOOL)
+build: build_tool build_tool_utility link
 
 build_tool: tool_launcher.o
 
@@ -61,10 +58,19 @@ tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(FLAGS_LIB) -o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD)common_version.o $(DIR_BUILD)system_processor_instruction.o \
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
+		-o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
+	strip -s $(DIR_BIN)$(BIN_LAUNCHER)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD_TOOL)$(LIB_TOOL) $(DIR_BUILD)common_version.o \
 		-o $(DIR_BIN)$(BIN_UTILITY_DASM) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD)common_version.o -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD)common_version.o -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_DASM)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD)common_version.o $(DIR_BUILD_TOOL)$(LIB_TOOL) \
+		-o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_INFO)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD)common_version.o $(DIR_BUILD_TOOL)$(LIB_TOOL) \
+		-o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO)
+	$(SHA256) $(DIR_BIN_LIB)$(LIB) $(DIR_BIN)$(BIN_LAUNCHER) $(DIR_BIN)$(BIN_UTILITY_DASM) $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) \
+		> $(DIR_BIN)$(SHA256).txt
 	@echo '--- DONE -----------------------------------'
 	@echo ''

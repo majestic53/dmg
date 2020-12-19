@@ -33,22 +33,22 @@ dmg_launcher_version(
 	const dmg_version_t *version;
 
 	if(verbose) {
-		fprintf(stream, "%s", DMG);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
 	}
 
 	if((version = dmg_version())) {
 
 		if(verbose) {
-			fprintf(stream, " ");
+			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
 		}
 
-		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
+		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u\n", version->major, version->minor, version->patch);
 	} else {
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
 	if(verbose) {
-		fprintf(stream, "%s\n", DMG_NOTICE);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
 	}
 }
 
@@ -64,9 +64,9 @@ dmg_launcher_capture(
 		g_launcher.capture.length = 0;
 
 		if(!isprint(g_launcher.capture.data) && !isspace(g_launcher.capture.data)) {
-			fprintf(stdout, "\\%02x", g_launcher.capture.data);
+			TRACE_TOOL_MESSAGE("\\%02x", g_launcher.capture.data);
 		} else {
-			fprintf(stdout, "%c", g_launcher.capture.data);
+			TRACE_TOOL_MESSAGE("%c", g_launcher.capture.data);
 		}
 
 		fflush(stdout);
@@ -130,7 +130,7 @@ dmg_launcher_debug_disassemble_data(
 	}
 
 	if(verbose) {
-		fprintf(stdout, "[%04x-%04x] -- %.02f KB (%u bytes), %u instructions\n\n", address, request.address - 1,
+		TRACE_TOOL_MESSAGE("[%04x-%04x] -- %.02f KB (%u bytes), %u instructions\n\n", address, request.address - 1,
 			(request.address - address) / (float)KBYTE, (uint32_t)(request.address - address), offset);
 	}
 
@@ -171,26 +171,26 @@ dmg_launcher_debug_disassemble_data(
 				operand[0] = response.data.byte;
 
 				if(extended) {
-					fprintf(stdout, "%04x | %02x %02x %02x     ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
+					TRACE_TOOL_MESSAGE("%04x | %02x %02x %02x     ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
 						operand[0]);
 				} else {
-					fprintf(stdout, "%04x | %02x %02x        ", address, opcode, operand[0]);
+					TRACE_TOOL_MESSAGE("%04x | %02x %02x        ", address, opcode, operand[0]);
 				}
 
 				switch(instruction->opcode) {
 					case INSTRUCTION_ADD_SP_I8:
 					case INSTRUCTION_LD_HL_SP_I8:
-						fprintf(stdout, format, operand[0], operand[0]);
+						TRACE_TOOL_MESSAGE(format, operand[0], operand[0]);
 						break;
 					case INSTRUCTION_JR_C_I8:
 					case INSTRUCTION_JR_NC_I8:
 					case INSTRUCTION_JR_NZ_I8:
 					case INSTRUCTION_JR_I8:
 					case INSTRUCTION_JR_Z_I8:
-						fprintf(stdout, format, operand[0], operand[0], request.address + (int8_t)operand[0]);
+						TRACE_TOOL_MESSAGE(format, operand[0], operand[0], request.address + (int8_t)operand[0]);
 						break;
 					default:
-						fprintf(stdout, format, operand[0]);
+						TRACE_TOOL_MESSAGE(format, operand[0]);
 						break;
 				}
 				break;
@@ -211,27 +211,27 @@ dmg_launcher_debug_disassemble_data(
 				operand[1] = response.data.byte;
 
 				if(extended) {
-					fprintf(stdout, "%04x | %02x %02x %02x %02x   ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
+					TRACE_TOOL_MESSAGE("%04x | %02x %02x %02x %02x   ", address, INSTRUCTION_EXTENDED_PREFIX, opcode,
 						operand[0], operand[1]);
 				} else {
-					fprintf(stdout, "%04x | %02x %02x %02x     ", address, opcode, operand[0], operand[1]);
+					TRACE_TOOL_MESSAGE("%04x | %02x %02x %02x     ", address, opcode, operand[0], operand[1]);
 				}
 
-				fprintf(stdout, format, (operand[1] << CHAR_BIT) | operand[0]);
+				TRACE_TOOL_MESSAGE(format, (operand[1] << CHAR_BIT) | operand[0]);
 				break;
 			default:
 
 				if(extended) {
-					fprintf(stdout, "%04x | %02x %02x        ", address, INSTRUCTION_EXTENDED_PREFIX, opcode);
+					TRACE_TOOL_MESSAGE("%04x | %02x %02x        ", address, INSTRUCTION_EXTENDED_PREFIX, opcode);
 				} else {
-					fprintf(stdout, "%04x | %02x           ", address, opcode);
+					TRACE_TOOL_MESSAGE("%04x | %02x           ", address, opcode);
 				}
 
-				fprintf(stdout, "%s", format);
+				TRACE_TOOL_MESSAGE("%s", format);
 				break;
 		}
 
-		fprintf(stdout, "\n");
+		TRACE_TOOL_MESSAGE("%s", "\n");
 		address = request.address;
 	}
 
@@ -346,7 +346,7 @@ dmg_launcher_debug_help(
 	}
 
 	for(int debug = 0; debug < DEBUG_MAX; ++debug) {
-		fprintf(stdout, "%c\t%s\n", DEBUG_CHAR[debug], DEBUG_DESCRIPTION_STR[debug]);
+		TRACE_TOOL_MESSAGE("%c\t%s\n", DEBUG_CHAR[debug], DEBUG_DESCRIPTION_STR[debug]);
 	}
 
 exit:
@@ -367,17 +367,17 @@ dmg_launcher_debug_read_data(
 	request.type = DMG_ACTION_READ;
 
 	if(offset > 1) {
-		fprintf(stdout, "[%04x-%04x] -- %.02f KB (%u bytes)\n\n      ", address, (address + offset - 1) % UINT16_MAX,
+		TRACE_TOOL_MESSAGE("[%04x-%04x] -- %.02f KB (%u bytes)\n\n      ", address, (address + offset - 1) % UINT16_MAX,
 			offset / (float)KBYTE, offset);
 
 		for(index = address; index < (address + ARGUMENT_READ_WIDTH); ++index) {
-			fprintf(stdout, " %02x", index % ARGUMENT_READ_WIDTH);
+			TRACE_TOOL_MESSAGE(" %02x", index % ARGUMENT_READ_WIDTH);
 		}
 
-		fprintf(stdout, "\n      ");
+		TRACE_TOOL_MESSAGE("%s", "\n      ");
 
 		for(index = 0; index < ARGUMENT_READ_WIDTH; ++index) {
-			fprintf(stdout, " --");
+			TRACE_TOOL_MESSAGE("%s", " --");
 		}
 	}
 
@@ -387,11 +387,11 @@ dmg_launcher_debug_read_data(
 		if((offset > 1) && !count) {
 
 			if(strlen(str)) {
-				fprintf(stdout, "   %s", str);
+				TRACE_TOOL_MESSAGE("   %s", str);
 				memset(str, 0, sizeof(str));
 			}
 
-			fprintf(stdout, "\n%04x |", request.address);
+			TRACE_TOOL_MESSAGE("\n%04x |", request.address);
 		}
 
 		if((result = dmg_action(&request, &response)) != DMG_STATUS_SUCCESS) {
@@ -399,10 +399,10 @@ dmg_launcher_debug_read_data(
 		}
 
 		if(offset > 1) {
-			fprintf(stdout, " ");
+			TRACE_TOOL_MESSAGE("%s", " ");
 		}
 
-		fprintf(stdout, "%02x", response.data.byte);
+		TRACE_TOOL_MESSAGE("%02x", response.data.byte);
 		str[count++] = ((isprint((char)response.data.byte) && !isspace((char)response.data.byte))
 				? response.data.byte : CHARACTER_FILL);
 	}
@@ -410,14 +410,14 @@ dmg_launcher_debug_read_data(
 	if(offset > 1 && strlen(str)) {
 
 		for(index = 0; index < (ARGUMENT_READ_WIDTH - ((request.address - address) % ARGUMENT_READ_WIDTH)); ++index) {
-			fprintf(stdout, "   ");
+			TRACE_TOOL_MESSAGE("%s", "   ");
 		}
 
-		fprintf(stdout, "%s", str);
+		TRACE_TOOL_MESSAGE("%s", str);
 		memset(str, 0, sizeof(str));
 	}
 
-	fprintf(stdout, "\n");
+	TRACE_TOOL_MESSAGE("%s", "\n");
 
 exit:
 	return result;
@@ -450,12 +450,12 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_IE:
 		case DMG_REGISTER_PROCESSOR_IF:
 		case DMG_REGISTER_PROCESSOR_L:
-			fprintf(stdout, "%02x", response.data.byte);
+			TRACE_TOOL_MESSAGE("%02x", response.data.byte);
 
 			switch(address) {
 				case DMG_REGISTER_PROCESSOR_IE:
 				case DMG_REGISTER_PROCESSOR_IF:
-					fprintf(stdout, "     [%c%c%c%c%c]",
+					TRACE_TOOL_MESSAGE("     [%c%c%c%c%c]",
 						response.data.interrupt.vblank ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_VBLANK] : PROCESSOR_DELIMITER,
 						response.data.interrupt.lcdc ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_LCDC] : PROCESSOR_DELIMITER,
 						response.data.interrupt.timer ? PROCESSOR_INTERRUPT_CHAR[PROCESSOR_INTERRUPT_TIMER] : PROCESSOR_DELIMITER,
@@ -472,11 +472,11 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_HL:
 		case DMG_REGISTER_PROCESSOR_PC:
 		case DMG_REGISTER_PROCESSOR_SP:
-			fprintf(stdout, "%04x", response.data.word);
+			TRACE_TOOL_MESSAGE("%04x", response.data.word);
 
 			switch(address) {
 				case DMG_REGISTER_PROCESSOR_AF:
-					fprintf(stdout, "   %s=%02x, %s=%02x [%c%c%c%c]",
+					TRACE_TOOL_MESSAGE("   %s=%02x, %s=%02x [%c%c%c%c]",
 						REGISTER_STR[DMG_REGISTER_PROCESSOR_A], response.data.high,
 						REGISTER_STR[DMG_REGISTER_PROCESSOR_F], response.data.low,
 						response.data.flag.carry ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_CARRY] : PROCESSOR_DELIMITER,
@@ -485,15 +485,15 @@ dmg_launcher_debug_read_register(
 						response.data.flag.zero ? PROCESSOR_FLAG_CHAR[PROCESSOR_FLAG_ZERO] : PROCESSOR_DELIMITER);
 					break;
 				case DMG_REGISTER_PROCESSOR_BC:
-					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_B], response.data.high,
+					TRACE_TOOL_MESSAGE("   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_B], response.data.high,
 						REGISTER_STR[DMG_REGISTER_PROCESSOR_C], response.data.low);
 					break;
 				case DMG_REGISTER_PROCESSOR_DE:
-					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_D], response.data.high,
+					TRACE_TOOL_MESSAGE("   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_D], response.data.high,
 						REGISTER_STR[DMG_REGISTER_PROCESSOR_E], response.data.low);
 					break;
 				case DMG_REGISTER_PROCESSOR_HL:
-					fprintf(stdout, "   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_H], response.data.high,
+					TRACE_TOOL_MESSAGE("   %s=%02x, %s=%02x", REGISTER_STR[DMG_REGISTER_PROCESSOR_H], response.data.high,
 						REGISTER_STR[DMG_REGISTER_PROCESSOR_L], response.data.low);
 					break;
 				default:
@@ -503,14 +503,14 @@ dmg_launcher_debug_read_register(
 		case DMG_REGISTER_PROCESSOR_HALT:
 		case DMG_REGISTER_PROCESSOR_IME:
 		case DMG_REGISTER_PROCESSOR_STOP:
-			fprintf(stdout, "%x", response.data.byte);
+			TRACE_TOOL_MESSAGE("%x", response.data.byte);
 			break;
 		default:
 			result = DMG_STATUS_INVALID;
 			break;
 	}
 
-	fprintf(stdout, "\n");
+	TRACE_TOOL_MESSAGE("%s", "\n");
 
 exit:
 	return result;
@@ -529,67 +529,67 @@ dmg_launcher_debug_processor(
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_AF]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_AF]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_AF)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_BC]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_BC]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_BC)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_DE]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_DE]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_DE)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HL]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HL]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_HL)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_PC]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_PC]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_PC)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_SP]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_SP]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_SP)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s  | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IME]);
+	TRACE_TOOL_MESSAGE("%s  | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IME]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IME)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IE]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IE]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IE)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IF]);
+	TRACE_TOOL_MESSAGE("%s   | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_IF]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_IF)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HALT]);
+	TRACE_TOOL_MESSAGE("%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_HALT]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_HALT)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fprintf(stdout, "%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_STOP]);
+	TRACE_TOOL_MESSAGE("%s | ", REGISTER_STR[DMG_REGISTER_PROCESSOR_STOP]);
 
 	if((result = dmg_launcher_debug_read_register(DMG_REGISTER_PROCESSOR_STOP)) != DMG_STATUS_SUCCESS) {
 		goto exit;
@@ -821,17 +821,14 @@ dmg_launcher_debug_header(
 		memcpy(path_full, path, (path_end - path) + 1);
 	}
 
-	LEVEL_COLOR(stdout, LEVEL_INFORMATION);
 	dmg_launcher_version(stdout, true);
-	LEVEL_COLOR(stdout, LEVEL_VERBOSE);
-	fprintf(stdout, "\n");
+	TRACE_TOOL_MESSAGE("%s", "\n");
 	strcat(path_full, PATH_ROM_INFO);
 	strcat(path_full, g_launcher.rom);
-	LEVEL_COLOR(stderr, LEVEL_VERBOSE);
 	result = system(path_full);
 
 	if(g_launcher.configuration.save_in) {
-		fprintf(stdout, "\n");
+		TRACE_TOOL_MESSAGE("%s", "\n");
 		memset(path_full, 0, sizeof(path_full));
 
 		if((path_end = strrchr(path, '/'))) {
@@ -842,8 +839,6 @@ dmg_launcher_debug_header(
 		strcat(path_full, g_launcher.configuration.save_in);
 		result = system(path_full);
 	}
-
-	LEVEL_COLOR(stdout, LEVEL_NONE);
 
 	return result;
 }
@@ -863,12 +858,8 @@ dmg_launcher_debug_prompt(
 		goto exit;
 	}
 
-#ifdef COLOR
-	snprintf(prompt, length, "%s%s%u%s%s", LEVEL_STR[LEVEL_INFORMATION], PROMPT_PREFIX, response.data.dword, PROMPT_POSTFIX,
-			LEVEL_STR[LEVEL_NONE]);
-#else
-	snprintf(prompt, length, "%s%u%s", PROMPT_PREFIX, response.data.word, PROMPT_POSTFIX);
-#endif /* COLOR */
+	snprintf(prompt, length, "%s%s%u%s%s", dmg_tool_trace_level_string(LEVEL_INFORMATION), PROMPT_PREFIX, response.data.dword,
+			PROMPT_POSTFIX, dmg_tool_trace_level_string(LEVEL_NONE));
 
 exit:
 	return result;
@@ -917,9 +908,7 @@ dmg_launcher_debug(
 			}
 
 			if(debug >= DEBUG_MAX) {
-				LEVEL_COLOR(stderr, LEVEL_ERROR);
-				fprintf(stderr, "Unsupported command: %s\n", input);
-				LEVEL_COLOR(stderr, LEVEL_NONE);
+				TRACE_TOOL_ERROR("Unsupported command: %s\n", input);
 				goto cleanup;
 			}
 
@@ -929,9 +918,7 @@ dmg_launcher_debug(
 			while(next) {
 
 				if(count >= ARGUMENT_MAX) {
-					LEVEL_COLOR(stderr, LEVEL_ERROR);
-					fprintf(stderr, "Too many arguments: %u\n", count + 1);
-					LEVEL_COLOR(stderr, LEVEL_NONE);
+					TRACE_TOOL_ERROR("Too many arguments: %u\n", count + 1);
 					goto cleanup;
 				}
 
@@ -953,30 +940,23 @@ dmg_launcher_debug(
 						case DMG_STATUS_SUCCESS:
 							break;
 						case DMG_STATUS_BREAKPOINT:
-							LEVEL_COLOR(stdout, LEVEL_WARNING);
 							request.type = DMG_ACTION_READ;
 							request.address = DMG_REGISTER_PROCESSOR_PC;
 							request.data.dword = UINT32_MAX;
 
 							if(dmg_action(&request, &response) == DMG_STATUS_SUCCESS) {
-								fprintf(stdout, "Breakpoint: %04x\n", response.data.word);
+								TRACE_TOOL_MESSAGE("Breakpoint: %04x\n", response.data.word);
 							} else {
-								fprintf(stdout, "Breakpoint\n");
+								TRACE_TOOL_MESSAGE("%s", "Breakpoint\n");
 							}
-
-							LEVEL_COLOR(stdout, LEVEL_NONE);
 							break;
 						default:
-							LEVEL_COLOR(stderr, LEVEL_ERROR);
-							fprintf(stderr, "Command failed: %s\n", input);
-							LEVEL_COLOR(stderr, LEVEL_NONE);
+							TRACE_TOOL_ERROR("Command failed: %s\n", input);
 							break;
 					}
 					break;
 				default:
-					LEVEL_COLOR(stderr, LEVEL_ERROR);
-					fprintf(stderr, "Unsupported command type: %i\n", debug);
-					LEVEL_COLOR(stderr, LEVEL_NONE);
+					TRACE_TOOL_ERROR("Unsupported command type: %i\n", debug);
 					break;
 			}
 
@@ -1117,18 +1097,18 @@ dmg_launcher_usage(
 
 	if(verbose) {
 		dmg_launcher_version(stream, verbose);
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
-	fprintf(stream, "%s\n", DMG_USAGE);
+	TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_USAGE);
 
 	if(verbose) {
 
 		for(int flag = 0; flag < FLAG_MAX; ++flag) {
-			fprintf(stream, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
+			TRACE_TOOL(stream, LEVEL_NONE, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
 		}
 
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 }
 
@@ -1171,24 +1151,18 @@ main(
 		if(g_launcher.bootrom) {
 
 			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
-				LEVEL_COLOR(stderr, LEVEL_ERROR);
-				fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
-				LEVEL_COLOR(stderr, LEVEL_NONE);
+				TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
 				goto exit;
 			}
 		}
 
 		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
 			goto exit;
 		}
 
 		if((result = ((dmg_load(&g_launcher.configuration) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Internal error -- %s\n", argv[0], dmg_error());
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Internal error -- %s\n", argv[0], dmg_error());
 			result = EXIT_FAILURE;
 			goto exit;
 		}

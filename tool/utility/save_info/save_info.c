@@ -76,10 +76,10 @@ dmg_utility_save_info_file_parse(void)
 	const dmg_save_header_t *header;
 	char timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
-	fprintf(stdout, "%s -- %.02f KB (%u bytes)\n\n", g_save_info.save, g_save_info.buffer.length / (float)KBYTE, g_save_info.buffer.length);
+	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_save_info.save, g_save_info.buffer.length / (float)KBYTE, g_save_info.buffer.length);
 
 	if(g_save_info.buffer.length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
-		fprintf(stderr, "File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_save_info.buffer.length / (float)KBYTE,
+		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_save_info.buffer.length / (float)KBYTE,
 			g_save_info.buffer.length, expected / (float)KBYTE, expected);
 		result = EXIT_FAILURE;
 		goto exit;
@@ -88,12 +88,12 @@ dmg_utility_save_info_file_parse(void)
 	header = (const dmg_save_header_t *)g_save_info.buffer.data;
 
 	if(header->magic != (expected = SAVE_MAGIC)) {
-		fprintf(stdout, "Magic     MISMATCH (Expecting \"%s\")\n", (char *)&expected);
+		TRACE_TOOL_MESSAGE("Magic     MISMATCH (Expecting \"%s\")\n", (char *)&expected);
 		result = EXIT_FAILURE;
 	}
 
 	if(header->version != (expected = SAVE_VERSION)) {
-		fprintf(stdout, "Version   MISMATCH (Expecting %u)\n", expected);
+		TRACE_TOOL_MESSAGE("Version   MISMATCH (Expecting %u)\n", expected);
 		result = EXIT_FAILURE;
 	}
 
@@ -102,13 +102,13 @@ dmg_utility_save_info_file_parse(void)
 		memcpy(timestamp, TIMESTAMP_MALFORMED, strlen(TIMESTAMP_MALFORMED));
 	}
 
-	fprintf(stdout, "Timestamp %s\n", timestamp);
-	fprintf(stdout, "Length    %.02f KB (%u bytes)", header->length / (float)KBYTE, header->length);
+	TRACE_TOOL_MESSAGE("Timestamp %s\n", timestamp);
+	TRACE_TOOL_MESSAGE("Length    %.02f KB (%u bytes)", header->length / (float)KBYTE, header->length);
 
 	if(header->length != (expected = (g_save_info.buffer.length - (sizeof(*header) + sizeof(checksum))))) {
-		fprintf(stdout, ", MISMATCH (Expecting %.02f KB (%u bytes))\n", expected / (float)KBYTE, expected);
+		TRACE_TOOL_MESSAGE(", MISMATCH (Expecting %.02f KB (%u bytes))\n", expected / (float)KBYTE, expected);
 	} else {
-		fprintf(stdout, "\n");
+		TRACE_TOOL_MESSAGE("%s", "\n");
 	}
 
 	for(address = 0; address < (header->length + sizeof(*header)); ++address) {
@@ -116,7 +116,7 @@ dmg_utility_save_info_file_parse(void)
 	}
 
 	if(checksum != (uint16_t)(((uint8_t *)g_save_info.buffer.data)[address] | (((uint8_t *)g_save_info.buffer.data)[address + 1] << CHAR_BIT))) {
-		fprintf(stdout, "Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
+		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
 		result = EXIT_FAILURE;
 	}
 
@@ -179,22 +179,22 @@ dmg_utility_save_info_version(
 	const dmg_version_t *version;
 
 	if(verbose) {
-		fprintf(stream, "%s", DMG);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
 	}
 
 	if((version = dmg_version_get())) {
 
 		if(verbose) {
-			fprintf(stream, " ");
+			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
 		}
 
-		fprintf(stream, "%u.%u.%u\n", version->major, version->minor, version->patch);
+		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u\n", version->major, version->minor, version->patch);
 	} else {
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
 	if(verbose) {
-		fprintf(stream, "%s\n", DMG_NOTICE);
+		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
 	}
 }
 
@@ -207,18 +207,18 @@ dmg_utility_save_info_usage(
 
 	if(verbose) {
 		dmg_utility_save_info_version(stream, verbose);
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 
-	fprintf(stream, "%s\n", DMG_USAGE);
+	TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_USAGE);
 
 	if(verbose) {
 
 		for(int flag = 0; flag < FLAG_MAX; ++flag) {
-			fprintf(stream, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
+			TRACE_TOOL(stream, LEVEL_NONE, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
 		}
 
-		fprintf(stream, "\n");
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
 	}
 }
 
@@ -241,16 +241,12 @@ main(
 	} else {
 
 		if((result = dmg_utility_save_info_file_load()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to load file -- %s\n", argv[0], g_save_info.save);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 
 		if((result = dmg_utility_save_info_file_parse()) != EXIT_SUCCESS) {
-			LEVEL_COLOR(stderr, LEVEL_ERROR);
-			fprintf(stderr, "%s: Failed to parse file -- %s\n", argv[0], g_save_info.save);
-			LEVEL_COLOR(stderr, LEVEL_NONE);
+			TRACE_TOOL_ERROR("%s: Unsupported file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 	}

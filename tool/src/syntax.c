@@ -16,13 +16,46 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#include "./syntax_type.h"
 
-#include "../../include/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 3
+const char *
+dmg_tool_directive_string(
+	__in int type
+	)
+{
+	return DIRECTIVE_STR[type];
+}
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+const dmg_tool_instruction_t *
+dmg_tool_instruction(
+	__in uint8_t opcode,
+	__in bool extended
+	)
+{
+	return (extended ? &INSTRUCTION_EXTENDED[opcode] : &INSTRUCTION[opcode]);
+}
+
+const char *
+dmg_tool_instruction_string(
+	__in uint8_t opcode,
+	__in bool extended
+	)
+{
+	return (extended ? INSTRUCTION_EXTENDED_STR[opcode] : INSTRUCTION_STR[opcode]);
+}
+
+const char *
+dmg_tool_vector_string(
+	__in int type
+	)
+{
+	return VECTOR_STR[type];
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
