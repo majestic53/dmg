@@ -117,43 +117,63 @@ dmg_utility_dasm_disassemble_comment(void)
 
 static int
 dmg_utility_dasm_disassemble_header(
-	__inout uint32_t *banks
+	__inout uint32_t *banks,
+	__in bool final
 	)
 {
-	int count = 0, result = EXIT_SUCCESS;
-	char str[HEADER_WIDTH + 1] = {};
+	int result = EXIT_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cHeader [%04x-%04x]", COMMENT_PREFIX, ADDRESS_HEADER_BEGIN, ADDRESS_HEADER_END);
+	if(final) {
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cHeader [%04x-%04x]", COMMENT_PREFIX, ADDRESS_HEADER_BEGIN, ADDRESS_HEADER_END);
+	}
 
 	header = (const dmg_cartridge_header_t *)&((uint8_t *)g_dasm.buffer.data)[ADDRESS_HEADER_BEGIN];
 	*banks = ROM_BANK[header->rom];
 
-	for(uint16_t address = ADDRESS_HEADER_BEGIN; address <= ADDRESS_HEADER_END; ++address) {
-		uint8_t value;
+	if(final) {
+		int index = 0;
 
-		if(!(address % HEADER_WIDTH)) {
+		for(uint16_t address = ADDRESS_HEADER_BEGIN; address <= ADDRESS_HEADER_END; address += HEADER_LEN[index++]) {
+			uint16_t offset;
+			int count = 0;
+			char str[HEADER_WIDTH + 1] = {};
 
-			if(strlen(str)) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s", COMMENT_PREFIX, str);
-				memset(str, 0, sizeof(str));
-				count = 0;
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t\t%c%04x\n\t%s", dmg_tool_header_string(index), COMMENT_PREFIX, address,
+					dmg_tool_directive_string(DIRECTIVE_DATA));
+
+			for(offset = address; offset < (address + HEADER_LEN[index]); ++offset) {
+				uint8_t value;
+
+				if(!(count % HEADER_WIDTH)) {
+
+					if(strlen(str)) {
+						TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s\n\t%s", COMMENT_PREFIX, str, dmg_tool_directive_string(DIRECTIVE_DATA));
+						memset(str, 0, sizeof(str));
+						count = 0;
+					}
+				}
+
+				value = ((uint8_t *)g_dasm.buffer.data)[offset];
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, " %02x", value);
+				str[count++] = ((isprint((char)value) && !isspace((char)value)) ? value : CHARACTER_FILL);
 			}
 
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s", dmg_tool_directive_string(DIRECTIVE_DATA));
+			if(strlen(str)) {
+
+				for(offset = 0; offset < (HEADER_WIDTH - count); ++offset) {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "   ");
+				}
+
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s", COMMENT_PREFIX, str);
+				memset(str, 0, sizeof(str));
+			}
+
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 		}
 
-		value = ((uint8_t *)g_dasm.buffer.data)[address];
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, " %02x", value);
-		str[count++] = ((isprint((char)value) && !isspace((char)value)) ? value : CHARACTER_FILL);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
 	}
-
-	if(strlen(str)) {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "   %c%s", COMMENT_PREFIX, str);
-		memset(str, 0, sizeof(str));
-	}
-
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n\n");
 
 	return result;
 }
@@ -162,62 +182,118 @@ static int
 dmg_utility_dasm_disassemble_instruction(
 	__inout uint16_t *address,
 	__in uint32_t origin,
-	__in uint32_t bank
+	__in uint32_t bank,
+	__in bool final
 	)
 {
 	const char *format;
 	bool extended = false;
-	uint16_t base = ((bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN) + *address);
 	int result = EXIT_SUCCESS;
 	uint8_t opcode, operand[2] = {};
 	const dmg_tool_instruction_t *instruction;
+	uint16_t base = ((bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN) + *address);
+
+	if(final) {
+		uint32_t index = 0;
+
+		for(; index < g_dasm.subroutine_count; ++index) {
+
+			if(base == g_dasm.subroutine[index]) {
+				break;
+			}
+		}
+
+		if(index < g_dasm.subroutine_count) {
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s%04x%s\n", SUBROUTINE_PREFIX, base, LABEL_PREFIX);
+		}
+	}
 
 	if((extended = ((opcode = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++]) == INSTRUCTION_EXTENDED_PREFIX))) {
 		opcode = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 	}
 
-	format = dmg_tool_instruction_string(opcode, extended);
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t\t");
+	if(final) {
+		format = dmg_tool_instruction_string(opcode, extended);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t\t");
+	}
 
 	switch((instruction = dmg_tool_instruction(opcode, extended))->operand) {
 		case OPERAND_BYTE:
 			operand[0] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 
-			if(extended) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
-					operand[0]);
-			} else {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0]);
-			}
+			if(final) {
 
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, operand[0]);
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+				if(extended) {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX,
+						opcode, operand[0]);
+				} else {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0]);
+				}
+
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, operand[0]);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+			}
 			break;
 		case OPERAND_WORD:
 			operand[0] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 			operand[1] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 
-			if(extended) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode,
-					operand[0], operand[1]);
-			} else {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0], operand[1]);
-			}
+			if(final) {
 
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, (operand[1] << CHAR_BIT) | operand[0]);
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+				if(extended) {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX,
+						opcode, operand[0], operand[1]);
+				} else {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x %02x}\n", COMMENT_PREFIX, base, opcode, operand[0], operand[1]);
+				}
+
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t");
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, format, (operand[1] << CHAR_BIT) | operand[0]);
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+			} else if(!extended && (g_dasm.subroutine_count < SUBROUTINE_MAX)) {
+
+				switch(opcode) {
+					case INSTRUCTION_CALL_U16:
+					case INSTRUCTION_CALL_C_U16:
+					case INSTRUCTION_CALL_NC_U16:
+					case INSTRUCTION_CALL_NZ_U16:
+					case INSTRUCTION_CALL_Z_U16: {
+							uint16_t value = ((operand[1] << CHAR_BIT) | operand[0]);
+
+							if(value <= ADDRESS_ROM_SWAP_END) {
+								uint32_t index = 0;
+
+								for(; index < g_dasm.subroutine_count; ++index) {
+
+									if(g_dasm.subroutine[index] == value) {
+										break;
+									}
+								}
+
+								if(index == g_dasm.subroutine_count) {
+									g_dasm.subroutine[g_dasm.subroutine_count++] = value;
+								}
+							}
+						} break;
+					default:
+						break;
+				}
+			}
 			break;
 		default:
 
-			if(extended) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX, opcode);
-			} else {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x}\n", COMMENT_PREFIX, base, opcode);
-			}
+			if(final) {
 
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t%s\n", format);
+				if(extended) {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x %02x}\n", COMMENT_PREFIX, base, INSTRUCTION_EXTENDED_PREFIX,
+							opcode);
+				} else {
+					TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%c%04x {%02x}\n", COMMENT_PREFIX, base, opcode);
+				}
+
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t%s\n", format);
+			}
 			break;
 	}
 
@@ -225,24 +301,30 @@ dmg_utility_dasm_disassemble_instruction(
 }
 
 static int
-dmg_utility_dasm_disassemble_vectors(void)
+dmg_utility_dasm_disassemble_vectors(
+	__in bool final
+	)
 {
 	int result = EXIT_SUCCESS;
 
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cVector table [%04x-%04x]", COMMENT_PREFIX, ADDRESS_VECTOR_BEGIN, ADDRESS_HEADER_BEGIN - 1);
+	if(final) {
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cVector table [%04x-%04x]", COMMENT_PREFIX, ADDRESS_VECTOR_BEGIN, ADDRESS_HEADER_BEGIN - 1);
+	}
 
 	for(uint16_t address = ADDRESS_VECTOR_BEGIN; address < ADDRESS_HEADER_BEGIN;) {
 
-		if(!(address % VECTOR_WIDTH) && (address <= ADDRESS_VECTOR_END)) {
+		if(final && !(address % VECTOR_WIDTH) && (address <= ADDRESS_VECTOR_END)) {
 			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n", dmg_tool_vector_string(address / VECTOR_WIDTH));
 		}
 
-		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0, final)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 	}
 
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+	if(final) {
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\n");
+	}
 
 exit:
 	return result;
@@ -251,23 +333,26 @@ exit:
 static int
 dmg_utility_dasm_disassemble_bank(
 	__inout uint32_t *banks,
-	__in uint32_t bank
+	__in uint32_t bank,
+	__in bool final
 	)
 {
 	uint16_t address;
 	int result = EXIT_SUCCESS;
 	uint32_t origin = (bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN);
 
-	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cBank #%u\n%s %x\n%s %04x\n\n", COMMENT_PREFIX, bank,
-		dmg_tool_directive_string(DIRECTIVE_BANK), bank, dmg_tool_directive_string(DIRECTIVE_ORIGIN), origin);
+	if(final) {
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cBank #%u\n\t%s %x\n\t%s %04x\n\n", COMMENT_PREFIX, bank,
+			dmg_tool_directive_string(DIRECTIVE_BANK), bank, dmg_tool_directive_string(DIRECTIVE_ORIGIN), origin);
+	}
 
 	if(!bank) {
 
-		if((result = dmg_utility_dasm_disassemble_vectors()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_vectors(final)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_disassemble_header(banks)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_header(banks, final)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 
@@ -280,7 +365,7 @@ dmg_utility_dasm_disassemble_bank(
 
 	for(; address < BANK_WIDTH;) {
 
-		if((result = dmg_utility_dasm_disassemble_instruction(&address, origin, bank)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_instruction(&address, origin, bank, final)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -318,18 +403,39 @@ dmg_utility_dasm_file_disassemble(void)
 		goto exit;
 	}
 
-	TRACE_TOOL_MESSAGE("Parsing bank[%02x]...      ", bank);
+	TRACE_TOOL_MESSAGE("Parsing bank[%u]...      ", bank);
 
-	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != EXIT_SUCCESS) {
 		goto exit;
 	}
 
 	TRACE_TOOL_MESSAGE("%s", "[Done]\n");
 
 	for(bank = 1; bank < banks; ++bank) {
-		TRACE_TOOL_MESSAGE("Parsing bank[%02x]...      ", bank);
+		TRACE_TOOL_MESSAGE("Parsing bank[%u]...      ", bank);
 
-		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != EXIT_SUCCESS) {
+			goto exit;
+		}
+
+		TRACE_TOOL_MESSAGE("%s", "[Done]\n");
+	}
+
+	TRACE_TOOL_MESSAGE("\nFound %u subroutines\n\n", g_dasm.subroutine_count);
+	bank = 0;
+
+	TRACE_TOOL_MESSAGE("Writing bank[%u]...      ", bank);
+
+	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != EXIT_SUCCESS) {
+		goto exit;
+	}
+
+	TRACE_TOOL_MESSAGE("%s", "[Done]\n");
+
+	for(bank = 1; bank < banks; ++bank) {
+		TRACE_TOOL_MESSAGE("Writing bank[%u]...      ", bank);
+
+		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != EXIT_SUCCESS) {
 			goto exit;
 		}
 

@@ -33,11 +33,6 @@
 #define OPTION_VERSION 'v'
 #define OPTIONS "hr:v"
 
-#define CGB_SUPPORT 0x80
-#define CGB_SUPPORT_ONLY 0xc0
-
-#define SGB_SUPPORT 0x03
-
 enum {
 	FLAG_HELP = 0,
 	FLAG_ROM,

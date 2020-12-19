@@ -34,6 +34,10 @@ const char *dmg_tool_directive_string(
 	__in int type
 	);
 
+const char *dmg_tool_header_string(
+	__in int type
+	);
+
 const dmg_tool_instruction_t *dmg_tool_instruction(
 	__in uint8_t opcode,
 	__in bool extended

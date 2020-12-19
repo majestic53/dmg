@@ -36,14 +36,12 @@
 
 #define PATH_OUTPUT "output.s"
 
-#define CGB_SUPPORT 0x80
-#define CGB_SUPPORT_ONLY 0xc0
-
 #define HEADER_WIDTH 16
 
-#define VECTOR_WIDTH 8
+#define SUBROUTINE_PREFIX "sub_"
+#define SUBROUTINE_MAX 10000
 
-#define SGB_SUPPORT 0x03
+#define VECTOR_WIDTH 8
 
 enum {
 	FLAG_HELP = 0,
@@ -67,6 +65,25 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify rom file", /* FLAG_ROM */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
+	};
+
+static const uint32_t HEADER_LEN[] = {
+	CARTRIDGE_HEADER_ENTRY_LENGTH, /* HEADER_ENTRY */
+	CARTRIDGE_HEADER_LOGO_LENGTH, /* HEADER_LOGO */
+	CARTRIDGE_HEADER_TITLE_LENGTH, /* HEADER_TITLE */
+	CARTRIDGE_HEADER_MANUFACTURER_LENGTH, /* HEADER_MANUFACTURER */
+	sizeof(uint8_t), /* HEADER_COLOR_GAMEBOY */
+	CARTRIDGE_HEADER_LICENSEE_LENGTH, /* HEADER_LICENSEE */
+	sizeof(uint8_t), /* HEADER_SUPER_GAMEBOY */
+	sizeof(uint8_t), /* HEADER_MAPPER */
+	sizeof(uint8_t), /* HEADER_ROM */
+	sizeof(uint8_t), /* HEADER_RAM */
+	sizeof(uint8_t), /* HEADER_DESTINATION */
+	sizeof(uint8_t), /* HEADER_LICENSEE_OLD */
+	sizeof(uint8_t), /* HEADER_VERSION */
+	sizeof(uint8_t), /* HEADER_CHECKSUM */
+	sizeof(uint16_t), /* HEADER_CHECKSUM_GLOBAL */
+	0, /* HEADER_MAX */
 	};
 
 static const char *MAPPER_STR[] = {
@@ -119,6 +136,8 @@ typedef struct {
 	const char *rom;
 	const char *output;
 	dmg_buffer_t buffer;
+	uint16_t subroutine[SUBROUTINE_MAX];
+	uint32_t subroutine_count;
 	FILE *file;
 	bool help;
 	bool version;

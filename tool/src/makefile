@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+DIR_BUILD=../../build/
 DIR_BUILD_TOOL=../../build/tool/
 DIR_INCLUDE=../include/
 DIR_SRC=./
@@ -35,6 +36,6 @@ base_trace.o: $(DIR_SRC)trace.c $(DIR_INCLUDE)trace.h
 archive:
 	@echo ''
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
-	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)base_syntax.o $(DIR_BUILD_TOOL)base_trace.o
+	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD)common_version.o $(DIR_BUILD_TOOL)base_syntax.o $(DIR_BUILD_TOOL)base_trace.o
 	@echo '--- DONE -----------------------------------'
 	@echo ''

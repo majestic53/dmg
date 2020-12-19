@@ -27,7 +27,26 @@ static const char *DIRECTIVE_STR[] = {
 	DIRECTIVE_DELIMITER "db", /* DIRECTIVE_DATA */
 	DIRECTIVE_DELIMITER "org", /* DIRECTIVE_ORIGIN */
 	"", /* DIRECTIVE_MAX */
-};
+	};
+
+static const char *HEADER_STR[] = {
+	"hdr_entry" LABEL_PREFIX, /* HEADER_ENTRY */
+	"hdr_logo" LABEL_PREFIX, /* HEADER_LOGO */
+	"hdr_title" LABEL_PREFIX, /* HEADER_TITLE */
+	"hdr_manuf" LABEL_PREFIX, /* HEADER_MANUFACTURER */
+	"hdr_cgb" LABEL_PREFIX, /* HEADER_COLOR_GAMEBOY */
+	"hdr_lic" LABEL_PREFIX, /* HEADER_LICENSEE */
+	"hdr_sgb" LABEL_PREFIX, /* HEADER_SUPER_GAMEBOY */
+	"hdr_map" LABEL_PREFIX, /* HEADER_MAPPER */
+	"hdr_rom" LABEL_PREFIX, /* HEADER_ROM */
+	"hdr_ram" LABEL_PREFIX, /* HEADER_RAM */
+	"hdr_dest" LABEL_PREFIX, /* HEADER_DESTINATION */
+	"hdr_lic_old" LABEL_PREFIX, /* HEADER_LICENSEE_OLD */
+	"hdr_ver" LABEL_PREFIX, /* HEADER_VERSION */
+	"hdr_sum" LABEL_PREFIX, /* HEADER_CHECKSUM */
+	"hdr_sum_glb" LABEL_PREFIX, /* HEADER_CHECKSUM_GLOBAL */
+	"", /* HEADER_MAX */
+	};
 
 static const dmg_tool_instruction_t INSTRUCTION[] = {
 	{ INSTRUCTION_NOP, OPERAND_NONE}, /* 0x00 */
