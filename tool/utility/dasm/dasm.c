@@ -186,8 +186,8 @@ dmg_utility_dasm_disassemble_instruction(
 	__in bool final
 	)
 {
-	const char *format;
 	bool extended = false;
+	const char *format = NULL;
 	int result = EXIT_SUCCESS;
 	uint8_t opcode, operand[2] = {};
 	const dmg_tool_instruction_t *instruction;
