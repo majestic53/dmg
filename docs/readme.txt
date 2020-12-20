@@ -1,4 +1,4 @@
-DMG 0.2.3-alpha
+DMG 0.2.4-alpha
 Copyright (C) 2020 David Jolly
 ==============================
 
@@ -46,6 +46,13 @@ For details see: https://github.com/majestic53/dmg/blob/master/tool/launcher/rea
 
 Utilities
 ---------
+
+dmg-asm [args]
+
+-h	Display help information
+-o	Specify output file
+-s	Specify source file
+-v	Display version information
 
 dmg-dasm [args]
 

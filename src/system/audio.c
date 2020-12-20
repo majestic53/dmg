@@ -30,7 +30,38 @@ dmg_audio_trace(
 	__in const dmg_audio_t *audio
 	)
 {
-	// TODO: TRACE REGISTERS
+	TRACE_FORMAT(level, "Audio control=%02x (1=%s:%u, 2=%s:%u)", audio->control.raw, audio->control.enable_1 ? "Enabled" : "Disabled",
+			audio->control.level_1, audio->control.enable_2 ? "Enabled" : "Disabled", audio->control.level_2);
+	TRACE_FORMAT(level, "Audio output=%02x (1=[%c%c%c%c], 2=[%c%c%c%c])", audio->output.raw, audio->output.output_1_1 ? '1' : '-',
+			audio->output.output_2_1 ? '2' : '-', audio->output.output_3_1 ? '3' : '-', audio->output.output_4_1 ? '4' : '-',
+			audio->output.output_1_2 ? '1' : '-', audio->output.output_2_2 ? '2' : '-', audio->output.output_3_2 ? '3' : '-',
+			audio->output.output_4_2 ? '4' : '-');
+	TRACE_FORMAT(level, "Audio state=%02x (%s [%c%c%c%c])", audio->state.raw, audio->state.enable, audio->state.enable_1, audio->state.enable_2,
+			audio->state.enable_2, audio->state.enable_3, audio->state.enable_4);
+	TRACE_FORMAT(level, "Audio mode 1 sweep=%02x (s=%u, i=%u, t=%u)", audio->mode_1.sweep.raw, audio->mode_1.sweep.shift, audio->mode_1.sweep.increase,
+			audio->mode_1.sweep.time);
+	TRACE_FORMAT(level, "Audio mode 1 length=%02x (l=%u, d=%u)", audio->mode_1.length.raw, audio->mode_1.length.length, audio->mode_1.length.duty);
+	TRACE_FORMAT(level, "Audio mode 1 envelope=%02x (s=%u, u=%u, v=%u)", audio->mode_1.envelope.raw, audio->mode_1.envelope.sweep, audio->mode_1.envelope.up,
+			audio->mode_1.envelope.volume);
+	TRACE_FORMAT(level, "Audio mode 1 frequency=%04x (%u, %u:[s=%x, r=%x])", audio->mode_1.frequency.raw, audio->mode_1.frequency.low,
+			audio->mode_1.frequency.high.high, audio->mode_1.frequency.high.select, audio->mode_1.frequency.high.restart);
+	TRACE_FORMAT(level, "Audio mode 2 length=%02x (l=%u, d=%u)", audio->mode_2.length.raw, audio->mode_2.length.length, audio->mode_2.length.duty);
+	TRACE_FORMAT(level, "Audio mode 2 envelope=%02x (s=%u, u=%u, v=%u)", audio->mode_2.envelope.raw, audio->mode_2.envelope.sweep, audio->mode_2.envelope.up,
+			audio->mode_2.envelope.volume);
+	TRACE_FORMAT(level, "Audio mode 2 frequency=%04x (%u, %u:[s=%x, r=%x])", audio->mode_2.frequency.raw, audio->mode_2.frequency.low,
+			audio->mode_2.frequency.high.high, audio->mode_2.frequency.high.select, audio->mode_2.frequency.high.restart);
+	TRACE_FORMAT(level, "Audio mode 3 enable=%02x (%s)", audio->mode_3.enable.raw, audio->mode_3.enable.enable ? "Enabled" : "Disabled");
+	TRACE_FORMAT(level, "Audio mode 3 length=%02x", audio->mode_3.length);
+	TRACE_FORMAT(level, "Audio mode 3 level=%02x (o=%u)", audio->mode_3.level.raw, audio->mode_3.level.output);
+	TRACE_FORMAT(level, "Audio mode 3 frequency=%04x (%u, %u:[s=%x, r=%x])", audio->mode_3.frequency.raw, audio->mode_3.frequency.low,
+			audio->mode_3.frequency.high.high, audio->mode_3.frequency.high.select, audio->mode_3.frequency.high.restart);
+	TRACE_FORMAT(level, "Audio mode 4 length=%02x", audio->mode_4.length.length);
+	TRACE_FORMAT(level, "Audio mode 4 envelope=%02x (s=%u, u=%u, v=%u)", audio->mode_4.envelope.raw, audio->mode_4.envelope.sweep, audio->mode_4.envelope.up,
+			audio->mode_4.envelope.volume);
+	TRACE_FORMAT(level, "Audio mode 4 polynomial-counter=%02x (r=%u, s=%x, sh=%u)", audio->mode_4.polynomial.raw, audio->mode_4.polynomial.ratio,
+			audio->mode_4.polynomial.select, audio->mode_4.polynomial.shift);
+	TRACE_FORMAT(level, "Audio mode 4 consecutive-counter=%02x (s=%x, r=%x)", audio->mode_4.consecutive.raw, audio->mode_4.consecutive.select,
+			audio->mode_4.consecutive.restart);
 }
 
 #endif /* NDEBUG */

@@ -395,9 +395,9 @@ dmg_test_serial_unload(void)
 int
 dmg_test_serial_write(void)
 {
-	dmg_serial_control_t control = {};
 	uint8_t value = rand();
 	int result = EXIT_SUCCESS;
+	dmg_serial_control_t control = {};
 
 	dmg_test_serial_initialize();
 	dmg_serial_write(&g_serial.serial, ADDRESS_SERIAL_CONTROL, value);

@@ -18,11 +18,11 @@
 
 #include "./launcher_type.h"
 
+static dmg_launcher_t g_launcher = {};
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-static dmg_launcher_t g_launcher = {};
 
 static void
 dmg_launcher_version(

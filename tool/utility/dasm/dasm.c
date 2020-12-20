@@ -18,16 +18,17 @@
 
 #include "./dasm_type.h"
 
+static dmg_dasm_t g_dasm = {};
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-static dmg_dasm_t g_dasm = {};
 
 static int
 dmg_utility_dasm_disassemble_comment(void)
 {
 	uint32_t address;
+	const char *mapper;
 	uint16_t checksum = 0;
 	int result = EXIT_SUCCESS;
 	const dmg_version_t *version;
@@ -80,11 +81,12 @@ dmg_utility_dasm_disassemble_comment(void)
 
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cRegion    %s", COMMENT_PREFIX, header->destination ? "U (International)" : "JP (Japan)");
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cMapper    ", COMMENT_PREFIX);
+	mapper = dmg_tool_mapper_string(header->mapper);
 
-	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
+	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", MAPPER_STR[header->mapper]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", mapper);
 	}
 
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRom       ", COMMENT_PREFIX);
@@ -92,7 +94,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	if(header->rom >= ROM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", ROM_STR[header->rom]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", dmg_tool_rom_string(header->rom));
 	}
 
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRam       ", COMMENT_PREFIX);
@@ -100,7 +102,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	if(header->ram >= RAM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", RAM_STR[header->ram]);
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", dmg_tool_ram_string(header->ram));
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
@@ -204,7 +206,12 @@ dmg_utility_dasm_disassemble_instruction(
 		}
 
 		if(index < g_dasm.subroutine_count) {
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s%04x%s\n", SUBROUTINE_PREFIX, base, LABEL_PREFIX);
+
+			if(bank > 1) {
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s%04x_%u%s\n", SUBROUTINE_PREFIX, base, bank, LABEL_PREFIX);
+			} else {
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s%04x%s\n", SUBROUTINE_PREFIX, base, LABEL_PREFIX);
+			}
 		}
 	}
 
@@ -314,7 +321,8 @@ dmg_utility_dasm_disassemble_vectors(
 	for(uint16_t address = ADDRESS_VECTOR_BEGIN; address < ADDRESS_HEADER_BEGIN;) {
 
 		if(final && !(address % VECTOR_WIDTH) && (address <= ADDRESS_VECTOR_END)) {
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n", dmg_tool_vector_string(address / VECTOR_WIDTH));
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t%s %04x\n", dmg_tool_vector_string(address / VECTOR_WIDTH),
+					dmg_tool_directive_string(DIRECTIVE_ORIGIN), address);
 		}
 
 		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0, final)) != EXIT_SUCCESS) {
@@ -374,18 +382,8 @@ exit:
 	return result;
 }
 
-static void
-dmg_utility_dasm_file_close(void)
-{
-
-	if(g_dasm.file) {
-		fclose(g_dasm.file);
-		g_dasm.file = NULL;
-	}
-}
-
 static int
-dmg_utility_dasm_file_disassemble(void)
+dmg_utility_dasm_disassemble(void)
 {
 	int result = EXIT_SUCCESS;
 	uint32_t bank = 0, banks, length = 0;
@@ -452,7 +450,7 @@ exit:
 }
 
 static int
-dmg_utility_dasm_file_open(
+dmg_utility_dasm_output_load(
 	__in const char *path
 	)
 {
@@ -480,8 +478,56 @@ exit:
 	return result;
 }
 
+static void
+dmg_utility_dasm_output_unload(void)
+{
+
+	if(g_dasm.file) {
+		fclose(g_dasm.file);
+		g_dasm.file = NULL;
+	}
+}
+
 static int
-dmg_utility_dasm_file_load(void)
+dmg_utility_dasm_parse(
+	__in int argc,
+	__in char *argv[]
+	)
+{
+	int option, result = EXIT_SUCCESS;
+
+	opterr = 1;
+
+	while((option = getopt(argc, argv, OPTIONS)) != -1) {
+
+		switch(option) {
+			case OPTION_HELP:
+				g_dasm.help = true;
+				break;
+			case OPTION_OUTPUT:
+				g_dasm.output = optarg;
+				break;
+			case OPTION_ROM:
+				g_dasm.rom = optarg;
+				break;
+			case OPTION_VERSION:
+				g_dasm.version = true;
+				break;
+			case '?':
+				result = EXIT_FAILURE;
+				goto exit;
+			default:
+				result = EXIT_FAILURE;
+				goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_utility_dasm_rom_load(void)
 {
 	FILE *file = NULL;
 	int length, result = EXIT_SUCCESS;
@@ -523,7 +569,7 @@ exit:
 }
 
 static void
-dmg_utility_dasm_file_unload(void)
+dmg_utility_dasm_rom_unload(void)
 {
 
 	if(g_dasm.buffer.data) {
@@ -531,44 +577,6 @@ dmg_utility_dasm_file_unload(void)
 	}
 
 	memset(&g_dasm.buffer, 0, sizeof(g_dasm.buffer));
-}
-
-static int
-dmg_utility_dasm_parse(
-	__in int argc,
-	__in char *argv[]
-	)
-{
-	int option, result = EXIT_SUCCESS;
-
-	opterr = 1;
-
-	while((option = getopt(argc, argv, OPTIONS)) != -1) {
-
-		switch(option) {
-			case OPTION_HELP:
-				g_dasm.help = true;
-				break;
-			case OPTION_OUTPUT:
-				g_dasm.output = optarg;
-				break;
-			case OPTION_ROM:
-				g_dasm.rom = optarg;
-				break;
-			case OPTION_VERSION:
-				g_dasm.version = true;
-				break;
-			case '?':
-				result = EXIT_FAILURE;
-				goto exit;
-			default:
-				result = EXIT_FAILURE;
-				goto exit;
-		}
-	}
-
-exit:
-	return result;
 }
 
 static void
@@ -641,25 +649,25 @@ main(
 		dmg_utility_dasm_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_dasm_file_load()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_dasm.rom);
+		if((result = dmg_utility_dasm_rom_load()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_file_open(argv[0])) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to open file -- %s\n", argv[0], g_dasm.output);
+		if((result = dmg_utility_dasm_output_load(argv[0])) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to create output file -- %s\n", argv[0], g_dasm.output);
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_file_disassemble()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to disassemble file -- %s\n", argv[0], g_dasm.rom);
+		if((result = dmg_utility_dasm_disassemble()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to assemble rom file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}
 	}
 
 exit:
-	dmg_utility_dasm_file_close();
-	dmg_utility_dasm_file_unload();
+	dmg_utility_dasm_output_unload();
+	dmg_utility_dasm_rom_unload();
 	memset(&g_dasm, 0, sizeof(g_dasm));
 
 	return result;

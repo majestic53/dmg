@@ -16,49 +16,54 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
-#define DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
+#ifndef DMG_TOOL_UTILITY_ASM_H_
+#define DMG_TOOL_UTILITY_ASM_H_
 
-#include "../../../src/common/cartridge_type.h"
-#include "../../../src/common/mapper_type.h"
-#include "../../../include/common/cartridge.h"
 #include "../../include/common.h"
 
-#define DMG "DMG-ROM-INFO"
+#define DMG "DMG-ASM"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
-#define DMG_USAGE "dmg-rom-info [args]"
+#define DMG_USAGE "dmg-asm [args]"
 
 #define OPTION_HELP 'h'
-#define OPTION_ROM 'r'
+#define OPTION_OUTPUT 'o'
+#define OPTION_SOURCE 's'
 #define OPTION_VERSION 'v'
-#define OPTIONS "hr:v"
+#define OPTIONS "ho:s:v"
+
+#define PATH_OUTPUT "output.gb"
 
 enum {
 	FLAG_HELP = 0,
-	FLAG_ROM,
+	FLAG_OUTPUT,
+	FLAG_SOURCE,
 	FLAG_VERSION,
 	FLAG_MAX,
 };
 
 static const char *FLAG_STR[] = {
 	"-h", /* FLAG_HELP */
-	"-r", /* FLAG_ROM */
+	"-o", /* FLAG_OUTPUT */
+	"-s", /* FLAG_SOURCE */
 	"-v", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
 
 static const char *FLAG_DESCRIPTION_STR[] = {
 	"Display help information", /* FLAG_HELP */
-	"Specify rom file", /* FLAG_ROM */
+	"Specify output file", /* FLAG_OUTPUT */
+	"Specify source file", /* FLAG_SOURCE */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
 
 typedef struct {
-	const char *rom;
+	const char *source;
+	const char *output;
 	dmg_buffer_t buffer;
+	FILE *file;
 	bool help;
 	bool version;
-} __attribute__((packed)) dmg_rom_info_t;
+} __attribute__((packed)) dmg_asm_t;
 
-#endif /* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */
+#endif /* DMG_TOOL_UTILITY_ASM_H_ */

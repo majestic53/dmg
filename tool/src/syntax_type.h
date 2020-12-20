@@ -1084,6 +1084,52 @@ static const char *INSTRUCTION_EXTENDED_STR[] =  {
 	"set7 a",
 	};
 
+static const char *MAPPER_STR[] = {
+	"ROM", /* MAPPER_ROM_ONLY */
+	"MBC1", /* MAPPER_MBC1 */
+	"MBC1-RAM", /* MAPPER_MBC1_RAM */
+	"MBC1-RAM-BATTERY", /* MAPPER_MBC1_RAM_BATTERY */
+	"",
+	"MBC2", /* MAPPER_MBC2 */
+	"MBC2-BATTERY", /* MAPPER_MBC2_BATTERY */
+	"",
+	"ROM-RAM", /* MAPPER_ROM_RAM */
+	"ROM-RAM-BATTERY", /* MAPPER_ROM_RAM_BATTERY */
+	"", "", "", "", "",
+	"MBC3-TIMER-BATTERY", /* MAPPER_MBC3_TIMER_BATTERY */
+	"MBC3-TIMER-RAM-BATTERY", /* MAPPER_MBC3_TIMER_RAM_BATTERY */
+	"MBC3", /* MAPPER_MBC3 */
+	"MBC3-RAM", /* MAPPER_MBC3_RAM */
+	"MBC3-RAM-BATTERY", /* MAPPER_MBC3_RAM_BATTERY */
+	"", "", "", "", "",
+	"MBC5", /* MAPPER_MBC5 */
+	"MBC5-RAM", /* MAPPER_MBC5_RAM */
+	"MBC5-RAM-BATTERY", /* MAPPER_MBC5_RAM_BATTERY */
+	"MBC5-RUMBLE", /* MAPPER_MBC5_RUMBLE */
+	"MBC5-RUMBLE-RAM", /* MAPPER_MBC5_RUMBLE_RAM */
+	"MBC5-RUMBLE-RAM-BATTERY", /* MAPPER_MBC5_RUMBLE_RAM_BATTERY */
+	};
+
+static const char *RAM_STR[] = {
+	"None", /* RAM_NONE */
+	"1 bank (2 KB)", /* RAM_2KB */
+	"1 bank (8 KB)", /* RAM_8KB */
+	"4 banks (32 KB)", /* RAM_32KB */
+	"16 banks (128 KB)", /* RAM_128KB */
+	};
+
+static const char *ROM_STR[] = {
+	"2 banks (32 KB)", /* ROM_32KB */
+	"4 banks (64 KB)", /* ROM_64KB */
+	"8 banks (128 KB)", /* ROM_128KB */
+	"16 banks (256 KB)", /* ROM_256KB */
+	"32 banks (512 KB)", /* ROM_512KB */
+	"64 banks (1 MB)", /* ROM_1MB */
+	"128 banks (2 MB)", /* ROM_2MB */
+	"256 banks (4 MB)", /* ROM_4MB */
+	"512 banks (8 MB)", /* ROM_8MB */
+	};
+
 static const char *VECTOR_STR[] = {
 	"vec_rst_00" LABEL_PREFIX, /* VECTOR_RST_00 */
 	"vec_rst_08" LABEL_PREFIX, /* VECTOR_RST_08 */

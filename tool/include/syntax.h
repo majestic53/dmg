@@ -48,6 +48,18 @@ const char *dmg_tool_instruction_string(
 	__in bool extended
 	);
 
+const char *dmg_tool_mapper_string(
+	__in int type
+	);
+
+const char *dmg_tool_ram_string(
+	__in int type
+	);
+
+const char *dmg_tool_rom_string(
+	__in int type
+	);
+
 const char *dmg_tool_vector_string(
 	__in int type
 	);

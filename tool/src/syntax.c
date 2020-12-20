@@ -57,6 +57,30 @@ dmg_tool_instruction_string(
 }
 
 const char *
+dmg_tool_mapper_string(
+	__in int type
+	)
+{
+	return MAPPER_STR[type];
+}
+
+const char *
+dmg_tool_ram_string(
+	__in int type
+	)
+{
+	return RAM_STR[type];
+}
+
+const char *
+dmg_tool_rom_string(
+	__in int type
+	)
+{
+	return ROM_STR[type];
+}
+
+const char *
 dmg_tool_vector_string(
 	__in int type
 	)

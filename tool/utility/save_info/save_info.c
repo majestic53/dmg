@@ -18,11 +18,11 @@
 
 #include "./save_info_type.h"
 
+static dmg_save_info_t g_save_info = {};
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-static dmg_save_info_t g_save_info = {};
 
 static int
 dmg_utility_save_info_file_load(void)

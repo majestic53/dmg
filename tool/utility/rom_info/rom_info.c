@@ -18,11 +18,11 @@
 
 #include "./rom_info_type.h"
 
+static dmg_rom_info_t g_rom_info = {};
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
-
-static dmg_rom_info_t g_rom_info = {};
 
 static int
 dmg_utility_rom_info_file_load(void)
@@ -70,6 +70,7 @@ static int
 dmg_utility_rom_info_file_parse(void)
 {
 	uint32_t address;
+	const char *mapper;
 	uint16_t checksum = 0;
 	int result = EXIT_SUCCESS;
 	const dmg_cartridge_header_t *header;
@@ -121,12 +122,13 @@ dmg_utility_rom_info_file_parse(void)
 
 	TRACE_TOOL_MESSAGE("\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
 	TRACE_TOOL_MESSAGE("%s", "\nMapper    ");
+	mapper = dmg_tool_mapper_string(header->mapper);
 
-	if((header->mapper >= MAPPER_MAX) || !strlen(MAPPER_STR[header->mapper])) {
+	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
 		TRACE_TOOL_MESSAGE("UNSUPPORTED (%u)\n", header->mapper);
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL_MESSAGE("%s\n", MAPPER_STR[header->mapper]);
+		TRACE_TOOL_MESSAGE("%s\n", mapper);
 	}
 
 	TRACE_TOOL_MESSAGE("%s", "Rom       ");
@@ -135,7 +137,7 @@ dmg_utility_rom_info_file_parse(void)
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL_MESSAGE("%s\n", ROM_STR[header->rom]);
+		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_rom_string(header->rom));
 	}
 
 	TRACE_TOOL_MESSAGE("%s", "Ram       ");
@@ -144,7 +146,7 @@ dmg_utility_rom_info_file_parse(void)
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL_MESSAGE("%s\n", RAM_STR[header->ram]);
+		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_ram_string(header->ram));
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
