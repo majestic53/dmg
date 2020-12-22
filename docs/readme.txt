@@ -1,4 +1,4 @@
-DMG 0.2.4-alpha
+DMG 0.2.5-alpha
 Copyright (C) 2020 David Jolly
 ==============================
 
@@ -53,6 +53,8 @@ dmg-asm [args]
 -o	Specify output file
 -s	Specify source file
 -v	Display version information
+
+For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/asm/readme.md
 
 dmg-dasm [args]
 

@@ -17,13 +17,20 @@
 DIR_BUILD=../../build/
 DIR_BUILD_TOOL=../../build/tool/
 DIR_INCLUDE=../include/
+DIR_INCLUDE_ASSEMBLER=../include/assembler/
 DIR_SRC=./
+DIR_SRC_ASSEMBLER=./assembler/
 
 FLAGS=-std=c11 -Wall -Werror
 
 LIB=libdmg_tool.a
 
-build: build_base
+build: build_assembler build_base
+
+build_assembler: assembler_stream.o
+
+assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)assembler_stream.o
 
 build_base: base_syntax.o base_trace.o
 
@@ -36,6 +43,8 @@ base_trace.o: $(DIR_SRC)trace.c $(DIR_INCLUDE)trace.h
 archive:
 	@echo ''
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
-	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD)common_version.o $(DIR_BUILD_TOOL)base_syntax.o $(DIR_BUILD_TOOL)base_trace.o
+	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)assembler_stream.o \
+		$(DIR_BUILD_TOOL)base_syntax.o $(DIR_BUILD_TOOL)base_trace.o \
+		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o
 	@echo '--- DONE -----------------------------------'
 	@echo ''

@@ -32,12 +32,55 @@ dmg_utility_asm_assemble(void)
 	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
 
 	// TODO
+	dmg_assembler_stream_t stream = {};
+
+	if((result = dmg_assembler_stream_load(&stream, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	do {
+		int type = CHARACTER_END;
+		char value = dmg_assembler_stream_character(&stream, &type);
+
+		fprintf(stdout, "\n[%u/%u] {", stream.index, stream.buffer->length);
+
+		if(!type) {
+			fprintf(stdout, " END");
+		}
+
+		if((type & CHARACTER_ALPHA) == CHARACTER_ALPHA) {
+			fprintf(stdout, " ALPHA");
+		}
+
+		if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
+			fprintf(stdout, " DECIMAL");
+		}
+
+		if((type & CHARACTER_HEXIDECIMAL) == CHARACTER_HEXIDECIMAL) {
+			fprintf(stdout, " HEXIDECIMAL");
+		}
+
+		if((type & CHARACTER_SPACE) == CHARACTER_SPACE) {
+			fprintf(stdout, " SPACE");
+		}
+
+		if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
+			fprintf(stdout, " SYMBOL");
+		}
+
+		fprintf(stdout, " } \'%c\' (%02x)", (!isprint(value) || isspace(value)) ? CHARACTER_FILL : value, value);
+	} while(dmg_assembler_stream_next(&stream) == DMG_STATUS_SUCCESS);
+
+	fprintf(stdout, "\n");
+	dmg_assembler_stream_unload(&stream);
+	// ---
 
 	fseek(g_asm.file, 0, SEEK_END);
 	length = ftell(g_asm.file);
 	fseek(g_asm.file, 0, SEEK_SET);
 	TRACE_TOOL_MESSAGE("\n%s -- %.02f KB (%u bytes)\n", g_asm.output, length / (float)KBYTE, length);
 
+exit:
 	return result;
 }
 
@@ -252,7 +295,7 @@ main(
 		}
 
 		if((result = dmg_utility_asm_assemble()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to disassemble source file -- %s\n", argv[0], g_asm.source);
+			TRACE_TOOL_ERROR("%s: Failed to disassemble source file -- %s\n", argv[0], dmg_error_get());
 			goto exit;
 		}
 	}

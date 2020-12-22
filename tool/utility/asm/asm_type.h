@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_UTILITY_ASM_H_
 #define DMG_TOOL_UTILITY_ASM_H_
 
-#include "../../include/common.h"
+#include "../../include/assembler/stream.h"
 
 #define DMG "DMG-ASM"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
@@ -58,8 +58,8 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	};
 
 typedef struct {
-	const char *source;
 	const char *output;
+	const char *source;
 	dmg_buffer_t buffer;
 	FILE *file;
 	bool help;
