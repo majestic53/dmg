@@ -21,6 +21,18 @@
 
 #include "../../include/system/processor/instruction.h"
 
+#define CHARACTER_EOF '\0'
+#define CHARACTER_FILL '.'
+#define CHARACTER_NEWLINE '\n'
+
+#define DELIMITER_BINARY "@"
+#define DELIMITER_COMMENT ';'
+#define DELIMITER_DIRECTIVE "."
+#define DELIMITER_HEXIDECIMAL "$"
+#define DELIMITER_LABEL ":"
+
+#define LITERAL_MAX 32
+
 enum {
 	DIRECTIVE_BANK = 0,
 	DIRECTIVE_DATA,

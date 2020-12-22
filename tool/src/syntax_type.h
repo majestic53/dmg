@@ -23,28 +23,28 @@
 #include "../include/syntax.h"
 
 static const char *DIRECTIVE_STR[] = {
-	DIRECTIVE_DELIMITER "bank", /* DIRECTIVE_BANK */
-	DIRECTIVE_DELIMITER "db", /* DIRECTIVE_DATA */
-	DIRECTIVE_DELIMITER "org", /* DIRECTIVE_ORIGIN */
+	DELIMITER_DIRECTIVE "bank", /* DIRECTIVE_BANK */
+	DELIMITER_DIRECTIVE "db", /* DIRECTIVE_DATA */
+	DELIMITER_DIRECTIVE "org", /* DIRECTIVE_ORIGIN */
 	"", /* DIRECTIVE_MAX */
 	};
 
 static const char *HEADER_STR[] = {
-	"hdr_entry" LABEL_PREFIX, /* HEADER_ENTRY */
-	"hdr_logo" LABEL_PREFIX, /* HEADER_LOGO */
-	"hdr_title" LABEL_PREFIX, /* HEADER_TITLE */
-	"hdr_manuf" LABEL_PREFIX, /* HEADER_MANUFACTURER */
-	"hdr_cgb" LABEL_PREFIX, /* HEADER_COLOR_GAMEBOY */
-	"hdr_lic" LABEL_PREFIX, /* HEADER_LICENSEE */
-	"hdr_sgb" LABEL_PREFIX, /* HEADER_SUPER_GAMEBOY */
-	"hdr_map" LABEL_PREFIX, /* HEADER_MAPPER */
-	"hdr_rom" LABEL_PREFIX, /* HEADER_ROM */
-	"hdr_ram" LABEL_PREFIX, /* HEADER_RAM */
-	"hdr_dest" LABEL_PREFIX, /* HEADER_DESTINATION */
-	"hdr_lic_old" LABEL_PREFIX, /* HEADER_LICENSEE_OLD */
-	"hdr_ver" LABEL_PREFIX, /* HEADER_VERSION */
-	"hdr_sum" LABEL_PREFIX, /* HEADER_CHECKSUM */
-	"hdr_sum_glb" LABEL_PREFIX, /* HEADER_CHECKSUM_GLOBAL */
+	"hdr_entry" DELIMITER_LABEL, /* HEADER_ENTRY */
+	"hdr_logo" DELIMITER_LABEL, /* HEADER_LOGO */
+	"hdr_title" DELIMITER_LABEL, /* HEADER_TITLE */
+	"hdr_manuf" DELIMITER_LABEL, /* HEADER_MANUFACTURER */
+	"hdr_cgb" DELIMITER_LABEL, /* HEADER_COLOR_GAMEBOY */
+	"hdr_lic" DELIMITER_LABEL, /* HEADER_LICENSEE */
+	"hdr_sgb" DELIMITER_LABEL, /* HEADER_SUPER_GAMEBOY */
+	"hdr_map" DELIMITER_LABEL, /* HEADER_MAPPER */
+	"hdr_rom" DELIMITER_LABEL, /* HEADER_ROM */
+	"hdr_ram" DELIMITER_LABEL, /* HEADER_RAM */
+	"hdr_dest" DELIMITER_LABEL, /* HEADER_DESTINATION */
+	"hdr_lic_old" DELIMITER_LABEL, /* HEADER_LICENSEE_OLD */
+	"hdr_ver" DELIMITER_LABEL, /* HEADER_VERSION */
+	"hdr_sum" DELIMITER_LABEL, /* HEADER_CHECKSUM */
+	"hdr_sum_glb" DELIMITER_LABEL, /* HEADER_CHECKSUM_GLOBAL */
 	"", /* HEADER_MAX */
 	};
 
@@ -309,68 +309,68 @@ static const dmg_tool_instruction_t INSTRUCTION[] = {
 
 static const char *INSTRUCTION_STR[] =  {
 	"nop", /* 0x00 */
-	"ld bc, %04x",
+	"ld bc, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (bc), a",
 	"inc bc",
 	"inc b",
 	"dec b",
-	"ld b, %02x",
+	"ld b, " DELIMITER_HEXIDECIMAL "%02x",
 	"rlca",
-	"ld (%04x), sp", /* 0x08 */
+	"ld (" DELIMITER_HEXIDECIMAL "%04x), sp", /* 0x08 */
 	"add hl, bc",
 	"ld a, (bc)",
 	"dec bc",
 	"inc c",
 	"dec c",
-	"ld c, %02x",
+	"ld c, " DELIMITER_HEXIDECIMAL "%02x",
 	"rrca",
-	"stop %02x", /* 0x10 */
-	"ld de, %04x",
+	"stop " DELIMITER_HEXIDECIMAL "%02x", /* 0x10 */
+	"ld de, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (de), a",
 	"inc de",
 	"inc d",
 	"dec d",
-	"ld d, %02x",
+	"ld d, " DELIMITER_HEXIDECIMAL "%02x",
 	"rla",
-	"jr %02x", /* 0x18 */
+	"jr " DELIMITER_HEXIDECIMAL "%02x", /* 0x18 */
 	"add hl, de",
 	"ld a, (de)",
 	"dec de",
 	"inc e",
 	"dec e",
-	"ld e, %02x",
+	"ld e, " DELIMITER_HEXIDECIMAL "%02x",
 	"rra",
-	"jr nz, %02x", /* 0x20 */
-	"ld hl, %04x",
+	"jr nz, " DELIMITER_HEXIDECIMAL "%02x", /* 0x20 */
+	"ld hl, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (hl+), a",
 	"inc hl",
 	"inc h",
 	"dec h",
-	"ld h, %02x",
+	"ld h, " DELIMITER_HEXIDECIMAL "%02x",
 	"daa",
-	"jr z, %02x", /* 0x28 */
+	"jr z, " DELIMITER_HEXIDECIMAL "%02x", /* 0x28 */
 	"add hl, hl",
 	"ld a, (hl+)",
 	"dec hl",
 	"inc l",
 	"dec l",
-	"ld l, %02x",
+	"ld l, " DELIMITER_HEXIDECIMAL "%02x",
 	"cpl",
-	"jr nc, %02x", /* 0x30 */
-	"ld sp, %04x",
+	"jr nc, " DELIMITER_HEXIDECIMAL "%02x", /* 0x30 */
+	"ld sp, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (hl-), a",
 	"inc sp",
 	"inc (hl)",
 	"dec (hl)",
-	"ld (hl), %02x",
+	"ld (hl), " DELIMITER_HEXIDECIMAL "%02x",
 	"scf",
-	"jr c, %02x", /* 0x38 */
+	"jr c, " DELIMITER_HEXIDECIMAL "%02x", /* 0x38 */
 	"add hl, sp",
 	"ld a, (hl-)",
 	"dec sp",
 	"inc a",
 	"dec a",
-	"ld a, %02x",
+	"ld a, " DELIMITER_HEXIDECIMAL "%02x",
 	"ccf",
 	"ld b, b", /* 0x40 */
 	"ld b, c",
@@ -502,67 +502,67 @@ static const char *INSTRUCTION_STR[] =  {
 	"cp a, a",
 	"ret nz", /* 0xc0 */
 	"pop bc",
-	"jp nz, %04x",
-	"jp %04x",
-	"call nz, %04x",
+	"jp nz, " DELIMITER_HEXIDECIMAL "%04x",
+	"jp " DELIMITER_HEXIDECIMAL "%04x",
+	"call nz, " DELIMITER_HEXIDECIMAL "%04x",
 	"push bc",
-	"add a, %02x",
+	"add a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 00",
 	"ret z", /* 0xc8 */
 	"ret",
-	"jp z, %04x",
-	"unused",
-	"call z, %04x",
-	"call %04x",
-	"adc a, %02x",
+	"jp z, " DELIMITER_HEXIDECIMAL "%04x",
+	"unused_cb",
+	"call z, " DELIMITER_HEXIDECIMAL "%04x",
+	"call " DELIMITER_HEXIDECIMAL "%04x",
+	"adc a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 08",
 	"ret nc", /* 0xd0 */
 	"pop de",
-	"jp nc, %04x",
-	"unused",
-	"call nc, %04x",
+	"jp nc, " DELIMITER_HEXIDECIMAL "%04x",
+	"unused_d3",
+	"call nc, " DELIMITER_HEXIDECIMAL "%04x",
 	"push de",
-	"sub a, %02x",
+	"sub a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 10",
 	"ret c", /* 0xd8 */
 	"reti",
-	"jp c, %04x",
-	"unused",
-	"call c, %04x",
-	"unused",
-	"sbc a, %02x",
+	"jp c, " DELIMITER_HEXIDECIMAL "%04x",
+	"unused_db",
+	"call c, " DELIMITER_HEXIDECIMAL "%04x",
+	"unused_dd",
+	"sbc a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 18",
-	"ld (ff00+%02x), a", /* 0xe0 */
+	"ld (ff00+" DELIMITER_HEXIDECIMAL "%02x), a", /* 0xe0 */
 	"pop hl",
 	"ld (ff00+c), a",
-	"unused",
-	"unused",
+	"unused_e3",
+	"unused_e4",
 	"push hl",
-	"and a, %02x",
+	"and a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 20",
-	"add sp, %02x", /* 0xe8 */
+	"add sp, " DELIMITER_HEXIDECIMAL "%02x", /* 0xe8 */
 	"jp hl",
-	"ld (%04x), a",
-	"unused",
-	"unused",
-	"unused",
-	"xor a, %02x",
+	"ld (" DELIMITER_HEXIDECIMAL "%04x), a",
+	"unused_eb",
+	"unused_ec",
+	"unused_ed",
+	"xor a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 28",
-	"ld a, (ff00+%02x)", /* 0xf0 */
+	"ld a, (ff00+" DELIMITER_HEXIDECIMAL "%02x)", /* 0xf0 */
 	"pop af",
 	"ld a, (ff00+c)",
 	"di",
-	"unused",
+	"unused_f4",
 	"push af",
-	"or a, %02x",
+	"or a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 30",
-	"ld hl, sp+%02x", /* 0xf8 */
+	"ld hl, sp+" DELIMITER_HEXIDECIMAL "%02x", /* 0xf8 */
 	"ld sp, hl",
-	"ld a, (%04x)",
+	"ld a, (" DELIMITER_HEXIDECIMAL "%04x)",
 	"ei",
-	"unused",
-	"unused",
-	"cp a, %02x",
+	"unused_fc",
+	"unused_fd",
+	"cp a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst 38",
 	};
 
@@ -1131,19 +1131,19 @@ static const char *ROM_STR[] = {
 	};
 
 static const char *VECTOR_STR[] = {
-	"vec_rst_00" LABEL_PREFIX, /* VECTOR_RST_00 */
-	"vec_rst_08" LABEL_PREFIX, /* VECTOR_RST_08 */
-	"vec_rst_10" LABEL_PREFIX, /* VECTOR_RST_10 */
-	"vec_rst_18" LABEL_PREFIX, /* VECTOR_RST_18 */
-	"vec_rst_20" LABEL_PREFIX, /* VECTOR_RST_20 */
-	"vec_rst_28" LABEL_PREFIX, /* VECTOR_RST_28 */
-	"vec_rst_30" LABEL_PREFIX, /* VECTOR_RST_30 */
-	"vec_rst_38" LABEL_PREFIX, /* VECTOR_RST_38 */
-	"vec_vblank" LABEL_PREFIX, /* VECTOR_VBLANK */
-	"vec_lcdc" LABEL_PREFIX, /* VECTOR_LCDC */
-	"vec_timer" LABEL_PREFIX, /* VECTOR_TIMER */
-	"vec_serial" LABEL_PREFIX, /* VECTOR_SERIAL */
-	"vec_joypad" LABEL_PREFIX, /* VECTOR_JOYPAD */
+	"vec_rst_00" DELIMITER_LABEL, /* VECTOR_RST_00 */
+	"vec_rst_08" DELIMITER_LABEL, /* VECTOR_RST_08 */
+	"vec_rst_10" DELIMITER_LABEL, /* VECTOR_RST_10 */
+	"vec_rst_18" DELIMITER_LABEL, /* VECTOR_RST_18 */
+	"vec_rst_20" DELIMITER_LABEL, /* VECTOR_RST_20 */
+	"vec_rst_28" DELIMITER_LABEL, /* VECTOR_RST_28 */
+	"vec_rst_30" DELIMITER_LABEL, /* VECTOR_RST_30 */
+	"vec_rst_38" DELIMITER_LABEL, /* VECTOR_RST_38 */
+	"vec_vblank" DELIMITER_LABEL, /* VECTOR_VBLANK */
+	"vec_lcdc" DELIMITER_LABEL, /* VECTOR_LCDC */
+	"vec_timer" DELIMITER_LABEL, /* VECTOR_TIMER */
+	"vec_serial" DELIMITER_LABEL, /* VECTOR_SERIAL */
+	"vec_joypad" DELIMITER_LABEL, /* VECTOR_JOYPAD */
 	"", /* VECTOR_MAX */
 	};
 

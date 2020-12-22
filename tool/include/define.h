@@ -36,17 +36,7 @@
 #define CGB_SUPPORT 0x80
 #define CGB_SUPPORT_ONLY 0xc0
 
-#define CHARACTER_EOF '\0'
-#define CHARACTER_FILL '.'
-#define CHARACTER_NEWLINE '\n'
-
-#define COMMENT_PREFIX ';'
-
-#define DIRECTIVE_DELIMITER "."
-
 #define KBYTE 1024
-
-#define LABEL_PREFIX ":"
 
 #define PATH_DELIMITER '/'
 #define PATH_MAX 1024
@@ -59,5 +49,7 @@
 	TRACE_TOOL(stderr, LEVEL_ERROR, _FORMAT_, __VA_ARGS__)
 #define TRACE_TOOL_MESSAGE(_FORMAT_, ...) \
 	TRACE_TOOL(stdout, LEVEL_NONE, _FORMAT_, __VA_ARGS__)
+#define TRACE_TOOL_WARNING(_FORMAT_, ...) \
+	TRACE_TOOL(stderr, LEVEL_WARNING, _FORMAT_, __VA_ARGS__)
 
 #endif /* DMG_TOOL_DEFINE_H_ */

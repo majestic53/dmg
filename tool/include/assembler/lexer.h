@@ -16,54 +16,70 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_STREAM_H_
-#define DMG_TOOL_ASSEMBLER_STREAM_H_
+#ifndef DMG_TOOL_ASSEMBLER_LEXER_H_
+#define DMG_TOOL_ASSEMBLER_LEXER_H_
 
-#include "../common.h"
-
-#define CHARACTER_END 0
-#define CHARACTER_ALPHA 1
-#define CHARACTER_DECIMAL 2
-#define CHARACTER_HEXIDECIMAL 4
-#define CHARACTER_SPACE 8
-#define CHARACTER_SYMBOL 16
+#include "./stream.h"
 
 typedef struct {
-	const dmg_buffer_t *buffer;
-	const char *path;
-	uint32_t index;
-	uint32_t line;
-} dmg_assembler_stream_t;
+	int type;
+	int subtype;
+	int line;
+
+	union {
+		const char literal[LITERAL_MAX];
+
+		union {
+
+			struct {
+				uint8_t low;
+				uint8_t high;
+				uint16_t unused;
+			};
+
+			int8_t offset;
+			uint16_t word;
+			int32_t raw;
+		} scalar;
+	};
+} dmg_assembler_token_t;
+
+typedef struct {
+	dmg_assembler_stream_t stream;
+
+	// TODO
+
+} dmg_assembler_lexer_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_assembler_stream_load(
-	__inout dmg_assembler_stream_t *stream,
+int dmg_assembler_lexer_load(
+	__inout dmg_assembler_lexer_t *lexer,
 	__in const dmg_buffer_t *buffer,
 	__in const char *path
 	);
 
-char dmg_assembler_stream_character(
-	__inout dmg_assembler_stream_t *stream,
-	__inout int *type
+int dmg_assembler_lexer_next(
+	__inout dmg_assembler_lexer_t *lexer
 	);
 
-int dmg_assembler_stream_next(
-	__inout dmg_assembler_stream_t *stream
+int dmg_assembler_lexer_previous(
+	__inout dmg_assembler_lexer_t *lexer
 	);
 
-int dmg_assembler_stream_previous(
-	__inout dmg_assembler_stream_t *stream
+int dmg_assembler_lexer_token(
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	);
 
-void dmg_assembler_stream_unload(
-	__inout dmg_assembler_stream_t *stream
+void dmg_assembler_lexer_unload(
+	__inout dmg_assembler_lexer_t *lexer
 	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TOOL_ASSEMBLER_STREAM_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_LEXER_H_ */

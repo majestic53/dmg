@@ -945,9 +945,9 @@ dmg_launcher_debug(
 							request.data.dword = UINT32_MAX;
 
 							if(dmg_action(&request, &response) == DMG_STATUS_SUCCESS) {
-								TRACE_TOOL_MESSAGE("Breakpoint: %04x\n", response.data.word);
+								TRACE_TOOL_WARNING("Breakpoint: %04x\n", response.data.word);
 							} else {
-								TRACE_TOOL_MESSAGE("%s", "Breakpoint\n");
+								TRACE_TOOL_WARNING("%s", "Breakpoint\n");
 							}
 							break;
 						default:

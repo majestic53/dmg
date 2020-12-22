@@ -49,7 +49,7 @@ exit:
 char
 dmg_assembler_stream_character(
 	__inout dmg_assembler_stream_t *stream,
-	__out int *type
+	__inout int *type
 	)
 {
 	char result = ((char *)stream->buffer->data)[stream->index];

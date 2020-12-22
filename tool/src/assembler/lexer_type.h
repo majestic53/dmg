@@ -16,13 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
+#define DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
 
-#include "../../include/common.h"
+#include "../../include/assembler/lexer.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 6
-
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_ */
