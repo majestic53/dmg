@@ -50,6 +50,14 @@ char dmg_assembler_stream_character(
 	__inout int *type
 	);
 
+bool dmg_assembler_stream_has_next(
+	__inout dmg_assembler_stream_t *stream
+	);
+
+bool dmg_assembler_stream_has_previous(
+	__inout dmg_assembler_stream_t *stream
+	);
+
 int dmg_assembler_stream_next(
 	__inout dmg_assembler_stream_t *stream
 	);

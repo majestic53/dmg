@@ -29,21 +29,10 @@ dmg_assembler_stream_load(
 	__in const char *path
 	)
 {
-	int result = DMG_STATUS_SUCCESS;
-
-	if(!buffer || !buffer->data) {
-		result = ERROR_SET(DMG_STATUS_INVALID, "Invalid buffer");
-		goto exit;
-	} else if(!path) {
-		result = ERROR_SET(DMG_STATUS_INVALID, "Invalid path");
-		goto exit;
-	}
-
 	stream->buffer = buffer;
 	stream->path = path;
 
-exit:
-	return result;
+	return DMG_STATUS_SUCCESS;
 }
 
 char
@@ -75,6 +64,22 @@ dmg_assembler_stream_character(
 	}
 
 	return result;
+}
+
+bool
+dmg_assembler_stream_has_next(
+	__inout dmg_assembler_stream_t *stream
+	)
+{
+	return (stream->index < (stream->buffer->length - 1));
+}
+
+bool
+dmg_assembler_stream_has_previous(
+	__inout dmg_assembler_stream_t *stream
+	)
+{
+	return (stream->index > 0);
 }
 
 int

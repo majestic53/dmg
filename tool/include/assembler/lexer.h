@@ -27,7 +27,10 @@ typedef struct {
 	int line;
 
 	union {
-		const char literal[LITERAL_MAX];
+		struct {
+			const char *str;
+			uint32_t length;
+		} literal;
 
 		union {
 
@@ -46,9 +49,10 @@ typedef struct {
 
 typedef struct {
 	dmg_assembler_stream_t stream;
-
-	// TODO
-
+	dmg_assembler_token_t *token;
+	uint32_t count;
+	uint32_t index;
+	uint32_t total;
 } dmg_assembler_lexer_t;
 
 #ifdef __cplusplus
@@ -69,9 +73,8 @@ int dmg_assembler_lexer_previous(
 	__inout dmg_assembler_lexer_t *lexer
 	);
 
-int dmg_assembler_lexer_token(
-	__inout dmg_assembler_lexer_t *lexer,
-	__inout dmg_assembler_token_t *token
+const dmg_assembler_token_t *dmg_assembler_lexer_token(
+	__inout dmg_assembler_lexer_t *lexer
 	);
 
 void dmg_assembler_lexer_unload(

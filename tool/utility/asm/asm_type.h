@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_UTILITY_ASM_H_
 #define DMG_TOOL_UTILITY_ASM_H_
 
-#include "../../include/assembler/stream.h"
+#include "../../include/assembler/lexer.h"
 
 #define DMG "DMG-ASM"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"

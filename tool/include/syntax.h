@@ -31,8 +31,6 @@
 #define DELIMITER_HEXIDECIMAL "$"
 #define DELIMITER_LABEL ":"
 
-#define LITERAL_MAX 32
-
 enum {
 	DIRECTIVE_BANK = 0,
 	DIRECTIVE_DATA,
