@@ -1,4 +1,4 @@
-DMG 0.2.7-alpha
+DMG 0.2.8-alpha
 Copyright (C) 2020 David Jolly
 ==============================
 
@@ -64,6 +64,14 @@ dmg-dasm [args]
 -v	Display version information
 
 For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/dasm/readme.md
+
+dmg-rom-fix [args]
+
+-h	Display help information
+-r	Specify rom file
+-v	Display version information
+
+For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/rom_fix/readme.md
 
 dmg-rom-info [args]
 

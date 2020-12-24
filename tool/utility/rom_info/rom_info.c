@@ -25,7 +25,42 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
-dmg_utility_rom_info_file_load(void)
+dmg_utility_rom_info_parse(
+	__in int argc,
+	__in char *argv[]
+	)
+{
+	int option, result = EXIT_SUCCESS;
+
+	opterr = 1;
+
+	while((option = getopt(argc, argv, OPTIONS)) != -1) {
+
+		switch(option) {
+			case OPTION_HELP:
+				g_rom_info.help = true;
+				break;
+			case OPTION_ROM:
+				g_rom_info.rom = optarg;
+				break;
+			case OPTION_VERSION:
+				g_rom_info.version = true;
+				break;
+			case '?':
+				result = EXIT_FAILURE;
+				goto exit;
+			default:
+				result = EXIT_FAILURE;
+				goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_utility_rom_info_rom_load(void)
 {
 	FILE *file = NULL;
 	int length, result = EXIT_SUCCESS;
@@ -67,7 +102,7 @@ exit:
 }
 
 static int
-dmg_utility_rom_info_file_parse(void)
+dmg_utility_rom_info_rom_parse(void)
 {
 	uint32_t address;
 	const char *mapper;
@@ -153,8 +188,7 @@ dmg_utility_rom_info_file_parse(void)
 		checksum = (checksum - ((uint8_t *)g_rom_info.buffer.data)[address] - 1);
 	}
 
-	checksum &= UINT8_MAX;
-	if(header->checksum != checksum) {
+	if(header->checksum != (checksum &= UINT8_MAX)) {
 		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %02x)\n", checksum);
 		result = EXIT_FAILURE;
 	}
@@ -164,7 +198,7 @@ exit:
 }
 
 static void
-dmg_utility_rom_info_file_unload(void)
+dmg_utility_rom_info_rom_unload(void)
 {
 
 	if(g_rom_info.buffer.data) {
@@ -172,41 +206,6 @@ dmg_utility_rom_info_file_unload(void)
 	}
 
 	memset(&g_rom_info.buffer, 0, sizeof(g_rom_info.buffer));
-}
-
-static int
-dmg_utility_rom_info_parse(
-	__in int argc,
-	__in char *argv[]
-	)
-{
-	int option, result = EXIT_SUCCESS;
-
-	opterr = 1;
-
-	while((option = getopt(argc, argv, OPTIONS)) != -1) {
-
-		switch(option) {
-			case OPTION_HELP:
-				g_rom_info.help = true;
-				break;
-			case OPTION_ROM:
-				g_rom_info.rom = optarg;
-				break;
-			case OPTION_VERSION:
-				g_rom_info.version = true;
-				break;
-			case '?':
-				result = EXIT_FAILURE;
-				goto exit;
-			default:
-				result = EXIT_FAILURE;
-				goto exit;
-		}
-	}
-
-exit:
-	return result;
 }
 
 static void
@@ -279,19 +278,19 @@ main(
 		dmg_utility_rom_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_rom_info_file_load()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_rom_info.rom);
+		if((result = dmg_utility_rom_info_rom_load()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 
-		if((result = dmg_utility_rom_info_file_parse()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Unsupported file -- %s\n", argv[0], g_rom_info.rom);
+		if((result = dmg_utility_rom_info_rom_parse()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Unsupported rom file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 	}
 
 exit:
-	dmg_utility_rom_info_file_unload();
+	dmg_utility_rom_info_rom_unload();
 	memset(&g_rom_info, 0, sizeof(g_rom_info));
 
 	return result;

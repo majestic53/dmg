@@ -218,27 +218,6 @@ static const char *REGISTER_STR[] = {
 	REGISTER_DELIMITER "", /* DMG_REGISTER_MAX */
 	};
 
-typedef int (*dmg_launcher_debug_hdlr)(
-	__in const char *argument[],
-	__in uint32_t count
-	);
-
-typedef struct {
-	uint8_t data;
-	uint8_t length;
-} dmg_launcher_capture_t;
-
-typedef struct {
-	dmg_t configuration;
-	const char *bootrom;
-	const char *rom;
-	dmg_launcher_capture_t capture;
-	bool debug;
-	bool help;
-	long palette;
-	bool version;
-} dmg_launcher_t;
-
 static const uint32_t BUTTON[] = {
 	SDL_SCANCODE_X, /* DMG_BUTTON_A */
 	SDL_SCANCODE_Z, /* DMG_BUTTON_B */
@@ -315,5 +294,26 @@ static const uint32_t PALETTE[][DMG_PALETTE_MAX] = {
 			0x1b0326, /* DMG_PALETTE_BLACK */
 		},
 	};
+
+typedef int (*dmg_launcher_debug_hdlr)(
+	__in const char *argument[],
+	__in uint32_t count
+	);
+
+typedef struct {
+	uint8_t data;
+	uint8_t length;
+} dmg_launcher_capture_t;
+
+typedef struct {
+	dmg_t configuration;
+	const char *bootrom;
+	const char *rom;
+	dmg_launcher_capture_t capture;
+	bool debug;
+	bool help;
+	long palette;
+	bool version;
+} dmg_launcher_t;
 
 #endif /* DMG_TOOL_LAUNCHER_TYPE_H_ */

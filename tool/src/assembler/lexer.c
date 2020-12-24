@@ -37,14 +37,14 @@ dmg_assembler_lexer_token_free(
 static int
 dmg_assembler_lexer_token_allocate(
 	__inout dmg_assembler_token_t **token,
-	__in uint32_t total
+	__in uint32_t capacity
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
 	dmg_assembler_lexer_token_free(token);
 
-	if((*token = (dmg_assembler_token_t *)calloc(total, sizeof(dmg_assembler_token_t))) == NULL) {
+	if((*token = (dmg_assembler_token_t *)calloc(capacity, sizeof(dmg_assembler_token_t))) == NULL) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate token buffer");
 		goto exit;
 	}
@@ -56,19 +56,19 @@ exit:
 static int
 dmg_assembler_lexer_token_reallocate(
 	__inout dmg_assembler_token_t **token,
-	__inout uint32_t *total,
+	__inout uint32_t *capacity,
 	__in uint32_t scale
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((*token = (dmg_assembler_token_t *)realloc(*token, sizeof(dmg_assembler_token_t) * *total * scale)) == NULL) {
+	if((*token = (dmg_assembler_token_t *)realloc(*token, sizeof(dmg_assembler_token_t) * *capacity * scale)) == NULL) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate token buffer");
 		goto exit;
 	}
 
-	memset(&((*token)[*total]), 0, sizeof(dmg_assembler_token_t) * *total);
-	*total *= scale;
+	memset(&((*token)[*capacity]), 0, sizeof(dmg_assembler_token_t) * *capacity);
+	*capacity *= scale;
 
 exit:
 	return result;
@@ -82,18 +82,18 @@ dmg_assembler_lexer_token_parse(
 	int result = DMG_STATUS_SUCCESS;
 
 	if(!dmg_assembler_stream_has_next(&lexer->stream)) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next token %u", lexer->index);
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next token %u", lexer->position);
 		goto exit;
 	}
 
-	if(((lexer->count + 1) == lexer->total)
-			&& ((result = dmg_assembler_lexer_token_reallocate(&lexer->token, &lexer->total, TOKEN_SCALE)) != DMG_STATUS_SUCCESS)) {
+	if(((lexer->count + 1) == lexer->capacity)
+			&& ((result = dmg_assembler_lexer_token_reallocate(&lexer->token, &lexer->capacity, TOKEN_CAPACITY_SCALE)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
-	// TODO: PARSE TOKEN[lexer->index]
+	// TODO: PARSE TOKEN[lexer->position]
 	++lexer->count;
-	++lexer->index;
+	++lexer->position;
 	// ---
 
 exit:
@@ -113,9 +113,9 @@ dmg_assembler_lexer_load(
 		goto exit;
 	}
 
-	lexer->total = TOKEN_TOTAL;
+	lexer->capacity = TOKEN_CAPACITY_INIT;
 
-	if((result = dmg_assembler_lexer_token_allocate(&lexer->token, lexer->total)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_lexer_token_allocate(&lexer->token, lexer->capacity)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -132,11 +132,11 @@ dmg_assembler_lexer_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((lexer->index == lexer->count)
+	if((lexer->position == lexer->count)
 			&& ((result = dmg_assembler_lexer_token_parse(lexer)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	} else {
-		++lexer->index;
+		++lexer->position;
 	}
 
 exit:
@@ -150,12 +150,12 @@ dmg_assembler_lexer_previous(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if(lexer->index == 0) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No previous token %u", lexer->index);
+	if(lexer->position == 0) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No previous token %u", lexer->position);
 		goto exit;
 	}
 
-	--lexer->index;
+	--lexer->position;
 
 exit:
 	return result;
@@ -166,7 +166,7 @@ dmg_assembler_lexer_token(
 	__inout dmg_assembler_lexer_t *lexer
 	)
 {
-	return &lexer->token[lexer->index];
+	return &lexer->token[lexer->position];
 }
 
 void

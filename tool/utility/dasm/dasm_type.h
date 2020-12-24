@@ -95,6 +95,6 @@ typedef struct {
 	FILE *file;
 	bool help;
 	bool version;
-} __attribute__((packed)) dmg_dasm_t;
+} dmg_dasm_t;
 
 #endif /* DMG_TOOL_UTILITY_DASM_TYPE_H_ */

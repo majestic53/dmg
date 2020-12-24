@@ -50,9 +50,9 @@ typedef struct {
 typedef struct {
 	dmg_assembler_stream_t stream;
 	dmg_assembler_token_t *token;
+	uint32_t capacity;
 	uint32_t count;
-	uint32_t index;
-	uint32_t total;
+	uint32_t position;
 } dmg_assembler_lexer_t;
 
 #ifdef __cplusplus

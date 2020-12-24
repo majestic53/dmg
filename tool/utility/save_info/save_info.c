@@ -25,7 +25,42 @@ extern "C" {
 #endif /* __cplusplus */
 
 static int
-dmg_utility_save_info_file_load(void)
+dmg_utility_save_info_parse(
+	__in int argc,
+	__in char *argv[]
+	)
+{
+	int option, result = EXIT_SUCCESS;
+
+	opterr = 1;
+
+	while((option = getopt(argc, argv, OPTIONS)) != -1) {
+
+		switch(option) {
+			case OPTION_HELP:
+				g_save_info.help = true;
+				break;
+			case OPTION_SAVE:
+				g_save_info.save = optarg;
+				break;
+			case OPTION_VERSION:
+				g_save_info.version = true;
+				break;
+			case '?':
+				result = EXIT_FAILURE;
+				goto exit;
+			default:
+				result = EXIT_FAILURE;
+				goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_utility_save_info_save_load(void)
 {
 	FILE *file = NULL;
 	int length, result = EXIT_SUCCESS;
@@ -67,7 +102,7 @@ exit:
 }
 
 static int
-dmg_utility_save_info_file_parse(void)
+dmg_utility_save_info_save_parse(void)
 {
 	time_t current;
 	uint16_t checksum = 0;
@@ -125,7 +160,7 @@ exit:
 }
 
 static void
-dmg_utility_save_info_file_unload(void)
+dmg_utility_save_info_save_unload(void)
 {
 
 	if(g_save_info.buffer.data) {
@@ -133,41 +168,6 @@ dmg_utility_save_info_file_unload(void)
 	}
 
 	memset(&g_save_info.buffer, 0, sizeof(g_save_info.buffer));
-}
-
-static int
-dmg_utility_save_info_parse(
-	__in int argc,
-	__in char *argv[]
-	)
-{
-	int option, result = EXIT_SUCCESS;
-
-	opterr = 1;
-
-	while((option = getopt(argc, argv, OPTIONS)) != -1) {
-
-		switch(option) {
-			case OPTION_HELP:
-				g_save_info.help = true;
-				break;
-			case OPTION_SAVE:
-				g_save_info.save = optarg;
-				break;
-			case OPTION_VERSION:
-				g_save_info.version = true;
-				break;
-			case '?':
-				result = EXIT_FAILURE;
-				goto exit;
-			default:
-				result = EXIT_FAILURE;
-				goto exit;
-		}
-	}
-
-exit:
-	return result;
 }
 
 static void
@@ -240,19 +240,19 @@ main(
 		dmg_utility_save_info_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_save_info_file_load()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_save_info.save);
+		if((result = dmg_utility_save_info_save_load()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to load save file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 
-		if((result = dmg_utility_save_info_file_parse()) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Unsupported file -- %s\n", argv[0], g_save_info.save);
+		if((result = dmg_utility_save_info_save_parse()) != EXIT_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Unsupported save file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 	}
 
 exit:
-	dmg_utility_save_info_file_unload();
+	dmg_utility_save_info_save_unload();
 	memset(&g_save_info, 0, sizeof(g_save_info));
 
 	return result;

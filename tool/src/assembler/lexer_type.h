@@ -21,7 +21,7 @@
 
 #include "../../include/assembler/lexer.h"
 
-#define TOKEN_SCALE 2
-#define TOKEN_TOTAL 20
+#define TOKEN_CAPACITY_INIT 20
+#define TOKEN_CAPACITY_SCALE 2
 
 #endif /* DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_ */

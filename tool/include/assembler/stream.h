@@ -31,8 +31,8 @@
 typedef struct {
 	const dmg_buffer_t *buffer;
 	const char *path;
-	uint32_t index;
 	uint32_t line;
+	uint32_t position;
 } dmg_assembler_stream_t;
 
 #ifdef __cplusplus

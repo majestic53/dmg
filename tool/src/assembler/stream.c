@@ -41,7 +41,7 @@ dmg_assembler_stream_character(
 	__inout int *type
 	)
 {
-	char result = ((char *)stream->buffer->data)[stream->index];
+	char result = ((char *)stream->buffer->data)[stream->position];
 
 	if(result == CHARACTER_EOF) {
 		*type |= CHARACTER_END;
@@ -71,7 +71,7 @@ dmg_assembler_stream_has_next(
 	__inout dmg_assembler_stream_t *stream
 	)
 {
-	return (stream->index < (stream->buffer->length - 1));
+	return (stream->position < (stream->buffer->length - 1));
 }
 
 bool
@@ -79,7 +79,7 @@ dmg_assembler_stream_has_previous(
 	__inout dmg_assembler_stream_t *stream
 	)
 {
-	return (stream->index > 0);
+	return (stream->position > 0);
 }
 
 int
@@ -89,12 +89,12 @@ dmg_assembler_stream_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if(stream->index == stream->buffer->length) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next character %u", stream->index);
+	if(stream->position == stream->buffer->length) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next character %u", stream->position);
 		goto exit;
 	}
 
-	if(((char *)stream->buffer->data)[stream->index++] == CHARACTER_NEWLINE) {
+	if(((char *)stream->buffer->data)[stream->position++] == CHARACTER_NEWLINE) {
 		++stream->line;
 	}
 
@@ -109,12 +109,12 @@ dmg_assembler_stream_previous(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if(!stream->index) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No previous character %u", stream->index);
+	if(!stream->position) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No previous character %u", stream->position);
 		goto exit;
 	}
 
-	if(((char *)stream->buffer->data)[--stream->index] == CHARACTER_NEWLINE) {
+	if(((char *)stream->buffer->data)[--stream->position] == CHARACTER_NEWLINE) {
 		--stream->line;
 	}
 

@@ -1,3 +1,4 @@
+/* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */
 /**
  * DMG
  * Copyright (C) 2020 David Jolly
@@ -16,17 +17,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
-#define DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_
+#ifndef DMG_TOOL_UTILITY_ROM_FIX_TYPE_H_
+#define DMG_TOOL_UTILITY_ROM_FIX_TYPE_H_
 
-#include "../../../src/common/cartridge_type.h"
-#include "../../../src/common/mapper_type.h"
 #include "../../../include/common/cartridge.h"
 #include "../../include/common.h"
 
-#define DMG "DMG-ROM-INFO"
+#define DMG "DMG-ROM-FIX"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
-#define DMG_USAGE "dmg-rom-info [args]"
+#define DMG_USAGE "dmg-rom-fix [args]"
 
 #define OPTION_HELP 'h'
 #define OPTION_ROM 'r'
@@ -57,8 +56,9 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 typedef struct {
 	const char *rom;
 	dmg_buffer_t buffer;
+	FILE *file;
 	bool help;
 	bool version;
-} dmg_rom_info_t;
+} dmg_rom_fix_t;
 
-#endif /* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */
+#endif /* DMG_TOOL_UTILITY_ROM_FIX_TYPE_H_ */

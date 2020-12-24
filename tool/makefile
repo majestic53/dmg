@@ -19,14 +19,17 @@ DIR_BIN_LIB=../bin/lib/
 DIR_BUILD=../build/
 DIR_BUILD_TOOL=../build/tool/
 DIR_LAUNCHER=./launcher/
+DIR_LIB=./lib/
 DIR_UTILITY_ASM=./utility/asm/
 DIR_UTILITY_DASM=./utility/dasm/
+DIR_UTILITY_ROM_FIX=./utility/rom_fix/
 DIR_UTILITY_ROM_INFO=./utility/rom_info/
 DIR_UTILITY_SAVE_INFO=./utility/save_info/
 
 BIN_LAUNCHER=dmg
 BIN_UTILITY_ASM=dmg-asm
 BIN_UTILITY_DASM=dmg-dasm
+BIN_UTILITY_ROM_FIX=dmg-rom-fix
 BIN_UTILITY_ROM_INFO=dmg-rom-info
 BIN_UTILITY_SAVE_INFO=dmg-save-info
 
@@ -46,13 +49,16 @@ build_tool: tool_launcher.o
 tool_launcher.o: $(DIR_LAUNCHER)launcher.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_LAUNCHER)launcher.c -o $(DIR_BUILD_TOOL)tool_launcher.o
 
-build_tool_utility: tool_utility_asm.o tool_utility_dasm.o tool_utility_rom_info.o tool_utility_save_info.o
+build_tool_utility: tool_utility_asm.o tool_utility_dasm.o tool_utility_rom_fix.o tool_utility_rom_info.o tool_utility_save_info.o
 
 tool_utility_asm.o: $(DIR_UTILITY_ASM)asm.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_ASM)asm.c -o $(DIR_BUILD_TOOL)tool_utility_asm.o
 
 tool_utility_dasm.o: $(DIR_UTILITY_DASM)dasm.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_DASM)dasm.c -o $(DIR_BUILD_TOOL)tool_utility_dasm.o
+
+tool_utility_rom_fix.o: $(DIR_UTILITY_ROM_FIX)rom_fix.c
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_ROM_FIX)rom_fix.c -o $(DIR_BUILD_TOOL)tool_utility_rom_fix.o
 
 tool_utility_rom_info.o: $(DIR_UTILITY_ROM_INFO)rom_info.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_ROM_INFO)rom_info.c -o $(DIR_BUILD_TOOL)tool_utility_rom_info.o
@@ -70,11 +76,13 @@ link:
 	strip -s $(DIR_BIN)$(BIN_UTILITY_ASM)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_DASM) $(FLAGS_BIN)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_DASM)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_fix.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ROM_FIX) $(FLAGS_BIN)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_FIX)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_INFO)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO)
-	$(SHA256) $(DIR_BIN_LIB)$(LIB) $(DIR_BIN)$(BIN_LAUNCHER) $(DIR_BIN)$(BIN_UTILITY_ASM) $(DIR_BIN)$(BIN_UTILITY_DASM) $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) \
-		$(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256).txt
+	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(BIN_LAUNCHER) $(BIN_UTILITY_ASM) $(BIN_UTILITY_DASM) $(BIN_UTILITY_ROM_FIX) $(BIN_UTILITY_ROM_INFO) \
+		$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256).txt
 	@echo '--- DONE -----------------------------------'
 	@echo ''

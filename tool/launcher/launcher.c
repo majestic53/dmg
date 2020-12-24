@@ -1151,13 +1151,13 @@ main(
 		if(g_launcher.bootrom) {
 
 			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
-				TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_launcher.bootrom);
+				TRACE_TOOL_ERROR("%s: Failed to load bootrom file -- %s\n", argv[0], g_launcher.bootrom);
 				goto exit;
 			}
 		}
 
 		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to load file -- %s\n", argv[0], g_launcher.rom);
+			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_launcher.rom);
 			goto exit;
 		}
 

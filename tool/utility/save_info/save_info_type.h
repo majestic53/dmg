@@ -61,6 +61,6 @@ typedef struct {
 	dmg_buffer_t buffer;
 	bool help;
 	bool version;
-} __attribute__((packed)) dmg_save_info_t;
+} dmg_save_info_t;
 
 #endif /* DMG_TOOL_UTILITY_SAVE_INFO_TYPE_H_ */
