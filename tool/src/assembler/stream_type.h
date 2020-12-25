@@ -21,4 +21,6 @@
 
 #include "../../include/assembler/stream.h"
 
+#define LINE_INIT 1
+
 #endif /* DMG_TOOL_ASSEMBLER_STREAM_TYPE_H_ */

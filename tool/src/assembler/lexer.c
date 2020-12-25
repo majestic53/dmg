@@ -81,6 +81,23 @@ dmg_assembler_lexer_token_parse(
 {
 	int result = DMG_STATUS_SUCCESS;
 
+	do {
+		int type;
+		char value;
+
+		if((value = dmg_assembler_stream_character(&lexer->stream, &type)) == DELIMITER_COMMENT) {
+
+			do {
+
+				if((value = dmg_assembler_stream_character(&lexer->stream, &type)) == CHARACTER_NEWLINE) {
+					break;
+				}
+			} while(dmg_assembler_stream_next(&lexer->stream) == DMG_STATUS_SUCCESS);
+		} else if(!(type & CHARACTER_SPACE)) {
+			break;
+		}
+	} while(dmg_assembler_stream_next(&lexer->stream) == DMG_STATUS_SUCCESS);
+
 	if(!dmg_assembler_stream_has_next(&lexer->stream)) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next token %u", lexer->position);
 		goto exit;
@@ -91,10 +108,16 @@ dmg_assembler_lexer_token_parse(
 		goto exit;
 	}
 
-	// TODO: PARSE TOKEN[lexer->position]
+// TODO
+lexer->token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->token[lexer->position].type);
+lexer->token[lexer->position].line = lexer->stream.line;
+
+if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
+	goto exit;
+}
+// ---
+
 	++lexer->count;
-	++lexer->position;
-	// ---
 
 exit:
 	return result;
@@ -132,11 +155,9 @@ dmg_assembler_lexer_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((lexer->position == lexer->count)
+	if((++lexer->position == lexer->count)
 			&& ((result = dmg_assembler_lexer_token_parse(lexer)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
-	} else {
-		++lexer->position;
 	}
 
 exit:

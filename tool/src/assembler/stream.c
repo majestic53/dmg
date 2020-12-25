@@ -30,6 +30,7 @@ dmg_assembler_stream_load(
 	)
 {
 	stream->buffer = buffer;
+	stream->line = LINE_INIT;
 	stream->path = path;
 
 	return DMG_STATUS_SUCCESS;
@@ -43,24 +44,27 @@ dmg_assembler_stream_character(
 {
 	char result = ((char *)stream->buffer->data)[stream->position];
 
-	if(result == CHARACTER_EOF) {
-		*type |= CHARACTER_END;
-	} else if(isalpha(result)) {
-		*type |= CHARACTER_ALPHA;
+	*type = 0;
 
-		if(isxdigit(result)) {
-			*type |= CHARACTER_HEXIDECIMAL;
-		}
-	} else if(isdigit(result)) {
-		*type |= CHARACTER_DECIMAL;
+	if(result != CHARACTER_EOF) {
 
-		if(isxdigit(result)) {
-			*type |= CHARACTER_HEXIDECIMAL;
+		if(isalpha(result)) {
+			*type |= CHARACTER_ALPHA;
+
+			if(isxdigit(result)) {
+				*type |= CHARACTER_HEXIDECIMAL;
+			}
+		} else if(isdigit(result)) {
+			*type |= CHARACTER_DECIMAL;
+
+			if(isxdigit(result)) {
+				*type |= CHARACTER_HEXIDECIMAL;
+			}
+		} else if(isspace(result)) {
+			*type |= CHARACTER_SPACE;
+		} else {
+			*type |= CHARACTER_SYMBOL;
 		}
-	} else if(isspace(result)) {
-		*type |= CHARACTER_SPACE;
-	} else {
-		*type |= CHARACTER_SYMBOL;
 	}
 
 	return result;
@@ -71,7 +75,13 @@ dmg_assembler_stream_has_next(
 	__inout dmg_assembler_stream_t *stream
 	)
 {
-	return (stream->position < (stream->buffer->length - 1));
+	bool result = false;
+
+	if(stream->buffer && stream->buffer->length) {
+		result = (stream->position < stream->buffer->length);
+	}
+
+	return result;
 }
 
 bool

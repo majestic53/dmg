@@ -32,21 +32,32 @@ dmg_utility_asm_assemble(void)
 	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
 
 	// TODO
-	dmg_assembler_lexer_t lexer = {};
+	/*dmg_assembler_stream_t stream = {};
 
+	if((result = dmg_assembler_stream_load(&stream, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	do {
+		int type;
+		char value = dmg_assembler_stream_character(&stream, &type);
+		fprintf(stdout, "[%u/%u] {%i} \'%c\' (%02x)\n", stream.position, stream.buffer->length, type,
+			(isprint(value) && !isspace(value)) ? value : CHARACTER_FILL, value);
+	} while(dmg_assembler_stream_next(&stream) == DMG_STATUS_SUCCESS);
+
+	dmg_assembler_stream_unload(&stream);*/
+	dmg_assembler_lexer_t lexer = {};
 
 	if((result = dmg_assembler_lexer_load(&lexer, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	/*do {
+	do {
 		const dmg_assembler_token_t *token = dmg_assembler_lexer_token(&lexer);
 
-		// TODO
-		(void)token;
-		// ---
-
-	} while(dmg_assembler_lexer_next(&lexer) == DMG_STATUS_SUCCESS);*/
+		fprintf(stdout, "[%i] {%i} \'%c\' (%02x)\n", token->line, token->type,
+			(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL, token->scalar.low);
+	} while(dmg_assembler_lexer_next(&lexer) == DMG_STATUS_SUCCESS);
 
 	dmg_assembler_lexer_unload(&lexer);
 	// ---
@@ -152,22 +163,27 @@ dmg_utility_asm_source_load(void)
 	length = ftell(file);
 	fseek(file, 0, SEEK_SET);
 
-	if(length <= 0) {
+	if(length < 0) {
 		result = EXIT_FAILURE;
 		goto exit;
 	}
 
-	if(!(g_asm.buffer.data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
+	memset(&g_asm.buffer, 0, sizeof(g_asm.buffer));
 
-	if(fread(g_asm.buffer.data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
-		goto exit;
-	}
+	if(length > 0) {
 
-	g_asm.buffer.length = length;
+		if(!(g_asm.buffer.data = (void *)malloc(length))) {
+			result = EXIT_FAILURE;
+			goto exit;
+		}
+
+		if(fread(g_asm.buffer.data, sizeof(uint8_t), length, file) != length) {
+			result = EXIT_FAILURE;
+			goto exit;
+		}
+
+		g_asm.buffer.length = length;
+	}
 
 exit:
 
