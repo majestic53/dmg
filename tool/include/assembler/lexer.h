@@ -21,10 +21,25 @@
 
 #include "./stream.h"
 
+enum {
+	TOKEN_END = 0,
+	TOKEN_DIRECTIVE,
+	TOKEN_IDENTIFIER,
+	TOKEN_LABEL,
+	TOKEN_LITERAL,
+	TOKEN_MACRO,
+	TOKEN_OPCODE,
+	TOKEN_OPERATOR,
+	TOKEN_REGISTER,
+	TOKEN_SCALAR,
+	TOKEN_SYMBOL,
+	TOKEN_MAX,
+};
+
 typedef struct {
 	int type;
 	int subtype;
-	int line;
+	uint32_t line;
 
 	union {
 		struct {
@@ -65,6 +80,14 @@ int dmg_assembler_lexer_load(
 	__in const char *path
 	);
 
+bool dmg_assembler_lexer_has_next(
+	__in const dmg_assembler_lexer_t *lexer
+	);
+
+bool dmg_assembler_lexer_has_previous(
+	__in const dmg_assembler_lexer_t *lexer
+	);
+
 int dmg_assembler_lexer_next(
 	__inout dmg_assembler_lexer_t *lexer
 	);
@@ -74,7 +97,7 @@ int dmg_assembler_lexer_previous(
 	);
 
 const dmg_assembler_token_t *dmg_assembler_lexer_token(
-	__inout dmg_assembler_lexer_t *lexer
+	__in const dmg_assembler_lexer_t *lexer
 	);
 
 void dmg_assembler_lexer_unload(

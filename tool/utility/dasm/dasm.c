@@ -272,7 +272,7 @@ dmg_utility_dasm_disassemble_header(
 					dmg_tool_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
 
 			if(address >= 0x0104) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t\t%c%04x\n\t%s", DELIMITER_COMMENT, address, dmg_tool_directive_string(DIRECTIVE_DATA));
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t\t%c%04x\n\t%s", DELIMITER_COMMENT, address, dmg_tool_directive_string(DIRECTIVE_DATA_BYTE));
 
 				for(offset = address; offset < (address + HEADER_LEN[index]); ++offset) {
 					uint8_t value;
@@ -281,7 +281,7 @@ dmg_utility_dasm_disassemble_header(
 
 						if(strlen(str)) {
 							TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n\t\t%c%s\n\t%s", DELIMITER_COMMENT, str,
-									dmg_tool_directive_string(DIRECTIVE_DATA));
+									dmg_tool_directive_string(DIRECTIVE_DATA_BYTE));
 							memset(str, 0, sizeof(str));
 							count = 0;
 						}

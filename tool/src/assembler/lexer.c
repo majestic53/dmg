@@ -75,13 +75,72 @@ exit:
 }
 
 static int
+dmg_assembler_lexer_token_parse_directive(
+	__inout dmg_assembler_lexer_t *lexer
+	)
+{
+	dmg_assembler_token_t *token;
+	char str[TOKEN_LITERAL_MAX] = {};
+	int result = DMG_STATUS_SUCCESS, type;
+
+	token = &(lexer->token[lexer->position]);
+	token->type = TOKEN_DIRECTIVE;
+	token->line = lexer->stream.line;
+	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+	token->literal.length = 0;
+
+	str[token->literal.length] = dmg_assembler_stream_character(&lexer->stream, &type);
+
+	if(((type & CHARACTER_SYMBOL) != CHARACTER_SYMBOL)
+			|| (str[token->literal.length] != DELIMITER_DIRECTIVE[0])) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Missing directive delimiter \"%s\" (%s@%u)", str, lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	for(;;) {
+		char value;
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+		++token->literal.length;
+
+		if((type & CHARACTER_SPACE) == CHARACTER_SPACE) {
+			break;
+		}
+
+		str[token->literal.length] = value;
+	}
+
+	for(type = 0; type < DIRECTIVE_MAX; ++type) {
+
+		if(!strcmp(dmg_tool_directive_string(type), str)) {
+			break;
+		}
+	}
+
+	if(type == DIRECTIVE_MAX) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported directive \"%s\" (%s@%u)", str, lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	token->subtype = type;
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_lexer_token_parse(
 	__inout dmg_assembler_lexer_t *lexer
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	do {
+	for(;;) {
 		int type;
 		char value;
 
@@ -96,19 +155,35 @@ dmg_assembler_lexer_token_parse(
 		} else if(!(type & CHARACTER_SPACE)) {
 			break;
 		}
-	} while(dmg_assembler_stream_next(&lexer->stream) == DMG_STATUS_SUCCESS);
 
-	if(!dmg_assembler_stream_has_next(&lexer->stream)) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next token %u", lexer->position);
-		goto exit;
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+
 	}
 
-	if(((lexer->count + 1) == lexer->capacity)
-			&& ((result = dmg_assembler_lexer_token_reallocate(&lexer->token, &lexer->capacity, TOKEN_CAPACITY_SCALE)) != DMG_STATUS_SUCCESS)) {
-		goto exit;
-	}
+	if(dmg_assembler_stream_has_next(&lexer->stream)) {
+		int type;
+		char value;
 
-// TODO
+		if(((lexer->count + 1) == lexer->capacity)
+				&& ((result = dmg_assembler_lexer_token_reallocate(&lexer->token, &lexer->capacity, TOKEN_CAPACITY_SCALE)) != DMG_STATUS_SUCCESS)) {
+			goto exit;
+		}
+
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+		if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
+
+			if(value == DELIMITER_DIRECTIVE[0]) {
+
+				if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+			} else {
+
+// TODO: PARSE OTHER SYMBOLS
 lexer->token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->token[lexer->position].type);
 lexer->token[lexer->position].line = lexer->stream.line;
 
@@ -117,10 +192,42 @@ if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
 }
 // ---
 
-	++lexer->count;
+			}
+		} else {
+
+// TODO: PARSE OTHER TOKEN TYPES
+lexer->token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->token[lexer->position].type);
+lexer->token[lexer->position].line = lexer->stream.line;
+
+if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
+	goto exit;
+}
+// ---
+
+		}
+
+		++lexer->count;
+	}
 
 exit:
 	return result;
+}
+
+bool
+dmg_assembler_lexer_has_next(
+	__in const dmg_assembler_lexer_t *lexer
+	)
+{
+	return ((lexer->position < lexer->count)
+		|| (((lexer->position + 1) == lexer->count) && dmg_assembler_stream_has_next(&lexer->stream)));
+}
+
+bool
+dmg_assembler_lexer_has_previous(
+	__in const dmg_assembler_lexer_t *lexer
+	)
+{
+	return (lexer->position > 0);
 }
 
 int
@@ -142,7 +249,9 @@ dmg_assembler_lexer_load(
 		goto exit;
 	}
 
-	dmg_assembler_lexer_token_parse(lexer);
+	if(dmg_assembler_stream_has_next(&lexer->stream)) {
+		result = dmg_assembler_lexer_token_parse(lexer);
+	}
 
 exit:
 	return result;
@@ -171,7 +280,7 @@ dmg_assembler_lexer_previous(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if(lexer->position == 0) {
+	if(!dmg_assembler_lexer_has_previous(lexer)) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No previous token %u", lexer->position);
 		goto exit;
 	}
@@ -184,7 +293,7 @@ exit:
 
 const dmg_assembler_token_t *
 dmg_assembler_lexer_token(
-	__inout dmg_assembler_lexer_t *lexer
+	__in const dmg_assembler_lexer_t *lexer
 	)
 {
 	return &lexer->token[lexer->position];

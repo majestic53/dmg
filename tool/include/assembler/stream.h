@@ -46,16 +46,20 @@ int dmg_assembler_stream_load(
 	);
 
 char dmg_assembler_stream_character(
-	__inout dmg_assembler_stream_t *stream,
+	__in const dmg_assembler_stream_t *stream,
 	__inout int *type
 	);
 
+const char *dmg_assembler_stream_character_str(
+	__in const dmg_assembler_stream_t *stream
+	);
+
 bool dmg_assembler_stream_has_next(
-	__inout dmg_assembler_stream_t *stream
+	__in const dmg_assembler_stream_t *stream
 	);
 
 bool dmg_assembler_stream_has_previous(
-	__inout dmg_assembler_stream_t *stream
+	__in const dmg_assembler_stream_t *stream
 	);
 
 int dmg_assembler_stream_next(

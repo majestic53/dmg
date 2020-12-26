@@ -38,26 +38,55 @@ dmg_utility_asm_assemble(void)
 		goto exit;
 	}
 
-	do {
+	for(;;) {
 		int type;
 		char value = dmg_assembler_stream_character(&stream, &type);
+
 		fprintf(stdout, "[%u/%u] {%i} \'%c\' (%02x)\n", stream.position, stream.buffer->length, type,
 			(isprint(value) && !isspace(value)) ? value : CHARACTER_FILL, value);
-	} while(dmg_assembler_stream_next(&stream) == DMG_STATUS_SUCCESS);
+
+		if(!dmg_assembler_stream_has_next(&stream)
+				|| ((result = dmg_assembler_stream_next(&stream)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
 
 	dmg_assembler_stream_unload(&stream);*/
+	// ---
 	dmg_assembler_lexer_t lexer = {};
 
 	if((result = dmg_assembler_lexer_load(&lexer, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	do {
+	for(;;) {
 		const dmg_assembler_token_t *token = dmg_assembler_lexer_token(&lexer);
 
-		fprintf(stdout, "[%i] {%i} \'%c\' (%02x)\n", token->line, token->type,
-			(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL, token->scalar.low);
-	} while(dmg_assembler_lexer_next(&lexer) == DMG_STATUS_SUCCESS);
+		fprintf(stdout, "[%i:%i]", token->type, token->subtype);
+
+		switch(token->type) {
+			case TOKEN_DIRECTIVE:
+				fprintf(stdout, " \"");
+
+				for(uint32_t index = 0; index < token->literal.length; ++index) {
+					fprintf(stdout, "%c", token->literal.str[index]);
+				}
+
+				fprintf(stdout, "\"");
+				break;
+			default:
+				fprintf(stdout, " \'%c\' (%02x)",
+					(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL, token->scalar.low);
+				break;
+		}
+
+		fprintf(stdout, " (%s@%u)\n", lexer.stream.path, token->line);
+
+		if(!dmg_assembler_lexer_has_next(&lexer)
+				|| ((result = dmg_assembler_lexer_next(&lexer)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
 
 	dmg_assembler_lexer_unload(&lexer);
 	// ---

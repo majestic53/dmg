@@ -38,7 +38,7 @@ dmg_assembler_stream_load(
 
 char
 dmg_assembler_stream_character(
-	__inout dmg_assembler_stream_t *stream,
+	__in const dmg_assembler_stream_t *stream,
 	__inout int *type
 	)
 {
@@ -70,9 +70,17 @@ dmg_assembler_stream_character(
 	return result;
 }
 
+const char *
+dmg_assembler_stream_character_str(
+	__in const dmg_assembler_stream_t *stream
+	)
+{
+	return &(((const char *)stream->buffer->data)[stream->position]);
+}
+
 bool
 dmg_assembler_stream_has_next(
-	__inout dmg_assembler_stream_t *stream
+	__in const dmg_assembler_stream_t *stream
 	)
 {
 	bool result = false;
@@ -86,7 +94,7 @@ dmg_assembler_stream_has_next(
 
 bool
 dmg_assembler_stream_has_previous(
-	__inout dmg_assembler_stream_t *stream
+	__in const dmg_assembler_stream_t *stream
 	)
 {
 	return (stream->position > 0);
