@@ -66,6 +66,11 @@ dmg_utility_asm_assemble(void)
 
 		switch(token->type) {
 			case TOKEN_DIRECTIVE:
+			case TOKEN_IDENTIFIER:
+			case TOKEN_LABEL:
+			case TOKEN_MACRO:
+			case TOKEN_OPCODE:
+			case TOKEN_REGISTER:
 				fprintf(stdout, " \"");
 
 				for(uint32_t index = 0; index < token->literal.length; ++index) {

@@ -19,54 +19,12 @@
 #ifndef DMG_TOOL_ASSEMBLER_LEXER_H_
 #define DMG_TOOL_ASSEMBLER_LEXER_H_
 
+#include "./common/token.h"
 #include "./stream.h"
-
-enum {
-	TOKEN_END = 0,
-	TOKEN_DIRECTIVE,
-	TOKEN_IDENTIFIER,
-	TOKEN_LABEL,
-	TOKEN_LITERAL,
-	TOKEN_MACRO,
-	TOKEN_OPCODE,
-	TOKEN_OPERATOR,
-	TOKEN_REGISTER,
-	TOKEN_SCALAR,
-	TOKEN_SYMBOL,
-	TOKEN_MAX,
-};
-
-typedef struct {
-	int type;
-	int subtype;
-	uint32_t line;
-
-	union {
-		struct {
-			const char *str;
-			uint32_t length;
-		} literal;
-
-		union {
-
-			struct {
-				uint8_t low;
-				uint8_t high;
-				uint16_t unused;
-			};
-
-			int8_t offset;
-			uint16_t word;
-			int32_t raw;
-		} scalar;
-	};
-} dmg_assembler_token_t;
 
 typedef struct {
 	dmg_assembler_stream_t stream;
-	dmg_assembler_token_t *token;
-	uint32_t capacity;
-	uint32_t count;
+	dmg_assembler_tokens_t tokens;
 	uint32_t position;
 } dmg_assembler_lexer_t;
 

@@ -16,11 +16,36 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
-#define DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_STRING_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_STRING_H_
 
+#include "../../common.h"
 
-#include "../../include/assembler/common/string.h"
-#include "../../include/assembler/lexer.h"
+typedef struct {
+	char *str;
+	uint32_t capacity;
+	uint32_t length;
+} dmg_assembler_string_t;
 
-#endif /* DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+int dmg_assembler_string_allocate(
+	__inout dmg_assembler_string_t *string
+	);
+
+int dmg_assembler_string_append(
+	__inout dmg_assembler_string_t *string,
+	__in char value
+	);
+
+void dmg_assembler_string_free(
+	__inout dmg_assembler_string_t *string
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_STRING_H_ */

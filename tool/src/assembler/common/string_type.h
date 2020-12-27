@@ -16,11 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
-#define DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_STRING_TYPE_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_STRING_TYPE_H_
 
+#include "../../../include/assembler/common/string.h"
 
-#include "../../include/assembler/common/string.h"
-#include "../../include/assembler/lexer.h"
+#define STRING_CAPACITY_INIT 128
+#define STRING_CAPACITY_SCALE 2
 
-#endif /* DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_STRING_TYPE_H_ */

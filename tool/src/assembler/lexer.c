@@ -22,55 +22,88 @@
 extern "C" {
 #endif /* __cplusplus */
 
-static void
-dmg_assembler_lexer_token_free(
-	__inout dmg_assembler_token_t **token
-	)
-{
-
-	if(token && *token) {
-		free(*token);
-		*token = NULL;
-	}
-}
-
 static int
-dmg_assembler_lexer_token_allocate(
-	__inout dmg_assembler_token_t **token,
-	__in uint32_t capacity
+dmg_assembler_lexer_token_parse_alpha(
+	__inout dmg_assembler_lexer_t *lexer
 	)
 {
-	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_token_t *token;
+	dmg_assembler_string_t string = {};
+	int result = DMG_STATUS_SUCCESS, type;
 
-	dmg_assembler_lexer_token_free(token);
-
-	if((*token = (dmg_assembler_token_t *)calloc(capacity, sizeof(dmg_assembler_token_t))) == NULL) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate token buffer");
+	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-exit:
-	return result;
-}
+	token = &(lexer->tokens.token[lexer->position]);
+	token->type = TOKEN_IDENTIFIER;
+	token->line = lexer->stream.line;
+	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+	token->literal.length = 0;
 
-static int
-dmg_assembler_lexer_token_reallocate(
-	__inout dmg_assembler_token_t **token,
-	__inout uint32_t *capacity,
-	__in uint32_t scale
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if((*token = (dmg_assembler_token_t *)realloc(*token, sizeof(dmg_assembler_token_t) * *capacity * scale)) == NULL) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate token buffer");
+	if((result = dmg_assembler_string_append(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	memset(&((*token)[*capacity]), 0, sizeof(dmg_assembler_token_t) * *capacity);
-	*capacity *= scale;
+	if(((type & CHARACTER_ALPHA) != CHARACTER_ALPHA)
+			&& (((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL)
+				&& (string.str[token->literal.length] != DELIMITER_IDENTIFIER[0]))) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting identifier \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	for(;;) {
+		char value;
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+		++token->literal.length;
+
+		if((type & CHARACTER_SPACE) == CHARACTER_SPACE) {
+			break;
+		} else if(((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL)
+				&& (value != DELIMITER_IDENTIFIER[0])) {
+
+			if(value == DELIMITER_LABEL[0]) {
+
+				if(!dmg_assembler_stream_has_next(&lexer->stream)
+						|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+					break;
+				}
+
+				token->type = TOKEN_LABEL;
+			}
+
+			break;
+		}
+
+		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+			break;
+		}
+	}
+
+	if(token->type == TOKEN_IDENTIFIER) {
+
+		if(dmg_tool_is_macro_string(string.str, &type)) {
+			token->type = TOKEN_MACRO;
+			token->subtype = type;
+		} else if(dmg_tool_is_opcode_string(string.str, &type)) {
+			token->type = TOKEN_OPCODE;
+			token->subtype = type;
+		} else if(dmg_tool_is_register_string(string.str, &type)) {
+			token->type = TOKEN_REGISTER;
+			token->subtype = type;
+		}
+	}
 
 exit:
+	dmg_assembler_string_free(&string);
+
 	return result;
 }
 
@@ -80,20 +113,27 @@ dmg_assembler_lexer_token_parse_directive(
 	)
 {
 	dmg_assembler_token_t *token;
-	char str[TOKEN_LITERAL_MAX] = {};
+	dmg_assembler_string_t string = {};
 	int result = DMG_STATUS_SUCCESS, type;
 
-	token = &(lexer->token[lexer->position]);
+	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	token = &(lexer->tokens.token[lexer->position]);
 	token->type = TOKEN_DIRECTIVE;
 	token->line = lexer->stream.line;
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
 	token->literal.length = 0;
 
-	str[token->literal.length] = dmg_assembler_stream_character(&lexer->stream, &type);
+	if((result = dmg_assembler_string_append(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 	if(((type & CHARACTER_SYMBOL) != CHARACTER_SYMBOL)
-			|| (str[token->literal.length] != DELIMITER_DIRECTIVE[0])) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Missing directive delimiter \"%s\" (%s@%u)", str, lexer->stream.path, lexer->stream.line);
+			|| (string.str[token->literal.length] != DELIMITER_DIRECTIVE[0])) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting directive \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
 		goto exit;
 	}
 
@@ -112,24 +152,22 @@ dmg_assembler_lexer_token_parse_directive(
 			break;
 		}
 
-		str[token->literal.length] = value;
-	}
-
-	for(type = 0; type < DIRECTIVE_MAX; ++type) {
-
-		if(!strcmp(dmg_tool_directive_string(type), str)) {
-			break;
+		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
 		}
 	}
 
-	if(type == DIRECTIVE_MAX) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported directive \"%s\" (%s@%u)", str, lexer->stream.path, lexer->stream.line);
+	if(!dmg_tool_is_directive_string(string.str, &type)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported directive \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
 		goto exit;
 	}
 
 	token->subtype = type;
 
 exit:
+	dmg_assembler_string_free(&string);
+
 	return result;
 }
 
@@ -167,37 +205,45 @@ dmg_assembler_lexer_token_parse(
 		int type;
 		char value;
 
-		if(((lexer->count + 1) == lexer->capacity)
-				&& ((result = dmg_assembler_lexer_token_reallocate(&lexer->token, &lexer->capacity, TOKEN_CAPACITY_SCALE)) != DMG_STATUS_SUCCESS)) {
+		if((result = dmg_assembler_tokens_resize(&lexer->tokens)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
 		value = dmg_assembler_stream_character(&lexer->stream, &type);
 
-		if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
+		if((type & CHARACTER_ALPHA) == CHARACTER_ALPHA) {
+
+			if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		} else if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
 
 			if(value == DELIMITER_DIRECTIVE[0]) {
 
 				if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
+			} else if(value == DELIMITER_IDENTIFIER[0]) {
+
+				if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
 			} else {
 
-// TODO: PARSE OTHER SYMBOLS
-lexer->token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->token[lexer->position].type);
-lexer->token[lexer->position].line = lexer->stream.line;
+// TODO: PARSE OTHER TOKEN TYPES
+lexer->tokens.token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->tokens.token[lexer->position].type);
+lexer->tokens.token[lexer->position].line = lexer->stream.line;
 
 if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
 	goto exit;
 }
 // ---
-
 			}
 		} else {
 
 // TODO: PARSE OTHER TOKEN TYPES
-lexer->token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->token[lexer->position].type);
-lexer->token[lexer->position].line = lexer->stream.line;
+lexer->tokens.token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->tokens.token[lexer->position].type);
+lexer->tokens.token[lexer->position].line = lexer->stream.line;
 
 if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
 	goto exit;
@@ -206,7 +252,7 @@ if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
 
 		}
 
-		++lexer->count;
+		++lexer->tokens.count;
 	}
 
 exit:
@@ -218,8 +264,8 @@ dmg_assembler_lexer_has_next(
 	__in const dmg_assembler_lexer_t *lexer
 	)
 {
-	return ((lexer->position < lexer->count)
-		|| (((lexer->position + 1) == lexer->count) && dmg_assembler_stream_has_next(&lexer->stream)));
+	return ((lexer->position < lexer->tokens.count)
+		|| (((lexer->position + 1) == lexer->tokens.count) && dmg_assembler_stream_has_next(&lexer->stream)));
 }
 
 bool
@@ -243,9 +289,7 @@ dmg_assembler_lexer_load(
 		goto exit;
 	}
 
-	lexer->capacity = TOKEN_CAPACITY_INIT;
-
-	if((result = dmg_assembler_lexer_token_allocate(&lexer->token, lexer->capacity)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tokens_allocate(&lexer->tokens)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -264,7 +308,7 @@ dmg_assembler_lexer_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((++lexer->position == lexer->count)
+	if((++lexer->position == lexer->tokens.count)
 			&& ((result = dmg_assembler_lexer_token_parse(lexer)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
@@ -296,7 +340,7 @@ dmg_assembler_lexer_token(
 	__in const dmg_assembler_lexer_t *lexer
 	)
 {
-	return &lexer->token[lexer->position];
+	return &lexer->tokens.token[lexer->position];
 }
 
 void
@@ -304,7 +348,7 @@ dmg_assembler_lexer_unload(
 	__inout dmg_assembler_lexer_t *lexer
 	)
 {
-	dmg_assembler_lexer_token_free(&lexer->token);
+	dmg_assembler_tokens_free(&lexer->tokens);
 	dmg_assembler_stream_unload(&lexer->stream);
 	memset(lexer, 0, sizeof(*lexer));
 }

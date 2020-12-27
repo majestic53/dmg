@@ -1095,6 +1095,12 @@ static const char *INSTRUCTION_EXTENDED_STR[] =  {
 	"set7 a",
 	};
 
+static const char *MACRO_STR[] = {
+	"high", /* MACRO_HIGH */
+	"low", /* MACRO_LOW */
+	"", /* MACRO_MAX */
+	};
+
 static const char *MAPPER_STR[] = {
 	"ROM", /* MAPPER_ROM_ONLY */
 	"MBC1", /* MAPPER_MBC1 */
@@ -1121,12 +1127,109 @@ static const char *MAPPER_STR[] = {
 	"MBC5-RUMBLE-RAM-BATTERY", /* MAPPER_MBC5_RUMBLE_RAM_BATTERY */
 	};
 
+static const char *OPCODE_STR[] = {
+	"adc", /* OPCODE_ADC */
+	"add", /* OPCODE_ADD */
+	"and", /* OPCODE_AND */
+	"call", /* OPCODE_CALL */
+	"ccf", /* OPCODE_CCF */
+	"cp", /* OPCODE_CP */
+	"cpl", /* OPCODE_CPL */
+	"daa", /* OPCODE_DAA */
+	"dec", /* OPCODE_DEC */
+	"di", /* OPCODE_DI */
+	"ei", /* OPCODE_EI */
+	"halt", /* OPCODE_HALT */
+	"inc", /* OPCODE_INC */
+	"jp", /* OPCODE_JP */
+	"jr", /* OPCODE_JR */
+	"ld", /* OPCODE_LD */
+	"nop", /* OPCODE_NOP */
+	"or", /* OPCODE_OR */
+	"pop", /* OPCODE_POP */
+	"push", /* OPCODE_PUSH */
+	"ret", /* OPCODE_RET */
+	"reti", /* OPCODE_RETI */
+	"rla", /* OPCODE_RLA */
+	"rlca", /* OPCODE_RLCA */
+	"rra", /* OPCODE_RRA */
+	"rrca", /* OPCODE_RRCA */
+	"rst", /* OPCODE_RST */
+	"scf", /* OPCODE_SCF */
+	"sbc", /* OPCODE_SBC */
+	"stop", /* OPCODE_STOP */
+	"sub", /* OPCODE_SUB */
+	"xor", /* OPCODE_XOR */
+	"unused_cb", /* OPCODE_UNUSED_CB */
+	"unused_d3", /* OPCODE_UNUSED_D3 */
+	"unused_db", /* OPCODE_UNUSED_DB */
+	"unused_dd", /* OPCODE_UNUSED_DD */
+	"unused_e3", /* OPCODE_UNUSED_E3 */
+	"unused_e4", /* OPCODE_UNUSED_E4 */
+	"unused_eb", /* OPCODE_UNUSED_EB */
+	"unused_ec", /* OPCODE_UNUSED_EC */
+	"unused_ed", /* OPCODE_NUSED_ED */
+	"unused_f4", /* OPCODE_UNUSED_F4 */
+	"unused_fc", /* OPCODE_UNUSED_FC */
+	"unused_fd", /* OPCODE_UNUSED_FD */
+	"bit0", /* OPCODE_BIT0 */
+	"bit1", /* OPCODE_BIT1 */
+	"bit2", /* OPCODE_BIT2 */
+	"bit3", /* OPCODE_BIT3 */
+	"bit4", /* OPCODE_BIT4 */
+	"bit5", /* OPCODE_BIT5 */
+	"bit6", /* OPCODE_BIT6 */
+	"bit7", /* OPCODE_BIT7 */
+	"res0", /* OPCODE_RES0 */
+	"res1", /* OPCODE_RES1 */
+	"res2", /* OPCODE_RES2 */
+	"res3", /* OPCODE_RES3 */
+	"res4", /* OPCODE_RES4 */
+	"res5", /* OPCODE_RES5 */
+	"res6", /* OPCODE_RES6 */
+	"res7", /* OPCODE_RES7 */
+	"rl", /* OPCODE_RL */
+	"rlc", /* OPCODE_RLC */
+	"rr", /* OPCODE_RR */
+	"rrc", /* OPCODE_RRC */
+	"set0", /* OPCODE_SET0 */
+	"set1", /* OPCODE_SET1 */
+	"set2", /* OPCODE_SET2 */
+	"set3", /* OPCODE_SET3 */
+	"set4", /* OPCODE_SET4 */
+	"set5", /* OPCODE_SET5 */
+	"set6", /* OPCODE_SET6 */
+	"set7", /* OPCODE_SET7 */
+	"sla", /* OPCODE_SLA */
+	"sra", /* OPCODE_SRA */
+	"srl", /* OPCODE_SRL */
+	"swap", /* OPCODE_SWAP */
+	"", /* OPCODE_MAX */
+	};
+
 static const char *RAM_STR[] = {
 	"None", /* RAM_NONE */
 	"1 bank (2 KB)", /* RAM_2KB */
 	"1 bank (8 KB)", /* RAM_8KB */
 	"4 banks (32 KB)", /* RAM_32KB */
 	"16 banks (128 KB)", /* RAM_128KB */
+	};
+
+static const char *REGISTER_STR[] = {
+	"a", /* REGISTER_A */
+	"af", /* REGISTER_AF */
+	"b", /* REIGSTER_B */
+	"bc", /* REGISTER_BC */
+	"c", /* REGISTER_C */
+	"d", /* REGISTER_D */
+	"de", /* REGISTER_DE */
+	"e", /* REGISTER_E */
+	"h", /* REGISTER_H */
+	"hl", /* REGISTER_HL */
+	"l", /* REGISTER_L */
+	"pc", /* REGISTER_PC */
+	"sp", /* REGISTER_SP */
+	"", /* REGISTER_MAX */
 	};
 
 static const char *ROM_STR[] = {

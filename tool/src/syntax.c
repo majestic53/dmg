@@ -56,6 +56,70 @@ dmg_tool_instruction_string(
 	return (extended ? INSTRUCTION_EXTENDED_STR[opcode] : INSTRUCTION_STR[opcode]);
 }
 
+bool
+dmg_tool_is_directive_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	for(*type = 0; *type < DIRECTIVE_MAX; ++*type) {
+
+		if(!strcmp(DIRECTIVE_STR[*type], str)) {
+			break;
+		}
+	}
+
+	return (*type < DIRECTIVE_MAX);
+}
+
+bool
+dmg_tool_is_macro_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	for(*type = 0; *type < MACRO_MAX; ++*type) {
+
+		if(!strcmp(MACRO_STR[*type], str)) {
+			break;
+		}
+	}
+
+	return (*type < MACRO_MAX);
+}
+
+bool
+dmg_tool_is_opcode_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	for(*type = 0; *type < OPCODE_MAX; ++*type) {
+
+		if(!strcmp(OPCODE_STR[*type], str)) {
+			break;
+		}
+	}
+
+	return (*type < OPCODE_MAX);
+}
+
+bool
+dmg_tool_is_register_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	for(*type = 0; *type < REGISTER_MAX; ++*type) {
+
+		if(!strcmp(REGISTER_STR[*type], str)) {
+			break;
+		}
+	}
+
+	return (*type < REGISTER_MAX);
+}
+
 const char *
 dmg_tool_mapper_string(
 	__in int type

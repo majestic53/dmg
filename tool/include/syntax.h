@@ -29,6 +29,7 @@
 #define DELIMITER_COMMENT ';'
 #define DELIMITER_DIRECTIVE "."
 #define DELIMITER_HEXIDECIMAL "$"
+#define DELIMITER_IDENTIFIER "_"
 #define DELIMITER_LABEL ":"
 
 enum {
@@ -66,6 +67,109 @@ enum {
 	HEADER_CHECKSUM,
 	HEADER_CHECKSUM_GLOBAL,
 	HEADER_MAX,
+};
+
+enum {
+	MACRO_HIGH = 0,
+	MACRO_LOW,
+	MACRO_MAX,
+};
+
+enum {
+	OPCODE_ADC = 0,
+	OPCODE_ADD,
+	OPCODE_AND,
+	OPCODE_CALL,
+	OPCODE_CCF,
+	OPCODE_CP,
+	OPCODE_CPL,
+	OPCODE_DAA,
+	OPCODE_DEC,
+	OPCODE_DI,
+	OPCODE_EI,
+	OPCODE_HALT,
+	OPCODE_INC,
+	OPCODE_JP,
+	OPCODE_JR,
+	OPCODE_LD,
+	OPCODE_NOP,
+	OPCODE_OR,
+	OPCODE_POP,
+	OPCODE_PUSH,
+	OPCODE_RET,
+	OPCODE_RETI,
+	OPCODE_RLA,
+	OPCODE_RLCA,
+	OPCODE_RRA,
+	OPCODE_RRCA,
+	OPCODE_RST,
+	OPCODE_SCF,
+	OPCODE_SBC,
+	OPCODE_STOP,
+	OPCODE_SUB,
+	OPCODE_XOR,
+	OPCODE_UNUSED_CB,
+	OPCODE_UNUSED_D3,
+	OPCODE_UNUSED_DB,
+	OPCODE_UNUSED_DD,
+	OPCODE_UNUSED_E3,
+	OPCODE_UNUSED_E4,
+	OPCODE_UNUSED_EB,
+	OPCODE_UNUSED_EC,
+	OPCODE_NUSED_ED,
+	OPCODE_UNUSED_F4,
+	OPCODE_UNUSED_FC,
+	OPCODE_UNUSED_FD,
+	OPCODE_BIT0,
+	OPCODE_BIT1,
+	OPCODE_BIT2,
+	OPCODE_BIT3,
+	OPCODE_BIT4,
+	OPCODE_BIT5,
+	OPCODE_BIT6,
+	OPCODE_BIT7,
+	OPCODE_RES0,
+	OPCODE_RES1,
+	OPCODE_RES2,
+	OPCODE_RES3,
+	OPCODE_RES4,
+	OPCODE_RES5,
+	OPCODE_RES6,
+	OPCODE_RES7,
+	OPCODE_RL,
+	OPCODE_RLC,
+	OPCODE_RR,
+	OPCODE_RRC,
+	OPCODE_SET0,
+	OPCODE_SET1,
+	OPCODE_SET2,
+	OPCODE_SET3,
+	OPCODE_SET4,
+	OPCODE_SET5,
+	OPCODE_SET6,
+	OPCODE_SET7,
+	OPCODE_SLA,
+	OPCODE_SRA,
+	OPCODE_SRL,
+	OPCODE_SWAP,
+	OPCODE_MAX,
+};
+
+enum {
+	REGISTER_A = 0,
+	REGISTER_AF,
+	REIGSTER_B,
+	REGISTER_BC,
+	REGISTER_C,
+	REGISTER_D,
+	REGISTER_DE,
+	REGISTER_E,
+	REGISTER_H,
+	REGISTER_HL,
+	REGISTER_L,
+	REGISTER_PC,
+	REGISTER_SP,
+	REGISTER_MAX,
 };
 
 enum {
@@ -110,6 +214,26 @@ const dmg_tool_instruction_t *dmg_tool_instruction(
 const char *dmg_tool_instruction_string(
 	__in uint8_t opcode,
 	__in bool extended
+	);
+
+bool dmg_tool_is_directive_string(
+	__in const char *str,
+	__inout int *type
+	);
+
+bool dmg_tool_is_macro_string(
+	__in const char *str,
+	__inout int *type
+	);
+
+bool dmg_tool_is_opcode_string(
+	__in const char *str,
+	__inout int *type
+	);
+
+bool dmg_tool_is_register_string(
+	__in const char *str,
+	__inout int *type
 	);
 
 const char *dmg_tool_mapper_string(
