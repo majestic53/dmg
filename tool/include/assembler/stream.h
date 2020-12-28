@@ -23,10 +23,11 @@
 
 #define CHARACTER_END 0
 #define CHARACTER_ALPHA 1
-#define CHARACTER_DECIMAL 2
-#define CHARACTER_HEXIDECIMAL 4
-#define CHARACTER_SPACE 8
-#define CHARACTER_SYMBOL 16
+#define CHARACTER_BINARY 2
+#define CHARACTER_DECIMAL 4
+#define CHARACTER_HEXIDECIMAL 8
+#define CHARACTER_SPACE 16
+#define CHARACTER_SYMBOL 32
 
 typedef struct {
 	const dmg_buffer_t *buffer;

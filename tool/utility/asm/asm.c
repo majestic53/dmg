@@ -70,7 +70,10 @@ dmg_utility_asm_assemble(void)
 			case TOKEN_LABEL:
 			case TOKEN_MACRO:
 			case TOKEN_OPCODE:
+			case TOKEN_OPERATOR:
 			case TOKEN_REGISTER:
+			case TOKEN_SCALAR:
+			case TOKEN_SYMBOL:
 				fprintf(stdout, " \"");
 
 				for(uint32_t index = 0; index < token->literal.length; ++index) {
@@ -78,7 +81,13 @@ dmg_utility_asm_assemble(void)
 				}
 
 				fprintf(stdout, "\"");
+
+				if(token->type == TOKEN_SCALAR) {
+					fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
+				}
 				break;
+			case TOKEN_LITERAL:
+				// TODO
 			default:
 				fprintf(stdout, " \'%c\' (%02x)",
 					(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL, token->scalar.low);

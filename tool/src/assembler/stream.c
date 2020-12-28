@@ -57,6 +57,10 @@ dmg_assembler_stream_character(
 		} else if(isdigit(result)) {
 			*type |= CHARACTER_DECIMAL;
 
+			if((result == CHARACTER_BINARY_MIN) || (result == CHARACTER_BINARY_MAX)) {
+				*type |= CHARACTER_BINARY;
+			}
+
 			if(isxdigit(result)) {
 				*type |= CHARACTER_HEXIDECIMAL;
 			}

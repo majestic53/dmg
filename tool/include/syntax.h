@@ -21,9 +21,15 @@
 
 #include "../../include/system/processor/instruction.h"
 
+#define CHARACTER_BINARY_MAX '1'
+#define CHARACTER_BINARY_MIN '0'
 #define CHARACTER_EOF '\0'
 #define CHARACTER_FILL '.'
 #define CHARACTER_NEWLINE '\n'
+
+#define COUNT_BINARY_MAX 16
+#define COUNT_DECIMAL_MAX 5
+#define COUNT_HEXIDECIMAL_MAX 4
 
 #define DELIMITER_BINARY "@"
 #define DELIMITER_COMMENT ';'
@@ -156,6 +162,28 @@ enum {
 };
 
 enum {
+	OPERATOR_ARITHMETIC_ADD = 0,
+	OPERATOR_ARITHMETIC_DIVIDE,
+	OPERATOR_ARITHMETIC_MODULUS,
+	OPERATOR_ARITHMETIC_MULTIPLY,
+	OPERATOR_ARITHMETIC_SUBTRACT,
+	OPERATOR_BINARY_AND,
+	OPERATOR_BINARY_OR,
+	OPERATOR_BINARY_XOR,
+	OPERATOR_CONDITIONAL_EQUALS,
+	OPERATOR_CONDITIONAL_GREATER_THAN,
+	OPERATOR_CONDITIONAL_GREATER_THAN_EQUALS,
+	OPERATOR_CONDITIONAL_LESS_THAN,
+	OPERATOR_CONDITIONAL_LESS_THAN_EQUALS,
+	OPERATOR_CONDITIONAL_NOT_EQUALS,
+	OPERATOR_LOGICAL_AND,
+	OPERATOR_LOGICAL_OR,
+	OPERATOR_UNARY_NEGATE,
+	OPERATOR_UNARY_NOT,
+	OPERATOR_MAX,
+};
+
+enum {
 	REGISTER_A = 0,
 	REGISTER_AF,
 	REIGSTER_B,
@@ -170,6 +198,13 @@ enum {
 	REGISTER_PC,
 	REGISTER_SP,
 	REGISTER_MAX,
+};
+
+enum {
+	SYMBOL_BRACE_CLOSE = 0,
+	SYMBOL_BRACE_OPEN,
+	SYMBOL_SEPERATOR,
+	SYMBOL_MAX,
 };
 
 enum {
@@ -231,7 +266,17 @@ bool dmg_tool_is_opcode_string(
 	__inout int *type
 	);
 
+bool dmg_tool_is_operator_string(
+	__in const char *str,
+	__inout int *type
+	);
+
 bool dmg_tool_is_register_string(
+	__in const char *str,
+	__inout int *type
+	);
+
+bool dmg_tool_is_symbol_string(
 	__in const char *str,
 	__inout int *type
 	);

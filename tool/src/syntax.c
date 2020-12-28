@@ -22,6 +22,25 @@
 extern "C" {
 #endif /* __cplusplus */
 
+static bool
+dmg_tool_is_string(
+	__in const char **strings,
+	__in int count,
+	__in const char *str,
+	__inout int *type
+	)
+{
+
+	for(*type = 0; *type < count; ++*type) {
+
+		if(!strcmp(strings[*type], str)) {
+			break;
+		}
+	}
+
+	return (*type < count);
+}
+
 const char *
 dmg_tool_directive_string(
 	__in int type
@@ -62,14 +81,7 @@ dmg_tool_is_directive_string(
 	__inout int *type
 	)
 {
-	for(*type = 0; *type < DIRECTIVE_MAX; ++*type) {
-
-		if(!strcmp(DIRECTIVE_STR[*type], str)) {
-			break;
-		}
-	}
-
-	return (*type < DIRECTIVE_MAX);
+	return dmg_tool_is_string(DIRECTIVE_STR, DIRECTIVE_MAX, str, type);
 }
 
 bool
@@ -78,14 +90,7 @@ dmg_tool_is_macro_string(
 	__inout int *type
 	)
 {
-	for(*type = 0; *type < MACRO_MAX; ++*type) {
-
-		if(!strcmp(MACRO_STR[*type], str)) {
-			break;
-		}
-	}
-
-	return (*type < MACRO_MAX);
+	return dmg_tool_is_string(MACRO_STR, MACRO_MAX, str, type);
 }
 
 bool
@@ -94,14 +99,16 @@ dmg_tool_is_opcode_string(
 	__inout int *type
 	)
 {
-	for(*type = 0; *type < OPCODE_MAX; ++*type) {
+	return dmg_tool_is_string(OPCODE_STR, OPCODE_MAX, str, type);
+}
 
-		if(!strcmp(OPCODE_STR[*type], str)) {
-			break;
-		}
-	}
-
-	return (*type < OPCODE_MAX);
+bool
+dmg_tool_is_operator_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	return dmg_tool_is_string(OPERATOR_STR, OPERATOR_MAX, str, type);
 }
 
 bool
@@ -110,14 +117,16 @@ dmg_tool_is_register_string(
 	__inout int *type
 	)
 {
-	for(*type = 0; *type < REGISTER_MAX; ++*type) {
+	return dmg_tool_is_string(REGISTER_STR, REGISTER_MAX, str, type);
+}
 
-		if(!strcmp(REGISTER_STR[*type], str)) {
-			break;
-		}
-	}
-
-	return (*type < REGISTER_MAX);
+bool
+dmg_tool_is_symbol_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	return dmg_tool_is_string(SYMBOL_STR, SYMBOL_MAX, str, type);
 }
 
 const char *

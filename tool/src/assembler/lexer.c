@@ -172,6 +172,207 @@ exit:
 }
 
 static int
+dmg_assembler_lexer_token_parse_scalar(
+	__inout dmg_assembler_lexer_t *lexer
+	)
+{
+	char value;
+	dmg_assembler_token_t *token;
+	dmg_assembler_string_t string = {};
+	int count = COUNT_DECIMAL_MAX, result = DMG_STATUS_SUCCESS, type;
+	bool binary = false, hexidecimal = false, negate = false, not = false, subtract = false;
+
+	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((token = &(lexer->tokens.token[lexer->position]))->type == TOKEN_OPERATOR) {
+
+		switch(token->subtype) {
+			case OPERATOR_ARITHMETIC_SUBTRACT:
+				subtract = true;
+				break;
+			case OPERATOR_UNARY_NEGATE:
+				negate = true;
+				break;
+			case OPERATOR_UNARY_NOT:
+				not = true;
+				break;
+			default:
+				token->line = lexer->stream.line;
+				token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+				token->literal.length = 0;
+				break;
+		}
+	} else {
+		token->line = lexer->stream.line;
+		token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+		token->literal.length = 0;
+	}
+
+	token->type = TOKEN_SCALAR;
+	value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+	if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
+
+		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(value == DELIMITER_BINARY[0]) {
+			binary = true;
+			count = COUNT_BINARY_MAX;
+		} else if(value == DELIMITER_HEXIDECIMAL[0]) {
+			hexidecimal = true;
+			count = COUNT_HEXIDECIMAL_MAX;
+		} else {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported scalar \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated scalar \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
+		string.str[--string.length] = CHARACTER_EOF;
+		++token->literal.length;
+	}
+
+	// TODO: HANDLE (BINARY|DECIMAL|HEXIDECIMAL) character from [1-count]
+	(void)binary;
+	(void)hexidecimal;
+	(void)count;
+	// ---
+
+	if(subtract) {
+		token->scalar.word = -token->scalar.word;
+	} else if(negate) {
+		token->scalar.word = ~token->scalar.word;
+	} else if(not) {
+		token->scalar.word = !token->scalar.word;
+	}
+
+exit:
+	dmg_assembler_string_free(&string);
+
+	return result;
+}
+
+static int
+dmg_assembler_lexer_token_parse_symbol(
+	__inout dmg_assembler_lexer_t *lexer
+	)
+{
+	char value;
+	dmg_assembler_string_t string = {};
+	int result = DMG_STATUS_SUCCESS, type;
+
+	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_string_append(&string, (value = dmg_assembler_stream_character(&lexer->stream, &type)))) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((type & CHARACTER_SYMBOL) != CHARACTER_SYMBOL) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting symbol \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	if(value == DELIMITER_DIRECTIVE[0]) {
+
+		if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	} else if(value == DELIMITER_IDENTIFIER[0]) {
+
+		if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	} else {
+		dmg_assembler_token_t *token;
+
+		token = &(lexer->tokens.token[lexer->position]);
+		token->line = lexer->stream.line;
+		token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+		token->literal.length = 1;
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+
+			if(!dmg_tool_is_operator_string(string.str, &type)
+					&& !dmg_tool_is_symbol_string(string.str, &type)) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported symbol \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+			}
+			goto exit;
+		}
+
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+		if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
+
+			if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			if(!dmg_tool_is_operator_string(string.str, &type)
+					&& !dmg_tool_is_symbol_string(string.str, &type)) {
+				string.str[--string.length] = CHARACTER_EOF;
+			} else if(!dmg_assembler_stream_has_next(&lexer->stream)
+					|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+				goto exit;
+			} else {
+				++token->literal.length;
+			}
+		}
+
+		if(dmg_tool_is_operator_string(string.str, &type)) {
+			token->type = TOKEN_OPERATOR;
+		} else if(dmg_tool_is_symbol_string(string.str, &type)) {
+			token->type = TOKEN_SYMBOL;
+		} else {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported symbol \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
+		token->subtype = type;
+
+		if(token->type == TOKEN_OPERATOR) {
+
+			switch(token->subtype) {
+				case OPERATOR_ARITHMETIC_SUBTRACT:
+				case OPERATOR_UNARY_NEGATE:
+				case OPERATOR_UNARY_NOT:
+					value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+					if((((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL)
+							|| (value == DELIMITER_BINARY[0])
+							|| (value == DELIMITER_HEXIDECIMAL[0]))
+							&& ((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS)) {
+						goto exit;
+					}
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+exit:
+	dmg_assembler_string_free(&string);
+
+	return result;
+}
+
+static int
 dmg_assembler_lexer_token_parse(
 	__inout dmg_assembler_lexer_t *lexer
 	)
@@ -218,26 +419,8 @@ dmg_assembler_lexer_token_parse(
 			}
 		} else if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
 
-			if(value == DELIMITER_DIRECTIVE[0]) {
-
-				if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
-					goto exit;
-				}
-			} else if(value == DELIMITER_IDENTIFIER[0]) {
-
-				if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
-					goto exit;
-				}
-			} else {
-
-// TODO: PARSE OTHER TOKEN TYPES
-lexer->tokens.token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->tokens.token[lexer->position].type);
-lexer->tokens.token[lexer->position].line = lexer->stream.line;
-
-if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
-	goto exit;
-}
-// ---
+			if((result = dmg_assembler_lexer_token_parse_symbol(lexer)) != DMG_STATUS_SUCCESS) {
+				goto exit;
 			}
 		} else {
 
@@ -248,6 +431,7 @@ lexer->tokens.token[lexer->position].line = lexer->stream.line;
 if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
 	goto exit;
 }
+(void)value;
 // ---
 
 		}
