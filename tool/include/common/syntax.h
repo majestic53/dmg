@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_SYNTAX_H_
-#define DMG_TOOL_SYNTAX_H_
+#ifndef DMG_TOOL_COMMON_SYNTAX_H_
+#define DMG_TOOL_COMMON_SYNTAX_H_
 
-#include "../../include/system/processor/instruction.h"
+#include "../../../include/system/processor/instruction.h"
 
 #define CHARACTER_BINARY_MAX '1'
 #define CHARACTER_BINARY_MIN '0'
@@ -27,16 +27,14 @@
 #define CHARACTER_FILL '.'
 #define CHARACTER_NEWLINE '\n'
 
-#define COUNT_BINARY_MAX 16
-#define COUNT_DECIMAL_MAX 5
-#define COUNT_HEXIDECIMAL_MAX 4
-
 #define DELIMITER_BINARY "@"
 #define DELIMITER_COMMENT ';'
 #define DELIMITER_DIRECTIVE "."
 #define DELIMITER_HEXIDECIMAL "$"
 #define DELIMITER_IDENTIFIER "_"
 #define DELIMITER_LABEL ":"
+#define DELIMITER_LITERAL_CHARACTER "\'"
+#define DELIMITER_LITERAL_STRING "\""
 
 enum {
 	DIRECTIVE_BANK = 0,
@@ -301,4 +299,4 @@ const char *dmg_tool_vector_string(
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TOOL_SYNTAX_H_ */
+#endif /* DMG_TOOL_COMMON_SYNTAX_H_ */

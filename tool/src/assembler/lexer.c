@@ -176,10 +176,10 @@ dmg_assembler_lexer_token_parse_scalar(
 	__inout dmg_assembler_lexer_t *lexer
 	)
 {
-	char value;
+	char *end, value;
 	dmg_assembler_token_t *token;
 	dmg_assembler_string_t string = {};
-	int count = COUNT_DECIMAL_MAX, result = DMG_STATUS_SUCCESS, type;
+	int base = BASE_DECIMAL, count = COUNT_DECIMAL_MAX, result = DMG_STATUS_SUCCESS, type;
 	bool binary = false, hexidecimal = false, negate = false, not = false, subtract = false;
 
 	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
@@ -211,6 +211,7 @@ dmg_assembler_lexer_token_parse_scalar(
 	}
 
 	token->type = TOKEN_SCALAR;
+	token->subtype = 0;
 	value = dmg_assembler_stream_character(&lexer->stream, &type);
 
 	if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
@@ -221,9 +222,11 @@ dmg_assembler_lexer_token_parse_scalar(
 
 		if(value == DELIMITER_BINARY[0]) {
 			binary = true;
+			base = BASE_BINARY;
 			count = COUNT_BINARY_MAX;
 		} else if(value == DELIMITER_HEXIDECIMAL[0]) {
 			hexidecimal = true;
+			base = BASE_HEXIDECIMAL;
 			count = COUNT_HEXIDECIMAL_MAX;
 		} else {
 			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported scalar \"%s\" (%s@%u)", string.str,
@@ -238,15 +241,89 @@ dmg_assembler_lexer_token_parse_scalar(
 			goto exit;
 		}
 
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+		if(binary) {
+
+			if((type & CHARACTER_BINARY) != CHARACTER_BINARY) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting binary scalar \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+				goto exit;
+			}
+		} else if(hexidecimal) {
+
+			if((type & CHARACTER_HEXIDECIMAL) != CHARACTER_HEXIDECIMAL) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting hexidecimal scalar \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+				goto exit;
+			}
+		} else if((type & CHARACTER_DECIMAL) != CHARACTER_DECIMAL) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting scalar \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
 		string.str[--string.length] = CHARACTER_EOF;
 		++token->literal.length;
 	}
 
-	// TODO: HANDLE (BINARY|DECIMAL|HEXIDECIMAL) character from [1-count]
-	(void)binary;
-	(void)hexidecimal;
-	(void)count;
-	// ---
+	if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	++token->literal.length;
+
+	for(; count > 0; count--) {
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+
+		value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+		if(binary) {
+
+			if((type & CHARACTER_BINARY) != CHARACTER_BINARY) {
+				break;
+			}
+		} else if(hexidecimal) {
+
+			if((type & CHARACTER_HEXIDECIMAL) != CHARACTER_HEXIDECIMAL) {
+				break;
+			}
+		} else if((type & CHARACTER_DECIMAL) != CHARACTER_DECIMAL) {
+			break;
+		}
+
+		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		++token->literal.length;
+	}
+
+	if(binary) {
+
+		if((type & CHARACTER_BINARY) == CHARACTER_BINARY) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range binary scalar \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+	} else if(hexidecimal) {
+
+		if((type & CHARACTER_HEXIDECIMAL) == CHARACTER_HEXIDECIMAL) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range hexidecimal scalar \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+	} else if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range scalar \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	token->scalar.word = strtol(string.str, &end, base);
 
 	if(subtract) {
 		token->scalar.word = -token->scalar.word;
@@ -285,7 +362,12 @@ dmg_assembler_lexer_token_parse_symbol(
 		goto exit;
 	}
 
-	if(value == DELIMITER_DIRECTIVE[0]) {
+	if((value == DELIMITER_BINARY[0]) || (value == DELIMITER_HEXIDECIMAL[0])) {
+
+		if((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	} else if(value == DELIMITER_DIRECTIVE[0]) {
 
 		if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
 			goto exit;
@@ -412,9 +494,19 @@ dmg_assembler_lexer_token_parse(
 
 		value = dmg_assembler_stream_character(&lexer->stream, &type);
 
-		if((type & CHARACTER_ALPHA) == CHARACTER_ALPHA) {
+		if((type & CHARACTER_END) != CHARACTER_END) {
+
+			if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		} else if((type & CHARACTER_ALPHA) == CHARACTER_ALPHA) {
 
 			if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		} else if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
+
+			if((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		} else if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
@@ -423,17 +515,9 @@ dmg_assembler_lexer_token_parse(
 				goto exit;
 			}
 		} else {
-
-// TODO: PARSE OTHER TOKEN TYPES
-lexer->tokens.token[lexer->position].scalar.low = dmg_assembler_stream_character(&lexer->stream, &lexer->tokens.token[lexer->position].type);
-lexer->tokens.token[lexer->position].line = lexer->stream.line;
-
-if((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS) {
-	goto exit;
-}
-(void)value;
-// ---
-
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported character \'%c\' (%s@%u)", value,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
 		}
 
 		++lexer->tokens.count;

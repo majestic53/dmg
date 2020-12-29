@@ -19,46 +19,48 @@ DIR_BUILD_TOOL=../../build/tool/
 DIR_INCLUDE=../include/
 DIR_INCLUDE_ASSEMBLER=../include/assembler/
 DIR_INCLUDE_ASSEMBLER_COMMON=../include/assembler/common/
+DIR_INCLUDE_COMMON=../include/common/
 DIR_SRC=./
 DIR_SRC_ASSEMBLER=./assembler/
 DIR_SRC_ASSEMBLER_COMMON=./assembler/common/
+DIR_SRC_COMMON=./common/
 
 FLAGS=-std=c11 -Wall -Werror
 
 LIB=libdmg_tool.a
 
-build: build_assembler build_assembler_common build_base
+build: build_tool_assembler build_tool_assembler_common build_tool_common
 
-build_assembler: assembler_stream.o assembler_lexer.o
+build_tool_assembler: tool_assembler_stream.o tool_assembler_lexer.o
 
-assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)assembler_stream.o
+tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)tool_assembler_stream.o
 
-assembler_lexer.o: $(DIR_SRC_ASSEMBLER)lexer.c $(DIR_INCLUDE_ASSEMBLER)lexer.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)lexer.c -o $(DIR_BUILD_TOOL)assembler_lexer.o
+tool_assembler_lexer.o: $(DIR_SRC_ASSEMBLER)lexer.c $(DIR_INCLUDE_ASSEMBLER)lexer.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)lexer.c -o $(DIR_BUILD_TOOL)tool_assembler_lexer.o
 
-build_assembler_common: assembler_common_string.o assembler_common_token.o
+build_tool_assembler_common: tool_assembler_common_string.o tool_assembler_common_token.o
 
-assembler_common_string.o: $(DIR_SRC_ASSEMBLER_COMMON)string.c $(DIR_INCLUDE_ASSEMBLER_COMMON)string.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)string.c -o $(DIR_BUILD_TOOL)assembler_common_string.o
+tool_assembler_common_string.o: $(DIR_SRC_ASSEMBLER_COMMON)string.c $(DIR_INCLUDE_ASSEMBLER_COMMON)string.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)string.c -o $(DIR_BUILD_TOOL)tool_assembler_common_string.o
 
-assembler_common_token.o: $(DIR_SRC_ASSEMBLER_COMMON)token.c $(DIR_INCLUDE_ASSEMBLER_COMMON)token.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)token.c -o $(DIR_BUILD_TOOL)assembler_common_token.o
+tool_assembler_common_token.o: $(DIR_SRC_ASSEMBLER_COMMON)token.c $(DIR_INCLUDE_ASSEMBLER_COMMON)token.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)token.c -o $(DIR_BUILD_TOOL)tool_assembler_common_token.o
 
-build_base: base_syntax.o base_trace.o
+build_tool_common: tool_common_syntax.o tool_common_trace.o
 
-base_syntax.o: $(DIR_SRC)syntax.c $(DIR_INCLUDE)syntax.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)syntax.c -o $(DIR_BUILD_TOOL)base_syntax.o
+tool_common_syntax.o: $(DIR_SRC_COMMON)syntax.c $(DIR_INCLUDE_COMMON)syntax.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)syntax.c -o $(DIR_BUILD_TOOL)tool_common_syntax.o
 
-base_trace.o: $(DIR_SRC)trace.c $(DIR_INCLUDE)trace.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)trace.c -o $(DIR_BUILD_TOOL)base_trace.o
+tool_common_trace.o: $(DIR_SRC_COMMON)trace.c $(DIR_INCLUDE_COMMON)trace.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)trace.c -o $(DIR_BUILD_TOOL)tool_common_trace.o
 
 archive:
 	@echo ''
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
-	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)assembler_stream.o $(DIR_BUILD_TOOL)assembler_lexer.o \
-		$(DIR_BUILD_TOOL)assembler_common_string.o $(DIR_BUILD_TOOL)assembler_common_token.o \
-		$(DIR_BUILD_TOOL)base_syntax.o $(DIR_BUILD_TOOL)base_trace.o \
+	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)tool_assembler_stream.o $(DIR_BUILD_TOOL)tool_assembler_lexer.o \
+		$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
+		$(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o
 	@echo '--- DONE -----------------------------------'
 	@echo ''

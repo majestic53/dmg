@@ -16,27 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_TRACE_TYPE_H_
-#define DMG_TOOL_TRACE_TYPE_H_
+#ifndef DMG_TOOL_COMMON_TRACE_H_
+#define DMG_TOOL_COMMON_TRACE_H_
 
-#include "../include/common.h"
-#include "../include/trace.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#ifdef COLOR
+void dmg_tool_trace(
+	__in FILE *stream,
+	__in int level,
+	__in const char *format,
+	...
+	);
 
-static const char *LEVEL_STR[] = {
-	"\x1b[0m", /* LEVEL_NONE */
-	"\x1b[91m", /* LEVEL_ERROR */
-	"\x1b[93m", /* LEVEL_WARNING */
-	"\x1b[94m", /* LEVEL_INFORMATION */
-	"\x1b[90m", /* LEVEL_VERBOSE */
-	"", /* LEVEL_MAX */
-	};
+const char *dmg_tool_trace_level_string(
+	__in int level
+	);
 
-#define LEVEL_COLOR(_STREAM_, _LEVEL_) \
-	fprintf(_STREAM_, "%s", LEVEL_STR[_LEVEL_])
-#else
-#define LEVEL_COLOR(_STREAM_, _LEVEL_)
-#endif /* COLOR */
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
-#endif /* DMG_TOOL_TRACE_TYPE_H_ */
+#endif /* DMG_TOOL_COMMON_TRACE_H_ */

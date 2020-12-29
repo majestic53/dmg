@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_DEFINE_H_
-#define DMG_TOOL_DEFINE_H_
+#ifndef DMG_TOOL_COMMON_DEFINE_H_
+#define DMG_TOOL_COMMON_DEFINE_H_
 
-#include "../../include/common/define.h"
+#include "../../../include/common/define.h"
 
 #ifndef __in
 #define __in
@@ -52,4 +52,4 @@
 #define TRACE_TOOL_WARNING(_FORMAT_, ...) \
 	TRACE_TOOL(stderr, LEVEL_WARNING, _FORMAT_, __VA_ARGS__)
 
-#endif /* DMG_TOOL_DEFINE_H_ */
+#endif /* DMG_TOOL_COMMON_DEFINE_H_ */

@@ -16,11 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_SYNTAX_TYPE_H_
-#define DMG_TOOL_SYNTAX_TYPE_H_
+#ifndef DMG_TOOL_COMMON_SYNTAX_TYPE_H_
+#define DMG_TOOL_COMMON_SYNTAX_TYPE_H_
 
-#include "../include/common.h"
-#include "../include/syntax.h"
+#include "../../include/common.h"
 
 static const char *DIRECTIVE_STR[] = {
 	DELIMITER_DIRECTIVE "bank", /* DIRECTIVE_BANK */
@@ -1290,4 +1289,4 @@ static const char *VECTOR_STR[] = {
 	"", /* VECTOR_MAX */
 	};
 
-#endif /* DMG_TOOL_SYNTAX_TYPE_H_ */
+#endif /* DMG_TOOL_COMMON_SYNTAX_TYPE_H_ */

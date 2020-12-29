@@ -31,8 +31,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "./define.h"
-#include "./syntax.h"
-#include "./trace.h"
+#include "./common/define.h"
+#include "./common/syntax.h"
+#include "./common/trace.h"
 
 #endif /* DMG_TOOL_COMMON_H_ */

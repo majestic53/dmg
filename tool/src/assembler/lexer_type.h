@@ -23,4 +23,12 @@
 #include "../../include/assembler/common/string.h"
 #include "../../include/assembler/lexer.h"
 
+#define BASE_BINARY 2
+#define BASE_DECIMAL 10
+#define BASE_HEXIDECIMAL 16
+
+#define COUNT_BINARY_MAX 16
+#define COUNT_DECIMAL_MAX 5
+#define COUNT_HEXIDECIMAL_MAX 4
+
 #endif /* DMG_TOOL_ASSEMBLER_LEXER_TYPE_H_ */

@@ -41,25 +41,20 @@ typedef struct {
 	int subtype;
 	uint32_t line;
 
+	struct {
+		const char *str;
+		uint32_t length;
+	} literal;
+
 	union {
+
 		struct {
-			const char *str;
-			uint32_t length;
-		} literal;
+			uint8_t low;
+			uint8_t high;
+		};
 
-		union {
-
-			struct {
-				uint8_t low;
-				uint8_t high;
-				uint16_t unused;
-			};
-
-			int8_t offset;
-			uint16_t word;
-			int32_t raw;
-		} scalar;
-	};
+		uint16_t word;
+	} scalar;
 } dmg_assembler_token_t;
 
 typedef struct {
