@@ -21,20 +21,14 @@
 
 #include "../../../include/system/processor/instruction.h"
 
-#define CHARACTER_BINARY_MAX '1'
-#define CHARACTER_BINARY_MIN '0'
-#define CHARACTER_EOF '\0'
-#define CHARACTER_FILL '.'
-#define CHARACTER_NEWLINE '\n'
-
-#define DELIMITER_BINARY "@"
-#define DELIMITER_COMMENT ';'
-#define DELIMITER_DIRECTIVE "."
-#define DELIMITER_HEXIDECIMAL "$"
-#define DELIMITER_IDENTIFIER "_"
-#define DELIMITER_LABEL ":"
-#define DELIMITER_LITERAL_CHARACTER "\'"
-#define DELIMITER_LITERAL_STRING "\""
+enum {
+	CHARACTER_ESCAPE_BACKSLASH = 0,
+	CHARACTER_ESCAPE_NEWLINE,
+	CHARACTER_ESCAPE_QUOTATION,
+	CHARACTER_ESCAPE_QUOTATION_DOUBLE,
+	CHARACTER_ESCAPE_TAB,
+	CHARACTER_ESCAPE_MAX,
+};
 
 enum {
 	DIRECTIVE_BANK = 0,
@@ -176,6 +170,8 @@ enum {
 	OPERATOR_CONDITIONAL_NOT_EQUALS,
 	OPERATOR_LOGICAL_AND,
 	OPERATOR_LOGICAL_OR,
+	OPERATOR_LOGICAL_SHIFT_LEFT,
+	OPERATOR_LOGICAL_SHIFT_RIGHT,
 	OPERATOR_UNARY_NEGATE,
 	OPERATOR_UNARY_NOT,
 	OPERATOR_MAX,
@@ -225,73 +221,78 @@ enum {
 typedef struct {
 	uint8_t opcode;
 	uint8_t operand;
-} dmg_tool_instruction_t;
+} dmg_tool_syntax_instruction_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-const char *dmg_tool_directive_string(
+const char *dmg_tool_syntax_directive_string(
 	__in int type
 	);
 
-const char *dmg_tool_header_string(
+const char *dmg_tool_syntax_header_string(
 	__in int type
 	);
 
-const dmg_tool_instruction_t *dmg_tool_instruction(
+const dmg_tool_syntax_instruction_t *dmg_tool_syntax_instruction(
 	__in uint8_t opcode,
 	__in bool extended
 	);
 
-const char *dmg_tool_instruction_string(
+const char *dmg_tool_syntax_instruction_string(
 	__in uint8_t opcode,
 	__in bool extended
 	);
 
-bool dmg_tool_is_directive_string(
+bool dmg_tool_syntax_is_escape_character(
+	__in const char ch,
+	__inout int *type
+	);
+
+bool dmg_tool_syntax_is_directive_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-bool dmg_tool_is_macro_string(
+bool dmg_tool_syntax_is_macro_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-bool dmg_tool_is_opcode_string(
+bool dmg_tool_syntax_is_opcode_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-bool dmg_tool_is_operator_string(
+bool dmg_tool_syntax_is_operator_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-bool dmg_tool_is_register_string(
+bool dmg_tool_syntax_is_register_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-bool dmg_tool_is_symbol_string(
+bool dmg_tool_syntax_is_symbol_string(
 	__in const char *str,
 	__inout int *type
 	);
 
-const char *dmg_tool_mapper_string(
+const char *dmg_tool_syntax_mapper_string(
 	__in int type
 	);
 
-const char *dmg_tool_ram_string(
+const char *dmg_tool_syntax_ram_string(
 	__in int type
 	);
 
-const char *dmg_tool_rom_string(
+const char *dmg_tool_syntax_rom_string(
 	__in int type
 	);
 
-const char *dmg_tool_vector_string(
+const char *dmg_tool_syntax_vector_string(
 	__in int type
 	);
 

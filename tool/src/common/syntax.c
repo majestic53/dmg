@@ -23,7 +23,26 @@ extern "C" {
 #endif /* __cplusplus */
 
 static bool
-dmg_tool_is_string(
+dmg_tool_syntax_is_character(
+	__in const char *chars,
+	__in int count,
+	__in const char ch,
+	__inout int *type
+	)
+{
+
+	for(*type = 0; *type < count; ++*type) {
+
+		if(chars[*type] == ch) {
+			break;
+		}
+	}
+
+	return (*type < count);
+}
+
+static bool
+dmg_tool_syntax_is_string(
 	__in const char **strings,
 	__in int count,
 	__in const char *str,
@@ -42,7 +61,7 @@ dmg_tool_is_string(
 }
 
 const char *
-dmg_tool_directive_string(
+dmg_tool_syntax_directive_string(
 	__in int type
 	)
 {
@@ -50,15 +69,15 @@ dmg_tool_directive_string(
 }
 
 const char *
-dmg_tool_header_string(
+dmg_tool_syntax_header_string(
 	__in int type
 	)
 {
 	return HEADER_STR[type];
 }
 
-const dmg_tool_instruction_t *
-dmg_tool_instruction(
+const dmg_tool_syntax_instruction_t *
+dmg_tool_syntax_instruction(
 	__in uint8_t opcode,
 	__in bool extended
 	)
@@ -67,7 +86,7 @@ dmg_tool_instruction(
 }
 
 const char *
-dmg_tool_instruction_string(
+dmg_tool_syntax_instruction_string(
 	__in uint8_t opcode,
 	__in bool extended
 	)
@@ -76,61 +95,70 @@ dmg_tool_instruction_string(
 }
 
 bool
-dmg_tool_is_directive_string(
-	__in const char *str,
+dmg_tool_syntax_is_escape_character(
+	__in const char ch,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(DIRECTIVE_STR, DIRECTIVE_MAX, str, type);
+	return dmg_tool_syntax_is_character(CHARACTER_ESCAPE_CHAR, CHARACTER_ESCAPE_MAX, ch, type);
 }
 
 bool
-dmg_tool_is_macro_string(
+dmg_tool_syntax_is_directive_string(
 	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(MACRO_STR, MACRO_MAX, str, type);
+	return dmg_tool_syntax_is_string(DIRECTIVE_STR, DIRECTIVE_MAX, str, type);
 }
 
 bool
-dmg_tool_is_opcode_string(
+dmg_tool_syntax_is_macro_string(
 	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(OPCODE_STR, OPCODE_MAX, str, type);
+	return dmg_tool_syntax_is_string(MACRO_STR, MACRO_MAX, str, type);
 }
 
 bool
-dmg_tool_is_operator_string(
+dmg_tool_syntax_is_opcode_string(
 	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(OPERATOR_STR, OPERATOR_MAX, str, type);
+	return dmg_tool_syntax_is_string(OPCODE_STR, OPCODE_MAX, str, type);
 }
 
 bool
-dmg_tool_is_register_string(
+dmg_tool_syntax_is_operator_string(
 	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(REGISTER_STR, REGISTER_MAX, str, type);
+	return dmg_tool_syntax_is_string(OPERATOR_STR, OPERATOR_MAX, str, type);
 }
 
 bool
-dmg_tool_is_symbol_string(
+dmg_tool_syntax_is_register_string(
 	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_is_string(SYMBOL_STR, SYMBOL_MAX, str, type);
+	return dmg_tool_syntax_is_string(REGISTER_STR, REGISTER_MAX, str, type);
+}
+
+bool
+dmg_tool_syntax_is_symbol_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	return dmg_tool_syntax_is_string(SYMBOL_STR, SYMBOL_MAX, str, type);
 }
 
 const char *
-dmg_tool_mapper_string(
+dmg_tool_syntax_mapper_string(
 	__in int type
 	)
 {
@@ -138,7 +166,7 @@ dmg_tool_mapper_string(
 }
 
 const char *
-dmg_tool_ram_string(
+dmg_tool_syntax_ram_string(
 	__in int type
 	)
 {
@@ -146,7 +174,7 @@ dmg_tool_ram_string(
 }
 
 const char *
-dmg_tool_rom_string(
+dmg_tool_syntax_rom_string(
 	__in int type
 	)
 {
@@ -154,7 +182,7 @@ dmg_tool_rom_string(
 }
 
 const char *
-dmg_tool_vector_string(
+dmg_tool_syntax_vector_string(
 	__in int type
 	)
 {

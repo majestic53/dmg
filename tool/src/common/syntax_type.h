@@ -21,6 +21,15 @@
 
 #include "../../include/common.h"
 
+static const char CHARACTER_ESCAPE_CHAR[] = {
+	'\\', /* CHARACTER_ESCAPE_BACKSLASH */
+	'n', /* CHARACTER_ESCAPE_NEWLINE */
+	'\'', /* CHARACTER_ESCAPE_QUOTATION */
+	'\"', /* CHARACTER_ESCAPE_QUOTATION_DOUBLE */
+	't', /* CHARACTER_ESCAPE_TAB */
+	'\0', /* CHARACTER_ESCAPE_MAX */
+	};
+
 static const char *DIRECTIVE_STR[] = {
 	DELIMITER_DIRECTIVE "bank", /* DIRECTIVE_BANK */
 	DELIMITER_DIRECTIVE "db", /* DIRECTIVE_DATA_BYTE */
@@ -58,7 +67,7 @@ static const char *HEADER_STR[] = {
 	"", /* HEADER_MAX */
 	};
 
-static const dmg_tool_instruction_t INSTRUCTION[] = {
+static const dmg_tool_syntax_instruction_t INSTRUCTION[] = {
 	{ INSTRUCTION_NOP, OPERAND_NONE}, /* 0x00 */
 	{ INSTRUCTION_LD_BC_U16, OPERAND_WORD},
 	{ INSTRUCTION_LD_BC_IND_A, OPERAND_NONE},
@@ -576,7 +585,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"rst 38",
 	};
 
-static const dmg_tool_instruction_t INSTRUCTION_EXTENDED[] = {
+static const dmg_tool_syntax_instruction_t INSTRUCTION_EXTENDED[] = {
 	{ INSTRUCTION_EXTENDED_RLC_B, OPERAND_NONE}, /* 0x00 */
 	{ INSTRUCTION_EXTENDED_RLC_C, OPERAND_NONE},
 	{ INSTRUCTION_EXTENDED_RLC_D, OPERAND_NONE},
@@ -1223,6 +1232,8 @@ static const char *OPERATOR_STR[] = {
 	"!=", /* OPERATOR_CONDITIONAL_NOT_EQUALS */
 	"&&", /* OPERATOR_LOGICAL_AND */
 	"||", /* OPERATOR_LOGICAL_OR */
+	"<<", /* OPERATOR_LOGICAL_SHIFT_LEFT */
+	">>", /* OPERATOR_LOGICAL_SHIFT_RIGHT */
 	"~", /* OPERATOR_UNARY_NEGATE */
 	"!", /* OPERATOR_UNARY_NOT */
 	"", /* OPERATOR_MAX */

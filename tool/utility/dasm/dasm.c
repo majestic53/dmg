@@ -81,7 +81,7 @@ dmg_utility_dasm_disassemble_comment(void)
 
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cRegion    %s", DELIMITER_COMMENT, header->destination ? "U (International)" : "JP (Japan)");
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cMapper    ", DELIMITER_COMMENT);
-	mapper = dmg_tool_mapper_string(header->mapper);
+	mapper = dmg_tool_syntax_mapper_string(header->mapper);
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
 		result = EXIT_FAILURE;
@@ -94,7 +94,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	if(header->rom >= ROM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", dmg_tool_rom_string(header->rom));
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", dmg_tool_syntax_rom_string(header->rom));
 	}
 
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRam       ", DELIMITER_COMMENT);
@@ -102,7 +102,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	if(header->ram >= RAM_MAX) {
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", dmg_tool_ram_string(header->ram));
+		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", dmg_tool_syntax_ram_string(header->ram));
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
@@ -129,7 +129,7 @@ dmg_utility_dasm_disassemble_instruction(
 	const char *format = NULL;
 	int result = EXIT_SUCCESS;
 	uint8_t opcode, operand[2] = {};
-	const dmg_tool_instruction_t *instruction;
+	const dmg_tool_syntax_instruction_t *instruction;
 	uint16_t base = ((bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN) + *address);
 
 	if(final) {
@@ -157,11 +157,11 @@ dmg_utility_dasm_disassemble_instruction(
 	}
 
 	if(final) {
-		format = dmg_tool_instruction_string(opcode, extended);
+		format = dmg_tool_syntax_instruction_string(opcode, extended);
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "\t\t");
 	}
 
-	switch((instruction = dmg_tool_instruction(opcode, extended))->operand) {
+	switch((instruction = dmg_tool_syntax_instruction(opcode, extended))->operand) {
 		case OPERAND_BYTE:
 			operand[0] = ((uint8_t *)g_dasm.buffer.data)[origin + (*address)++];
 
@@ -268,11 +268,12 @@ dmg_utility_dasm_disassemble_header(
 			int count = 0;
 			char str[HEADER_WIDTH + 1] = {};
 
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t%s %s%04x\n", dmg_tool_header_string(index),
-					dmg_tool_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t%s %s%04x\n", dmg_tool_syntax_header_string(index),
+					dmg_tool_syntax_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
 
 			if(address >= 0x0104) {
-				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t\t%c%04x\n\t%s", DELIMITER_COMMENT, address, dmg_tool_directive_string(DIRECTIVE_DATA_BYTE));
+				TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\t\t%c%04x\n\t%s", DELIMITER_COMMENT, address,
+						dmg_tool_syntax_directive_string(DIRECTIVE_DATA_BYTE));
 
 				for(offset = address; offset < (address + HEADER_LEN[index]); ++offset) {
 					uint8_t value;
@@ -281,7 +282,7 @@ dmg_utility_dasm_disassemble_header(
 
 						if(strlen(str)) {
 							TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n\t\t%c%s\n\t%s", DELIMITER_COMMENT, str,
-									dmg_tool_directive_string(DIRECTIVE_DATA_BYTE));
+									dmg_tool_syntax_directive_string(DIRECTIVE_DATA_BYTE));
 							memset(str, 0, sizeof(str));
 							count = 0;
 						}
@@ -331,8 +332,8 @@ dmg_utility_dasm_disassemble_vectors(
 	for(uint16_t address = ADDRESS_VECTOR_BEGIN; address < ADDRESS_HEADER_BEGIN;) {
 
 		if(final && !(address % VECTOR_WIDTH) && (address <= ADDRESS_VECTOR_END)) {
-			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t%s %s%04x\n", dmg_tool_vector_string(address / VECTOR_WIDTH),
-					dmg_tool_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
+			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%s\n\t%s %s%04x\n", dmg_tool_syntax_vector_string(address / VECTOR_WIDTH),
+					dmg_tool_syntax_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
 		}
 
 		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0, final)) != EXIT_SUCCESS) {
@@ -361,7 +362,7 @@ dmg_utility_dasm_disassemble_bank(
 
 	if(final) {
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "\n%cBank #%u\n\t%s %u\n\t%s %s%04x\n\n", DELIMITER_COMMENT, bank,
-			dmg_tool_directive_string(DIRECTIVE_BANK), bank, dmg_tool_directive_string(DIRECTIVE_ORIGIN),
+			dmg_tool_syntax_directive_string(DIRECTIVE_BANK), bank, dmg_tool_syntax_directive_string(DIRECTIVE_ORIGIN),
 			DELIMITER_HEXIDECIMAL, origin);
 	}
 

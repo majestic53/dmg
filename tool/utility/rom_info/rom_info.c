@@ -157,7 +157,7 @@ dmg_utility_rom_info_rom_parse(void)
 
 	TRACE_TOOL_MESSAGE("\nRegion    %s", header->destination ? "U (International)" : "JP (Japan)");
 	TRACE_TOOL_MESSAGE("%s", "\nMapper    ");
-	mapper = dmg_tool_mapper_string(header->mapper);
+	mapper = dmg_tool_syntax_mapper_string(header->mapper);
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
 		TRACE_TOOL_MESSAGE("UNSUPPORTED (%u)\n", header->mapper);
@@ -172,7 +172,7 @@ dmg_utility_rom_info_rom_parse(void)
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_rom_string(header->rom));
+		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_syntax_rom_string(header->rom));
 	}
 
 	TRACE_TOOL_MESSAGE("%s", "Ram       ");
@@ -181,7 +181,7 @@ dmg_utility_rom_info_rom_parse(void)
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
 		result = EXIT_FAILURE;
 	} else {
-		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_ram_string(header->ram));
+		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_syntax_ram_string(header->ram));
 	}
 
 	for(address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {

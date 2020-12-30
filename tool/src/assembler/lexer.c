@@ -89,13 +89,13 @@ dmg_assembler_lexer_token_parse_alpha(
 
 	if(token->type == TOKEN_IDENTIFIER) {
 
-		if(dmg_tool_is_macro_string(string.str, &type)) {
+		if(dmg_tool_syntax_is_macro_string(string.str, &type)) {
 			token->type = TOKEN_MACRO;
 			token->subtype = type;
-		} else if(dmg_tool_is_opcode_string(string.str, &type)) {
+		} else if(dmg_tool_syntax_is_opcode_string(string.str, &type)) {
 			token->type = TOKEN_OPCODE;
 			token->subtype = type;
-		} else if(dmg_tool_is_register_string(string.str, &type)) {
+		} else if(dmg_tool_syntax_is_register_string(string.str, &type)) {
 			token->type = TOKEN_REGISTER;
 			token->subtype = type;
 		}
@@ -157,7 +157,7 @@ dmg_assembler_lexer_token_parse_directive(
 		}
 	}
 
-	if(!dmg_tool_is_directive_string(string.str, &type)) {
+	if(!dmg_tool_syntax_is_directive_string(string.str, &type)) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported directive \"%s\" (%s@%u)", string.str,
 						lexer->stream.path, lexer->stream.line);
 		goto exit;
@@ -172,10 +172,214 @@ exit:
 }
 
 static int
+dmg_assembler_lexer_token_parse_literal(
+	__inout dmg_assembler_lexer_t *lexer
+	)
+{
+	char value;
+	dmg_assembler_token_t *token;
+	int result = DMG_STATUS_SUCCESS, type;
+	dmg_assembler_string_t string_scalar = {}, string = {};
+	bool literal_character = false, literal_string = false;
+
+	if((result = dmg_assembler_string_allocate(&string)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_string_append(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(value == DELIMITER_LITERAL_CHARACTER[0]) {
+		literal_character = true;
+	} else if(value == DELIMITER_LITERAL_STRING[0]) {
+		literal_string = true;
+	} else {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Expecting literal \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	if(!dmg_assembler_stream_has_next(&lexer->stream)
+			|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated literal \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	token = &(lexer->tokens.token[lexer->position]);
+	token->type = TOKEN_LITERAL;
+	token->subtype = 0;
+	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
+	token->literal.length = 0;
+
+	for(uint32_t length = 0;; ++length) {
+
+		if((result = dmg_assembler_string_append(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(literal_character && (value == DELIMITER_LITERAL_CHARACTER[0])) {
+
+			if(length != 1) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported character literal \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+				goto exit;
+			}
+
+			break;
+		} else if(literal_string && (value == DELIMITER_LITERAL_STRING[0])) {
+			break;
+		} else if(value == CHARACTER_NEWLINE) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated literal \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
+		if(!dmg_assembler_stream_has_next(&lexer->stream)
+				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated literal \"%s\" (%s@%u)", string.str,
+							lexer->stream.path, lexer->stream.line);
+			goto exit;
+		}
+
+		++token->literal.length;
+
+		if(value == DELIMITER_LITERAL_ESCAPE[0]) {
+			char *end;
+			int base, count = 0;
+			bool binary = false, decimal = false, hexidecimal = false;
+
+			if((result = dmg_assembler_string_allocate(&string_scalar)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			if((value = dmg_assembler_stream_character(&lexer->stream, &type)) == DELIMITER_BINARY[0]) {
+				binary = true;
+				base = BASE_BINARY;
+				count = COUNT_BINARY_ESCAPE_MAX;
+			} else if(value == DELIMITER_HEXIDECIMAL[0]) {
+				hexidecimal = true;
+				base = BASE_HEXIDECIMAL;
+				count = COUNT_HEXIDECIMAL_ESCAPE_MAX;
+			} else if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
+				decimal = true;
+				base = BASE_DECIMAL;
+				count = COUNT_DECIMAL_ESCAPE_MAX;
+
+				if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+
+				if((result = dmg_assembler_string_append(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+			}
+
+			if(!dmg_assembler_stream_has_next(&lexer->stream)
+					|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated literal \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+				goto exit;
+			}
+
+			++token->literal.length;
+
+			if(binary || decimal || hexidecimal) {
+
+				for(; count >= 0; count--) {
+					value = dmg_assembler_stream_character(&lexer->stream, &type);
+
+					if((literal_character && (value == DELIMITER_LITERAL_CHARACTER[0]))
+							|| (literal_string && (value == DELIMITER_LITERAL_STRING[0]))) {
+						break;
+					}
+
+					if(binary) {
+
+						if((type & CHARACTER_BINARY) != CHARACTER_BINARY) {
+							break;
+						}
+					} else if(hexidecimal) {
+
+						if((type & CHARACTER_HEXIDECIMAL) != CHARACTER_HEXIDECIMAL) {
+							break;
+						}
+					} else if((type & CHARACTER_DECIMAL) != CHARACTER_DECIMAL) {
+						break;
+					}
+
+					if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+						goto exit;
+					}
+
+					if((result = dmg_assembler_string_append(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
+						goto exit;
+					}
+
+					++token->literal.length;
+
+					if(!dmg_assembler_stream_has_next(&lexer->stream)
+							|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+						break;
+					}
+				}
+
+				if(binary) {
+
+					if((type & CHARACTER_BINARY) == CHARACTER_BINARY) {
+						result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range binary scalar \"%s\" (%s@%u)",
+										string.str, lexer->stream.path, lexer->stream.line);
+						goto exit;
+					}
+				} else if(hexidecimal) {
+
+					if((type & CHARACTER_HEXIDECIMAL) == CHARACTER_HEXIDECIMAL) {
+						result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range hexidecimal scalar \"%s\" (%s@%u)",
+										string.str, lexer->stream.path, lexer->stream.line);
+						goto exit;
+					}
+				} else if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
+					result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range scalar \"%s\" (%s@%u)",
+									string.str, lexer->stream.path, lexer->stream.line);
+					goto exit;
+				}
+
+				if(strtol(string_scalar.str, &end, base) > UINT8_MAX) {
+					result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range scalar \"%s\" (%s@%u)", string.str,
+									lexer->stream.path, lexer->stream.line);
+					goto exit;
+				}
+			} else if(!dmg_tool_syntax_is_escape_character(value, &type)) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported character escape \"%s\" (%s@%u)", string.str,
+								lexer->stream.path, lexer->stream.line);
+				goto exit;
+			}
+
+			dmg_assembler_string_free(&string_scalar);
+		}
+	}
+
+	if(!dmg_assembler_stream_has_next(&lexer->stream)
+			|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unterminated literal \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+exit:
+	dmg_assembler_string_free(&string_scalar);
+	dmg_assembler_string_free(&string);
+
+	return result;
+}
+
+static int
 dmg_assembler_lexer_token_parse_scalar(
 	__inout dmg_assembler_lexer_t *lexer
 	)
 {
+	long scalar;
 	char *end, value;
 	dmg_assembler_token_t *token;
 	dmg_assembler_string_t string = {};
@@ -323,7 +527,13 @@ dmg_assembler_lexer_token_parse_scalar(
 		goto exit;
 	}
 
-	token->scalar.word = strtol(string.str, &end, base);
+	if((scalar = strtol(string.str, &end, base)) > UINT16_MAX) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Out-of-range scalar \"%s\" (%s@%u)", string.str,
+						lexer->stream.path, lexer->stream.line);
+		goto exit;
+	}
+
+	token->scalar.word = (uint16_t)scalar;
 
 	if(subtract) {
 		token->scalar.word = -token->scalar.word;
@@ -377,6 +587,11 @@ dmg_assembler_lexer_token_parse_symbol(
 		if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
+	} else if((value == DELIMITER_LITERAL_CHARACTER[0]) || (value == DELIMITER_LITERAL_STRING[0])) {
+
+		if((result = dmg_assembler_lexer_token_parse_literal(lexer)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 	} else {
 		dmg_assembler_token_t *token;
 
@@ -388,8 +603,8 @@ dmg_assembler_lexer_token_parse_symbol(
 		if(!dmg_assembler_stream_has_next(&lexer->stream)
 				|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
 
-			if(!dmg_tool_is_operator_string(string.str, &type)
-					&& !dmg_tool_is_symbol_string(string.str, &type)) {
+			if(!dmg_tool_syntax_is_operator_string(string.str, &type)
+					&& !dmg_tool_syntax_is_symbol_string(string.str, &type)) {
 				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported symbol \"%s\" (%s@%u)", string.str,
 								lexer->stream.path, lexer->stream.line);
 			}
@@ -404,8 +619,8 @@ dmg_assembler_lexer_token_parse_symbol(
 				goto exit;
 			}
 
-			if(!dmg_tool_is_operator_string(string.str, &type)
-					&& !dmg_tool_is_symbol_string(string.str, &type)) {
+			if(!dmg_tool_syntax_is_operator_string(string.str, &type)
+					&& !dmg_tool_syntax_is_symbol_string(string.str, &type)) {
 				string.str[--string.length] = CHARACTER_EOF;
 			} else if(!dmg_assembler_stream_has_next(&lexer->stream)
 					|| ((result = dmg_assembler_stream_next(&lexer->stream)) != DMG_STATUS_SUCCESS)) {
@@ -415,9 +630,9 @@ dmg_assembler_lexer_token_parse_symbol(
 			}
 		}
 
-		if(dmg_tool_is_operator_string(string.str, &type)) {
+		if(dmg_tool_syntax_is_operator_string(string.str, &type)) {
 			token->type = TOKEN_OPERATOR;
-		} else if(dmg_tool_is_symbol_string(string.str, &type)) {
+		} else if(dmg_tool_syntax_is_symbol_string(string.str, &type)) {
 			token->type = TOKEN_SYMBOL;
 		} else {
 			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Unsupported symbol \"%s\" (%s@%u)", string.str,
