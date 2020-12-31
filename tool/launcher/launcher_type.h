@@ -35,7 +35,6 @@
 
 #define DEFAULT_PALETTE PALETTE_GREEN
 #define DEFAULT_SCALE 2
-#define DEFAULT_OUT NULL
 
 #define DMG "DMG"
 #define DMG_NOTICE "Copyright (C) 2020 David Jolly"
@@ -50,8 +49,10 @@
 #define OPTION_PALETTE 'p'
 #define OPTION_ROM 'r'
 #define OPTION_SCALE 's'
+#define OPTION_SERIAL_CLIENT 'n'
+#define OPTION_SERIAL_SERVER 'm'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:cdhi:o:p:r:s:v"
+#define OPTIONS "b:cdhi:m:n:o:p:r:s:v"
 
 #define PROMPT_MAX 128
 #define PROMPT_PREFIX "\n("
@@ -117,6 +118,8 @@ enum {
 	FLAG_PALETTE,
 	FLAG_ROM,
 	FLAG_SCALE,
+	FLAG_SERIAL_CLIENT,
+	FLAG_SERIAL_SERVER,
 	FLAG_VERSION,
 	FLAG_MAX,
 };
@@ -131,6 +134,8 @@ static const char *FLAG_STR[] = {
 	"-p", /* FLAG_PALETTE */
 	"-r", /* FLAG_ROM */
 	"-s", /* FLAG_SCALE */
+	"-n", /* FLAG_SERIAL_CLIENT */
+	"-m", /* FLAG_SERIAL_SERVER */
 	"-v", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
@@ -145,6 +150,8 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify color palette", /* FLAG_PALETTE */
 	"Specify rom binary", /* FLAG_ROM */
 	"Specify display scale", /* FLAG_SCALE */
+	"Specify client serial port", /* FLAG_SERIAL_CLIENT */
+	"Specify server serial port", /* FLAG_SERIAL_SERVER */
 	"Display version information", /* FLAG_VERSION */
 	"", /* FLAG_MAX */
 	};
@@ -303,13 +310,20 @@ typedef int (*dmg_launcher_debug_hdlr)(
 typedef struct {
 	uint8_t data;
 	uint8_t length;
-} dmg_launcher_capture_t;
+	uint16_t port;
+	bool client;
+	bool enable;
+	int socket_client;
+	int socket_server;
+	pthread_t thread_id;
+} dmg_launcher_serial_t;
 
 typedef struct {
 	dmg_t configuration;
+	dmg_launcher_serial_t serial;
 	const char *bootrom;
 	const char *rom;
-	dmg_launcher_capture_t capture;
+	bool capture;
 	bool debug;
 	bool help;
 	long palette;

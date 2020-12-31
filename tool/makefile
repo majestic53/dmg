@@ -35,7 +35,7 @@ BIN_UTILITY_SAVE_INFO=dmg-save-info
 
 FLAGS=-std=c11 -Wall -Werror
 FLAGS_BIN=
-FLAGS_LIB=-lreadline -lSDL2 -lSDL2main
+FLAGS_LIB=-lpthread -lreadline -lSDL2 -lSDL2main
 
 LIB=libdmg.a
 LIB_TOOL=libdmg_tool.a

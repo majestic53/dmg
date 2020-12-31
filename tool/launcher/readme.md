@@ -30,6 +30,8 @@ dmg [args]
 -p	Specify color palette
 -r	Specify rom binary
 -s	Specify display scale
+-n	Specify client serial port
+-m	Specify server serial port
 -v	Display version information
 ```
 
@@ -81,6 +83,16 @@ The following example shows how to launch dmg with the display scaled by 2x:
 
 ```
 $ ./bin/dmg -r rom.gb -s 2
+```
+
+The following example shows how to launch dmg with as a serial server, using port ```1234```
+```
+$ ./bin/dmg -r rom.gb -m 1234
+```
+
+The following example shows how to launch dmg with as a serial client, using port ```1234```
+```
+$ ./bin/dmg -r rom.gb -n 1234
 ```
 
 #### Debug Prompt

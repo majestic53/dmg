@@ -52,29 +52,6 @@ dmg_launcher_version(
 	}
 }
 
-static unsigned
-dmg_launcher_capture(
-	__in unsigned in
-	)
-{
-	g_launcher.capture.data <<= DATA_SHIFT;
-	g_launcher.capture.data |= (in & DATA_MASK);
-
-	if(++g_launcher.capture.length == CHAR_BIT) {
-		g_launcher.capture.length = 0;
-
-		if(!isprint(g_launcher.capture.data) && !isspace(g_launcher.capture.data)) {
-			TRACE_TOOL_MESSAGE("\\%02x", g_launcher.capture.data);
-		} else {
-			TRACE_TOOL_MESSAGE("%c", g_launcher.capture.data);
-		}
-
-		fflush(stdout);
-	}
-
-	return UINT8_MAX;
-}
-
 static int
 dmg_launcher_debug_register(
 	__in const char *argument
@@ -1049,7 +1026,7 @@ dmg_launcher_parse(
 				g_launcher.bootrom = optarg;
 				break;
 			case OPTION_CAPTURE:
-				g_launcher.configuration.serial_out = dmg_launcher_capture;
+				g_launcher.capture = true;
 				break;
 			case OPTION_DEBUG:
 				g_launcher.debug = true;
@@ -1059,6 +1036,12 @@ dmg_launcher_parse(
 				break;
 			case OPTION_INPUT:
 				g_launcher.configuration.save_in = optarg;
+				break;
+			case OPTION_SERIAL_CLIENT:
+			case OPTION_SERIAL_SERVER:
+				g_launcher.serial.enable = true;
+				g_launcher.serial.client = (option == OPTION_SERIAL_CLIENT);
+				g_launcher.serial.port = (uint16_t)strtol(optarg, NULL, 10);
 				break;
 			case OPTION_OUTPUT:
 				g_launcher.configuration.save_out = optarg;
@@ -1086,6 +1069,98 @@ dmg_launcher_parse(
 
 exit:
 	return result;
+}
+
+/*static void
+dmg_launcher_socket_thread(void)
+{
+	// TODO
+}*/
+
+static void
+dmg_launcher_socket_close(void)
+{
+	pthread_join(g_launcher.serial.thread_id, NULL);
+
+	if(g_launcher.serial.socket_client) {
+		close(g_launcher.serial.socket_client);
+		g_launcher.serial.socket_client = 0;
+	}
+
+	if(g_launcher.serial.socket_server) {
+		close(g_launcher.serial.socket_server);
+		g_launcher.serial.socket_server = 0;
+	}
+}
+
+static int
+dmg_launcher_socket_open(void)
+{
+	int result = EXIT_SUCCESS;
+
+	if(g_launcher.serial.enable) {
+
+		if(g_launcher.serial.client) {
+
+			// TODO
+
+		} else {
+
+			// TODO
+
+		}
+	}
+
+	return result;
+}
+
+static unsigned
+dmg_launcher_socket_transfer(
+	__in unsigned in
+	)
+{
+	unsigned result = UINT8_MAX;
+
+	if(g_launcher.serial.enable) {
+
+		if(g_launcher.serial.client) {
+
+			// TODO
+
+		} else {
+
+			// TODO
+
+		}
+	}
+
+	return result;
+}
+
+static unsigned
+dmg_launcher_serial_out(
+	__in unsigned in
+	)
+{
+	g_launcher.serial.data <<= DATA_SHIFT;
+	g_launcher.serial.data |= (in & DATA_MASK);
+
+	if(++g_launcher.serial.length == CHAR_BIT) {
+		g_launcher.serial.length = 0;
+
+		if(g_launcher.capture) {
+
+			if(!isprint(g_launcher.serial.data) && !isspace(g_launcher.serial.data)) {
+				TRACE_TOOL_MESSAGE("\\%02x", g_launcher.serial.data);
+			} else {
+				TRACE_TOOL_MESSAGE("%c", g_launcher.serial.data);
+			}
+
+			fflush(stdout);
+		}
+	}
+
+	return dmg_launcher_socket_transfer(in & DATA_MASK);
 }
 
 static void
@@ -1144,9 +1219,7 @@ main(
 			g_launcher.configuration.scale = DEFAULT_SCALE;
 		}
 
-		if(!g_launcher.configuration.serial_out) {
-			g_launcher.configuration.serial_out = DEFAULT_OUT;
-		}
+		g_launcher.configuration.serial_out = dmg_launcher_serial_out;
 
 		if(g_launcher.bootrom) {
 
@@ -1158,6 +1231,10 @@ main(
 
 		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_launcher.rom);
+			goto exit;
+		}
+
+		if((result = dmg_launcher_socket_open()) != EXIT_SUCCESS) {
 			goto exit;
 		}
 
@@ -1176,6 +1253,7 @@ main(
 
 exit:
 	dmg_unload();
+	dmg_launcher_socket_close();
 	dmg_launcher_file_unload(&g_launcher.configuration.rom);
 	dmg_launcher_file_unload(&g_launcher.configuration.bootrom);
 	memset(&g_launcher, 0, sizeof(g_launcher));

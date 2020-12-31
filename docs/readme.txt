@@ -1,4 +1,4 @@
-DMG 0.2.10-alpha
+DMG 0.2.11-alpha
 Copyright (C) 2020 David Jolly
 ==============================
 
@@ -40,6 +40,8 @@ dmg [args]
 -p	Specify color palette
 -r	Specify rom binary
 -s	Specify display scale
+-n	Specify client serial port
+-m	Specify server serial port
 -v	Display version information
 
 For details see: https://github.com/majestic53/dmg/blob/master/tool/launcher/readme.md
