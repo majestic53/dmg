@@ -1,6 +1,6 @@
 /**
  * DMG
- * Copyright (C) 2020 David Jolly
+ * Copyright (C) 2020-2021 David Jolly
  *
  * DMG is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

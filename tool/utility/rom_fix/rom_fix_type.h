@@ -1,7 +1,7 @@
 /* DMG_TOOL_UTILITY_ROM_INFO_TYPE_H_ */
 /**
  * DMG
- * Copyright (C) 2020 David Jolly
+ * Copyright (C) 2020-2021 David Jolly
  *
  * DMG is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #include "../../include/common.h"
 
 #define DMG "DMG-ROM-FIX"
-#define DMG_NOTICE "Copyright (C) 2020 David Jolly"
+#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-rom-fix [args]"
 
 #define OPTION_HELP 'h'

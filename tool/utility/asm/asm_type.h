@@ -1,6 +1,6 @@
 /**
  * DMG
- * Copyright (C) 2020 David Jolly
+ * Copyright (C) 2020-2021 David Jolly
  *
  * DMG is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #include "../../include/assembler/lexer.h"
 
 #define DMG "DMG-ASM"
-#define DMG_NOTICE "Copyright (C) 2020 David Jolly"
+#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-asm [args]"
 
 #define OPTION_HELP 'h'

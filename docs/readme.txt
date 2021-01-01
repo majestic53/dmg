@@ -1,5 +1,5 @@
 DMG 0.2.11-alpha
-Copyright (C) 2020 David Jolly
+Copyright (C) 2020-2021 David Jolly
 ==============================
 
 A simple GameBoy emulator, written in C.
