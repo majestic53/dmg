@@ -33,7 +33,7 @@ LIB=libdmg_tool.a
 
 build: build_tool_assembler build_tool_assembler_common build_tool_common build_tool_launcher
 
-build_tool_assembler: tool_assembler_stream.o tool_assembler_lexer.o
+build_tool_assembler: tool_assembler_stream.o tool_assembler_lexer.o tool_assembler_parser.o
 
 tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)tool_assembler_stream.o
@@ -41,13 +41,19 @@ tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)st
 tool_assembler_lexer.o: $(DIR_SRC_ASSEMBLER)lexer.c $(DIR_INCLUDE_ASSEMBLER)lexer.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)lexer.c -o $(DIR_BUILD_TOOL)tool_assembler_lexer.o
 
-build_tool_assembler_common: tool_assembler_common_string.o tool_assembler_common_token.o
+tool_assembler_parser.o: $(DIR_SRC_ASSEMBLER)parser.c $(DIR_INCLUDE_ASSEMBLER)parser.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)parser.c -o $(DIR_BUILD_TOOL)tool_assembler_parser.o
+
+build_tool_assembler_common: tool_assembler_common_string.o tool_assembler_common_token.o tool_assembler_common_tree.o
 
 tool_assembler_common_string.o: $(DIR_SRC_ASSEMBLER_COMMON)string.c $(DIR_INCLUDE_ASSEMBLER_COMMON)string.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)string.c -o $(DIR_BUILD_TOOL)tool_assembler_common_string.o
 
 tool_assembler_common_token.o: $(DIR_SRC_ASSEMBLER_COMMON)token.c $(DIR_INCLUDE_ASSEMBLER_COMMON)token.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)token.c -o $(DIR_BUILD_TOOL)tool_assembler_common_token.o
+
+tool_assembler_common_tree.o: $(DIR_SRC_ASSEMBLER_COMMON)tree.c $(DIR_INCLUDE_ASSEMBLER_COMMON)tree.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)tree.c -o $(DIR_BUILD_TOOL)tool_assembler_common_tree.o
 
 build_tool_common: tool_common_syntax.o tool_common_trace.o tool_common_usage.o tool_common_version.o
 
@@ -75,7 +81,9 @@ archive:
 	@echo ''
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
 	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)tool_assembler_stream.o $(DIR_BUILD_TOOL)tool_assembler_lexer.o \
+			$(DIR_BUILD_TOOL)tool_assembler_parser.o \
 		$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
+			$(DIR_BUILD_TOOL)tool_assembler_common_tree.o \
 		$(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o $(DIR_BUILD_TOOL)tool_common_usage.o \
 			$(DIR_BUILD_TOOL)tool_common_version.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
