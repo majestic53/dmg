@@ -22,10 +22,9 @@
 #include "../../../src/common/cartridge_type.h"
 #include "../../../src/common/mapper_type.h"
 #include "../../../include/common/cartridge.h"
+#include "../../src/common/version_type.h"
 #include "../../include/common.h"
 
-#define DMG "DMG-DASM"
-#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-dasm [args]"
 
 #define OPTION_HELP 'h'

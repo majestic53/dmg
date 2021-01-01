@@ -16,28 +16,80 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_COMMON_TRACE_H_
-#define DMG_TOOL_COMMON_TRACE_H_
-
-#include "./define.h"
+#include "./socket_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-void dmg_tool_trace(
-	__in FILE *stream,
-	__in int level,
-	__in const char *format,
-	...
-	);
+/*static void
+dmg_launcher_socket_thread(void)
+{
+	// TODO
+}*/
 
-const char *dmg_tool_trace_level_string(
-	__in int level
-	);
+void
+dmg_launcher_socket_close(
+	__inout dmg_launcher_socket_t *socket
+	)
+{
+	pthread_join(socket->thread_id, NULL);
+
+	if(socket->client) {
+		close(socket->client);
+		socket->client = 0;
+	}
+
+	if(socket->server) {
+		close(socket->server);
+		socket->server = 0;
+	}
+}
+
+int
+dmg_launcher_socket_open(
+	__inout dmg_launcher_socket_t *socket,
+	__in uint16_t port,
+	__in bool client
+	)
+{
+	int result = EXIT_SUCCESS;
+
+	if(client) {
+
+		// TODO
+
+	} else {
+
+		// TODO
+
+	}
+
+	return result;
+}
+
+unsigned
+dmg_launcher_socket_transfer(
+	__inout dmg_launcher_socket_t *socket,
+	__in bool client,
+	__in unsigned in
+	)
+{
+	unsigned result = UINT8_MAX;
+
+	if(client) {
+
+		// TODO
+
+	} else {
+
+		// TODO
+
+	}
+
+	return result;
+}
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* DMG_TOOL_COMMON_TRACE_H_ */

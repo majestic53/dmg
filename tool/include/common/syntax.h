@@ -20,6 +20,7 @@
 #define DMG_TOOL_COMMON_SYNTAX_H_
 
 #include "../../../include/system/processor/instruction.h"
+#include "./define.h"
 
 enum {
 	CHARACTER_ESCAPE_BACKSLASH = 0,

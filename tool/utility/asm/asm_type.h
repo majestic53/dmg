@@ -21,8 +21,6 @@
 
 #include "../../include/assembler/lexer.h"
 
-#define DMG "DMG-ASM"
-#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-asm [args]"
 
 #define OPTION_HELP 'h'

@@ -16,13 +16,39 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_LAUNCHER_SOCKET_H_
+#define DMG_TOOL_LAUNCHER_SOCKET_H_
 
-#include "../../include/common.h"
+#include "../common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 12
+typedef struct {
+	int client;
+	int server;
+	pthread_t thread_id;
+} dmg_launcher_socket_t;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+void dmg_launcher_socket_close(
+	__inout dmg_launcher_socket_t *socket
+	);
+
+int dmg_launcher_socket_open(
+	__inout dmg_launcher_socket_t *socket,
+	__in uint16_t port,
+	__in bool client
+	);
+
+unsigned dmg_launcher_socket_transfer(
+	__inout dmg_launcher_socket_t *socket,
+	__in bool client,
+	__in unsigned in
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_LAUNCHER_SOCKET_H_ */

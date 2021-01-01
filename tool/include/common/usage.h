@@ -16,13 +16,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_COMMON_USAGE_H_
+#define DMG_TOOL_COMMON_USAGE_H_
 
-#include "../../include/common.h"
+#include "./define.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 12
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+void dmg_tool_usage(
+	__in FILE *stream,
+	__in bool verbose,
+	__in const char *usage,
+	__in const char **flags,
+	__in const char **descriptions,
+	__in int count
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_COMMON_USAGE_H_ */

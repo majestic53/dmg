@@ -22,8 +22,6 @@
 #include "../../../src/service_type.h"
 #include "../../include/common.h"
 
-#define DMG "DMG-SAVE-INFO"
-#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-save-info [args]"
 
 #define OPTION_HELP 'h'

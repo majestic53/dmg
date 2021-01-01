@@ -152,58 +152,6 @@ dmg_utility_rom_fix_rom_unload(void)
 	memset(&g_rom_fix.buffer, 0, sizeof(g_rom_fix.buffer));
 }
 
-static void
-dmg_utility_rom_fix_version(
-	__in FILE *stream,
-	__in bool verbose
-	)
-{
-	const dmg_version_t *version;
-
-	if(verbose) {
-		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
-	}
-
-	if((version = dmg_version_get())) {
-
-		if(verbose) {
-			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
-		}
-
-		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u\n", version->major, version->minor, version->patch);
-	} else {
-		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
-	}
-
-	if(verbose) {
-		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
-	}
-}
-
-static void
-dmg_utility_rom_fix_usage(
-	__in FILE *stream,
-	__in bool verbose
-	)
-{
-
-	if(verbose) {
-		dmg_utility_rom_fix_version(stream, verbose);
-		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
-	}
-
-	TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_USAGE);
-
-	if(verbose) {
-
-		for(int flag = 0; flag < FLAG_MAX; ++flag) {
-			TRACE_TOOL(stream, LEVEL_NONE, "\n%s\t%s", FLAG_STR[flag], FLAG_DESCRIPTION_STR[flag]);
-		}
-
-		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
-	}
-}
-
 int
 main(
 	__in int argc,
@@ -217,9 +165,9 @@ main(
 	}
 
 	if(g_rom_fix.help) {
-		dmg_utility_rom_fix_usage(stdout, true);
+		dmg_tool_usage(stdout, true, DMG_USAGE, FLAG_STR, FLAG_DESCRIPTION_STR, FLAG_MAX);
 	} else if(g_rom_fix.version) {
-		dmg_utility_rom_fix_version(stdout, false);
+		dmg_tool_version(stdout, false);
 	} else {
 
 		if((result = dmg_utility_rom_fix_rom_load()) != EXIT_SUCCESS) {

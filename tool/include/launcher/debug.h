@@ -16,13 +16,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_LAUNCHER_DEBUG_H_
+#define DMG_TOOL_LAUNCHER_DEBUG_H_
 
-#include "../../include/common.h"
+#include "../common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 12
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+int dmg_launcher_debug(
+	__in const char *root,
+	__in const char *rom,
+	__in const char *save
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_LAUNCHER_DEBUG_H_ */

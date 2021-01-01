@@ -23,8 +23,6 @@
 #include "../../../include/common/cartridge.h"
 #include "../../include/common.h"
 
-#define DMG "DMG-ROM-FIX"
-#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
 #define DMG_USAGE "dmg-rom-fix [args]"
 
 #define OPTION_HELP 'h'

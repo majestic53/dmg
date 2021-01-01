@@ -16,13 +16,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#include "./version_type.h"
 
-#include "../../include/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 12
+void
+dmg_tool_version(
+	__in FILE *stream,
+	__in bool verbose
+	)
+{
+	const dmg_version_t *version;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+	if(verbose) {
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", DMG);
+	}
+
+	if((version = dmg_version_get())) {
+
+		if(verbose) {
+			TRACE_TOOL(stream, LEVEL_NONE, "%s", " ");
+		}
+
+		TRACE_TOOL(stream, LEVEL_NONE, "%u.%u.%u-%s\n", version->major, version->minor, version->patch, DMG_RELEASE);
+	} else {
+		TRACE_TOOL(stream, LEVEL_NONE, "%s", "\n");
+	}
+
+	if(verbose) {
+		TRACE_TOOL(stream, LEVEL_NONE, "%s\n", DMG_NOTICE);
+	}
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

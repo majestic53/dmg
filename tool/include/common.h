@@ -35,8 +35,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include "./common/define.h"
 #include "./common/syntax.h"
 #include "./common/trace.h"
+#include "./common/usage.h"
+#include "./common/version.h"
 
 #endif /* DMG_TOOL_COMMON_H_ */

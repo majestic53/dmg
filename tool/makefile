@@ -69,7 +69,7 @@ tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
 		-o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
 	strip -s $(DIR_BIN)$(BIN_LAUNCHER)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_asm.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ASM) $(FLAGS_BIN)

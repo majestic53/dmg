@@ -16,13 +16,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_COMMON_VERSION_TYPE_H_
+#define DMG_TOOL_COMMON_VERSION_TYPE_H_
 
 #include "../../include/common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 12
+#define DMG "DMG"
+#define DMG_NOTICE "Copyright (C) 2020-2021 David Jolly"
+#define DMG_RELEASE "alpha"
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+#endif /* DMG_TOOL_COMMON_VERSION_TYPE_H_ */
