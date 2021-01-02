@@ -53,7 +53,7 @@ dmg_assembler_lexer_token_parse_alpha(
 		goto exit;
 	}
 
-	for(;;) {
+	for(; token->literal.length < ALPHA_LENGTH_MAX;) {
 		char value;
 
 		if(!dmg_assembler_stream_has_next(&lexer->stream)
@@ -137,7 +137,7 @@ dmg_assembler_lexer_token_parse_directive(
 		goto exit;
 	}
 
-	for(;;) {
+	for(; token->literal.length < DIRECTIVE_LENGTH_MAX;) {
 		char value;
 
 		if(!dmg_assembler_stream_has_next(&lexer->stream)

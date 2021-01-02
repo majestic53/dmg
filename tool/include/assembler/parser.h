@@ -20,19 +20,52 @@
 #define DMG_TOOL_ASSEMBLER_PARSER_H_
 
 #include "./common/tree.h"
-#include "./parser.h"
+#include "./lexer.h"
 
 typedef struct {
-
-	// TODO
-
+	dmg_assembler_lexer_t lexer;
+	dmg_assembler_trees_t trees;
+	uint32_t position;
 } dmg_assembler_parser_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+bool dmg_assembler_parser_has_next(
+	__in const dmg_assembler_parser_t *parser
+	);
+
+bool dmg_assembler_parser_has_previous(
+	__in const dmg_assembler_parser_t *parser
+	);
+
+int dmg_assembler_parser_load(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_buffer_t *buffer,
+	__in const char *path
+	);
+
+int dmg_assembler_parser_next(
+	__inout dmg_assembler_parser_t *parser
+	);
+
+int dmg_assembler_parser_previous(
+	__inout dmg_assembler_parser_t *parser
+	);
+
+const dmg_assembler_tree_t *dmg_assembler_parser_tree(
+	__in const dmg_assembler_parser_t *parser
+	);
+
+const dmg_assembler_tree_t *dmg_assembler_parser_tree_child(
+	__in const dmg_assembler_parser_t *parser,
+	__in uint32_t position
+	);
+
+void dmg_assembler_parser_unload(
+	__inout dmg_assembler_parser_t *parser
+	);
 
 #ifdef __cplusplus
 }

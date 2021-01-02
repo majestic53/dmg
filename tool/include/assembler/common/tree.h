@@ -19,12 +19,13 @@
 #ifndef DMG_TOOL_ASSEMBLER_COMMON_TREE_H_
 #define DMG_TOOL_ASSEMBLER_COMMON_TREE_H_
 
-#include "../../common.h"
+#include "./token.h"
 
 typedef struct {
-
-	// TODO
-
+	const dmg_assembler_token_t *parent;
+	const uintptr_t **child;
+	uint32_t capacity;
+	uint32_t count;
 } dmg_assembler_tree_t;
 
 typedef struct {
@@ -37,7 +38,27 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+const dmg_assembler_tree_t *dmg_assembler_tree_child(
+	__in const dmg_assembler_tree_t *tree,
+	__in uint32_t position
+	);
+
+int dmg_assembler_tree_child_append(
+	__inout dmg_assembler_tree_t *tree,
+	__in const dmg_assembler_tree_t *child
+	);
+
+int dmg_assembler_trees_allocate(
+	__inout dmg_assembler_trees_t *trees
+	);
+
+void dmg_assembler_trees_free(
+	__inout dmg_assembler_trees_t *trees
+	);
+
+int dmg_assembler_trees_resize(
+	__inout dmg_assembler_trees_t *trees
+	);
 
 #ifdef __cplusplus
 }

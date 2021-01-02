@@ -32,18 +32,18 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_assembler_lexer_load(
-	__inout dmg_assembler_lexer_t *lexer,
-	__in const dmg_buffer_t *buffer,
-	__in const char *path
-	);
-
 bool dmg_assembler_lexer_has_next(
 	__in const dmg_assembler_lexer_t *lexer
 	);
 
 bool dmg_assembler_lexer_has_previous(
 	__in const dmg_assembler_lexer_t *lexer
+	);
+
+int dmg_assembler_lexer_load(
+	__inout dmg_assembler_lexer_t *lexer,
+	__in const dmg_buffer_t *buffer,
+	__in const char *path
 	);
 
 int dmg_assembler_lexer_next(

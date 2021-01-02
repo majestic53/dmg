@@ -23,9 +23,13 @@
 #include "../../include/assembler/common/string.h"
 #include "../../include/assembler/lexer.h"
 
+#define ALPHA_LENGTH_MAX 32
+
 #define BASE_BINARY 2
 #define BASE_DECIMAL 10
 #define BASE_HEXIDECIMAL 16
+
+#define DIRECTIVE_LENGTH_MAX 32
 
 #define COUNT_BINARY_MAX 16
 #define COUNT_BINARY_ESCAPE_MAX 8

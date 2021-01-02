@@ -21,4 +21,10 @@
 
 #include "../../../include/assembler/common/tree.h"
 
+#define TREE_CAPACITY_INIT 20
+#define TREE_CAPACITY_SCALE 2
+
+#define TREE_CHILD_CAPACITY_INIT 2
+#define TREE_CHILD_CAPACITY_SCALE 2
+
 #endif /* DMG_TOOL_ASSEMBLER_COMMON_TREE_TYPE_H_ */

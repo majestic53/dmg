@@ -40,12 +40,6 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_assembler_stream_load(
-	__inout dmg_assembler_stream_t *stream,
-	__in const dmg_buffer_t *buffer,
-	__in const char *path
-	);
-
 char dmg_assembler_stream_character(
 	__in const dmg_assembler_stream_t *stream,
 	__inout int *type
@@ -61,6 +55,12 @@ bool dmg_assembler_stream_has_next(
 
 bool dmg_assembler_stream_has_previous(
 	__in const dmg_assembler_stream_t *stream
+	);
+
+int dmg_assembler_stream_load(
+	__inout dmg_assembler_stream_t *stream,
+	__in const dmg_buffer_t *buffer,
+	__in const char *path
 	);
 
 int dmg_assembler_stream_next(
