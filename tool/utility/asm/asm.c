@@ -24,15 +24,11 @@ static dmg_asm_t g_asm = {};
 extern "C" {
 #endif /* __cplusplus */
 
-static int
-dmg_utility_asm_assemble(void)
+/*static int
+dmg_utility_asm_parse_characters(void)
 {
-	int length, result = EXIT_SUCCESS;
-
-	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
-
-	// TODO
-	/*dmg_assembler_stream_t stream = {};
+	int result = EXIT_SUCCESS;
+	dmg_assembler_stream_t stream = {};
 
 	if((result = dmg_assembler_stream_load(&stream, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
@@ -51,8 +47,16 @@ dmg_utility_asm_assemble(void)
 		}
 	}
 
-	dmg_assembler_stream_unload(&stream);*/
-	// ---
+	dmg_assembler_stream_unload(&stream);
+
+exit:
+	return result;
+}
+
+static int
+dmg_utility_asm_parse_tokens(void)
+{
+	int result = EXIT_SUCCESS;
 	dmg_assembler_lexer_t lexer = {};
 
 	if((result = dmg_assembler_lexer_load(&lexer, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
@@ -102,6 +106,110 @@ dmg_utility_asm_assemble(void)
 	}
 
 	dmg_assembler_lexer_unload(&lexer);
+
+exit:
+	return result;
+}*/
+
+static int
+dmg_utility_asm_parse_trees(void)
+{
+	int result = EXIT_SUCCESS;
+	dmg_assembler_parser_t parser = {};
+
+	if((result = dmg_assembler_parser_load(&parser, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	// TODO
+	dmg_assembler_token_t tok[4] = {};
+
+	tok[0].scalar.word = 0x10;
+	parser.trees.tree[0].parent = &tok[0];
+	++parser.trees.count;
+
+	fprintf(stdout, "[%p] %02x\n", parser.trees.tree[0].parent, parser.trees.tree[0].parent->scalar.word);
+
+	if((result = dmg_assembler_trees_resize(&parser.trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	tok[1].scalar.word = 0x20;
+	parser.trees.tree[1].parent = &tok[1];
+	++parser.trees.count;
+
+	fprintf(stdout, "[%p] %02x\n", parser.trees.tree[1].parent, parser.trees.tree[1].parent->scalar.word);
+
+	if((result = dmg_assembler_trees_resize(&parser.trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	tok[2].scalar.word = 0x40;
+	parser.trees.tree[2].parent = &tok[2];
+	++parser.trees.count;
+
+	fprintf(stdout, "[%p] %02x\n", parser.trees.tree[2].parent, parser.trees.tree[2].parent->scalar.word);
+
+	if((result = dmg_assembler_trees_resize(&parser.trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	tok[3].scalar.word = 0x80;
+	parser.trees.tree[3].parent = &tok[3];
+	++parser.trees.count;
+
+	fprintf(stdout, "[%p] %02x\n", parser.trees.tree[3].parent, parser.trees.tree[3].parent->scalar.word);
+
+	if((result = dmg_assembler_trees_resize(&parser.trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child_append(&parser.trees.tree[0], &parser.trees.tree[1])) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child_append(&parser.trees.tree[0], &parser.trees.tree[2])) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child_append(&parser.trees.tree[0], &parser.trees.tree[3])) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	fprintf(stdout, "\n[%p] %02x\n", parser.trees.tree[0].parent, parser.trees.tree[0].parent->scalar.word);
+
+	for(uint32_t index = 0; index < parser.trees.tree[0].count; ++index) {
+		const dmg_assembler_tree_t *child = dmg_assembler_tree_child(&parser.trees.tree[0], index);
+
+		fprintf(stdout, "-- {%u} [%p] %02x\n", index, child->parent, child->parent->scalar.word);
+	}
+	// ---
+
+	dmg_assembler_parser_unload(&parser);
+
+exit:
+	return result;
+}
+
+static int
+dmg_utility_asm_assemble(void)
+{
+	int length, result = EXIT_SUCCESS;
+
+	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
+
+	// TODO
+	/*if((result == dmg_utility_asm_parse_characters()) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}*/
+	// ---
+	/*if((result == dmg_utility_asm_parse_tokens()) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}*/
+	// ---
+	if((result == dmg_utility_asm_parse_trees()) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 	// ---
 
 	fseek(g_asm.file, 0, SEEK_END);

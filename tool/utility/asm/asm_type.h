@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_UTILITY_ASM_H_
 #define DMG_TOOL_UTILITY_ASM_H_
 
-#include "../../include/assembler/lexer.h"
+#include "../../include/assembler/parser.h"
 
 #define DMG_USAGE "dmg-asm [args]"
 

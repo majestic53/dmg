@@ -27,9 +27,21 @@ dmg_assembler_parser_tree_parse(
 	__inout dmg_assembler_parser_t *parser
 	)
 {
-	// TODO
-	return DMG_STATUS_SUCCESS;
-	// ---
+	int result = DMG_STATUS_SUCCESS;
+
+	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+
+		if((result = dmg_assembler_trees_resize(&parser->trees)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		// TODO: PARSE TOKEN INTO TREES
+
+		++parser->trees.count;
+	}
+
+exit:
+	return result;
 }
 
 bool
