@@ -19,7 +19,7 @@
 #ifndef DMG_TOOL_ASSEMBLER_STREAM_H_
 #define DMG_TOOL_ASSEMBLER_STREAM_H_
 
-#include "../common.h"
+#include "./common.h"
 
 #define CHARACTER_END 0
 #define CHARACTER_ALPHA 1

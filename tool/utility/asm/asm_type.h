@@ -21,6 +21,10 @@
 
 #include "../../include/assembler/parser.h"
 
+//#define ASM_PARSE_CHARACTERS
+//#define ASM_PARSE_TOKENS
+#define ASM_PARSE_TREES
+
 #define DMG_USAGE "dmg-asm [args]"
 
 #define OPTION_HELP 'h'

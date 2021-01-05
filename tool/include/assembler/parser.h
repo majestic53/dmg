@@ -19,7 +19,6 @@
 #ifndef DMG_TOOL_ASSEMBLER_PARSER_H_
 #define DMG_TOOL_ASSEMBLER_PARSER_H_
 
-#include "./common/tree.h"
 #include "./lexer.h"
 
 typedef struct {

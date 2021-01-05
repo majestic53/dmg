@@ -16,12 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_PARSER_TYPE_H_
-#define DMG_TOOL_ASSEMBLER_PARSER_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_H_
 
-#include "../../include/assembler/parser.h"
+#include "../common.h"
+#include "./common/string.h"
+#include "./common/token.h"
+#include "./common/tree.h"
 
-#define PARSER_ERROR(_PARSER_, _TOKEN_, _MESSAGE_) \
-	dmg_assembler_parser_error(_PARSER_, _TOKEN_, _MESSAGE_)
-
-#endif /* DMG_TOOL_ASSEMBLER_PARSER_TYPE_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_H_ */

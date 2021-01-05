@@ -19,7 +19,6 @@
 #ifndef DMG_TOOL_ASSEMBLER_LEXER_H_
 #define DMG_TOOL_ASSEMBLER_LEXER_H_
 
-#include "./common/token.h"
 #include "./stream.h"
 
 typedef struct {
