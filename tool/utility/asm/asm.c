@@ -121,64 +121,6 @@ exit:
 
 #ifdef ASM_PARSE_TREES
 
-static void
-dmg_utility_asm_parse_tree(
-	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree,
-	__in uint32_t depth
-	)
-{
-	uint32_t index;
-	const dmg_assembler_token_t *token;
-
-	for(index = 0; index < depth; ++index) {
-		fprintf(stdout, "\t");
-	}
-
-	fprintf(stdout, "[%u] {%u} ", parser->position, tree->count);
-
-	if((token = tree->parent)) {
-		fprintf(stdout, "[%i:%i]", token->type, token->subtype);
-
-		switch(token->type) {
-			case TOKEN_DIRECTIVE:
-			case TOKEN_IDENTIFIER:
-			case TOKEN_LABEL:
-			case TOKEN_LITERAL:
-			case TOKEN_MACRO:
-			case TOKEN_OPCODE:
-			case TOKEN_OPERATOR:
-			case TOKEN_REGISTER:
-			case TOKEN_SCALAR:
-			case TOKEN_SYMBOL:
-				fprintf(stdout, " \"");
-
-				for(index = 0; index < token->literal.length; ++index) {
-					fprintf(stdout, "%c", token->literal.str[index]);
-				}
-
-				fprintf(stdout, "\"");
-
-				if(token->type == TOKEN_SCALAR) {
-					fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
-				}
-				break;
-			default:
-				fprintf(stdout, " \'%c\' (%02x)",
-					(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL, token->scalar.low);
-				break;
-		}
-
-		fprintf(stdout, " (%s@%u)\n", parser->lexer.stream.path, token->line);
-
-		for(index = 0; index < tree->count; ++index) {
-			dmg_utility_asm_parse_tree(parser, dmg_assembler_tree_child(tree, index), depth + 1);
-		}
-	} else {
-		fprintf(stdout, "EOF\n");
-	}
-}
-
 static int
 dmg_utility_asm_parse_trees(void)
 {
@@ -194,7 +136,10 @@ dmg_utility_asm_parse_trees(void)
 	}
 
 	for(;;) {
-		dmg_utility_asm_parse_tree(&parser, dmg_assembler_parser_tree(&parser), 0);
+
+		// TODO
+		fprintf(stdout, "TREE\n");
+		// ---
 
 		if(!dmg_assembler_parser_has_next(&parser)
 				|| ((result = dmg_assembler_parser_next(&parser)) != DMG_STATUS_SUCCESS)) {

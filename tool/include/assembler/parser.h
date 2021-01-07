@@ -23,7 +23,7 @@
 
 typedef struct {
 	dmg_assembler_lexer_t lexer;
-	dmg_assembler_trees_t trees;
+	uint32_t count;
 	uint32_t position;
 } dmg_assembler_parser_t;
 
@@ -55,11 +55,6 @@ int dmg_assembler_parser_previous(
 
 const dmg_assembler_tree_t *dmg_assembler_parser_tree(
 	__in const dmg_assembler_parser_t *parser
-	);
-
-const dmg_assembler_tree_t *dmg_assembler_parser_tree_child(
-	__in const dmg_assembler_parser_t *parser,
-	__in uint32_t position
 	);
 
 void dmg_assembler_parser_unload(

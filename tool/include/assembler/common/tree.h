@@ -29,7 +29,14 @@ typedef struct {
 } dmg_assembler_tree_t;
 
 typedef struct {
-	dmg_assembler_tree_t *tree;
+
+	struct {
+		dmg_assembler_tree_t *ptr;
+		uint32_t capacity;
+		uint32_t count;
+	} trees;
+
+	dmg_assembler_tree_t **entry;
 	uint32_t capacity;
 	uint32_t count;
 } dmg_assembler_trees_t;
@@ -38,14 +45,13 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-const dmg_assembler_tree_t *dmg_assembler_tree_child(
-	__in const dmg_assembler_tree_t *tree,
-	__in uint32_t position
+dmg_assembler_tree_t *dmg_assembler_tree_add(
+	__in const dmg_assembler_token_t *token
 	);
 
-int dmg_assembler_tree_child_append(
-	__inout dmg_assembler_tree_t *tree,
-	__in const dmg_assembler_tree_t *child
+dmg_assembler_tree_t *dmg_assembler_tree_add_child(
+	__inout dmg_assembler_tree_t *parent,
+	__in const dmg_assembler_token_t *token
 	);
 
 int dmg_assembler_trees_allocate(
@@ -53,10 +59,6 @@ int dmg_assembler_trees_allocate(
 	);
 
 void dmg_assembler_trees_free(
-	__inout dmg_assembler_trees_t *trees
-	);
-
-int dmg_assembler_trees_resize(
 	__inout dmg_assembler_trees_t *trees
 	);
 
