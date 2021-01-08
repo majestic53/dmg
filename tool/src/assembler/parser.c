@@ -203,6 +203,10 @@ dmg_assembler_parser_load(
 		goto exit;
 	}
 
+	if((result = dmg_assembler_trees_allocate(&parser->trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
 	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
 		result = dmg_assembler_parser_tree_parse(parser);
 	}
@@ -250,10 +254,7 @@ dmg_assembler_tree_t *dmg_assembler_parser_tree(
 	__in const dmg_assembler_parser_t *parser
 	)
 {
-	// TODO
-	static const dmg_assembler_tree_t tree = {};
-	return &tree;
-	// ---
+	return parser->trees.entry[parser->position];
 }
 
 void
@@ -261,6 +262,7 @@ dmg_assembler_parser_unload(
 	__inout dmg_assembler_parser_t *parser
 	)
 {
+	dmg_assembler_trees_free(&parser->trees);
 	dmg_assembler_lexer_unload(&parser->lexer);
 	memset(parser, 0, sizeof(*parser));
 }

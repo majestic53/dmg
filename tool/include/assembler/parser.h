@@ -23,6 +23,7 @@
 
 typedef struct {
 	dmg_assembler_lexer_t lexer;
+	dmg_assembler_trees_t trees;
 	uint32_t count;
 	uint32_t position;
 } dmg_assembler_parser_t;

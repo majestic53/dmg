@@ -147,7 +147,58 @@ dmg_utility_asm_parse_trees(void)
 		}
 	}
 
+	/*dmg_assembler_trees_t trees = {};
+	dmg_assembler_tree_t *tree_child = NULL, *tree_root = NULL;
+	dmg_assembler_token_t token_child[4] = {}, token_root = {};
+
+	if((result = dmg_assembler_trees_allocate(&trees)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	token_root.scalar.word = 0x10;
+	token_child[0].scalar.word = 0x20;
+	token_child[1].scalar.word = 0x40;
+	token_child[2].scalar.word = 0x80;
+	token_child[3].scalar.word = 0xA0;
+
+	if((result = dmg_assembler_trees_add(&trees, &token_root, &tree_root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[0], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[1], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[2], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&trees, &token_root, &tree_root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[0], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[1], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[2], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&trees, tree_root, &token_child[3], &tree_child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}*/
+
 exit:
+	//dmg_assembler_trees_free(&trees);
 	dmg_assembler_parser_unload(&parser);
 
 	return result;
