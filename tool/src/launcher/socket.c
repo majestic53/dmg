@@ -53,7 +53,7 @@ dmg_launcher_socket_open(
 	__in bool client
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(client) {
 

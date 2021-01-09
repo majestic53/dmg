@@ -2,7 +2,7 @@ tree ::= <statement_list>
 
 [ ] condition ::= <condition><operator><condition>|<expression>
 
-[ ] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
+[X] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 	| <directive_origin>|<directive_reserve>|<directive_undefine>
 
 [ ] directive_bank ::= .bank<expression>

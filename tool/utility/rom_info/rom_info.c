@@ -30,7 +30,7 @@ dmg_utility_rom_info_parse(
 	__in char *argv[]
 	)
 {
-	int option, result = EXIT_SUCCESS;
+	int option, result = DMG_STATUS_SUCCESS;
 
 	opterr = 1;
 
@@ -47,10 +47,10 @@ dmg_utility_rom_info_parse(
 				g_rom_info.version = true;
 				break;
 			case '?':
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			default:
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
 	}
@@ -63,10 +63,10 @@ static int
 dmg_utility_rom_info_rom_load(void)
 {
 	FILE *file = NULL;
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(!(file = fopen(g_rom_info.rom, "rb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -75,17 +75,17 @@ dmg_utility_rom_info_rom_load(void)
 	fseek(file, 0, SEEK_SET);
 
 	if(length <= 0) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(!(g_rom_info.buffer.data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(fread(g_rom_info.buffer.data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -107,7 +107,7 @@ dmg_utility_rom_info_rom_parse(void)
 	uint32_t address;
 	const char *mapper;
 	uint16_t checksum = 0;
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
 	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_rom_info.rom, g_rom_info.buffer.length / (float)KBYTE, g_rom_info.buffer.length);
@@ -115,7 +115,7 @@ dmg_utility_rom_info_rom_parse(void)
 	if(g_rom_info.buffer.length <= ADDRESS_HEADER_END) {
 		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_rom_info.buffer.length / (float)KBYTE,
 			g_rom_info.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -144,7 +144,7 @@ dmg_utility_rom_info_rom_parse(void)
 			break;
 		case CGB_SUPPORT_ONLY:
 			TRACE_TOOL_MESSAGE("%s", "GBC Only (Gameboy Color Only)");
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			break;
 		default:
 			TRACE_TOOL_MESSAGE("%s", "GB (Gameboy)");
@@ -161,7 +161,7 @@ dmg_utility_rom_info_rom_parse(void)
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
 		TRACE_TOOL_MESSAGE("UNSUPPORTED (%u)\n", header->mapper);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL_MESSAGE("%s\n", mapper);
 	}
@@ -170,7 +170,7 @@ dmg_utility_rom_info_rom_parse(void)
 
 	if(header->rom >= ROM_MAX) {
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_syntax_rom_string(header->rom));
 	}
@@ -179,7 +179,7 @@ dmg_utility_rom_info_rom_parse(void)
 
 	if(header->ram >= RAM_MAX) {
 		TRACE_TOOL_MESSAGE("%s", "UNSUPPORTED\n");
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL_MESSAGE("%s\n", dmg_tool_syntax_ram_string(header->ram));
 	}
@@ -190,7 +190,7 @@ dmg_utility_rom_info_rom_parse(void)
 
 	if(header->checksum != (checksum &= UINT8_MAX)) {
 		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %02x)\n", checksum);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 exit:
@@ -214,9 +214,9 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_utility_rom_info_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_rom_info_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -226,12 +226,12 @@ main(
 		dmg_tool_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_rom_info_rom_load()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_info_rom_load()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}
 
-		if((result = dmg_utility_rom_info_rom_parse()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_info_rom_parse()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Unsupported rom file -- %s\n", argv[0], g_rom_info.rom);
 			goto exit;
 		}

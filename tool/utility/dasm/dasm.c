@@ -30,8 +30,8 @@ dmg_utility_dasm_disassemble_comment(void)
 	uint32_t address;
 	const char *mapper;
 	uint16_t checksum = 0;
-	int result = EXIT_SUCCESS;
 	const dmg_version_t *version;
+	int result = DMG_STATUS_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
 	if((version = dmg_version_get())) {
@@ -68,7 +68,7 @@ dmg_utility_dasm_disassemble_comment(void)
 			break;
 		case CGB_SUPPORT_ONLY:
 			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "GBC Only (Gameboy Color Only)");
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			break;
 		default:
 			TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s", "GB (Gameboy)");
@@ -84,7 +84,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	mapper = dmg_tool_syntax_mapper_string(header->mapper);
 
 	if((header->mapper >= MAPPER_MAX) || !strlen(mapper)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", mapper);
 	}
@@ -92,7 +92,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRom       ", DELIMITER_COMMENT);
 
 	if(header->rom >= ROM_MAX) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n", dmg_tool_syntax_rom_string(header->rom));
 	}
@@ -100,7 +100,7 @@ dmg_utility_dasm_disassemble_comment(void)
 	TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cRam       ", DELIMITER_COMMENT);
 
 	if(header->ram >= RAM_MAX) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	} else {
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%s\n\n", dmg_tool_syntax_ram_string(header->ram));
 	}
@@ -127,7 +127,7 @@ dmg_utility_dasm_disassemble_instruction(
 {
 	bool extended = false;
 	const char *format = NULL;
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint8_t opcode, operand[2] = {};
 	const dmg_tool_syntax_instruction_t *instruction;
 	uint16_t base = ((bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN) + *address);
@@ -250,7 +250,7 @@ dmg_utility_dasm_disassemble_header(
 	__in bool final
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	const dmg_cartridge_header_t *header;
 
 	if(final) {
@@ -304,7 +304,7 @@ dmg_utility_dasm_disassemble_header(
 
 				while(entry_address < 0x0104) {
 
-					if((result = dmg_utility_dasm_disassemble_instruction(&entry_address, 0, 0, final)) != EXIT_SUCCESS) {
+					if((result = dmg_utility_dasm_disassemble_instruction(&entry_address, 0, 0, final)) != DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
 				}
@@ -323,7 +323,7 @@ dmg_utility_dasm_disassemble_vectors(
 	__in bool final
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(final) {
 		TRACE_TOOL(g_dasm.file, LEVEL_MAX, "%cVector table [%04x-%04x]", DELIMITER_COMMENT, ADDRESS_VECTOR_BEGIN, ADDRESS_HEADER_BEGIN - 1);
@@ -336,7 +336,7 @@ dmg_utility_dasm_disassemble_vectors(
 					dmg_tool_syntax_directive_string(DIRECTIVE_ORIGIN), DELIMITER_HEXIDECIMAL, address);
 		}
 
-		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0, final)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_instruction(&address, 0, 0, final)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -357,7 +357,7 @@ dmg_utility_dasm_disassemble_bank(
 	)
 {
 	uint16_t address;
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint32_t origin = (bank ? ADDRESS_ROM_SWAP_BEGIN : ADDRESS_ROM_BEGIN);
 
 	if(final) {
@@ -368,11 +368,11 @@ dmg_utility_dasm_disassemble_bank(
 
 	if(!bank) {
 
-		if((result = dmg_utility_dasm_disassemble_vectors(final)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_vectors(final)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_disassemble_header(banks, final)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_header(banks, final)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -385,7 +385,7 @@ dmg_utility_dasm_disassemble_bank(
 
 	for(; address < BANK_WIDTH;) {
 
-		if((result = dmg_utility_dasm_disassemble_instruction(&address, origin, bank, final)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_instruction(&address, origin, bank, final)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -397,7 +397,7 @@ exit:
 static int
 dmg_utility_dasm_disassemble(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint32_t bank = 0, banks, length = 0;
 
 	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_dasm.rom, g_dasm.buffer.length / (float)KBYTE, g_dasm.buffer.length);
@@ -405,17 +405,17 @@ dmg_utility_dasm_disassemble(void)
 	if(g_dasm.buffer.length <= ADDRESS_HEADER_END) {
 		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%i bytes))\n", g_dasm.buffer.length / (float)KBYTE,
 			g_dasm.buffer.length, ADDRESS_HEADER_END / (float)KBYTE, ADDRESS_HEADER_END);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
-	if((result = dmg_utility_dasm_disassemble_comment()) != EXIT_SUCCESS) {
+	if((result = dmg_utility_dasm_disassemble_comment()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	TRACE_TOOL_MESSAGE("Parsing bank[%u]...      ", bank);
 
-	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -424,7 +424,7 @@ dmg_utility_dasm_disassemble(void)
 	for(bank = 1; bank < banks; ++bank) {
 		TRACE_TOOL_MESSAGE("Parsing bank[%u]...      ", bank);
 
-		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, false)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -436,7 +436,7 @@ dmg_utility_dasm_disassemble(void)
 
 	TRACE_TOOL_MESSAGE("Writing bank[%u]...      ", bank);
 
-	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -445,7 +445,7 @@ dmg_utility_dasm_disassemble(void)
 	for(bank = 1; bank < banks; ++bank) {
 		TRACE_TOOL_MESSAGE("Writing bank[%u]...      ", bank);
 
-		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble_bank(&banks, bank, true)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -466,8 +466,8 @@ dmg_utility_dasm_output_load(
 	__in const char *path
 	)
 {
-	int result = EXIT_SUCCESS;
 	char path_full[PATH_MAX] = {};
+	int result = DMG_STATUS_SUCCESS;
 
 	if(!g_dasm.output || !strlen(g_dasm.output)) {
 		char *path_end;
@@ -482,7 +482,7 @@ dmg_utility_dasm_output_load(
 	}
 
 	if(!(g_dasm.file = fopen(path_full, "wb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -506,7 +506,7 @@ dmg_utility_dasm_parse(
 	__in char *argv[]
 	)
 {
-	int option, result = EXIT_SUCCESS;
+	int option, result = DMG_STATUS_SUCCESS;
 
 	opterr = 1;
 
@@ -526,10 +526,10 @@ dmg_utility_dasm_parse(
 				g_dasm.version = true;
 				break;
 			case '?':
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			default:
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
 	}
@@ -542,10 +542,10 @@ static int
 dmg_utility_dasm_rom_load(void)
 {
 	FILE *file = NULL;
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(!(file = fopen(g_dasm.rom, "rb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -554,17 +554,17 @@ dmg_utility_dasm_rom_load(void)
 	fseek(file, 0, SEEK_SET);
 
 	if(length <= 0) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(!(g_dasm.buffer.data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(fread(g_dasm.buffer.data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -597,9 +597,9 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_utility_dasm_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_dasm_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -609,17 +609,17 @@ main(
 		dmg_tool_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_dasm_rom_load()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_rom_load()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_output_load(argv[0])) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_output_load(argv[0])) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to create output file -- %s\n", argv[0], g_dasm.output);
 			goto exit;
 		}
 
-		if((result = dmg_utility_dasm_disassemble()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_dasm_disassemble()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to assemble rom file -- %s\n", argv[0], g_dasm.rom);
 			goto exit;
 		}

@@ -102,12 +102,12 @@ dmg_test_processor_initialize(void)
 int
 dmg_test_processor_load(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_processor_initialize();
 
-	if(ASSERT_SUCCESS(dmg_processor_load(&g_processor.processor, &g_processor.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_processor_load(&g_processor.processor, &g_processor.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_processor.processor.af.word == POST_AF)
@@ -122,14 +122,14 @@ dmg_test_processor_load(void)
 			|| ASSERT(g_processor.processor.interrupt_flag.raw == POST_IF)
 			|| ASSERT(g_processor.processor.halt == false)
 			|| ASSERT(g_processor.processor.stop == false)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	g_processor.configuration.bootrom.data = (void *)1;
 
-	if(ASSERT_SUCCESS(dmg_processor_load(&g_processor.processor, &g_processor.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_processor_load(&g_processor.processor, &g_processor.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_processor.processor.af.word == 0)
@@ -144,7 +144,7 @@ dmg_test_processor_load(void)
 			|| ASSERT(g_processor.processor.interrupt_flag.raw == POST_IF)
 			|| ASSERT(g_processor.processor.halt == false)
 			|| ASSERT(g_processor.processor.stop == false)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -156,26 +156,26 @@ int
 dmg_test_processor_read(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_processor_initialize();
 
 	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE - 1) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	g_processor.processor.interrupt_enable.raw = value;
 
 	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	g_processor.processor.interrupt_flag.raw = value;
 
 	if(ASSERT(dmg_processor_read(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_FLAG) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -186,7 +186,7 @@ dmg_test_processor_read(void)
 int
 dmg_test_processor_read_register(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	dmg_action_t request = {}, response = {};
 
 	request.type = DMG_ACTION_READ;
@@ -283,18 +283,18 @@ dmg_test_processor_read_register(void)
 		dmg_processor_read_register(&g_processor.processor, &request, &response);
 
 		if(ASSERT(response.length == length)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			break;
 		}
 
 		if(length <= sizeof(uint8_t)) {
 
 			if(ASSERT(response.data.byte == value)) {
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				break;
 			}
 		} else if(ASSERT(response.data.word == value)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			break;
 		}
 	}
@@ -307,7 +307,7 @@ dmg_test_processor_read_register(void)
 int
 dmg_test_processor_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint8_t opcode = INSTRUCTION_NOP;
 	const dmg_processor_instruction_t *instruction = dmg_processor_instruction(opcode, false);
 
@@ -317,7 +317,7 @@ dmg_test_processor_step(void)
 
 	if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
 			|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int interrupt = INTERRUPT_VBLANK; interrupt < INTERRUPT_MAX; ++interrupt) {
@@ -330,7 +330,7 @@ dmg_test_processor_step(void)
 
 		if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
 				|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 
 		dmg_test_processor_initialize();
@@ -341,7 +341,7 @@ dmg_test_processor_step(void)
 
 		if(ASSERT(dmg_processor_step(&g_processor.processor) == instruction->cycle)
 				|| ASSERT(g_processor.processor.pc.word == (STEP_ADDRESS + instruction->operand + 1))) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 
 		dmg_test_processor_initialize();
@@ -353,7 +353,7 @@ dmg_test_processor_step(void)
 
 		if(ASSERT(dmg_processor_step(&g_processor.processor) == (instruction->cycle + CYCLE_INTERRUPT))
 				|| ASSERT(g_processor.processor.pc.word == (INTERRUPT_ADDR[interrupt] + instruction->operand + 1))) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
@@ -365,7 +365,7 @@ dmg_test_processor_step(void)
 int
 dmg_test_processor_unload(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_processor_initialize();
 	dmg_processor_load(&g_processor.processor, &g_processor.configuration);
@@ -383,7 +383,7 @@ dmg_test_processor_unload(void)
 			|| ASSERT(g_processor.processor.interrupt_flag.raw == 0)
 			|| ASSERT(g_processor.processor.halt == false)
 			|| ASSERT(g_processor.processor.stop == false)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -395,20 +395,20 @@ int
 dmg_test_processor_write(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_processor_initialize();
 	dmg_processor_write(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_ENABLE, value);
 
 	if(ASSERT(g_processor.processor.interrupt_enable.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_processor_initialize();
 	dmg_processor_write(&g_processor.processor, ADDRESS_PROCESSOR_INTERRUPT_FLAG, value);
 
 	if(ASSERT(g_processor.processor.interrupt_flag.raw == (POST_IF | (value & INTERRUPT_FLAG_MASK)))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -419,7 +419,7 @@ dmg_test_processor_write(void)
 int
 dmg_test_processor_write_register(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	dmg_action_t request = {}, response = {};
 
 	request.type = DMG_ACTION_WRITE;
@@ -541,7 +541,7 @@ dmg_test_processor_write_register(void)
 
 fprintf(stdout, "%u %04x %04x\n", request.address, value, expected);
 
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			break;
 		}
 	}
@@ -567,7 +567,7 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(argc > 1) {
 		TEST_SEED(strtol(argv[1], NULL, 16));
@@ -580,8 +580,8 @@ main(
 
 		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
-			if(TEST[test]() != EXIT_SUCCESS) {
-				result = EXIT_FAILURE;
+			if(TEST[test]() != DMG_STATUS_SUCCESS) {
+				result = DMG_STATUS_FAILURE;
 			}
 		}
 	}

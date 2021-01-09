@@ -94,12 +94,12 @@ dmg_test_audio_initialize(void)
 int
 dmg_test_audio_load(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_audio_initialize();
 
-	if(ASSERT_SUCCESS(dmg_audio_load(&g_audio.audio, &g_audio.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_audio_load(&g_audio.audio, &g_audio.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_audio.audio.control.raw == POST_CONTROL)
@@ -123,14 +123,14 @@ dmg_test_audio_load(void)
 			|| ASSERT(g_audio.audio.mode_4.consecutive.raw == POST_MODE_4_COUNTER_CONSECUTIVE)
 			|| ASSERT(g_audio.audio.output.raw == POST_OUTPUT)
 			|| ASSERT(g_audio.audio.state.raw == POST_STATE)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.configuration.bootrom.data = (void *)1;
 
-	if(ASSERT_SUCCESS(dmg_audio_load(&g_audio.audio, &g_audio.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_audio_load(&g_audio.audio, &g_audio.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_audio.audio.control.raw == 0)
@@ -154,7 +154,7 @@ dmg_test_audio_load(void)
 			|| ASSERT(g_audio.audio.mode_4.consecutive.raw == 0)
 			|| ASSERT(g_audio.audio.output.raw == 0)
 			|| ASSERT(g_audio.audio.state.raw == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -166,153 +166,153 @@ int
 dmg_test_audio_read(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_audio_initialize();
 	g_audio.audio.control.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_CONTROL) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_1.sweep.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_1_SWEEP) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_1.length.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_1_LENGTH) == (value & MODE_1_LENGTH_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_1.envelope.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_1_ENVELOPE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_1.frequency.low = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_1_FREQUENCY_LOW) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_1.frequency.high.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH) == (value & MODE_1_FREQUENCY_HIGH_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_2.length.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_2_LENGTH) == (value & MODE_2_LENGTH_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_2.envelope.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_2_ENVELOPE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_2.frequency.low = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_2_FREQUENCY_LOW) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_2.frequency.high.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH) == (value & MODE_2_FREQUENCY_HIGH_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_3.enable.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_3_ENABLE) == (value & MODE_3_ENABLE_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_3.length = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_3_LENGTH) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_3.level.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_3_LEVEL) == (value & MODE_3_LEVEL_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_3.frequency.low = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_3_FREQUENCY_LOW) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_3.frequency.high.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH) == (value & MODE_3_FREQUENCY_HIGH_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_4.length.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_4_LENGTH) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_4.envelope.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_4_ENVELOPE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_4.polynomial.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.mode_4.consecutive.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE) == (value & MODE_4_CONSECUTIVE_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.output.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_OUTPUT) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	g_audio.audio.state.raw = value;
 
 	if(ASSERT(dmg_audio_read(&g_audio.audio, ADDRESS_AUDIO_STATE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -323,7 +323,7 @@ dmg_test_audio_read(void)
 int
 dmg_test_audio_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_audio_initialize();
 
@@ -337,7 +337,7 @@ dmg_test_audio_step(void)
 int
 dmg_test_audio_unload(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_audio_initialize();
 	dmg_audio_load(&g_audio.audio, &g_audio.configuration);
@@ -367,7 +367,7 @@ dmg_test_audio_unload(void)
 			|| ASSERT(g_audio.audio.mode_4.consecutive.raw == 0)
 			|| ASSERT(g_audio.audio.output.raw == 0)
 			|| ASSERT(g_audio.audio.state.raw == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -379,153 +379,153 @@ int
 dmg_test_audio_write(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_CONTROL, value);
 
 	if(ASSERT(g_audio.audio.control.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_1_SWEEP, value);
 
 	if(ASSERT(g_audio.audio.mode_1.sweep.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_1_LENGTH, value);
 
 	if(ASSERT(g_audio.audio.mode_1.length.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_1_ENVELOPE, value);
 
 	if(ASSERT(g_audio.audio.mode_1.envelope.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_1_FREQUENCY_LOW, value);
 
 	if(ASSERT(g_audio.audio.mode_1.frequency.low == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_1_FREQUENCY_HIGH, value);
 
 	if(ASSERT(g_audio.audio.mode_1.frequency.high.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_2_LENGTH, value);
 
 	if(ASSERT(g_audio.audio.mode_2.length.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_2_ENVELOPE, value);
 
 	if(ASSERT(g_audio.audio.mode_2.envelope.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_2_FREQUENCY_LOW, value);
 
 	if(ASSERT(g_audio.audio.mode_2.frequency.low == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_2_FREQUENCY_HIGH, value);
 
 	if(ASSERT(g_audio.audio.mode_2.frequency.high.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_3_ENABLE, value);
 
 	if(ASSERT(g_audio.audio.mode_3.enable.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_3_LENGTH, value);
 
 	if(ASSERT(g_audio.audio.mode_3.length == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_3_LEVEL, value);
 
 	if(ASSERT(g_audio.audio.mode_3.level.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_3_FREQUENCY_LOW, value);
 
 	if(ASSERT(g_audio.audio.mode_3.frequency.low == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_3_FREQUENCY_HIGH, value);
 
 	if(ASSERT(g_audio.audio.mode_3.frequency.high.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_4_LENGTH, value);
 
 	if(ASSERT(g_audio.audio.mode_4.length.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_4_ENVELOPE, value);
 
 	if(ASSERT(g_audio.audio.mode_4.envelope.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_4_COUNTER_POLYNOMIAL, value);
 
 	if(ASSERT(g_audio.audio.mode_4.polynomial.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_MODE_4_COUNTER_CONSECUTIVE, value);
 
 	if(ASSERT(g_audio.audio.mode_4.consecutive.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_OUTPUT, value);
 
 	if(ASSERT(g_audio.audio.output.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_audio_initialize();
 	dmg_audio_write(&g_audio.audio, ADDRESS_AUDIO_STATE, value);
 
 	if(ASSERT(g_audio.audio.state.raw == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -547,7 +547,7 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(argc > 1) {
 		TEST_SEED(strtol(argv[1], NULL, 16));
@@ -560,8 +560,8 @@ main(
 
 		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
-			if(TEST[test]() != EXIT_SUCCESS) {
-				result = EXIT_FAILURE;
+			if(TEST[test]() != DMG_STATUS_SUCCESS) {
+				result = DMG_STATUS_FAILURE;
 			}
 		}
 	}

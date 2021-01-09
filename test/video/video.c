@@ -148,12 +148,12 @@ dmg_test_video_initialize(void)
 int
 dmg_test_video_load(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_video_initialize();
 
 	if(ASSERT_SUCCESS(dmg_video_load(&g_video.video, &g_video.configuration))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_video.video.background.raw == POST_BACKGROUND_PALETTE)
@@ -167,14 +167,14 @@ dmg_test_video_load(void)
 			|| ASSERT(g_video.video.status.mode == MODE_SEARCH)
 			|| ASSERT(g_video.video.window_x == POST_WINDOW_X)
 			|| ASSERT(g_video.video.window_y == POST_WINDOW_Y)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.configuration.bootrom.data = (void *)1;
 
 	if(ASSERT_SUCCESS(dmg_video_load(&g_video.video, &g_video.configuration))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_video.video.background.raw == 0)
@@ -188,7 +188,7 @@ dmg_test_video_load(void)
 			|| ASSERT(g_video.video.status.mode == MODE_SEARCH)
 			|| ASSERT(g_video.video.window_x == 0)
 			|| ASSERT(g_video.video.window_y == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -200,54 +200,54 @@ int
 dmg_test_video_read(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_video_initialize();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE - 1) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.background.raw = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE) == g_video.video.background.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.control.raw = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_CONTROL) == g_video.video.control.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.line = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == g_video.video.line)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.line_coincidence = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE) == g_video.video.line_coincidence)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.object_0.raw = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0) == g_video.video.object_0.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.object_1.raw = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1) == g_video.video.object_1.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int mode = 0; mode < MODE_MAX; ++mode) {
@@ -261,13 +261,13 @@ dmg_test_video_read(void)
 			case MODE_VBLANK:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == value)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 			default:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == 0)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 		}
@@ -281,13 +281,13 @@ dmg_test_video_read(void)
 			case MODE_VBLANK:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == value)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 			default:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == 0)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 		}
@@ -297,39 +297,39 @@ dmg_test_video_read(void)
 	g_video.video.screen_x = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_X) == g_video.video.screen_x)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.screen_y = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_Y) == g_video.video.screen_y)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.status.raw = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_STATUS) == g_video.video.status.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_TRANSFER) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.window_x = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_X) == g_video.video.window_x)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	g_video.video.window_y = rand();
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_Y) == g_video.video.window_y)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -340,7 +340,7 @@ dmg_test_video_read(void)
 int
 dmg_test_video_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint16_t destination, source;
 
 	dmg_test_video_initialize();
@@ -357,7 +357,7 @@ dmg_test_video_step(void)
 		if(ASSERT(g_video.video.transfer.enable == true)
 				|| ASSERT(g_video.video.transfer.destination == destination++)
 				|| ASSERT(g_video.video.transfer.source == source++)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 
 		dmg_video_step(&g_video.video, CYCLE);
@@ -368,7 +368,7 @@ dmg_test_video_step(void)
 	if(ASSERT(g_video.video.transfer.enable == false)
 			|| ASSERT(g_video.video.transfer.destination == (ADDRESS_VIDEO_RAM_SPRITE_END + 1))
 			|| ASSERT(g_video.video.transfer.source == ((TRANSFER_SCALE * TRANSFER_BASE) + RAM_SPRITE_WIDTH))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
@@ -381,7 +381,7 @@ dmg_test_video_step(void)
 		int mode = g_video.video.status.mode;
 
 		if(ASSERT(g_video.interrupt_vblank == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 
 		for(uint32_t cycle = 0; cycle < (MODE_CYC[mode] - CYCLE); cycle += CYCLE) {
@@ -391,7 +391,7 @@ dmg_test_video_step(void)
 		dmg_video_step(&g_video.video, CYCLE);
 
 		if(ASSERT(g_video.video.status.mode != mode)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 
 		switch(g_video.video.status.mode) {
@@ -400,7 +400,7 @@ dmg_test_video_step(void)
 			case MODE_VBLANK:
 
 				if(ASSERT(g_video.interrupt_lcdc == true)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 
 				g_video.interrupt_lcdc = false;
@@ -412,7 +412,7 @@ dmg_test_video_step(void)
 
 	if(ASSERT(g_video.video.status.mode == MODE_VBLANK)
 			|| ASSERT(g_video.interrupt_vblank == true)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -423,7 +423,7 @@ dmg_test_video_step(void)
 int
 dmg_test_video_unload(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_video_initialize();
 	dmg_video_load(&g_video.video, &g_video.configuration);
@@ -442,7 +442,7 @@ dmg_test_video_unload(void)
 			|| ASSERT(g_video.video.window_y == 0)
 			|| ASSERT(g_video.video.ram.data == NULL)
 			|| ASSERT(g_video.video.ram_sprite.data == NULL)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -454,13 +454,13 @@ int
 dmg_test_video_write(void)
 {
 	uint8_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_BACKGROUND_PALETTE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
@@ -469,11 +469,11 @@ dmg_test_video_write(void)
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_CONTROL, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_CONTROL) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(g_video.video.control.enable && ASSERT(g_video.video.line == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
@@ -481,28 +481,28 @@ dmg_test_video_write(void)
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_LINE, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE) == (uint8_t)(value + 1))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_LINE_COINCIDENCE) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_0) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_OBJECT_PALETTE_1) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int mode = 0; mode < MODE_MAX; ++mode) {
@@ -520,13 +520,13 @@ dmg_test_video_write(void)
 			case MODE_VBLANK:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == value)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 			default:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_BEGIN) == 0)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 		}
@@ -542,13 +542,13 @@ dmg_test_video_write(void)
 			case MODE_VBLANK:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == value)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 			default:
 
 				if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_RAM_SPRITE_BEGIN) == 0)) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 				}
 				break;
 		}
@@ -558,21 +558,21 @@ dmg_test_video_write(void)
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_SCREEN_X, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_X) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_SCREEN_Y, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_SCREEN_Y) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_STATUS, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_STATUS) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
@@ -582,21 +582,21 @@ dmg_test_video_write(void)
 			|| ASSERT(g_video.video.transfer.enable == true)
 			|| ASSERT(g_video.video.transfer.destination == ADDRESS_VIDEO_RAM_SPRITE_BEGIN)
 			|| ASSERT(g_video.video.transfer.source == (TRANSFER_SCALE * (value & UINT8_MAX)))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_WINDOW_X, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_X) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_video_initialize();
 	dmg_video_write(&g_video.video, ADDRESS_VIDEO_WINDOW_Y, value);
 
 	if(ASSERT(dmg_video_read(&g_video.video, ADDRESS_VIDEO_WINDOW_Y) == value)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -618,7 +618,7 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(argc > 1) {
 		TEST_SEED(strtol(argv[1], NULL, 16));
@@ -631,8 +631,8 @@ main(
 
 		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
-			if(TEST[test]() != EXIT_SUCCESS) {
-				result = EXIT_FAILURE;
+			if(TEST[test]() != DMG_STATUS_SUCCESS) {
+				result = DMG_STATUS_FAILURE;
 			}
 		}
 	}

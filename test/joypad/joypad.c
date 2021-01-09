@@ -103,56 +103,56 @@ dmg_test_joypad_initialize(void)
 int
 dmg_test_joypad_load(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_joypad_initialize();
 
-	if(ASSERT_SUCCESS(dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_joypad.joypad.state.raw == POST_STATE)
 			|| ASSERT(g_joypad.joypad.cycle == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int button = 0; button < DMG_BUTTON_MAX; ++button) {
 
 		if(ASSERT(g_joypad.joypad.button[button] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
 	for(int direction = 0; direction < DMG_DIRECTION_MAX; ++direction) {
 
 		if(ASSERT(g_joypad.joypad.direction[direction] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
 	dmg_test_joypad_initialize();
 	g_joypad.configuration.bootrom.data = (void *)1;
 
-	if(ASSERT_SUCCESS(dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_joypad.joypad.state.raw == POST_STATE)
 			|| ASSERT(g_joypad.joypad.cycle == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int button = 0; button < DMG_BUTTON_MAX; ++button) {
 
 		if(ASSERT(g_joypad.joypad.button[button] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
 	for(int direction = 0; direction < DMG_DIRECTION_MAX; ++direction) {
 
 		if(ASSERT(g_joypad.joypad.direction[direction] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
@@ -164,19 +164,19 @@ dmg_test_joypad_load(void)
 int
 dmg_test_joypad_read(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_joypad_initialize();
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE - 1) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_joypad_initialize();
 	g_joypad.joypad.state.raw = rand();
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == (g_joypad.joypad.state.raw | STATE_READ))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -187,7 +187,7 @@ dmg_test_joypad_read(void)
 int
 dmg_test_joypad_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	dmg_joypad_state_t expected = {};
 
 	dmg_test_joypad_initialize();
@@ -198,7 +198,7 @@ dmg_test_joypad_step(void)
 
 		if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == POST_STATE)
 				|| ASSERT(g_joypad.interrupt == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 	}
@@ -217,7 +217,7 @@ dmg_test_joypad_step(void)
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)
 			|| ASSERT(g_joypad.interrupt == true)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -229,7 +229,7 @@ dmg_test_joypad_step(void)
 
 		if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == POST_STATE)
 				|| ASSERT(g_joypad.interrupt == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 	}
@@ -248,7 +248,7 @@ dmg_test_joypad_step(void)
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)
 			|| ASSERT(g_joypad.interrupt == true)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -273,7 +273,7 @@ dmg_test_joypad_step(void)
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)
 			|| ASSERT(g_joypad.interrupt == true)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -286,7 +286,7 @@ exit:
 int
 dmg_test_joypad_unload(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_joypad_initialize();
 	dmg_joypad_load(&g_joypad.joypad, &g_joypad.configuration);
@@ -294,20 +294,20 @@ dmg_test_joypad_unload(void)
 
 	if(ASSERT(g_joypad.joypad.state.raw == 0)
 			|| ASSERT(g_joypad.joypad.cycle == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	for(int button = 0; button < DMG_BUTTON_MAX; ++button) {
 
 		if(ASSERT(g_joypad.joypad.button[button] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
 	for(int direction = 0; direction < DMG_DIRECTION_MAX; ++direction) {
 
 		if(ASSERT(g_joypad.joypad.direction[direction] == false)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 		}
 	}
 
@@ -319,7 +319,7 @@ dmg_test_joypad_unload(void)
 int
 dmg_test_joypad_write(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	dmg_joypad_state_t expected = {}, value = {};
 
 	dmg_test_joypad_initialize();
@@ -328,7 +328,7 @@ dmg_test_joypad_write(void)
 	dmg_joypad_write(&g_joypad.joypad, ADDRESS_JOYPAD_STATE, value.raw);
 
 	if(ASSERT(dmg_joypad_read(&g_joypad.joypad, ADDRESS_JOYPAD_STATE) == expected.raw)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_joypad_initialize();
@@ -349,7 +349,7 @@ dmg_test_joypad_write(void)
 
 	if(ASSERT(value.raw == expected.raw)
 			|| ASSERT(value.button == expected.button)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_joypad_initialize();
@@ -370,7 +370,7 @@ dmg_test_joypad_write(void)
 
 	if(ASSERT(value.raw == expected.raw)
 			|| ASSERT(value.direction == expected.direction)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_joypad_initialize();
@@ -401,7 +401,7 @@ dmg_test_joypad_write(void)
 	if(ASSERT(value.raw == expected.raw)
 			|| ASSERT(value.button == expected.button)
 			|| ASSERT(value.direction == expected.direction)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -423,7 +423,7 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(argc > 1) {
 		TEST_SEED(strtol(argv[1], NULL, 16));
@@ -436,8 +436,8 @@ main(
 
 		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
-			if(TEST[test]() != EXIT_SUCCESS) {
-				result = EXIT_FAILURE;
+			if(TEST[test]() != DMG_STATUS_SUCCESS) {
+				result = DMG_STATUS_FAILURE;
 			}
 		}
 	}

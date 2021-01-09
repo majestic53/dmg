@@ -49,6 +49,278 @@ dmg_assembler_parser_error(
 }
 
 static int
+dmg_assembler_parser_tree_parse_directive_bank(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_BANK) {
+		result = PARSER_ERROR(parser, token, "Expecting bank directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated bank directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_data(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if((token->subtype != DIRECTIVE_DATA_BYTE)
+			&& (token->subtype != DIRECTIVE_DATA_WORD)) {
+		result = PARSER_ERROR(parser, token, "Expecting data directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated data directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_define(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_DEFINE) {
+		result = PARSER_ERROR(parser, token, "Expecting define directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated define directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_if(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_IF) {
+		result = PARSER_ERROR(parser, token, "Expecting if directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated if directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_if_define(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_IF_DEFINE) {
+		result = PARSER_ERROR(parser, token, "Expecting if-define directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated if-define directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_include(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if((token->subtype != DIRECTIVE_INCLUDE)
+			&& (token->subtype != DIRECTIVE_INCLUDE_BINARY)) {
+		result = PARSER_ERROR(parser, token, "Expecting include directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated include directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_origin(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_ORIGIN) {
+		result = PARSER_ERROR(parser, token, "Expecting origin directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated origin directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_reserve(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_RESERVE) {
+		result = PARSER_ERROR(parser, token, "Expecting reserve directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated reserve directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_directive_undefine(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
+
+	if(token->subtype != DIRECTIVE_UNDEFINE) {
+		result = PARSER_ERROR(parser, token, "Expecting undefine directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated undefine directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_parser_tree_parse_directive(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token
@@ -61,11 +333,67 @@ dmg_assembler_parser_tree_parse_directive(
 		goto exit;
 	}
 
-	// TODO
-	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
-		result = dmg_assembler_lexer_next(&parser->lexer);
+	switch(token->subtype) {
+		case DIRECTIVE_BANK:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_bank(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_DATA_BYTE:
+		case DIRECTIVE_DATA_WORD:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_data(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_DEFINE:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_define(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_IF:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_if(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_IF_DEFINE:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_if_define(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_INCLUDE:
+		case DIRECTIVE_INCLUDE_BINARY:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_include(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_ORIGIN:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_origin(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_RESERVE:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_reserve(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		case DIRECTIVE_UNDEFINE:
+
+			if((result = dmg_assembler_parser_tree_parse_directive_undefine(parser, token)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+			break;
+		default:
+			result = PARSER_ERROR(parser, token, "Invalid directive");
+			goto exit;
 	}
-	// ---
 
 exit:
 	return result;
@@ -101,17 +429,20 @@ dmg_assembler_parser_tree_parse_label(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *root = NULL;
 
 	if(token->type != TOKEN_LABEL) {
 		result = PARSER_ERROR(parser, token, "Expecting label");
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_trees_add(&parser->trees, token, &root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
 	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
 		result = dmg_assembler_lexer_next(&parser->lexer);
 	}
-	// ---
 
 exit:
 	return result;

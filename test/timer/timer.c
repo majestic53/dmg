@@ -85,12 +85,12 @@ dmg_test_timer_initialize(void)
 int
 dmg_test_timer_load(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_timer_initialize();
 
-	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_timer.timer.control.raw == POST_CONTROL)
@@ -98,14 +98,14 @@ dmg_test_timer_load(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider.raw == POST_DIVIDER)
 			|| ASSERT(g_timer.timer.modulo == POST_MODULO)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	g_timer.configuration.bootrom.data = (void *)1;
 
-	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != EXIT_SUCCESS) {
-		result = EXIT_FAILURE;
+	if(ASSERT_SUCCESS(dmg_timer_load(&g_timer.timer, &g_timer.configuration)) != DMG_STATUS_SUCCESS) {
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(ASSERT(g_timer.timer.control.raw == 0)
@@ -113,7 +113,7 @@ dmg_test_timer_load(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider.raw == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -125,40 +125,40 @@ int
 dmg_test_timer_read(void)
 {
 	uint16_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_timer_initialize();
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER - 1) == UINT8_MAX)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	g_timer.timer.control.raw = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_CONTROL) == (value & CONTROL_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	g_timer.timer.counter = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == (value & UINT8_MAX))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	g_timer.timer.divider.raw = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == (value >> CHAR_BIT))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	g_timer.timer.modulo = value;
 
 	if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_MODULO) == (value & UINT8_MAX))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -169,7 +169,7 @@ dmg_test_timer_read(void)
 int
 dmg_test_timer_step(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_timer_initialize();
 	dmg_timer_load(&g_timer.timer, &g_timer.configuration);
@@ -181,7 +181,7 @@ dmg_test_timer_step(void)
 			dmg_timer_step(&g_timer.timer, CYCLE);
 
 			if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == ((divider - 1) & UINT8_MAX))) {
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			}
 		}
@@ -189,7 +189,7 @@ dmg_test_timer_step(void)
 		dmg_timer_step(&g_timer.timer, CYCLE);
 
 		if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_DIVIDER) == (divider & UINT8_MAX))) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 	}
@@ -208,7 +208,7 @@ dmg_test_timer_step(void)
 				dmg_timer_step(&g_timer.timer, CYCLE);
 
 				if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == (counter & UINT8_MAX))) {
-					result = EXIT_FAILURE;
+					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}
 			}
@@ -216,7 +216,7 @@ dmg_test_timer_step(void)
 			dmg_timer_step(&g_timer.timer, CYCLE);
 
 			if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == ((counter + 1) & UINT8_MAX))) {
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			}
 		}
@@ -225,7 +225,7 @@ dmg_test_timer_step(void)
 
 		if(ASSERT(dmg_timer_read(&g_timer.timer, ADDRESS_TIMER_COUNTER) == g_timer.timer.modulo)
 				|| ASSERT(g_timer.interrupt == true)) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 
@@ -241,7 +241,7 @@ exit:
 int
 dmg_test_timer_unload(void)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_timer_initialize();
 	dmg_timer_load(&g_timer.timer, &g_timer.configuration);
@@ -252,7 +252,7 @@ dmg_test_timer_unload(void)
 			|| ASSERT(g_timer.timer.cycle == 0)
 			|| ASSERT(g_timer.timer.divider.raw == 0)
 			|| ASSERT(g_timer.timer.modulo == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -264,34 +264,34 @@ int
 dmg_test_timer_write(void)
 {
 	uint16_t value = rand();
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_CONTROL, value);
 
 	if(ASSERT(g_timer.timer.control.raw == (value & CONTROL_MASK))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_COUNTER, value);
 
 	if(ASSERT(g_timer.timer.counter == (value & UINT8_MAX))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_DIVIDER, value);
 
 	if(ASSERT(g_timer.timer.divider.raw == 0)) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	dmg_test_timer_initialize();
 	dmg_timer_write(&g_timer.timer, ADDRESS_TIMER_MODULO, value);
 
 	if(ASSERT(g_timer.timer.modulo == (value & UINT8_MAX))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	TRACE_TEST(result);
@@ -313,7 +313,7 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	if(argc > 1) {
 		TEST_SEED(strtol(argv[1], NULL, 16));
@@ -326,8 +326,8 @@ main(
 
 		for(size_t test = 0; test < TEST_COUNT(TEST); ++test) {
 
-			if(TEST[test]() != EXIT_SUCCESS) {
-				result = EXIT_FAILURE;
+			if(TEST[test]() != DMG_STATUS_SUCCESS) {
+				result = DMG_STATUS_FAILURE;
 			}
 		}
 	}

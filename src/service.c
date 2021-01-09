@@ -196,7 +196,7 @@ dmg_service_import(
 	uint16_t checksum = 0, expected = 0;
 	dmg_buffer_t buffer = {};
 	const dmg_save_header_t *header;
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(path) {
 		TRACE_FORMAT(LEVEL_INFORMATION, "Save file importing: %s", path);

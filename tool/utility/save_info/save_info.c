@@ -30,7 +30,7 @@ dmg_utility_save_info_parse(
 	__in char *argv[]
 	)
 {
-	int option, result = EXIT_SUCCESS;
+	int option, result = DMG_STATUS_SUCCESS;
 
 	opterr = 1;
 
@@ -47,10 +47,10 @@ dmg_utility_save_info_parse(
 				g_save_info.version = true;
 				break;
 			case '?':
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			default:
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
 	}
@@ -63,10 +63,10 @@ static int
 dmg_utility_save_info_save_load(void)
 {
 	FILE *file = NULL;
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(!(file = fopen(g_save_info.save, "rb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -75,17 +75,17 @@ dmg_utility_save_info_save_load(void)
 	fseek(file, 0, SEEK_SET);
 
 	if(length <= 0) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(!(g_save_info.buffer.data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(fread(g_save_info.buffer.data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -106,8 +106,8 @@ dmg_utility_save_info_save_parse(void)
 {
 	time_t current;
 	uint16_t checksum = 0;
-	int result = EXIT_SUCCESS;
 	uint32_t address, expected;
+	int result = DMG_STATUS_SUCCESS;
 	const dmg_save_header_t *header;
 	char timestamp[TIMESTAMP_LENGTH_MAX] = {};
 
@@ -116,7 +116,7 @@ dmg_utility_save_info_save_parse(void)
 	if(g_save_info.buffer.length <= (expected = (sizeof(*header) + sizeof(checksum)))) {
 		TRACE_TOOL_ERROR("File is too small -- %.02f KB (%u bytes) (expecting > %.02f KB (%u bytes))\n", g_save_info.buffer.length / (float)KBYTE,
 			g_save_info.buffer.length, expected / (float)KBYTE, expected);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -124,12 +124,12 @@ dmg_utility_save_info_save_parse(void)
 
 	if(header->magic != (expected = SAVE_MAGIC)) {
 		TRACE_TOOL_MESSAGE("Magic     MISMATCH (Expecting \"%s\")\n", (char *)&expected);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	if(header->version != (expected = SAVE_VERSION)) {
 		TRACE_TOOL_MESSAGE("Version   MISMATCH (Expecting %u)\n", expected);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 	current = header->timestamp;
@@ -152,7 +152,7 @@ dmg_utility_save_info_save_parse(void)
 
 	if(checksum != (uint16_t)(((uint8_t *)g_save_info.buffer.data)[address] | (((uint8_t *)g_save_info.buffer.data)[address + 1] << CHAR_BIT))) {
 		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 	}
 
 exit:
@@ -176,9 +176,9 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_utility_save_info_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_save_info_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -188,12 +188,12 @@ main(
 		dmg_tool_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_save_info_save_load()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_save_info_save_load()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load save file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}
 
-		if((result = dmg_utility_save_info_save_parse()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_save_info_save_parse()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Unsupported save file -- %s\n", argv[0], g_save_info.save);
 			goto exit;
 		}

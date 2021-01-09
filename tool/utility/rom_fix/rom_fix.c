@@ -30,7 +30,7 @@ dmg_utility_rom_fix_parse(
 	__in char *argv[]
 	)
 {
-	int option, result = EXIT_SUCCESS;
+	int option, result = DMG_STATUS_SUCCESS;
 
 	opterr = 1;
 
@@ -47,10 +47,10 @@ dmg_utility_rom_fix_parse(
 				g_rom_fix.version = true;
 				break;
 			case '?':
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			default:
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
 	}
@@ -62,10 +62,10 @@ exit:
 static int
 dmg_utility_rom_fix_rom_load(void)
 {
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(!(g_rom_fix.file = fopen(g_rom_fix.rom, "rb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -74,17 +74,17 @@ dmg_utility_rom_fix_rom_load(void)
 	fseek(g_rom_fix.file, 0, SEEK_SET);
 
 	if(length <= 0) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(!(g_rom_fix.buffer.data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(fread(g_rom_fix.buffer.data, sizeof(uint8_t), length, g_rom_fix.file) != length) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -104,7 +104,7 @@ static int
 dmg_utility_rom_fix_rom_parse(void)
 {
 	uint16_t expected = 0;
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 	uint8_t *found = &((uint8_t *)g_rom_fix.buffer.data)[ADDRESS_HEADER_CHECKSUM];
 
 	for(uint16_t address = ADDRESS_HEADER_CHECKSUM_BEGIN; address <= ADDRESS_HEADER_CHECKSUM_END; ++address) {
@@ -116,12 +116,12 @@ dmg_utility_rom_fix_rom_parse(void)
 		*found = expected;
 
 		if(!(g_rom_fix.file = fopen(g_rom_fix.rom, "wb"))) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 
 		if(fwrite(g_rom_fix.buffer.data, sizeof(uint8_t), g_rom_fix.buffer.length, g_rom_fix.file) != g_rom_fix.buffer.length) {
-			result = EXIT_FAILURE;
+			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
 	}
@@ -158,9 +158,9 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_utility_rom_fix_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_utility_rom_fix_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -170,12 +170,12 @@ main(
 		dmg_tool_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_rom_fix_rom_load()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_fix_rom_load()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_rom_fix.rom);
 			goto exit;
 		}
 
-		if((result = dmg_utility_rom_fix_rom_parse()) != EXIT_SUCCESS) {
+		if((result = dmg_utility_rom_fix_rom_parse()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Unsupported rom file -- %s\n", argv[0], g_rom_fix.rom);
 			goto exit;
 		}

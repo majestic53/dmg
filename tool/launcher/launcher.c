@@ -31,10 +31,10 @@ dmg_launcher_file_load(
 	)
 {
 	FILE *file = NULL;
-	int length, result = EXIT_SUCCESS;
+	int length, result = DMG_STATUS_SUCCESS;
 
 	if(!(file = fopen(path, "rb"))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -43,17 +43,17 @@ dmg_launcher_file_load(
 	fseek(file, 0, SEEK_SET);
 
 	if(length <= 0) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(!(buffer->data = (void *)malloc(length))) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
 	if(fread(buffer->data, sizeof(uint8_t), length, file) != length) {
-		result = EXIT_FAILURE;
+		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
 
@@ -88,7 +88,7 @@ dmg_launcher_parse(
 	__in char *argv[]
 	)
 {
-	int option, result = EXIT_SUCCESS;
+	int option, result = DMG_STATUS_SUCCESS;
 
 	opterr = 1;
 
@@ -132,10 +132,10 @@ dmg_launcher_parse(
 				g_launcher.version = true;
 				break;
 			case '?':
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 			default:
-				result = EXIT_FAILURE;
+				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
 	}
@@ -182,11 +182,11 @@ main(
 	__in char *argv[]
 	)
 {
-	int result = EXIT_SUCCESS;
+	int result = DMG_STATUS_SUCCESS;
 
 	g_launcher.palette = DEFAULT_PALETTE;
 
-	if((result = dmg_launcher_parse(argc, argv)) != EXIT_SUCCESS) {
+	if((result = dmg_launcher_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -212,33 +212,36 @@ main(
 
 		if(g_launcher.bootrom) {
 
-			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != EXIT_SUCCESS) {
+			if((result = dmg_launcher_file_load(&g_launcher.configuration.bootrom, g_launcher.bootrom)) != DMG_STATUS_SUCCESS) {
 				TRACE_TOOL_ERROR("%s: Failed to load bootrom file -- %s\n", argv[0], g_launcher.bootrom);
 				goto exit;
 			}
 		}
 
-		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != EXIT_SUCCESS) {
+		if((result = dmg_launcher_file_load(&g_launcher.configuration.rom, g_launcher.rom)) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to load rom file -- %s\n", argv[0], g_launcher.rom);
 			goto exit;
 		}
 
 		if(g_launcher.serial.enable && (result = dmg_launcher_socket_open(&g_launcher.serial.socket, g_launcher.serial.port, g_launcher.serial.client))
-				!= EXIT_SUCCESS) {
+				!= DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = ((dmg_load(&g_launcher.configuration) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE))) {
-			TRACE_TOOL_ERROR("%s: Internal error -- %s\n", argv[0], dmg_error());
-			result = EXIT_FAILURE;
+		if((result = dmg_load(&g_launcher.configuration)) != DMG_STATUS_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to load -- %s\n", argv[0], dmg_error());
 			goto exit;
 		}
 
 		if(g_launcher.debug) {
-			result = ((dmg_launcher_debug(argv[0], g_launcher.rom, g_launcher.configuration.save_in)
-					== DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
-		} else {
-			result = ((dmg_run(NULL, 0) == DMG_STATUS_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE);
+
+			if((result = dmg_launcher_debug(argv[0], g_launcher.rom, g_launcher.configuration.save_in)) != DMG_STATUS_SUCCESS) {
+				TRACE_TOOL_ERROR("%s: Failed to run debugger -- %s\n", argv[0], dmg_error());
+				goto exit;
+			}
+		} else if((result = dmg_run(NULL, 0)) != DMG_STATUS_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to run -- %s\n", argv[0], dmg_error());
+			goto exit;
 		}
 	}
 
