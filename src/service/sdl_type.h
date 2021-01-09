@@ -32,6 +32,10 @@
 #define AUDIO_PLAY 0
 #define AUDIO_SAMPLES 256
 
+#define FRAMES_PER_SEC 60
+
+#define MS_PER_SEC 1000
+
 #define PALETTE_MASK_BLUE 0x000000ff
 #define PALETTE_MASK_GREEN 0x0000ff00
 #define PALETTE_MASK_RED 0x00ff0000
@@ -75,6 +79,12 @@ typedef struct {
 	SDL_Texture *texture;
 	char title[TITLE_LENGTH_MAX];
 	SDL_Window *window;
+	uint64_t frame_begin;
+	float frame_elapsed;
+#ifndef NDEBUG
+	uint32_t frame_count;
+	float frame_rate;
+#endif /* NDEBUG */
 } dmg_sdl_video_t;
 
 typedef struct {
