@@ -171,10 +171,19 @@ dmg_utility_asm_parse_tree(
 		}
 
 		fprintf(stdout, " (%s@%u)\n", parser->lexer.stream.path, token->line);
+
+		for(uint32_t index = 0; index < tree->count; ++index) {
+
+			if((result = dmg_utility_asm_parse_tree(parser, (const dmg_assembler_tree_t *)tree->child[index], depth + 1))
+					!= DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		}
 	} else {
 		fprintf(stdout, "EOF\n");
 	}
 
+exit:
 	return result;
 }
 

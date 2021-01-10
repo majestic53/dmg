@@ -49,6 +49,90 @@ dmg_assembler_parser_error(
 }
 
 static int
+dmg_assembler_parser_tree_parse_expression_factor(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	// TODO
+	if((token = dmg_assembler_lexer_token(&parser->lexer))->type != TOKEN_SCALAR) {
+		result = PARSER_ERROR(parser, token, "Expecting scalar");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+		result = dmg_assembler_lexer_next(&parser->lexer);
+	}
+	// ---
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_expression(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	// TODO
+	if((result = dmg_assembler_parser_tree_parse_expression_factor(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+	// ---
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_expression_list(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	for(;;) {
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_SYMBOL)
+				|| (token->subtype != SYMBOL_SEPERATOR)) {
+			break;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated expression list");
+			goto exit;
+		}
+
+		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_parser_tree_parse_directive_bank(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token
@@ -72,7 +156,9 @@ dmg_assembler_parser_tree_parse_directive_bank(
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -103,7 +189,9 @@ dmg_assembler_parser_tree_parse_directive_data(
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_parser_tree_parse_expression_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -116,7 +204,7 @@ dmg_assembler_parser_tree_parse_directive_define(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	dmg_assembler_tree_t *root = NULL;
+	dmg_assembler_tree_t *child = NULL, *root = NULL;
 
 	if(token->subtype != DIRECTIVE_DEFINE) {
 		result = PARSER_ERROR(parser, token, "Expecting define directive");
@@ -133,7 +221,24 @@ dmg_assembler_parser_tree_parse_directive_define(
 		goto exit;
 	}
 
-	// TODO
+	if((token = dmg_assembler_lexer_token(&parser->lexer))->type != TOKEN_IDENTIFIER) {
+		result = PARSER_ERROR(parser, token, "Expecting identifier");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated define directive");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -206,7 +311,7 @@ dmg_assembler_parser_tree_parse_directive_include(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	dmg_assembler_tree_t *root = NULL;
+	dmg_assembler_tree_t *child = NULL, *root = NULL;
 
 	if((token->subtype != DIRECTIVE_INCLUDE)
 			&& (token->subtype != DIRECTIVE_INCLUDE_BINARY)) {
@@ -224,7 +329,18 @@ dmg_assembler_parser_tree_parse_directive_include(
 		goto exit;
 	}
 
-	// TODO
+	if((token = dmg_assembler_lexer_token(&parser->lexer))->type != TOKEN_LITERAL) {
+		result = PARSER_ERROR(parser, token, "Expecting literal");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+		result = dmg_assembler_lexer_next(&parser->lexer);
+	}
 
 exit:
 	return result;
@@ -254,7 +370,9 @@ dmg_assembler_parser_tree_parse_directive_origin(
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -284,7 +402,13 @@ dmg_assembler_parser_tree_parse_directive_reserve(
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -297,7 +421,7 @@ dmg_assembler_parser_tree_parse_directive_undefine(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	dmg_assembler_tree_t *root = NULL;
+	dmg_assembler_tree_t *child = NULL, *root = NULL;
 
 	if(token->subtype != DIRECTIVE_UNDEFINE) {
 		result = PARSER_ERROR(parser, token, "Expecting undefine directive");
@@ -314,7 +438,18 @@ dmg_assembler_parser_tree_parse_directive_undefine(
 		goto exit;
 	}
 
-	// TODO
+	if((token = dmg_assembler_lexer_token(&parser->lexer))->type != TOKEN_IDENTIFIER) {
+		result = PARSER_ERROR(parser, token, "Expecting identifier");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+		result = dmg_assembler_lexer_next(&parser->lexer);
+	}
 
 exit:
 	return result;

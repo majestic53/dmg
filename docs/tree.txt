@@ -5,11 +5,11 @@ tree ::= <statement_list>
 [X] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 	| <directive_origin>|<directive_reserve>|<directive_undefine>
 
-[ ] directive_bank ::= .bank<expression>
+[X] directive_bank ::= .bank<expression>
 
-[ ] directive_data ::= .[db|dw]<expression_list>
+[X] directive_data ::= .[db|dw]<expression_list>
 
-[ ] directive_define ::= .def<identifier><expression>
+[X] directive_define ::= .def<identifier><expression>
 
 [ ] directive_else ::= .else<statement_list>
 
@@ -21,13 +21,13 @@ tree ::= <statement_list>
 
 [ ] directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
 
-[ ] directive_include ::= .[inc|incb]<literal>
+[X] directive_include ::= .[inc|incb]<literal>
 
-[ ] directive_origin ::= .org<expression>
+[X] directive_origin ::= .org<expression>
 
-[ ] directive_reserve ::= .res<expression><expression>
+[X] directive_reserve ::= .res<expression><expression>
 
-[ ] directive_undefine ::= .undef<identifier>
+[X] directive_undefine ::= .undef<identifier>
 
 [ ] expression ::= <expression_binary>
 
@@ -39,7 +39,7 @@ tree ::= <statement_list>
 
 [ ] expression_factor ::= <operator>?<macro>?[(<expression>)|<identifier>|<literal>|<scalar>]
 
-[ ] expression_list ::= <expression>,<expression_list>|<expression>
+[X] expression_list ::= <expression>,<expression_list>|<expression>
 
 [ ] expression_logical ::= <expression_arithmetic_0>[&&||||<<|>>]<expression_logical>|<expression_arithmetic_0>
 
