@@ -65,6 +65,7 @@ dmg_assembler_parser_tree_parse_expression_factor(
 	}
 
 	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
 		goto exit;
 	}
 
@@ -227,6 +228,7 @@ dmg_assembler_parser_tree_parse_directive_define(
 	}
 
 	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
 		goto exit;
 	}
 
@@ -335,6 +337,7 @@ dmg_assembler_parser_tree_parse_directive_include(
 	}
 
 	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
 		goto exit;
 	}
 
@@ -444,6 +447,7 @@ dmg_assembler_parser_tree_parse_directive_undefine(
 	}
 
 	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
 		goto exit;
 	}
 
@@ -644,8 +648,7 @@ dmg_assembler_parser_has_next(
 	__in const dmg_assembler_parser_t *parser
 	)
 {
-	return ((parser->position < parser->count)
-		|| (((parser->position + 1) == parser->count) && dmg_assembler_lexer_has_next(&parser->lexer)));
+	return (parser->position < parser->count);
 }
 
 bool
@@ -673,9 +676,16 @@ dmg_assembler_parser_load(
 		goto exit;
 	}
 
-	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
-		result = dmg_assembler_parser_tree_parse(parser);
+	while(dmg_assembler_lexer_has_next(&parser->lexer)) {
+
+		if((result = dmg_assembler_parser_tree_parse(parser)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		++parser->position;
 	}
+
+	parser->position = 0;
 
 exit:
 	return result;
@@ -688,10 +698,12 @@ dmg_assembler_parser_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((++parser->position == parser->count)
-			&& ((result = dmg_assembler_parser_tree_parse(parser)) != DMG_STATUS_SUCCESS)) {
+	if(!dmg_assembler_parser_has_next(parser)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next tree %u", parser->position);
 		goto exit;
 	}
+
+	++parser->position;
 
 exit:
 	return result;

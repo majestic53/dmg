@@ -747,8 +747,7 @@ dmg_assembler_lexer_has_next(
 	__in const dmg_assembler_lexer_t *lexer
 	)
 {
-	return ((lexer->position < lexer->tokens.count)
-		|| (((lexer->position + 1) == lexer->tokens.count) && dmg_assembler_stream_has_next(&lexer->stream)));
+	return (lexer->position < lexer->tokens.count);
 }
 
 bool
@@ -776,9 +775,16 @@ dmg_assembler_lexer_load(
 		goto exit;
 	}
 
-	if(dmg_assembler_stream_has_next(&lexer->stream)) {
-		result = dmg_assembler_lexer_token_parse(lexer);
+	while(dmg_assembler_stream_has_next(&lexer->stream)) {
+
+		if((result = dmg_assembler_lexer_token_parse(lexer)) != DMG_STATUS_SUCCESS) {
+			break;
+		}
+
+		++lexer->position;
 	}
+
+	lexer->position = 0;
 
 exit:
 	return result;
@@ -791,10 +797,12 @@ dmg_assembler_lexer_next(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((++lexer->position == lexer->tokens.count)
-			&& ((result = dmg_assembler_lexer_token_parse(lexer)) != DMG_STATUS_SUCCESS)) {
+	if(!dmg_assembler_lexer_has_next(lexer)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "No next token %u", lexer->position);
 		goto exit;
 	}
+
+	++lexer->position;
 
 exit:
 	return result;

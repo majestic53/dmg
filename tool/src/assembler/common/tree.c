@@ -30,15 +30,8 @@ dmg_assembler_tree_allocate(
 	int result = DMG_STATUS_SUCCESS;
 
 	memset(tree, 0, sizeof(dmg_assembler_tree_t));
+	tree->capacity = TREE_CHILD_MAX;
 
-	if(!(tree->child = (const uintptr_t **)calloc(TREE_CHILD_CAPACITY, sizeof(const uintptr_t *)))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate tree child buffer");
-		goto exit;
-	}
-
-	tree->capacity = TREE_CHILD_CAPACITY;
-
-exit:
 	return result;
 }
 
@@ -47,31 +40,7 @@ dmg_assembler_tree_free(
 	__inout dmg_assembler_tree_t *tree
 	)
 {
-
-	if(tree->child) {
-		free(tree->child);
-	}
-
 	memset(tree, 0, sizeof(*tree));
-}
-
-static int
-dmg_assembler_tree_reallocate(
-	__inout dmg_assembler_tree_t *tree
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if(!(tree->child = (const uintptr_t **)realloc(tree->child, sizeof(const uintptr_t *) * tree->capacity * TREE_CHILD_CAPACITY_SCALE))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to reallocate tree child buffer");
-		goto exit;
-	}
-
-	memset(&tree->child[tree->capacity], 0, sizeof(const uintptr_t *) * ((tree->capacity * TREE_CHILD_CAPACITY_SCALE) - tree->capacity));
-	tree->capacity *= TREE_CHILD_CAPACITY_SCALE;
-
-exit:
-	return result;
 }
 
 static int
@@ -81,10 +50,12 @@ dmg_assembler_tree_resize(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((tree->count + 1) == tree->capacity) {
-		result = dmg_assembler_tree_reallocate(tree);
+	if(tree->count >= tree->capacity) {
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Exceeded maximum child length");
+		goto exit;
 	}
 
+exit:
 	return result;
 }
 
