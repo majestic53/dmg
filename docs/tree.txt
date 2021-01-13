@@ -37,7 +37,7 @@ tree ::= <statement_list>
 
 [ ] expression_binary ::= <expression_logical>[&|||^]<expression_binary>|<expression_logical>
 
-[ ] expression_factor ::= <operator>?<macro>?[(<expression>)|<identifier>|<literal>|<scalar>]
+[X] expression_factor ::= [~|!|-]?<macro>?[(<expression>)|<identifier>|<literal>|<scalar>]
 
 [X] expression_list ::= <expression>,<expression_list>|<expression>
 

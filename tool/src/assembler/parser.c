@@ -49,7 +49,14 @@ dmg_assembler_parser_error(
 }
 
 static int
-dmg_assembler_parser_tree_parse_expression_factor(
+dmg_assembler_parser_tree_parse_expression(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	);
+
+/*static int
+dmg_assembler_parser_tree_parse_expression_arithmetic_0(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__in dmg_assembler_tree_t *root
@@ -59,20 +66,255 @@ dmg_assembler_parser_tree_parse_expression_factor(
 	dmg_assembler_tree_t *child = NULL;
 
 	// TODO
-	if((token = dmg_assembler_lexer_token(&parser->lexer))->type != TOKEN_SCALAR) {
-		result = PARSER_ERROR(parser, token, "Expecting scalar");
-		goto exit;
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if((token->type == TOKEN_OPERATOR)
+			&& ((token->subtype == OPERATOR_ARITHMETIC_ADD)
+				|| (token->subtype == OPERATOR_ARITHMETIC_SUBTRACT))) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		// TODO
+	} else {
+		// TODO
 	}
 
-	if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
-		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
-		goto exit;
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_expression_arithmetic_1(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	// TODO
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if((token->type == TOKEN_OPERATOR)
+			&& ((token->subtype == OPERATOR_ARITHMETIC_DIVIDE)
+				|| (token->subtype == OPERATOR_ARITHMETIC_MODULUS)
+				|| (token->subtype == OPERATOR_ARITHMETIC_MULTIPLY))) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		// TODO
+	} else {
+		// TODO
 	}
 
-	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
-		result = dmg_assembler_lexer_next(&parser->lexer);
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_expression_binary(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	// TODO
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if((token->type == TOKEN_OPERATOR)
+			&& ((token->subtype == OPERATOR_BINARY_AND)
+				|| (token->subtype == OPERATOR_BINARY_OR)
+				|| (token->subtype == OPERATOR_BINARY_XOR))) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		// TODO
+	} else {
+		// TODO
 	}
-	// ---
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_tree_parse_expression_logical(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	// TODO
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if((token->type == TOKEN_OPERATOR)
+			&& ((token->subtype == OPERATOR_LOGICAL_AND)
+				|| (token->subtype == OPERATOR_LOGICAL_OR)
+				|| (token->subtype == OPERATOR_LOGICAL_SHIFT_LEFT)
+				|| (token->subtype == OPERATOR_LOGICAL_SHIFT_RIGHT))) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		// TODO
+	} else {
+		// TODO
+	}
+
+exit:
+	return result;
+}*/
+
+static int
+dmg_assembler_parser_tree_parse_expression_factor(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__in dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if(token->type == TOKEN_OPERATOR) {
+
+		if((token->subtype != OPERATOR_ARITHMETIC_SUBTRACT)
+				&& (token->subtype != OPERATOR_UNARY_NEGATE)
+				&& (token->subtype != OPERATOR_UNARY_NOT)) {
+			result = PARSER_ERROR(parser, token, "Unsupported unary operator");
+			goto exit;
+		}
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| (dmg_assembler_lexer_next(&parser->lexer) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated expression");
+			goto exit;
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+	}
+
+	if(token->type == TOKEN_MACRO) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| (dmg_assembler_lexer_next(&parser->lexer) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated expression");
+			goto exit;
+		}
+
+		root = child;
+		token = dmg_assembler_lexer_token(&parser->lexer);
+	}
+
+	if((token->type == TOKEN_SYMBOL)
+			&& (token->subtype == SYMBOL_BRACE_OPEN)) {
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| (dmg_assembler_lexer_next(&parser->lexer) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated expression");
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_SYMBOL)
+				|| (token->subtype != SYMBOL_BRACE_CLOSE)) {
+
+			if(dmg_assembler_lexer_previous(&parser->lexer) == DMG_STATUS_SUCCESS) {
+				token = dmg_assembler_lexer_token(&parser->lexer);
+			}
+
+			result = PARSER_ERROR(parser, token, "Unterminated expression brace");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+	} else if((token->type == TOKEN_IDENTIFIER)
+			|| (token->type == TOKEN_LITERAL)
+			|| (token->type == TOKEN_SCALAR)) {
+
+		if((result = dmg_assembler_trees_add_child(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+	} else {
+		result = PARSER_ERROR(parser, token, "Expecting expression factor");
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -85,16 +327,9 @@ dmg_assembler_parser_tree_parse_expression(
 	__in dmg_assembler_tree_t *root
 	)
 {
-	int result = DMG_STATUS_SUCCESS;
-
 	// TODO
-	if((result = dmg_assembler_parser_tree_parse_expression_factor(parser, token, root)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
+	return dmg_assembler_parser_tree_parse_expression_factor(parser, token, root);
 	// ---
-
-exit:
-	return result;
 }
 
 static int

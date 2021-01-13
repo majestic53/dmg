@@ -51,7 +51,7 @@ dmg_assembler_tree_resize(
 	int result = DMG_STATUS_SUCCESS;
 
 	if(tree->count >= tree->capacity) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Exceeded maximum child length");
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Exceeded maximum child capacity");
 		goto exit;
 	}
 
