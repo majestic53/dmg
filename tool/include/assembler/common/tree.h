@@ -49,15 +49,21 @@ extern "C" {
 
 int dmg_assembler_trees_add(
 	__inout dmg_assembler_trees_t *trees,
+	__in bool root,
 	__in const dmg_assembler_token_t *token,
 	__out dmg_assembler_tree_t **tree
 	);
 
-int dmg_assembler_trees_add_child(
+int dmg_assembler_trees_append_child_token(
 	__inout dmg_assembler_trees_t *trees,
 	__inout dmg_assembler_tree_t *parent,
 	__in const dmg_assembler_token_t *token,
 	__out dmg_assembler_tree_t **tree
+	);
+
+int dmg_assembler_trees_append_child_tree(
+	__inout dmg_assembler_tree_t *parent,
+	__in const dmg_assembler_tree_t *child
 	);
 
 int dmg_assembler_trees_allocate(

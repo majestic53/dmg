@@ -129,6 +129,7 @@ dmg_assembler_trees_resize_tree(
 int
 dmg_assembler_trees_add(
 	__inout dmg_assembler_trees_t *trees,
+	__in bool root,
 	__in const dmg_assembler_token_t *token,
 	__out dmg_assembler_tree_t **tree
 	)
@@ -147,19 +148,22 @@ dmg_assembler_trees_add(
 	(*tree)->parent = token;
 	++trees->tree.count;
 
-	if((result = dmg_assembler_trees_resize_entry(trees)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
+	if(root) {
 
-	trees->entry[trees->count] = *tree;
-	++trees->count;
+		if((result = dmg_assembler_trees_resize_entry(trees)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		trees->entry[trees->count] = *tree;
+		++trees->count;
+	}
 
 exit:
 	return result;
 }
 
 int
-dmg_assembler_trees_add_child(
+dmg_assembler_trees_append_child_token(
 	__inout dmg_assembler_trees_t *trees,
 	__inout dmg_assembler_tree_t *parent,
 	__in const dmg_assembler_token_t *token,
@@ -168,23 +172,47 @@ dmg_assembler_trees_add_child(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_assembler_tree_allocate(&trees->tree.ptr[trees->tree.count])) != DMG_STATUS_SUCCESS) {
-		goto exit;
+	if(parent->parent) {
+		if((result = dmg_assembler_tree_allocate(&trees->tree.ptr[trees->tree.count])) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_trees_resize_tree(trees)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		*tree = &trees->tree.ptr[trees->tree.count];
+		++trees->tree.count;
+		(*tree)->parent = token;
+
+		if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		parent->child[parent->count] = (const uintptr_t *)*tree;
+		++parent->count;
+	} else {
+		*tree = parent;
+		(*tree)->parent = token;
 	}
 
-	if((result = dmg_assembler_trees_resize_tree(trees)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
+exit:
+	return result;
+}
 
-	*tree = &trees->tree.ptr[trees->tree.count];
-	(*tree)->parent = token;
-	++trees->tree.count;
+int
+dmg_assembler_trees_append_child_tree(
+	__inout dmg_assembler_tree_t *parent,
+	__in const dmg_assembler_tree_t *child
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
 
 	if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	parent->child[parent->count] = (const uintptr_t *)*tree;
+	parent->child[parent->count] = (const uintptr_t *)child;
 	++parent->count;
 
 exit:
