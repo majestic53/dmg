@@ -29,22 +29,14 @@ tree ::= <statement_list>
 
 [X] directive_undefine ::= .undef<identifier>
 
-[ ] expression ::= <expression_binary>
-
-[ ] expression_arithmetic_0 ::= <expression_arithmetic_1>[+|-]<expression_arithmetic_0>|<expression_arithmetic_1>
-
-[ ] expression_arithmetic_1 ::= <expression_factor>[*|/|%]<expression_arithmetic_1>|<expression_factor>
-
-[ ] expression_binary ::= <expression_logical>[&|||^]<expression_binary>|<expression_logical>
+[X] expression ::= <expression_factor>[+|-|*|/|%|&|||^|&&||||<<|>>]<expression>|<expression_factor>
 
 [X] expression_factor ::= [~|!|-]?<macro>?[(<expression>)|<identifier>|<literal>|<scalar>]
 
 [X] expression_list ::= <expression>,<expression_list>|<expression>
 
-[ ] expression_logical ::= <expression_arithmetic_0>[&&||||<<|>>]<expression_logical>|<expression_arithmetic_0>
-
 [ ] instruction ::=
 
-[X] statement ::= <directive>|<instruction>|<label>
+[X] statement ::= <directive>|<instruction>|<label>|<register>
 
 [ ] statement_list ::= <statement>*
