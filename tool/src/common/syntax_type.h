@@ -526,7 +526,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"call nz, " DELIMITER_HEXIDECIMAL "%04x",
 	"push bc",
 	"add a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 00",
+	"rst " DELIMITER_HEXIDECIMAL "00",
 	"ret z", /* 0xc8 */
 	"ret",
 	"jp z, " DELIMITER_HEXIDECIMAL "%04x",
@@ -534,7 +534,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"call z, " DELIMITER_HEXIDECIMAL "%04x",
 	"call " DELIMITER_HEXIDECIMAL "%04x",
 	"adc a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 08",
+	"rst " DELIMITER_HEXIDECIMAL "08",
 	"ret nc", /* 0xd0 */
 	"pop de",
 	"jp nc, " DELIMITER_HEXIDECIMAL "%04x",
@@ -542,7 +542,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"call nc, " DELIMITER_HEXIDECIMAL "%04x",
 	"push de",
 	"sub a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 10",
+	"rst " DELIMITER_HEXIDECIMAL "10",
 	"ret c", /* 0xd8 */
 	"reti",
 	"jp c, " DELIMITER_HEXIDECIMAL "%04x",
@@ -550,15 +550,15 @@ static const char *INSTRUCTION_STR[] =  {
 	"call c, " DELIMITER_HEXIDECIMAL "%04x",
 	"unused_dd",
 	"sbc a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 18",
-	"ld (ff00+" DELIMITER_HEXIDECIMAL "%02x), a", /* 0xe0 */
+	"rst " DELIMITER_HEXIDECIMAL "18",
+	"ld (" DELIMITER_HEXIDECIMAL "ff00+" DELIMITER_HEXIDECIMAL "%02x), a", /* 0xe0 */
 	"pop hl",
-	"ld (ff00+c), a",
+	"ld (" DELIMITER_HEXIDECIMAL "ff00+c), a",
 	"unused_e3",
 	"unused_e4",
 	"push hl",
 	"and a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 20",
+	"rst " DELIMITER_HEXIDECIMAL "20",
 	"add sp, " DELIMITER_HEXIDECIMAL "%02x", /* 0xe8 */
 	"jp hl",
 	"ld (" DELIMITER_HEXIDECIMAL "%04x), a",
@@ -566,15 +566,15 @@ static const char *INSTRUCTION_STR[] =  {
 	"unused_ec",
 	"unused_ed",
 	"xor a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 28",
-	"ld a, (ff00+" DELIMITER_HEXIDECIMAL "%02x)", /* 0xf0 */
+	"rst " DELIMITER_HEXIDECIMAL "28",
+	"ld a, (" DELIMITER_HEXIDECIMAL "ff00+" DELIMITER_HEXIDECIMAL "%02x)", /* 0xf0 */
 	"pop af",
-	"ld a, (ff00+c)",
+	"ld a, (" DELIMITER_HEXIDECIMAL "ff00+c)",
 	"di",
 	"unused_f4",
 	"push af",
 	"or a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 30",
+	"rst " DELIMITER_HEXIDECIMAL "30",
 	"ld hl, sp+" DELIMITER_HEXIDECIMAL "%02x", /* 0xf8 */
 	"ld sp, hl",
 	"ld a, (" DELIMITER_HEXIDECIMAL "%04x)",
@@ -582,7 +582,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"unused_fc",
 	"unused_fd",
 	"cp a, " DELIMITER_HEXIDECIMAL "%02x",
-	"rst 38",
+	"rst " DELIMITER_HEXIDECIMAL "38",
 	};
 
 static const dmg_tool_syntax_instruction_t INSTRUCTION_EXTENDED[] = {
@@ -1279,6 +1279,8 @@ static const char *ROM_STR[] = {
 static const char *SYMBOL_STR[] = {
 	")", /* SYMBOL_BRACE_CLOSE */
 	"(", /* SYMBOL_BRACE_OPEN */
+	"]", /* SYMBOL_BRACKET_CLOSE */
+	"[", /* SYMBOL_BRACKET_OPEN */
 	",", /* SYMBOL_SEPERATOR */
 	"", /* SYMBOL_MAX */
 	};

@@ -15,10 +15,10 @@ opcode ::= adc|add|and|call|ccf|cp|cpl|daa|dec|di|ei|halt|inc|jp|jr|ld|nop|or|po
 	|bit0|bit1|bit2|bit3|bit4|bit5|bit6|bit7|res0|res1|res2|res3|res4|res5|res6|res7|rl|rlc|rr|rrc
 	|set0|set1|set2|set3|set4|set5|set6|set7|sla|sra|srl|swap
 
-operator ::= ==|!=|<|<=|<<|>|>=|>>|&&||||~|!|&|||^|+|-|*|/|%
+operator ::= ==|!=|<|<=|>|>=|<<|>>|&&||||~|!|&|||^|+|-|*|/|%
 
 register ::= a|af|b|bc|c|d|de|e|h|hl|l|pc|sp
 
 scalar ::= [~|!|-]?([0-9]{1-5}|$[0-9a-fA-F]{1-4}|@[0-1]{1-16})
 
-symbol ::= (|)|,
+symbol ::= (|)|[|]|,

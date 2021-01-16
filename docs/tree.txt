@@ -1,6 +1,6 @@
 tree ::= <statement_list>
 
-[ ] condition ::= <condition><operator><condition>|<expression>
+[X] condition ::= <expression_factor>[==|!=|<|<=|>|>=]<expression>|<expression_factor>
 
 [X] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 	| <directive_origin>|<directive_reserve>|<directive_undefine>
@@ -31,7 +31,7 @@ tree ::= <statement_list>
 
 [X] expression ::= <expression_factor>[+|-|*|/|%|&|||^|&&||||<<|>>]<expression>|<expression_factor>
 
-[X] expression_factor ::= [~|!|-]?<macro>?[(<expression>)|<identifier>|<literal>|<scalar>]
+[X] expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<literal>]([<expression>])?)|<scalar>]
 
 [X] expression_list ::= <expression>,<expression_list>|<expression>
 
