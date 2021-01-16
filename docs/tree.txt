@@ -1,6 +1,6 @@
 tree ::= <statement_list>
 
-[X] condition ::= <expression_factor>[==|!=|<|<=|>|>=]<expression>|<expression_factor>
+[X] condition ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
 
 [X] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 	| <directive_origin>|<directive_reserve>|<directive_undefine>
@@ -11,15 +11,15 @@ tree ::= <statement_list>
 
 [X] directive_define ::= .def<identifier><expression>
 
-[ ] directive_else ::= .else<statement_list>
+[X] directive_else ::= .else<statement_list>
 
-[ ] directive_else_if ::= .elsif<condition><statement_list>
+[X] directive_else_if ::= .elsif<condition><statement_list>
 
-[ ] directive_end ::= .end
+[X] directive_end ::= .end
 
-[ ] directive_if ::= .if<condition><statement_list><directive_else_if>*<directive_else>?<directive_end>
+[X] directive_if ::= .if<condition><statement_list><directive_else_if>*<directive_else>?<directive_end>
 
-[ ] directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
+[X] directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
 
 [X] directive_include ::= .[inc|incb]<literal>
 

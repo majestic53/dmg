@@ -197,13 +197,9 @@ dmg_utility_asm_parse_trees(void)
 		goto exit;
 	}
 
-	if(!dmg_assembler_parser_has_next(&parser)) {
-		goto exit;
-	}
-
 	for(;;) {
 
-		if((result = dmg_utility_asm_parse_tree(&parser, parser.trees.entry[parser.position], 0)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_utility_asm_parse_tree(&parser, dmg_assembler_parser_tree(&parser), 0)) != DMG_STATUS_SUCCESS) {
 			break;
 		}
 

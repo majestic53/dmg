@@ -25,7 +25,6 @@ typedef struct {
 	dmg_assembler_lexer_t lexer;
 	dmg_assembler_trees_t trees;
 	uint32_t count;
-	uint32_t position;
 } dmg_assembler_parser_t;
 
 #ifdef __cplusplus
@@ -36,10 +35,6 @@ bool dmg_assembler_parser_has_next(
 	__in const dmg_assembler_parser_t *parser
 	);
 
-bool dmg_assembler_parser_has_previous(
-	__in const dmg_assembler_parser_t *parser
-	);
-
 int dmg_assembler_parser_load(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_buffer_t *buffer,
@@ -47,10 +42,6 @@ int dmg_assembler_parser_load(
 	);
 
 int dmg_assembler_parser_next(
-	__inout dmg_assembler_parser_t *parser
-	);
-
-int dmg_assembler_parser_previous(
 	__inout dmg_assembler_parser_t *parser
 	);
 

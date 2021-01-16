@@ -60,26 +60,6 @@ exit:
 }
 
 static int
-dmg_assembler_trees_reallocate_entry(
-	__inout dmg_assembler_trees_t *trees
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if(!(trees->entry = (const dmg_assembler_tree_t **)realloc(trees->entry, sizeof(const dmg_assembler_tree_t *) * trees->capacity
-			* TREE_ENTRY_CAPACITY_SCALE))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to reallocate tree entry buffer");
-		goto exit;
-	}
-
-	memset(&trees->entry[trees->capacity], 0, sizeof(const dmg_assembler_tree_t *) * ((trees->capacity * TREE_ENTRY_CAPACITY_SCALE) - trees->capacity));
-	trees->capacity *= TREE_ENTRY_CAPACITY_SCALE;
-
-exit:
-	return result;
-}
-
-static int
 dmg_assembler_trees_reallocate_tree(
 	__inout dmg_assembler_trees_t *trees
 	)
@@ -95,20 +75,6 @@ dmg_assembler_trees_reallocate_tree(
 	trees->tree.capacity *= TREE_CAPACITY_SCALE;
 
 exit:
-	return result;
-}
-
-static int
-dmg_assembler_trees_resize_entry(
-	__inout dmg_assembler_trees_t *trees
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if((trees->count + 1) == trees->capacity) {
-		result = dmg_assembler_trees_reallocate_entry(trees);
-	}
-
 	return result;
 }
 
@@ -149,13 +115,7 @@ dmg_assembler_trees_add(
 	++trees->tree.count;
 
 	if(root) {
-
-		if((result = dmg_assembler_trees_resize_entry(trees)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
-
-		trees->entry[trees->count] = *tree;
-		++trees->count;
+		trees->root = *tree;
 	}
 
 exit:
@@ -208,12 +168,27 @@ dmg_assembler_trees_append_child_tree(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
+	if(parent->parent) {
 
-	parent->child[parent->count] = (const uintptr_t *)child;
-	++parent->count;
+		if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		parent->child[parent->count] = (const uintptr_t *)child;
+		++parent->count;
+	} else {
+		parent->parent = child->parent;
+
+		while(parent->count < child->count) {
+
+			if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			parent->child[parent->count] = child->child[parent->count];
+			++parent->count;
+		}
+	}
 
 exit:
 	return result;
@@ -235,13 +210,6 @@ dmg_assembler_trees_allocate(
 
 	trees->tree.capacity = TREE_CAPACITY;
 
-	if(!(trees->entry = (const dmg_assembler_tree_t **)calloc(TREE_ENTRY_CAPACITY, sizeof(const dmg_assembler_tree_t *)))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate tree entry buffer");
-		goto exit;
-	}
-
-	trees->capacity = TREE_ENTRY_CAPACITY;
-
 exit:
 	return result;
 }
@@ -251,10 +219,6 @@ dmg_assembler_trees_free(
 	__inout dmg_assembler_trees_t *trees
 	)
 {
-
-	if(trees->entry) {
-		free(trees->entry);
-	}
 
 	if(trees->tree.ptr) {
 

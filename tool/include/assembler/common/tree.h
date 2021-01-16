@@ -38,9 +38,7 @@ typedef struct {
 		uint32_t count;
 	} tree;
 
-	const dmg_assembler_tree_t **entry;
-	uint32_t capacity;
-	uint32_t count;
+	const dmg_assembler_tree_t *root;
 } dmg_assembler_trees_t;
 
 #ifdef __cplusplus
