@@ -1,42 +1,42 @@
 tree ::= <statement_list>
 
-[X] condition ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
+condition ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
 
-[X] directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
-	| <directive_origin>|<directive_reserve>|<directive_undefine>
+directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
+		| <directive_origin>|<directive_reserve>|<directive_undefine>
 
-[X] directive_bank ::= .bank<expression>
+directive_bank ::= .bank<expression>
 
-[X] directive_data ::= .[db|dw]<expression_list>
+directive_data ::= .[db|dw]<expression_list>
 
-[X] directive_define ::= .def<identifier><expression>
+directive_define ::= .def<identifier><expression>
 
-[X] directive_else ::= .else<statement_list>
+directive_else ::= .else<statement_list>
 
-[X] directive_else_if ::= .elsif<condition><statement_list>
+directive_else_if ::= .elsif<condition><statement_list>
 
-[X] directive_end ::= .end
+directive_end ::= .end
 
-[X] directive_if ::= .if<condition><statement_list><directive_else_if>*<directive_else>?<directive_end>
+directive_if ::= .if<condition><statement_list><directive_else_if>*<directive_else>?<directive_end>
 
-[X] directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
+directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
 
-[X] directive_include ::= .[inc|incb]<literal>
+directive_include ::= .[inc|incb]<literal>
 
-[X] directive_origin ::= .org<expression>
+directive_origin ::= .org<expression>
 
-[X] directive_reserve ::= .res<expression><expression>
+directive_reserve ::= .res<expression><expression>
 
-[X] directive_undefine ::= .undef<identifier>
+directive_undefine ::= .undef<identifier>
 
-[X] expression ::= <expression_factor>[+|-|*|/|%|&|||^|&&||||<<|>>]<expression>|<expression_factor>
+expression ::= <expression_factor>[+|-|*|/|%|&|||^|&&||||<<|>>]<expression>|<expression_factor>
 
-[X] expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<literal>]([<expression>])?)|<scalar>]
+expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
 
-[X] expression_list ::= <expression>,<expression_list>|<expression>
+expression_list ::= <expression>,<expression_list>|<expression>
 
-[ ] instruction ::=
+instruction ::=
 
-[X] statement ::= <directive>|<instruction>|<label>|<register>
+statement ::= <directive>|<instruction>|<label>|<register>
 
-[ ] statement_list ::= <statement>*
+statement_list ::= <statement>*

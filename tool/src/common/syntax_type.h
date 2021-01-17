@@ -1176,7 +1176,7 @@ static const char *OPCODE_STR[] = {
 	"unused_e4", /* OPCODE_UNUSED_E4 */
 	"unused_eb", /* OPCODE_UNUSED_EB */
 	"unused_ec", /* OPCODE_UNUSED_EC */
-	"unused_ed", /* OPCODE_NUSED_ED */
+	"unused_ed", /* OPCODE_UNUSED_ED */
 	"unused_f4", /* OPCODE_UNUSED_F4 */
 	"unused_fc", /* OPCODE_UNUSED_FC */
 	"unused_fd", /* OPCODE_UNUSED_FD */

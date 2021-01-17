@@ -54,14 +54,14 @@ dmg_assembler_parser_error(
 }
 
 static int
-dmg_assembler_parser_tree_parse_expression(
+dmg_assembler_parser_parse_expression(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	);
 
 static int
-dmg_assembler_parser_tree_parse_expression_factor(
+dmg_assembler_parser_parse_expression_factor(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -124,7 +124,7 @@ dmg_assembler_parser_tree_parse_expression_factor(
 
 		token = dmg_assembler_lexer_token(&parser->lexer);
 
-		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -146,6 +146,7 @@ dmg_assembler_parser_tree_parse_expression_factor(
 			result = dmg_assembler_lexer_next(&parser->lexer);
 		}
 	} else if((token->type == TOKEN_IDENTIFIER)
+			|| (token->type == TOKEN_LABEL)
 			|| (token->type == TOKEN_LITERAL)
 			|| (token->type == TOKEN_SCALAR)) {
 
@@ -172,7 +173,7 @@ dmg_assembler_parser_tree_parse_expression_factor(
 
 				token = dmg_assembler_lexer_token(&parser->lexer);
 
-				if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+				if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
 
@@ -205,7 +206,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_expression(
+dmg_assembler_parser_parse_expression(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -218,7 +219,7 @@ dmg_assembler_parser_tree_parse_expression(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression_factor(parser, token, child_left)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression_factor(parser, token, child_left)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -257,7 +258,7 @@ dmg_assembler_parser_tree_parse_expression(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if((result = dmg_assembler_trees_append_child_tree(root, child_left)) != DMG_STATUS_SUCCESS) {
@@ -269,7 +270,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_expression_list(
+dmg_assembler_parser_parse_expression_list(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -277,7 +278,7 @@ dmg_assembler_parser_tree_parse_expression_list(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -295,7 +296,7 @@ dmg_assembler_parser_tree_parse_expression_list(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -305,7 +306,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_condition(
+dmg_assembler_parser_parse_condition(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -318,7 +319,7 @@ dmg_assembler_parser_tree_parse_condition(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, child_left)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, child_left)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -351,7 +352,7 @@ dmg_assembler_parser_tree_parse_condition(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if((result = dmg_assembler_trees_append_child_tree(root, child_left)) != DMG_STATUS_SUCCESS) {
@@ -363,7 +364,47 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_bank(
+dmg_assembler_parser_parse_statement(
+	__inout dmg_assembler_parser_t *parser,
+	__inout dmg_assembler_tree_t *root
+	);
+
+static int
+dmg_assembler_parser_parse_statement_list(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	for(;;) {
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type == TOKEN_DIRECTIVE)
+				&& ((token->subtype == DIRECTIVE_ELSE)
+					|| (token->subtype == DIRECTIVE_ELSE_IF)
+					|| (token->subtype == DIRECTIVE_END))) {
+			break;
+		}
+
+		if((result = dmg_assembler_parser_parse_statement(parser, root)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = PARSER_ERROR(parser, token, "Unterminated statement list");
+			goto exit;
+		}
+	}
+
+exit:
+	return result;
+
+}
+
+static int
+dmg_assembler_parser_parse_directive_bank(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -390,7 +431,7 @@ dmg_assembler_parser_tree_parse_directive_bank(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -399,7 +440,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_data(
+dmg_assembler_parser_parse_directive_data(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -427,7 +468,7 @@ dmg_assembler_parser_tree_parse_directive_data(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -436,7 +477,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_define(
+dmg_assembler_parser_parse_directive_define(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -479,7 +520,7 @@ dmg_assembler_parser_tree_parse_directive_define(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -488,48 +529,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_statement(
-	__inout dmg_assembler_parser_t *parser,
-	__inout dmg_assembler_tree_t *root
-	);
-
-static int
-dmg_assembler_parser_tree_parse_statement_list(
-	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
-	__inout dmg_assembler_tree_t *root
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	for(;;) {
-		token = dmg_assembler_lexer_token(&parser->lexer);
-
-		if((token->type == TOKEN_DIRECTIVE)
-				&& ((token->subtype == DIRECTIVE_ELSE)
-					|| (token->subtype == DIRECTIVE_ELSE_IF)
-					|| (token->subtype == DIRECTIVE_END))) {
-			break;
-		}
-
-		if(!dmg_assembler_lexer_has_next(&parser->lexer)
-				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
-			result = PARSER_ERROR(parser, token, "Unterminated statement list");
-			goto exit;
-		}
-
-		if((result = dmg_assembler_parser_tree_parse_statement(parser, root)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
-	}
-
-exit:
-	return result;
-
-}
-
-static int
-dmg_assembler_parser_tree_parse_directive_else(
+dmg_assembler_parser_parse_directive_else(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -556,7 +556,7 @@ dmg_assembler_parser_tree_parse_directive_else(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -565,7 +565,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_else_if(
+dmg_assembler_parser_parse_directive_else_if(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -592,11 +592,11 @@ dmg_assembler_parser_tree_parse_directive_else_if(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_condition(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_condition(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -606,7 +606,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_end(
+dmg_assembler_parser_parse_directive_end(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -629,7 +629,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_if(
+dmg_assembler_parser_parse_directive_if(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -656,11 +656,11 @@ dmg_assembler_parser_tree_parse_directive_if(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_condition(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_condition(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -669,7 +669,7 @@ dmg_assembler_parser_tree_parse_directive_if(
 	while((token->type == TOKEN_DIRECTIVE)
 			&& (token->subtype == DIRECTIVE_ELSE_IF)) {
 
-		if((result = dmg_assembler_parser_tree_parse_directive_else_if(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_directive_else_if(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -679,14 +679,14 @@ dmg_assembler_parser_tree_parse_directive_if(
 	if((token->type == TOKEN_DIRECTIVE)
 			&& (token->subtype == DIRECTIVE_ELSE)) {
 
-		if((result = dmg_assembler_parser_tree_parse_directive_else(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_directive_else(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
 		token = dmg_assembler_lexer_token(&parser->lexer);
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_directive_end(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_directive_end(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -695,7 +695,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_if_define(
+dmg_assembler_parser_parse_directive_if_define(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -738,7 +738,7 @@ dmg_assembler_parser_tree_parse_directive_if_define(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_statement_list(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -747,14 +747,14 @@ dmg_assembler_parser_tree_parse_directive_if_define(
 	if((token->type == TOKEN_DIRECTIVE)
 			&& (token->subtype == DIRECTIVE_ELSE)) {
 
-		if((result = dmg_assembler_parser_tree_parse_directive_else(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_directive_else(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
 		token = dmg_assembler_lexer_token(&parser->lexer);
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_directive_end(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_directive_end(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -763,7 +763,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_include(
+dmg_assembler_parser_parse_directive_include(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -810,7 +810,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_origin(
+dmg_assembler_parser_parse_directive_origin(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -837,7 +837,7 @@ dmg_assembler_parser_tree_parse_directive_origin(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -846,7 +846,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_reserve(
+dmg_assembler_parser_parse_directive_reserve(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -873,11 +873,11 @@ dmg_assembler_parser_tree_parse_directive_reserve(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -886,7 +886,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_directive_undefine(
+dmg_assembler_parser_parse_directive_undefine(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -931,88 +931,133 @@ exit:
 	return result;
 }
 
+static dmg_assembler_parser_hdlr DIRECTIVE_HANDLER[] = {
+	dmg_assembler_parser_parse_directive_bank, /* DIRECTIVE_BANK */
+	dmg_assembler_parser_parse_directive_data, /* DIRECTIVE_DATA_BYTE */
+	dmg_assembler_parser_parse_directive_data, /* DIRECTIVE_DATA_WORD */
+	dmg_assembler_parser_parse_directive_define, /* DIRECTIVE_DEFINE */
+	NULL, /* DIRECTIVE_ELSE_IF */
+	NULL, /* DIRECTIVE_ELSE */
+	NULL, /* DIRECTIVE_END */
+	dmg_assembler_parser_parse_directive_if, /* DIRECTIVE_IF */
+	dmg_assembler_parser_parse_directive_if_define, /* DIRECTIVE_IF_DEFINE */
+	dmg_assembler_parser_parse_directive_include, /* DIRECTIVE_INCLUDE */
+	dmg_assembler_parser_parse_directive_include, /* DIRECTIVE_INCLUDE_BINARY */
+	dmg_assembler_parser_parse_directive_origin, /* DIRECTIVE_ORIGIN */
+	dmg_assembler_parser_parse_directive_reserve, /* DIRECTIVE_RESERVE */
+	dmg_assembler_parser_parse_directive_undefine, /* DIRECTIVE_UNDEFINE */
+	};
+
 static int
-dmg_assembler_parser_tree_parse_directive(
+dmg_assembler_parser_parse_directive(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_parser_hdlr handler;
 
 	if(token->type != TOKEN_DIRECTIVE) {
 		result = PARSER_ERROR(parser, token, "Expecting directive");
 		goto exit;
 	}
 
-	switch(token->subtype) {
-		case DIRECTIVE_BANK:
+	if((token->subtype >= DIRECTIVE_MAX)
+			|| !(handler = DIRECTIVE_HANDLER[token->subtype])) {
+		result = PARSER_ERROR(parser, token, "Invalid directive");
+		goto exit;
+	}
 
-			if((result = dmg_assembler_parser_tree_parse_directive_bank(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_DATA_BYTE:
-		case DIRECTIVE_DATA_WORD:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_data(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_DEFINE:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_define(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_IF:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_if(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_IF_DEFINE:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_if_define(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_INCLUDE:
-		case DIRECTIVE_INCLUDE_BINARY:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_include(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_ORIGIN:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_origin(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_RESERVE:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_reserve(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case DIRECTIVE_UNDEFINE:
-
-			if((result = dmg_assembler_parser_tree_parse_directive_undefine(parser, token, root)) != DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		default:
-			result = PARSER_ERROR(parser, token, "Invalid directive");
-			goto exit;
+	if((result = handler(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 exit:
 	return result;
 }
 
+static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
+	NULL, /* OPCODE_ADC */
+	NULL, /* OPCODE_ADD */
+	NULL, /* OPCODE_AND */
+	NULL, /* OPCODE_CALL */
+	NULL, /* OPCODE_CCF */
+	NULL, /* OPCODE_CP */
+	NULL, /* OPCODE_CPL */
+	NULL, /* OPCODE_DAA */
+	NULL, /* OPCODE_DEC */
+	NULL, /* OPCODE_DI */
+	NULL, /* OPCODE_EI */
+	NULL, /* OPCODE_HALT */
+	NULL, /* OPCODE_INC */
+	NULL, /* OPCODE_JP */
+	NULL, /* OPCODE_JR */
+	NULL, /* OPCODE_LD */
+	NULL, /* OPCODE_NOP */
+	NULL, /* OPCODE_OR */
+	NULL, /* OPCODE_POP */
+	NULL, /* OPCODE_PUSH */
+	NULL, /* OPCODE_RET */
+	NULL, /* OPCODE_RETI */
+	NULL, /* OPCODE_RLA */
+	NULL, /* OPCODE_RLCA */
+	NULL, /* OPCODE_RRA */
+	NULL, /* OPCODE_RRCA */
+	NULL, /* OPCODE_RST */
+	NULL, /* OPCODE_SCF */
+	NULL, /* OPCODE_SBC */
+	NULL, /* OPCODE_STOP */
+	NULL, /* OPCODE_SUB */
+	NULL, /* OPCODE_XOR */
+	NULL, /* OPCODE_UNUSED_CB */
+	NULL, /* OPCODE_UNUSED_D3 */
+	NULL, /* OPCODE_UNUSED_DB */
+	NULL, /* OPCODE_UNUSED_DD */
+	NULL, /* OPCODE_UNUSED_E3 */
+	NULL, /* OPCODE_UNUSED_E4 */
+	NULL, /* OPCODE_UNUSED_EB */
+	NULL, /* OPCODE_UNUSED_EC */
+	NULL, /* OPCODE_UNUSED_ED */
+	NULL, /* OPCODE_UNUSED_F4 */
+	NULL, /* OPCODE_UNUSED_FC */
+	NULL, /* OPCODE_UNUSED_FD */
+	NULL, /* OPCODE_BIT0 */
+	NULL, /* OPCODE_BIT1 */
+	NULL, /* OPCODE_BIT2 */
+	NULL, /* OPCODE_BIT3 */
+	NULL, /* OPCODE_BIT4 */
+	NULL, /* OPCODE_BIT5 */
+	NULL, /* OPCODE_BIT6 */
+	NULL, /* OPCODE_BIT7 */
+	NULL, /* OPCODE_RES0 */
+	NULL, /* OPCODE_RES1 */
+	NULL, /* OPCODE_RES2 */
+	NULL, /* OPCODE_RES3 */
+	NULL, /* OPCODE_RES4 */
+	NULL, /* OPCODE_RES5 */
+	NULL, /* OPCODE_RES6 */
+	NULL, /* OPCODE_RES7 */
+	NULL, /* OPCODE_RL */
+	NULL, /* OPCODE_RLC */
+	NULL, /* OPCODE_RR */
+	NULL, /* OPCODE_RRC */
+	NULL, /* OPCODE_SET0 */
+	NULL, /* OPCODE_SET1 */
+	NULL, /* OPCODE_SET2 */
+	NULL, /* OPCODE_SET3 */
+	NULL, /* OPCODE_SET4 */
+	NULL, /* OPCODE_SET5 */
+	NULL, /* OPCODE_SET6 */
+	NULL, /* OPCODE_SET7 */
+	NULL, /* OPCODE_SLA */
+	NULL, /* OPCODE_SRA */
+	NULL, /* OPCODE_SRL */
+	NULL, /* OPCODE_SWAP */
+	};
+
 static int
-dmg_assembler_parser_tree_parse_instruction(
+dmg_assembler_parser_parse_instruction(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -1020,6 +1065,7 @@ dmg_assembler_parser_tree_parse_instruction(
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_parser_hdlr handler;
 
 	if(token->type != TOKEN_OPCODE) {
 		result = PARSER_ERROR(parser, token, "Expecting instruction");
@@ -1031,18 +1077,30 @@ dmg_assembler_parser_tree_parse_instruction(
 		goto exit;
 	}
 
-	if(dmg_assembler_lexer_has_next(&parser->lexer)) {
-		result = dmg_assembler_lexer_next(&parser->lexer);
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated instruction");
+		goto exit;
 	}
 
-	// TODO
+	root = child;
+
+	if((token->subtype >= OPCODE_MAX)
+			|| !(handler = INSTRUCTION_HANDLER[token->subtype])) {
+		result = PARSER_ERROR(parser, token, "Invalid instruction");
+		goto exit;
+	}
+
+	if((result = handler(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
 }
 
 static int
-dmg_assembler_parser_tree_parse_label(
+dmg_assembler_parser_parse_label(
 	__inout dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
@@ -1070,7 +1128,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse_statement(
+dmg_assembler_parser_parse_statement(
 	__inout dmg_assembler_parser_t *parser,
 	__inout dmg_assembler_tree_t *root
 	)
@@ -1081,19 +1139,19 @@ dmg_assembler_parser_tree_parse_statement(
 	switch((token = dmg_assembler_lexer_token(&parser->lexer))->type) {
 		case TOKEN_DIRECTIVE:
 
-			if((result = dmg_assembler_parser_tree_parse_directive(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_parser_parse_directive(parser, token, root)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
 		case TOKEN_OPCODE:
 
-			if((result = dmg_assembler_parser_tree_parse_instruction(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_parser_parse_instruction(parser, token, root)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
 		case TOKEN_LABEL:
 
-			if((result = dmg_assembler_parser_tree_parse_label(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_parser_parse_label(parser, token, root)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
@@ -1107,7 +1165,7 @@ exit:
 }
 
 static int
-dmg_assembler_parser_tree_parse(
+dmg_assembler_parser_parse(
 	__inout dmg_assembler_parser_t *parser
 	)
 {
@@ -1120,7 +1178,7 @@ dmg_assembler_parser_tree_parse(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_parser_tree_parse_statement(parser, root)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parser_parse_statement(parser, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -1180,7 +1238,7 @@ dmg_assembler_parser_next(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_parser_tree_parse(parser)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_parse(parser)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 

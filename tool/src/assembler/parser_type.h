@@ -21,6 +21,12 @@
 
 #include "../../include/assembler/parser.h"
 
+typedef int (*dmg_assembler_parser_hdlr)(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_tree_t *root
+	);
+
 #define PARSER_ERROR(_PARSER_, _TOKEN_, _MESSAGE_) \
 	dmg_assembler_parser_error(_PARSER_, _TOKEN_, _MESSAGE_)
 
