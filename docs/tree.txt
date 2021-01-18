@@ -35,7 +35,39 @@ expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<label>|<literal>]([<expre
 
 expression_list ::= <expression>,<expression_list>|<expression>
 
-instruction ::=
+instruction ::= <instruction_ccf>|<instruction_cpl>|<instruction_daa>|<instruction_di>|<instruction_ei>
+	|<instruction_halt>|<instruction_nop>|<instruction_ret>|<instruction_reti>|<instruction_rla>
+	|<instruction_rlca>|<instruction_rra>|<instruction_rrca>|<instruction_scf>|<instruction_stop>
+
+instruction_ccf ::= ccf
+
+instruction_cpl ::= cpl
+
+instruction_daa ::= daa
+
+instruction_di ::= di
+
+instruction_ei ::= ei
+
+instruction_halt ::= halt
+
+instruction_nop ::= nop
+
+instruction_ret ::= ret
+
+instruction_reti ::= reti
+
+instruction_rla ::= rla
+
+instruction_rlca ::= rlca
+
+instruction_rra ::= rra
+
+instruction_rrca ::= rrca
+
+instruction_scf ::= scf
+
+instruction_stop ::= stop
 
 statement ::= <directive>|<instruction>|<label>|<register>
 
