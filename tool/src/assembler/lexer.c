@@ -89,7 +89,10 @@ dmg_assembler_lexer_token_parse_alpha(
 
 	if(token->type == TOKEN_IDENTIFIER) {
 
-		if(dmg_tool_syntax_is_macro_string(string.str, &type)) {
+		if(dmg_tool_syntax_is_condition_string(string.str, &type)) {
+			token->type = TOKEN_CONDITION;
+			token->subtype = type;
+		} else if(dmg_tool_syntax_is_macro_string(string.str, &type)) {
 			token->type = TOKEN_MACRO;
 			token->subtype = type;
 		} else if(dmg_tool_syntax_is_opcode_string(string.str, &type)) {

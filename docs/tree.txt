@@ -1,7 +1,5 @@
 tree ::= <statement_list>
 
-condition ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
-
 directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 		| <directive_origin>|<directive_reserve>|<directive_undefine>
 
@@ -13,11 +11,11 @@ directive_define ::= .def<identifier><expression>
 
 directive_else ::= .else<statement_list>
 
-directive_else_if ::= .elsif<condition><statement_list>
+directive_else_if ::= .elsif<inequality><statement_list>
 
 directive_end ::= .end
 
-directive_if ::= .if<condition><statement_list><directive_else_if>*<directive_else>?<directive_end>
+directive_if ::= .if<inequality><statement_list><directive_else_if>*<directive_else>?<directive_end>
 
 directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
 
@@ -35,9 +33,13 @@ expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<label>|<literal>]([<expre
 
 expression_list ::= <expression>,<expression_list>|<expression>
 
-instruction ::= <instruction_ccf>|<instruction_cpl>|<instruction_daa>|<instruction_di>|<instruction_ei>
-	|<instruction_halt>|<instruction_nop>|<instruction_ret>|<instruction_reti>|<instruction_rla>
-	|<instruction_rlca>|<instruction_rra>|<instruction_rrca>|<instruction_scf>|<instruction_stop>
+inequality ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
+
+instruction ::= <instruction_call>|<instruction_ccf>|<instruction_cpl>|<instruction_daa>|<instruction_dec>|<instruction_di>|<instruction_ei>
+	|<instruction_halt>|<instruction_inc>|<instruction_nop>|<instruction_pop>|<instruction_push>|<instruction_ret>|<instruction_reti>
+	|<instruction_rla>|<instruction_rlca>|<instruction_rra>|<instruction_rrca>|<instruction_rst>|<instruction_scf>|<instruction_stop>
+
+instruction_call ::= call (<condition>,)?<expression>
 
 instruction_ccf ::= ccf
 
@@ -45,15 +47,23 @@ instruction_cpl ::= cpl
 
 instruction_daa ::= daa
 
+instruction_dec ::= dec [bc|de|hl|sp]
+
 instruction_di ::= di
 
 instruction_ei ::= ei
 
 instruction_halt ::= halt
 
+instruction_inc ::= inc [bc|de|hl|sp]
+
 instruction_nop ::= nop
 
-instruction_ret ::= ret
+instruction_pop ::= pop [af|bc|de|hl]
+
+instruction_push ::= push [af|bc|de|hl]
+
+instruction_ret ::= ret <condition>?
 
 instruction_reti ::= reti
 
@@ -64,6 +74,8 @@ instruction_rlca ::= rlca
 instruction_rra ::= rra
 
 instruction_rrca ::= rrca
+
+instruction_rst ::= rst <expression>
 
 instruction_scf ::= scf
 

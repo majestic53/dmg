@@ -75,6 +75,7 @@ dmg_utility_asm_parse_tokens(void)
 		fprintf(stdout, "[%i:%i]", token->type, token->subtype);
 
 		switch(token->type) {
+			case TOKEN_CONDITION:
 			case TOKEN_DIRECTIVE:
 			case TOKEN_IDENTIFIER:
 			case TOKEN_LABEL:
@@ -141,6 +142,7 @@ dmg_utility_asm_parse_tree(
 		fprintf(stdout, "{%u} [%i:%i]", tree->count, token->type, token->subtype);
 
 		switch(token->type) {
+			case TOKEN_CONDITION:
 			case TOKEN_DIRECTIVE:
 			case TOKEN_IDENTIFIER:
 			case TOKEN_LABEL:

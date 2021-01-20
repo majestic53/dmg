@@ -30,6 +30,14 @@ static const char CHARACTER_ESCAPE_CHAR[] = {
 	'\0', /* CHARACTER_ESCAPE_MAX */
 	};
 
+static const char *CONDITION_STR[] = {
+	"C", /* CONDITION_CARRY */
+	"NC", /* CONDITION_CARRY_NOT */
+	"Z", /* CONDITION_ZERO */
+	"NZ", /* CONDITION_ZERO_NOT */
+	"", /* CONDITION_MAX */
+	};
+
 static const char *DIRECTIVE_STR[] = {
 	DELIMITER_DIRECTIVE "bank", /* DIRECTIVE_BANK */
 	DELIMITER_DIRECTIVE "db", /* DIRECTIVE_DATA_BYTE */
@@ -359,7 +367,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"dec e",
 	"ld e, " DELIMITER_HEXIDECIMAL "%02x",
 	"rra",
-	"jr nz, " DELIMITER_HEXIDECIMAL "%02x", /* 0x20 */
+	"jr NZ, " DELIMITER_HEXIDECIMAL "%02x", /* 0x20 */
 	"ld hl, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (hl+), a",
 	"inc hl",
@@ -367,7 +375,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"dec h",
 	"ld h, " DELIMITER_HEXIDECIMAL "%02x",
 	"daa",
-	"jr z, " DELIMITER_HEXIDECIMAL "%02x", /* 0x28 */
+	"jr Z, " DELIMITER_HEXIDECIMAL "%02x", /* 0x28 */
 	"add hl, hl",
 	"ld a, (hl+)",
 	"dec hl",
@@ -375,7 +383,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"dec l",
 	"ld l, " DELIMITER_HEXIDECIMAL "%02x",
 	"cpl",
-	"jr nc, " DELIMITER_HEXIDECIMAL "%02x", /* 0x30 */
+	"jr NC, " DELIMITER_HEXIDECIMAL "%02x", /* 0x30 */
 	"ld sp, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (hl-), a",
 	"inc sp",
@@ -383,7 +391,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"dec (hl)",
 	"ld (hl), " DELIMITER_HEXIDECIMAL "%02x",
 	"scf",
-	"jr c, " DELIMITER_HEXIDECIMAL "%02x", /* 0x38 */
+	"jr C, " DELIMITER_HEXIDECIMAL "%02x", /* 0x38 */
 	"add hl, sp",
 	"ld a, (hl-)",
 	"dec sp",
@@ -519,35 +527,35 @@ static const char *INSTRUCTION_STR[] =  {
 	"cp a, l",
 	"cp a, (hl)",
 	"cp a, a",
-	"ret nz", /* 0xc0 */
+	"ret NZ", /* 0xc0 */
 	"pop bc",
-	"jp nz, " DELIMITER_HEXIDECIMAL "%04x",
+	"jp NZ, " DELIMITER_HEXIDECIMAL "%04x",
 	"jp " DELIMITER_HEXIDECIMAL "%04x",
-	"call nz, " DELIMITER_HEXIDECIMAL "%04x",
+	"call NZ, " DELIMITER_HEXIDECIMAL "%04x",
 	"push bc",
 	"add a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst " DELIMITER_HEXIDECIMAL "00",
-	"ret z", /* 0xc8 */
+	"ret Z", /* 0xc8 */
 	"ret",
-	"jp z, " DELIMITER_HEXIDECIMAL "%04x",
+	"jp Z, " DELIMITER_HEXIDECIMAL "%04x",
 	"unused_cb",
-	"call z, " DELIMITER_HEXIDECIMAL "%04x",
+	"call Z, " DELIMITER_HEXIDECIMAL "%04x",
 	"call " DELIMITER_HEXIDECIMAL "%04x",
 	"adc a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst " DELIMITER_HEXIDECIMAL "08",
-	"ret nc", /* 0xd0 */
+	"ret NC", /* 0xd0 */
 	"pop de",
-	"jp nc, " DELIMITER_HEXIDECIMAL "%04x",
+	"jp NC, " DELIMITER_HEXIDECIMAL "%04x",
 	"unused_d3",
-	"call nc, " DELIMITER_HEXIDECIMAL "%04x",
+	"call NC, " DELIMITER_HEXIDECIMAL "%04x",
 	"push de",
 	"sub a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst " DELIMITER_HEXIDECIMAL "10",
-	"ret c", /* 0xd8 */
+	"ret C", /* 0xd8 */
 	"reti",
-	"jp c, " DELIMITER_HEXIDECIMAL "%04x",
+	"jp C, " DELIMITER_HEXIDECIMAL "%04x",
 	"unused_db",
-	"call c, " DELIMITER_HEXIDECIMAL "%04x",
+	"call C, " DELIMITER_HEXIDECIMAL "%04x",
 	"unused_dd",
 	"sbc a, " DELIMITER_HEXIDECIMAL "%02x",
 	"rst " DELIMITER_HEXIDECIMAL "18",

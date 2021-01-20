@@ -32,6 +32,14 @@ enum {
 };
 
 enum {
+	CONDITION_CARRY = 0,
+	CONDITION_CARRY_NOT,
+	CONDITION_ZERO,
+	CONDITION_ZERO_NOT,
+	CONDITION_MAX,
+};
+
+enum {
 	DIRECTIVE_BANK = 0,
 	DIRECTIVE_DATA_BYTE,
 	DIRECTIVE_DATA_WORD,
@@ -230,6 +238,10 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+const char *dmg_tool_syntax_condition_string(
+	__in int type
+	);
+
 const char *dmg_tool_syntax_directive_string(
 	__in int type
 	);
@@ -248,13 +260,18 @@ const char *dmg_tool_syntax_instruction_string(
 	__in bool extended
 	);
 
-bool dmg_tool_syntax_is_escape_character(
-	__in const char ch,
+bool dmg_tool_syntax_is_condition_string(
+	__in const char *str,
 	__inout int *type
 	);
 
 bool dmg_tool_syntax_is_directive_string(
 	__in const char *str,
+	__inout int *type
+	);
+
+bool dmg_tool_syntax_is_escape_character(
+	__in const char ch,
 	__inout int *type
 	);
 

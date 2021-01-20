@@ -1,5 +1,7 @@
 token ::= <directive>|<label>|<literal>|<macro>|<opcode>|<operator>|<register>|<scalar>|<symbol>
 
+condition ::= C|NC|Z|NZ
+
 directive ::= .[bank|db|def|dw|elsif|else|end|if|ifdef|inc|incb|org|res|undef]
 
 identifier ::= [_a-zA-Z][_a-zA-Z0-9]*

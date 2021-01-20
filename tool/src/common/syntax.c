@@ -61,6 +61,14 @@ dmg_tool_syntax_is_string(
 }
 
 const char *
+dmg_tool_syntax_condition_string(
+	__in int type
+	)
+{
+	return CONDITION_STR[type];
+}
+
+const char *
 dmg_tool_syntax_directive_string(
 	__in int type
 	)
@@ -95,12 +103,12 @@ dmg_tool_syntax_instruction_string(
 }
 
 bool
-dmg_tool_syntax_is_escape_character(
-	__in const char ch,
+dmg_tool_syntax_is_condition_string(
+	__in const char *str,
 	__inout int *type
 	)
 {
-	return dmg_tool_syntax_is_character(CHARACTER_ESCAPE_CHAR, CHARACTER_ESCAPE_MAX, ch, type);
+	return dmg_tool_syntax_is_string(CONDITION_STR, CONDITION_MAX, str, type);
 }
 
 bool
@@ -110,6 +118,15 @@ dmg_tool_syntax_is_directive_string(
 	)
 {
 	return dmg_tool_syntax_is_string(DIRECTIVE_STR, DIRECTIVE_MAX, str, type);
+}
+
+bool
+dmg_tool_syntax_is_escape_character(
+	__in const char ch,
+	__inout int *type
+	)
+{
+	return dmg_tool_syntax_is_character(CHARACTER_ESCAPE_CHAR, CHARACTER_ESCAPE_MAX, ch, type);
 }
 
 bool
