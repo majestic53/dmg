@@ -1,4 +1,4 @@
-DMG 0.2.23-alpha
+DMG 0.2.24-alpha
 Copyright (C) 2020-2021 David Jolly
 ==============================
 
