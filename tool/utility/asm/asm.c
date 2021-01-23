@@ -74,35 +74,21 @@ dmg_utility_asm_parse_tokens(void)
 
 		fprintf(stdout, "[%i:%i]", token->type, token->subtype);
 
-		switch(token->type) {
-			case TOKEN_CONDITION:
-			case TOKEN_DIRECTIVE:
-			case TOKEN_IDENTIFIER:
-			case TOKEN_LABEL:
-			case TOKEN_LITERAL:
-			case TOKEN_MACRO:
-			case TOKEN_OPCODE:
-			case TOKEN_OPERATOR:
-			case TOKEN_REGISTER:
-			case TOKEN_SCALAR:
-			case TOKEN_SYMBOL:
-				fprintf(stdout, " \"");
+		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
+			fprintf(stdout, " \"");
 
-				for(uint32_t index = 0; index < token->literal.length; ++index) {
-					fprintf(stdout, "%c", token->literal.str[index]);
-				}
+			for(uint32_t index = 0; index < token->literal.length; ++index) {
+				fprintf(stdout, "%c", token->literal.str[index]);
+			}
 
-				fprintf(stdout, "\"");
+			fprintf(stdout, "\"");
 
-				if(token->type == TOKEN_SCALAR) {
-					fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
-				}
-				break;
-			default:
-				fprintf(stdout, " \'%c\' (%02x)",
-					(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL,
-						token->scalar.low);
-				break;
+			if(token->type == TOKEN_SCALAR) {
+				fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
+			}
+		} else {
+			fprintf(stdout, " \'%c\' (%02x)", (isprint(token->scalar.low) && !isspace(token->scalar.low))
+				? token->scalar.low : CHARACTER_FILL, token->scalar.low);
 		}
 
 		fprintf(stdout, " (%s@%u)\n", lexer.stream.path, token->line);
@@ -141,35 +127,21 @@ dmg_utility_asm_parse_tree(
 
 		fprintf(stdout, "{%u} [%i:%i]", tree->count, token->type, token->subtype);
 
-		switch(token->type) {
-			case TOKEN_CONDITION:
-			case TOKEN_DIRECTIVE:
-			case TOKEN_IDENTIFIER:
-			case TOKEN_LABEL:
-			case TOKEN_LITERAL:
-			case TOKEN_MACRO:
-			case TOKEN_OPCODE:
-			case TOKEN_OPERATOR:
-			case TOKEN_REGISTER:
-			case TOKEN_SCALAR:
-			case TOKEN_SYMBOL:
-				fprintf(stdout, " \"");
+		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
+			fprintf(stdout, " \"");
 
-				for(uint32_t index = 0; index < token->literal.length; ++index) {
-					fprintf(stdout, "%c", token->literal.str[index]);
-				}
+			for(uint32_t index = 0; index < token->literal.length; ++index) {
+				fprintf(stdout, "%c", token->literal.str[index]);
+			}
 
-				fprintf(stdout, "\"");
+			fprintf(stdout, "\"");
 
-				if(token->type == TOKEN_SCALAR) {
-					fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
-				}
-				break;
-			default:
-				fprintf(stdout, " \'%c\' (%02x)",
-					(isprint(token->scalar.low) && !isspace(token->scalar.low)) ? token->scalar.low : CHARACTER_FILL,
-						token->scalar.low);
-				break;
+			if(token->type == TOKEN_SCALAR) {
+				fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
+			}
+		} else {
+			fprintf(stdout, " \'%c\' (%02x)", (isprint(token->scalar.low) && !isspace(token->scalar.low))
+				? token->scalar.low : CHARACTER_FILL, token->scalar.low);
 		}
 
 		fprintf(stdout, " (%s@%u)\n", parser->lexer.stream.path, token->line);
