@@ -27,13 +27,13 @@ directive_reserve ::= .res<expression><expression>
 
 directive_undefine ::= .undef<identifier>
 
-expression ::= <expression_factor><operator><expression>|<expression_factor>
+expression ::= <expression_factor><operator_binary><expression>|<expression_factor>
 
-expression_factor ::= <operator>?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
+expression_factor ::= <operator_unary>?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
 
 expression_list ::= <expression>,<expression_list>|<expression>
 
-inequality ::= <expression><operator><expression>|<expression>
+inequality ::= <expression><operator_condition><expression>|<expression>
 
 instruction ::= <instruction_adc>|<instruction_add>|<instruction_and>|<instruction_bit>|<instruction_call>|<instruction_ccf>
 	|<instruction_cp>|<instruction_cpl>|<instruction_daa>|<instruction_dec>|<instruction_di>|<instruction_ei>|<instruction_halt>
@@ -43,29 +43,25 @@ instruction ::= <instruction_adc>|<instruction_add>|<instruction_and>|<instructi
 	|<instruction_scf>|<instruction_set>|<instruction_sla>|<instruction_sra>|<instruction_srl>|<instruction_stop>|<instruction_sub>
 	|<instruction_swap>|<instruction_xor>
 
-register_8 ::= a|b|c|d|e|h|l|(hl)
+instruction_adc ::= adc <register>(,<expression>)?
 
-register_16 ::= af|bc|de|hl|sp
+instruction_add ::= add <register>,(<register>|<expression>)
 
-instruction_adc ::= adc <register_8>,[<register_8>|<expression>]
+instruction_and ::= and <register>|<expression>
 
-instruction_add ::= add (<register_8>,[<register_8>|<expression>])|(<register_16>,<register_16>)|(<register_16>,<expression>)
+instruction_bit ::= bit[0-7] <register>
 
-instruction_and ::= and <register_8>|<expression>
-
-instruction_bit ::= bit[0-7] <register_8>
-
-instruction_call ::= call [<condition>,]?<expression>
+instruction_call ::= call (<condition>,)?<expression>
 
 instruction_ccf ::= ccf
 
-instruction_cp ::= cp <register_8>|<expression>
+instruction_cp ::= cp <register>|<expression>
 
 instruction_cpl ::= cpl
 
 instruction_daa ::= daa
 
-instruction_dec ::= dec <register_8>|<register_16>
+instruction_dec ::= dec <register>
 
 instruction_di ::= di
 
@@ -73,65 +69,73 @@ instruction_ei ::= ei
 
 instruction_halt ::= halt
 
-instruction_inc ::= inc <register_8>|<register_16>
+instruction_inc ::= inc <register>
 
-instruction_jp ::= jp (<condition>,<expression>)|<expression>|<register_8>
+instruction_jp ::= jp <condition>,<expression>|(<register>)|<expression>
 
-instruction_jr ::= jr (<condition>,)?<expression>
+instruction_jr ::= jr <condition>,<expression>|<expression>
 
 instruction_ld ::=
 
 instruction_nop ::= nop
 
-instruction_or ::= or <register_8>|<expression>
+instruction_or ::= or <register>|<expression>
 
-instruction_pop ::= pop <register_16>
+instruction_pop ::= pop <register>
 
-instruction_push ::= push <register_16>
+instruction_push ::= push <register>
 
-instruction_res ::= res[0-7] <register_8>
+instruction_res ::= res[0-7] <register>
 
 instruction_ret ::= ret <condition>?
 
 instruction_reti ::= reti
 
-instruction_rl ::= rl <register_8>
+instruction_rl ::= rl <register>
 
 instruction_rla ::= rla
 
-instruction_rlc ::= rlc <register_8>
+instruction_rlc ::= rlc <register>
 
 instruction_rlca ::= rlca
 
-instruction_rr ::= rr <register_8>
+instruction_rr ::= rr <register>
 
 instruction_rra ::= rra
 
-instruction_rrc ::= rrc <register_8>
+instruction_rrc ::= rrc <register>
 
 instruction_rrca ::= rrca
 
 instruction_rst ::= rst <expression>
 
-instruction_sbc ::= sbc <register_8>,[<register_8>|<expression>]
+instruction_sbc ::= sbc <register>(,<expression>)?
 
 instruction_scf ::= scf
 
-instruction_set ::= set[0-7] <register_8>
+instruction_set ::= set[0-7] <register>
 
-instruction_sla ::= sla <register_8>
+instruction_sla ::= sla <register>
 
-instruction_sra ::= sra <register_8>
+instruction_sra ::= sra <register>
 
-instruction_srl ::= srl <register_8>
+instruction_srl ::= srl <register>
 
 instruction_stop ::= stop
 
-instruction_sub ::= <register_8>,[<register_8>|<expression>]
+instruction_sub ::= sub <register>|<expression>
 
-instruction_swap ::= swap <register_8>
+instruction_swap ::= swap <register>
 
-instruction_xor ::= xor [<register_8>|<expression>]
+instruction_xor ::= xor <register>|<expression>
+
+operator_binary ::= +|-|*|/|%|<<|>>|&|||^|&&|||
+
+operator_condition ::= ==|!=|<|<=|>|>=
+
+operator_unary ::= ~|!|-
+
+register ::= a|af|b|bc|c|d|de|e|h|hl|l|sp
 
 statement ::= <directive>|<instruction>|<label>|<register>
 
