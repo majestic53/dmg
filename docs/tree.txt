@@ -27,27 +27,45 @@ directive_reserve ::= .res<expression><expression>
 
 directive_undefine ::= .undef<identifier>
 
-expression ::= <expression_factor>[+|-|*|/|%|&|||^|&&||||<<|>>]<expression>|<expression_factor>
+expression ::= <expression_factor><operator><expression>|<expression_factor>
 
-expression_factor ::= [~|!|-]?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
+expression_factor ::= <operator>?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
 
 expression_list ::= <expression>,<expression_list>|<expression>
 
-inequality ::= <expression>[==|!=|<|<=|>|>=]<expression>|<expression>
+inequality ::= <expression><operator><expression>|<expression>
 
-instruction ::= <instruction_call>|<instruction_ccf>|<instruction_cpl>|<instruction_daa>|<instruction_dec>|<instruction_di>|<instruction_ei>
-	|<instruction_halt>|<instruction_inc>|<instruction_nop>|<instruction_pop>|<instruction_push>|<instruction_ret>|<instruction_reti>
-	|<instruction_rla>|<instruction_rlca>|<instruction_rra>|<instruction_rrca>|<instruction_rst>|<instruction_scf>|<instruction_stop>
+instruction ::= <instruction_adc>|<instruction_add>|<instruction_and>|<instruction_bit>|<instruction_call>|<instruction_ccf>
+	|<instruction_cp>|<instruction_cpl>|<instruction_daa>|<instruction_dec>|<instruction_di>|<instruction_ei>|<instruction_halt>
+	|<instruction_inc>|<instruction_jp>|<instruction_jr>|<instruction_ld>|<instruction_nop>|<instruction_or>|<instruction_pop>
+	|<instruction_push>|<instruction_res>|<instruction_ret>|<instruction_reti>|<instruction_rl>|<instruction_rla>|<instruction_rlc>
+	|<instruction_rlca>|<instruction_rr>|<instruction_rra>|<instruction_rrc>|<instruction_rrca>|<instruction_rst>|<instruction_sbc>
+	|<instruction_scf>|<instruction_set>|<instruction_sla>|<instruction_sra>|<instruction_srl>|<instruction_stop>|<instruction_sub>
+	|<instruction_swap>|<instruction_xor>
 
-instruction_call ::= call (<condition>,)?<expression>
+register_8 ::= a|b|c|d|e|h|l|(hl)
+
+register_16 ::= af|bc|de|hl|sp
+
+instruction_adc ::= adc <register_8>,[<register_8>|<expression>]
+
+instruction_add ::= add (<register_8>,[<register_8>|<expression>])|(<register_16>,<register_16>)|(<register_16>,<expression>)
+
+instruction_and ::= and <register_8>|<expression>
+
+instruction_bit ::= bit[0-7] <register_8>
+
+instruction_call ::= call [<condition>,]?<expression>
 
 instruction_ccf ::= ccf
+
+instruction_cp ::= cp <register_8>|<expression>
 
 instruction_cpl ::= cpl
 
 instruction_daa ::= daa
 
-instruction_dec ::= dec [bc|de|hl|sp]
+instruction_dec ::= dec <register_8>|<register_16>
 
 instruction_di ::= di
 
@@ -55,31 +73,65 @@ instruction_ei ::= ei
 
 instruction_halt ::= halt
 
-instruction_inc ::= inc [bc|de|hl|sp]
+instruction_inc ::= inc <register_8>|<register_16>
+
+instruction_jp ::= jp (<condition>,<expression>)|<expression>|<register_8>
+
+instruction_jr ::= jr (<condition>,)?<expression>
+
+instruction_ld ::=
 
 instruction_nop ::= nop
 
-instruction_pop ::= pop [af|bc|de|hl]
+instruction_or ::= or <register_8>|<expression>
 
-instruction_push ::= push [af|bc|de|hl]
+instruction_pop ::= pop <register_16>
+
+instruction_push ::= push <register_16>
+
+instruction_res ::= res[0-7] <register_8>
 
 instruction_ret ::= ret <condition>?
 
 instruction_reti ::= reti
 
+instruction_rl ::= rl <register_8>
+
 instruction_rla ::= rla
+
+instruction_rlc ::= rlc <register_8>
 
 instruction_rlca ::= rlca
 
+instruction_rr ::= rr <register_8>
+
 instruction_rra ::= rra
+
+instruction_rrc ::= rrc <register_8>
 
 instruction_rrca ::= rrca
 
 instruction_rst ::= rst <expression>
 
+instruction_sbc ::= sbc <register_8>,[<register_8>|<expression>]
+
 instruction_scf ::= scf
 
+instruction_set ::= set[0-7] <register_8>
+
+instruction_sla ::= sla <register_8>
+
+instruction_sra ::= sra <register_8>
+
+instruction_srl ::= srl <register_8>
+
 instruction_stop ::= stop
+
+instruction_sub ::= <register_8>,[<register_8>|<expression>]
+
+instruction_swap ::= swap <register_8>
+
+instruction_xor ::= xor [<register_8>|<expression>]
 
 statement ::= <directive>|<instruction>|<label>|<register>
 

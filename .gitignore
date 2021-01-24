@@ -1,2 +1,5 @@
+*.code-workspace
 *.sublime-workspace
 *.sublime-project
+bin/
+build/

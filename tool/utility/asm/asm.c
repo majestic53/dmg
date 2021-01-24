@@ -153,8 +153,6 @@ dmg_utility_asm_parse_tree(
 				goto exit;
 			}
 		}
-	} else {
-		fprintf(stdout, "EOF\n");
 	}
 
 exit:

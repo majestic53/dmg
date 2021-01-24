@@ -977,6 +977,34 @@ exit:
 	return result;
 }
 
+static bool
+dmg_assembler_parser_is_register_8(
+	__in const dmg_assembler_token_t *token
+	)
+{
+	return ((token->type == TOKEN_REGISTER)
+			&& ((token->subtype == REGISTER_A)
+				|| (token->subtype == REGISTER_B)
+				|| (token->subtype == REGISTER_C)
+				|| (token->subtype == REGISTER_D)
+				|| (token->subtype == REGISTER_E)
+				|| (token->subtype == REGISTER_H)
+				|| (token->subtype == REGISTER_L)));
+}
+
+static bool
+dmg_assembler_parser_is_register_16(
+	__in const dmg_assembler_token_t *token
+	)
+{
+	return ((token->type == TOKEN_REGISTER)
+			&& ((token->subtype == REGISTER_AF)
+				|| (token->subtype == REGISTER_BC)
+				|| (token->subtype == REGISTER_DE)
+				|| (token->subtype == REGISTER_HL)
+				|| (token->subtype == REGISTER_SP)));
+}
+
 static int
 dmg_assembler_parser_parse_operand_accumulator_expression(
 	__inout dmg_assembler_parser_t *parser,
@@ -1027,16 +1055,7 @@ dmg_assembler_parser_parse_operand_accumulator_expression(
 		goto exit;
 	}
 
-	token = dmg_assembler_lexer_token(&parser->lexer);
-
-	if((token->type == TOKEN_REGISTER)
-			&& ((token->subtype == REGISTER_A)
-				|| (token->subtype == REGISTER_B)
-				|| (token->subtype == REGISTER_C)
-				|| (token->subtype == REGISTER_D)
-				|| (token->subtype == REGISTER_E)
-				|| (token->subtype == REGISTER_H)
-				|| (token->subtype == REGISTER_L))) {
+	if(dmg_assembler_parser_is_register_8((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -1115,16 +1134,8 @@ dmg_assembler_parser_parse_operand_register_8(
 	}
 
 	root = child;
-	token = dmg_assembler_lexer_token(&parser->lexer);
 
-	if((token->type == TOKEN_REGISTER)
-			&& ((token->subtype == REGISTER_A)
-				|| (token->subtype == REGISTER_B)
-				|| (token->subtype == REGISTER_C)
-				|| (token->subtype == REGISTER_D)
-				|| (token->subtype == REGISTER_E)
-				|| (token->subtype == REGISTER_H)
-				|| (token->subtype == REGISTER_L))) {
+	if(dmg_assembler_parser_is_register_8((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -1206,18 +1217,8 @@ dmg_assembler_parser_parse_operand_register_8_16(
 	root = child;
 	token = dmg_assembler_lexer_token(&parser->lexer);
 
-	if((token->type == TOKEN_REGISTER)
-			&& ((token->subtype == REGISTER_A)
-				|| (token->subtype == REGISTER_B)
-				|| (token->subtype == REGISTER_BC)
-				|| (token->subtype == REGISTER_C)
-				|| (token->subtype == REGISTER_D)
-				|| (token->subtype == REGISTER_DE)
-				|| (token->subtype == REGISTER_E)
-				|| (token->subtype == REGISTER_H)
-				|| (token->subtype == REGISTER_HL)
-				|| (token->subtype == REGISTER_L)
-				|| (token->subtype == REGISTER_SP))) {
+	if(dmg_assembler_parser_is_register_8(token)
+			|| dmg_assembler_parser_is_register_16(token)) {
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -1298,16 +1299,8 @@ dmg_assembler_parser_parse_operand_register_8_expression(
 	}
 
 	root = child;
-	token = dmg_assembler_lexer_token(&parser->lexer);
 
-	if((token->type == TOKEN_REGISTER)
-			&& ((token->subtype == REGISTER_A)
-				|| (token->subtype == REGISTER_B)
-				|| (token->subtype == REGISTER_C)
-				|| (token->subtype == REGISTER_D)
-				|| (token->subtype == REGISTER_E)
-				|| (token->subtype == REGISTER_H)
-				|| (token->subtype == REGISTER_L))) {
+	if(dmg_assembler_parser_is_register_8((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -1386,13 +1379,8 @@ dmg_assembler_parser_parse_operand_register_16(
 	}
 
 	root = child;
-	token = dmg_assembler_lexer_token(&parser->lexer);
 
-	if((token->type != TOKEN_REGISTER)
-			|| ((token->subtype != REGISTER_AF)
-				&& (token->subtype != REGISTER_BC)
-				&& (token->subtype != REGISTER_DE)
-				&& (token->subtype != REGISTER_HL))) {
+	if(!dmg_assembler_parser_is_register_16((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 		result = PARSER_ERROR(parser, token, "Expecting register");
 		goto exit;
 	}
@@ -1485,16 +1473,7 @@ dmg_assembler_parser_parse_instruction_add(
 				goto exit;
 			}
 
-			token = dmg_assembler_lexer_token(&parser->lexer);
-
-			if((token->type == TOKEN_REGISTER)
-					&& ((token->subtype == REGISTER_A)
-						|| (token->subtype == REGISTER_B)
-						|| (token->subtype == REGISTER_C)
-						|| (token->subtype == REGISTER_D)
-						|| (token->subtype == REGISTER_E)
-						|| (token->subtype == REGISTER_H)
-						|| (token->subtype == REGISTER_L))) {
+			if(dmg_assembler_parser_is_register_8((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 
 				if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 					result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -1976,6 +1955,212 @@ dmg_assembler_parser_parse_instruction_inc(
 	}
 
 	result = dmg_assembler_parser_parse_operand_register_8_16(parser, token, root);
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_parse_instruction_jp(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if((token->type != TOKEN_OPCODE)
+			|| (token->subtype != OPCODE_JP)) {
+		result = PARSER_ERROR(parser, token, "Expecting opcode");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated opcode");
+		goto exit;
+	}
+
+	root = child;
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if(token->type == TOKEN_CONDITION) {
+
+		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_SYMBOL)
+				|| (token->subtype != SYMBOL_SEPERATOR)) {
+			result = PARSER_ERROR(parser, token, "Expecting seperator");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	} else if((token->type == TOKEN_SYMBOL)
+			|| (token->subtype == SYMBOL_BRACE_OPEN)) {
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_REGISTER)
+				|| (token->subtype != REGISTER_HL)) {
+			result = PARSER_ERROR(parser, token, "Expecting register");
+			goto exit;
+		}
+
+		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_SYMBOL)
+				|| (token->subtype != SYMBOL_BRACE_CLOSE)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		if(dmg_assembler_lexer_has_next(&parser->lexer)) {
+			result = dmg_assembler_lexer_next(&parser->lexer);
+		}
+	} else if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_parse_instruction_jr(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if((token->type != TOKEN_OPCODE)
+			|| (token->subtype != OPCODE_JR)) {
+		result = PARSER_ERROR(parser, token, "Expecting opcode");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated opcode");
+		goto exit;
+	}
+
+	root = child;
+	token = dmg_assembler_lexer_token(&parser->lexer);
+
+	if(token->type == TOKEN_CONDITION) {
+
+		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+
+		token = dmg_assembler_lexer_token(&parser->lexer);
+
+		if((token->type != TOKEN_SYMBOL)
+				|| (token->subtype != SYMBOL_SEPERATOR)) {
+			result = PARSER_ERROR(parser, token, "Expecting seperator");
+			goto exit;
+		}
+
+		if(!dmg_assembler_lexer_has_next(&parser->lexer)
+				|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+			result = PARSER_ERROR(parser, token, "Unterminated opcode");
+			goto exit;
+		}
+	}
+
+	if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_parser_parse_instruction_ld(
+	__inout dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_tree_t *root
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if((token->type != TOKEN_OPCODE)
+			|| (token->subtype != OPCODE_LD)) {
+		result = PARSER_ERROR(parser, token, "Expecting opcode");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
+		result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+		goto exit;
+	}
+
+	if(!dmg_assembler_lexer_has_next(&parser->lexer)
+			|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+		result = PARSER_ERROR(parser, token, "Unterminated opcode");
+		goto exit;
+	}
+
+	// TODO
 
 exit:
 	return result;
@@ -2627,16 +2812,7 @@ dmg_assembler_parser_parse_instruction_sub(
 		goto exit;
 	}
 
-	token = dmg_assembler_lexer_token(&parser->lexer);
-
-	if((token->type == TOKEN_REGISTER)
-			&& ((token->subtype == REGISTER_A)
-				|| (token->subtype == REGISTER_B)
-				|| (token->subtype == REGISTER_C)
-				|| (token->subtype == REGISTER_D)
-				|| (token->subtype == REGISTER_E)
-				|| (token->subtype == REGISTER_H)
-				|| (token->subtype == REGISTER_L))) {
+	if(dmg_assembler_parser_is_register_8((token = dmg_assembler_lexer_token(&parser->lexer)))) {
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
@@ -2789,9 +2965,9 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_assembler_parser_parse_instruction_ei, /* OPCODE_EI */
 	dmg_assembler_parser_parse_instruction_halt, /* OPCODE_HALT */
 	dmg_assembler_parser_parse_instruction_inc, /* OPCODE_INC */
-	NULL, /* OPCODE_JP */
-	NULL, /* OPCODE_JR */
-	NULL, /* OPCODE_LD */
+	dmg_assembler_parser_parse_instruction_jp, /* OPCODE_JP */
+	dmg_assembler_parser_parse_instruction_jr, /* OPCODE_JR */
+	dmg_assembler_parser_parse_instruction_ld, /* OPCODE_LD */
 	dmg_assembler_parser_parse_instruction_nop, /* OPCODE_NOP */
 	dmg_assembler_parser_parse_instruction_or, /* OPCODE_OR */
 	dmg_assembler_parser_parse_instruction_pop, /* OPCODE_POP */
