@@ -77,6 +77,16 @@ enum {
 };
 
 enum {
+	INEQUALITY_EQUALS = 0,
+	INEQUALITY_GREATER_THAN,
+	INEQUALITY_GREATER_THAN_EQUALS,
+	INEQUALITY_LESS_THAN,
+	INEQUALITY_LESS_THAN_EQUALS,
+	INEQUALITY_NOT_EQUALS,
+	INEQUALITY_MAX,
+};
+
+enum {
 	MACRO_HIGH = 0,
 	MACRO_LOW,
 	MACRO_MAX,
@@ -171,12 +181,6 @@ enum {
 	OPERATOR_BINARY_AND,
 	OPERATOR_BINARY_OR,
 	OPERATOR_BINARY_XOR,
-	OPERATOR_CONDITIONAL_EQUALS,
-	OPERATOR_CONDITIONAL_GREATER_THAN,
-	OPERATOR_CONDITIONAL_GREATER_THAN_EQUALS,
-	OPERATOR_CONDITIONAL_LESS_THAN,
-	OPERATOR_CONDITIONAL_LESS_THAN_EQUALS,
-	OPERATOR_CONDITIONAL_NOT_EQUALS,
 	OPERATOR_LOGICAL_AND,
 	OPERATOR_LOGICAL_OR,
 	OPERATOR_LOGICAL_SHIFT_LEFT,
@@ -238,10 +242,6 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
-const char *dmg_tool_syntax_condition_string(
-	__in int type
-	);
-
 const char *dmg_tool_syntax_directive_string(
 	__in int type
 	);
@@ -272,6 +272,11 @@ bool dmg_tool_syntax_is_directive_string(
 
 bool dmg_tool_syntax_is_escape_character(
 	__in const char ch,
+	__inout int *type
+	);
+
+bool dmg_tool_syntax_is_inequality_string(
+	__in const char *str,
 	__inout int *type
 	);
 

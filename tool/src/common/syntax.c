@@ -61,14 +61,6 @@ dmg_tool_syntax_is_string(
 }
 
 const char *
-dmg_tool_syntax_condition_string(
-	__in int type
-	)
-{
-	return CONDITION_STR[type];
-}
-
-const char *
 dmg_tool_syntax_directive_string(
 	__in int type
 	)
@@ -127,6 +119,15 @@ dmg_tool_syntax_is_escape_character(
 	)
 {
 	return dmg_tool_syntax_is_character(CHARACTER_ESCAPE_CHAR, CHARACTER_ESCAPE_MAX, ch, type);
+}
+
+bool
+dmg_tool_syntax_is_inequality_string(
+	__in const char *str,
+	__inout int *type
+	)
+{
+	return dmg_tool_syntax_is_string(INEQUALITY_STR, INEQUALITY_MAX, str, type);
 }
 
 bool

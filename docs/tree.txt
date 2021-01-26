@@ -1,5 +1,7 @@
 tree ::= <statement_list>
 
+conditional ::= <expression><inequality><expression>|<expression>
+
 directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
 		| <directive_origin>|<directive_reserve>|<directive_undefine>
 
@@ -11,11 +13,11 @@ directive_define ::= .def<identifier><expression>
 
 directive_else ::= .else<statement_list>
 
-directive_else_if ::= .elsif<inequality><statement_list>
+directive_else_if ::= .elsif<conditional><statement_list>
 
 directive_end ::= .end
 
-directive_if ::= .if<inequality><statement_list><directive_else_if>*<directive_else>?<directive_end>
+directive_if ::= .if<conditional><statement_list><directive_else_if>*<directive_else>?<directive_end>
 
 directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
 
@@ -29,11 +31,9 @@ directive_undefine ::= .undef<identifier>
 
 expression ::= <expression_factor><operator_binary><expression>|<expression_factor>
 
-expression_factor ::= <operator_unary>?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<scalar>]
+expression_factor ::= <operator_unary>?<macro>?[([<identifier>|<label>|<literal>]([<expression>])?)|<register>|<scalar>]
 
 expression_list ::= <expression>,<expression_list>|<expression>
-
-inequality ::= <expression><operator_condition><expression>|<expression>
 
 instruction ::= <instruction_adc>|<instruction_add>|<instruction_and>|<instruction_bit>|<instruction_call>|<instruction_ccf>
 	|<instruction_cp>|<instruction_cpl>|<instruction_daa>|<instruction_dec>|<instruction_di>|<instruction_ei>|<instruction_halt>
@@ -75,7 +75,7 @@ instruction_jp ::= jp <condition>,<expression>|(<register>)|<expression>
 
 instruction_jr ::= jr <condition>,<expression>|<expression>
 
-instruction_ld ::=
+instruction_ld ::= ld [(<register><operator>?)|<register>|(<expression>)],[(<register><operator>?)|<register>|(<expression>)|<expression>]
 
 instruction_nop ::= nop
 

@@ -622,7 +622,8 @@ dmg_assembler_lexer_token_parse_symbol(
 				goto exit;
 			}
 
-			if(!dmg_tool_syntax_is_operator_string(string.str, &type)
+			if(!dmg_tool_syntax_is_inequality_string(string.str, &type)
+					&& !dmg_tool_syntax_is_operator_string(string.str, &type)
 					&& !dmg_tool_syntax_is_symbol_string(string.str, &type)) {
 				string.str[--string.length] = CHARACTER_EOF;
 			} else if(!dmg_assembler_stream_has_next(&lexer->stream)
@@ -633,7 +634,9 @@ dmg_assembler_lexer_token_parse_symbol(
 			}
 		}
 
-		if(dmg_tool_syntax_is_operator_string(string.str, &type)) {
+		if(dmg_tool_syntax_is_inequality_string(string.str, &type)) {
+			token->type = TOKEN_INEQUALITY;
+		} else if(dmg_tool_syntax_is_operator_string(string.str, &type)) {
 			token->type = TOKEN_OPERATOR;
 		} else if(dmg_tool_syntax_is_symbol_string(string.str, &type)) {
 			token->type = TOKEN_SYMBOL;
