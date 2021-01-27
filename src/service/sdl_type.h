@@ -34,6 +34,8 @@
 
 #define FRAMES_PER_SEC 60
 
+#define KEY_FULLSCREEN SDL_SCANCODE_F11
+
 #define MS_PER_SEC 1000
 
 #define PALETTE_MASK_BLUE 0x000000ff
@@ -73,6 +75,7 @@ typedef struct {
 typedef struct {
 	dmg_sdl_bgra_t palette[DMG_PALETTE_MAX];
 	dmg_sdl_bgra_t pixel[WINDOW_HEIGHT][WINDOW_WIDTH];
+	bool fullscreen;
 	bool redraw;
 	SDL_Renderer *renderer;
 	uint32_t scale;

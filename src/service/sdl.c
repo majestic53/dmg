@@ -65,6 +65,24 @@ dmg_sdl_audio_unload(void)
 }
 
 static int
+dmg_sdl_display_fullscreen(void)
+{
+	int result = DMG_STATUS_SUCCESS;
+	bool fullscreen = !g_sdl.video.fullscreen;
+
+	if(SDL_SetWindowFullscreen(g_sdl.video.window, fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	g_sdl.video.fullscreen = fullscreen;
+	TRACE_FORMAT(LEVEL_INFORMATION, "SDL display %s", g_sdl.video.fullscreen ? "fullscreen" : "windowed");
+
+exit:
+	return result;
+}
+
+static int
 dmg_sdl_display_show(void)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -143,7 +161,7 @@ dmg_sdl_display_load(
 	SDL_SetWindowTitle(g_sdl.video.window, title_debug);
 #endif /* NDEBUG */
 
-	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED))) {
+	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -187,6 +205,31 @@ dmg_sdl_display_unload(void)
 	SDL_DestroyWindow(g_sdl.video.window);
 
 	TRACE(LEVEL_INFORMATION, "SDL display unloaded");
+}
+
+static int
+dmg_sdl_key_event(
+	__in const SDL_KeyboardEvent *key,
+	__in SDL_EventType type
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(!key->repeat) {
+
+		switch(key->keysym.scancode) {
+			case KEY_FULLSCREEN:
+
+				if(type == SDL_KEYUP) {
+					result = dmg_sdl_display_fullscreen();
+				}
+				break;
+			default:
+				break;
+		};
+	}
+
+	return result;
 }
 
 bool
@@ -253,11 +296,18 @@ dmg_sdl_poll(void)
 	bool result = true;
 	SDL_Event event = {};
 
-	g_sdl.video.frame_begin = SDL_GetPerformanceCounter();
-
 	while(SDL_PollEvent(&event)) {
 
 		switch(event.type) {
+			case SDL_KEYDOWN:
+			case SDL_KEYUP:
+				TRACE_FORMAT(LEVEL_VERBOSE, "SDL key %s event: %x", (event.type == SDL_KEYDOWN) ? "down" : "up",
+						event.key.keysym.scancode);
+
+				if(dmg_sdl_key_event(&event.key, event.type) != DMG_STATUS_SUCCESS) {
+					result = false;
+				}
+				break;
 			case SDL_WINDOWEVENT:
 				g_sdl.video.redraw = true;
 				break;
@@ -269,6 +319,8 @@ dmg_sdl_poll(void)
 				break;
 		}
 	}
+
+	g_sdl.video.frame_begin = SDL_GetPerformanceCounter();
 
 exit:
 	return result;

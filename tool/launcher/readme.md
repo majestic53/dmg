@@ -172,6 +172,22 @@ The following example shows how to disassemble the instruction at ```$pc```:
 (0) z $pc
 ```
 
+#### Keys
+
+The following keys-bindings are available:
+
+|Key       |Binding    |
+|:---------|:----------|
+|A         |X          |
+|B         |Z          |
+|Select    |C          |
+|Start     |Space      |
+|Right     |Right-Arrow|
+|Left      |Left-Arrow |
+|Up        |Up-Arrow   |
+|Down      |Down-Arrow |
+|Fullscreen|F11        |
+
 #### Palettes
 
 The following color palettes are available:
