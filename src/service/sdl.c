@@ -75,6 +75,7 @@ dmg_sdl_display_fullscreen(void)
 		goto exit;
 	}
 
+	SDL_ShowCursor(fullscreen ? SDL_DISABLE : SDL_ENABLE);
 	g_sdl.video.fullscreen = fullscreen;
 	TRACE_FORMAT(LEVEL_INFORMATION, "SDL display %s", g_sdl.video.fullscreen ? "fullscreen" : "windowed");
 
