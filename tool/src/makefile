@@ -33,16 +33,19 @@ LIB=libdmg_tool.a
 
 build: build_tool_assembler build_tool_assembler_common build_tool_common build_tool_launcher
 
-build_tool_assembler: tool_assembler_stream.o tool_assembler_lexer.o tool_assembler_parser.o
+build_tool_assembler: tool_assembler_generator.o tool_assembler_lexer.o tool_assembler_parser.o tool_assembler_stream.o
 
-tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
-	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)tool_assembler_stream.o
+tool_assembler_generator.o: $(DIR_SRC_ASSEMBLER)generator.c $(DIR_INCLUDE_ASSEMBLER)generator.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)generator.c -o $(DIR_BUILD_TOOL)tool_assembler_generator.o
 
 tool_assembler_lexer.o: $(DIR_SRC_ASSEMBLER)lexer.c $(DIR_INCLUDE_ASSEMBLER)lexer.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)lexer.c -o $(DIR_BUILD_TOOL)tool_assembler_lexer.o
 
 tool_assembler_parser.o: $(DIR_SRC_ASSEMBLER)parser.c $(DIR_INCLUDE_ASSEMBLER)parser.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)parser.c -o $(DIR_BUILD_TOOL)tool_assembler_parser.o
+
+tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)tool_assembler_stream.o
 
 build_tool_assembler_common: tool_assembler_common_string.o tool_assembler_common_token.o tool_assembler_common_tree.o
 
@@ -80,8 +83,8 @@ tool_launcher_socket.o: $(DIR_SRC_LAUNCHER)socket.c $(DIR_INCLUDE_LAUNCHER)socke
 archive:
 	@echo ''
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
-	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)tool_assembler_stream.o $(DIR_BUILD_TOOL)tool_assembler_lexer.o \
-			$(DIR_BUILD_TOOL)tool_assembler_parser.o \
+	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)tool_assembler_generator.o $(DIR_BUILD_TOOL)tool_assembler_lexer.o \
+			$(DIR_BUILD_TOOL)tool_assembler_parser.o $(DIR_BUILD_TOOL)tool_assembler_stream.o \
 		$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
 			$(DIR_BUILD_TOOL)tool_assembler_common_tree.o \
 		$(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o $(DIR_BUILD_TOOL)tool_common_usage.o \

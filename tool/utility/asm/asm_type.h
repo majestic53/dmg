@@ -19,11 +19,14 @@
 #ifndef DMG_TOOL_UTILITY_ASM_H_
 #define DMG_TOOL_UTILITY_ASM_H_
 
-#include "../../include/assembler/parser.h"
+#include "../../include/assembler/generator.h"
 
+#define ASM_GENERATE
+#ifndef ASM_GENERATE
 //#define ASM_PARSE_CHARACTERS
 //#define ASM_PARSE_TOKENS
 #define ASM_PARSE_TREES
+#endif /* ASM_GENERATE */
 
 #define DMG_USAGE "dmg-asm [args]"
 

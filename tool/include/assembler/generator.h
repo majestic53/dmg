@@ -16,13 +16,34 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_GENERATOR_H_
+#define DMG_TOOL_ASSEMBLER_GENERATOR_H_
 
-#include "../../include/common.h"
+#include "./parser.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 27
+typedef struct {
+	dmg_assembler_parser_t parser;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+	// TODO
+
+} dmg_assembler_generator_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+int dmg_assembler_generator_load(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_buffer_t *buffer,
+	__in const char *path
+	);
+
+void dmg_assembler_generator_unload(
+	__inout dmg_assembler_generator_t *generator
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_TOOL_ASSEMBLER_GENERATOR_H_ */

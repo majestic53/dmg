@@ -24,6 +24,27 @@ static dmg_asm_t g_asm = {};
 extern "C" {
 #endif /* __cplusplus */
 
+#ifdef ASM_GENERATE
+
+static int
+dmg_utility_asm_generate(void)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_generator_t generator = {};
+
+	if((result = dmg_assembler_generator_load(&generator, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	dmg_assembler_generator_unload(&generator);
+
+	return result;
+}
+
+#else
 #ifdef ASM_PARSE_CHARACTERS
 
 static int
@@ -188,6 +209,7 @@ exit:
 }
 
 #endif /* ASM_PARSE_TOKENS */
+#endif /* ASM_GENERATE */
 
 static int
 dmg_utility_asm_assemble(void)
@@ -196,6 +218,11 @@ dmg_utility_asm_assemble(void)
 
 	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
 
+#ifdef ASM_GENERATE
+	if((result = dmg_utility_asm_generate()) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+#else
 #ifdef ASM_PARSE_CHARACTERS
 	if((result = dmg_utility_asm_parse_characters()) != DMG_STATUS_SUCCESS) {
 		goto exit;
@@ -213,6 +240,7 @@ dmg_utility_asm_assemble(void)
 		goto exit;
 	}
 #endif /* ASM_PARSE_TOKENS */
+#endif /* ASM_GENERATE */
 
 	fseek(g_asm.file, 0, SEEK_END);
 	length = ftell(g_asm.file);

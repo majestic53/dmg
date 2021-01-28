@@ -16,13 +16,40 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#include "./generator_type.h"
 
-#include "../../include/common.h"
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 27
+int
+dmg_assembler_generator_load(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_buffer_t *buffer,
+	__in const char *path
+	)
+{
+	int result;
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+	if((result = dmg_assembler_parser_load(&generator->parser, buffer, path)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+void
+dmg_assembler_generator_unload(
+	__inout dmg_assembler_generator_t *generator
+	)
+{
+	dmg_assembler_parser_unload(&generator->parser);
+	memset(generator, 0, sizeof(*generator));
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
