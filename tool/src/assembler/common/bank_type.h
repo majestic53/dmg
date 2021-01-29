@@ -16,34 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_GENERATOR_H_
-#define DMG_TOOL_ASSEMBLER_GENERATOR_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_BANK_TYPE_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_BANK_TYPE_H_
 
-#include "./parser.h"
+#include "../../../include/assembler/common/bank.h"
 
-typedef struct {
-	dmg_assembler_parser_t parser;
-	dmg_assembler_banks_t banks;
-	dmg_assembler_globals_t globals;
-} dmg_assembler_generator_t;
-
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-int dmg_assembler_generator_load(
-	__inout dmg_assembler_generator_t *generator,
-	__in const dmg_buffer_t *buffer,
-	__in const char *path,
-	__in FILE *file
-	);
-
-void dmg_assembler_generator_unload(
-	__inout dmg_assembler_generator_t *generator
-	);
-
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-
-#endif /* DMG_TOOL_ASSEMBLER_GENERATOR_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_BANK_TYPE_H_ */

@@ -20,6 +20,8 @@
 #define DMG_TOOL_ASSEMBLER_COMMON_H_
 
 #include "../common.h"
+#include "./common/bank.h"
+#include "./common/global.h"
 #include "./common/string.h"
 #include "./common/token.h"
 #include "./common/tree.h"

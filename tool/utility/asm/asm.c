@@ -32,7 +32,7 @@ dmg_utility_asm_generate(void)
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_generator_t generator = {};
 
-	if((result = dmg_assembler_generator_load(&generator, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_load(&generator, &g_asm.buffer, g_asm.source, g_asm.file)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 

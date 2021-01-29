@@ -47,7 +47,14 @@ tool_assembler_parser.o: $(DIR_SRC_ASSEMBLER)parser.c $(DIR_INCLUDE_ASSEMBLER)pa
 tool_assembler_stream.o: $(DIR_SRC_ASSEMBLER)stream.c $(DIR_INCLUDE_ASSEMBLER)stream.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER)stream.c -o $(DIR_BUILD_TOOL)tool_assembler_stream.o
 
-build_tool_assembler_common: tool_assembler_common_string.o tool_assembler_common_token.o tool_assembler_common_tree.o
+build_tool_assembler_common: tool_assembler_common_bank.o tool_assembler_common_global.o tool_assembler_common_string.o \
+	tool_assembler_common_token.o tool_assembler_common_tree.o
+
+tool_assembler_common_bank.o: $(DIR_SRC_ASSEMBLER_COMMON)bank.c $(DIR_INCLUDE_ASSEMBLER_COMMON)bank.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)bank.c -o $(DIR_BUILD_TOOL)tool_assembler_common_bank.o
+
+tool_assembler_common_global.o: $(DIR_SRC_ASSEMBLER_COMMON)global.c $(DIR_INCLUDE_ASSEMBLER_COMMON)global.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)global.c -o $(DIR_BUILD_TOOL)tool_assembler_common_global.o
 
 tool_assembler_common_string.o: $(DIR_SRC_ASSEMBLER_COMMON)string.c $(DIR_INCLUDE_ASSEMBLER_COMMON)string.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)string.c -o $(DIR_BUILD_TOOL)tool_assembler_common_string.o
@@ -85,7 +92,8 @@ archive:
 	@echo '--- BUILDING TOOL LIBRARY ------------------'
 	ar rcs $(DIR_BUILD_TOOL)$(LIB) $(DIR_BUILD_TOOL)tool_assembler_generator.o $(DIR_BUILD_TOOL)tool_assembler_lexer.o \
 			$(DIR_BUILD_TOOL)tool_assembler_parser.o $(DIR_BUILD_TOOL)tool_assembler_stream.o \
-		$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
+		$(DIR_BUILD_TOOL)tool_assembler_common_bank.o $(DIR_BUILD_TOOL)tool_assembler_common_global.o \
+			$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
 			$(DIR_BUILD_TOOL)tool_assembler_common_tree.o \
 		$(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o $(DIR_BUILD_TOOL)tool_common_usage.o \
 			$(DIR_BUILD_TOOL)tool_common_version.o \

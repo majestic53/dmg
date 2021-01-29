@@ -26,7 +26,8 @@ int
 dmg_assembler_generator_load(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_buffer_t *buffer,
-	__in const char *path
+	__in const char *path,
+	__in FILE *file
 	)
 {
 	int result;
