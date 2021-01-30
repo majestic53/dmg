@@ -24,6 +24,28 @@ extern "C" {
 
 // TODO
 
+int
+dmg_assembler_globals_allocate(
+	__inout dmg_assembler_globals_t *globals
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	// TODO
+
+	return result;
+}
+
+void
+dmg_assembler_globals_free(
+	__inout dmg_assembler_globals_t *globals
+	)
+{
+	// TODO
+
+	memset(globals, 0, sizeof(*globals));
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

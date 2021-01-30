@@ -69,8 +69,8 @@ dmg_error(void)
 
 int
 dmg_run(
-	__in const unsigned short *breakpoint,
-	__in unsigned count
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -88,9 +88,9 @@ exit:
 
 int
 dmg_step(
-	__in unsigned instructions,
-	__in const unsigned short *breakpoint,
-	__in unsigned count
+	__in uint32_t instructions,
+	__in const uint16_t *breakpoint,
+	__in uint32_t count
 	)
 {
 	int result = DMG_STATUS_SUCCESS;

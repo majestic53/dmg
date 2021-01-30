@@ -69,15 +69,16 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_assembler_token_add(
+	__inout dmg_assembler_tokens_t *tokens,
+	__out dmg_assembler_token_t **token
+	);
+
 int dmg_assembler_tokens_allocate(
 	__inout dmg_assembler_tokens_t *tokens
 	);
 
 void dmg_assembler_tokens_free(
-	__inout dmg_assembler_tokens_t *tokens
-	);
-
-int dmg_assembler_tokens_resize(
 	__inout dmg_assembler_tokens_t *tokens
 	);
 

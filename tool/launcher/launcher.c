@@ -144,12 +144,12 @@ exit:
 	return result;
 }
 
-static unsigned
+static uint8_t
 dmg_launcher_serial_out(
-	__in unsigned in
+	__in uint8_t in
 	)
 {
-	unsigned result = UINT8_MAX;
+	uint8_t result = UINT8_MAX;
 
 	g_launcher.serial.data <<= DATA_SHIFT;
 	g_launcher.serial.data |= (in & DATA_MASK);

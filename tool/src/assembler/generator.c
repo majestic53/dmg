@@ -36,7 +36,13 @@ dmg_assembler_generator_load(
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_banks_allocate(&generator->banks)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_globals_allocate(&generator->globals)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -47,6 +53,8 @@ dmg_assembler_generator_unload(
 	__inout dmg_assembler_generator_t *generator
 	)
 {
+	dmg_assembler_globals_free(&generator->globals);
+	dmg_assembler_banks_free(&generator->banks);
 	dmg_assembler_parser_unload(&generator->parser);
 	memset(generator, 0, sizeof(*generator));
 }

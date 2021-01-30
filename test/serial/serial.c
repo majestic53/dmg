@@ -68,9 +68,9 @@ dmg_service_import_data(
 	return g_serial.import;
 }
 
-unsigned
+uint8_t
 dmg_transfer_out(
-	__in unsigned in
+	__in uint8_t in
 	)
 {
 	return in;

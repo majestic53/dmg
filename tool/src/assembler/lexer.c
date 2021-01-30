@@ -24,10 +24,10 @@ extern "C" {
 
 static int
 dmg_assembler_lexer_token_parse_alpha(
-	__inout dmg_assembler_lexer_t *lexer
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	)
 {
-	dmg_assembler_token_t *token;
 	dmg_assembler_string_t string = {};
 	int result = DMG_STATUS_SUCCESS, type;
 
@@ -35,7 +35,6 @@ dmg_assembler_lexer_token_parse_alpha(
 		goto exit;
 	}
 
-	token = &(lexer->tokens.token[lexer->position]);
 	token->type = TOKEN_IDENTIFIER;
 	token->line = lexer->stream.line;
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
@@ -112,10 +111,10 @@ exit:
 
 static int
 dmg_assembler_lexer_token_parse_directive(
-	__inout dmg_assembler_lexer_t *lexer
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	)
 {
-	dmg_assembler_token_t *token;
 	dmg_assembler_string_t string = {};
 	int result = DMG_STATUS_SUCCESS, type;
 
@@ -123,7 +122,6 @@ dmg_assembler_lexer_token_parse_directive(
 		goto exit;
 	}
 
-	token = &(lexer->tokens.token[lexer->position]);
 	token->type = TOKEN_DIRECTIVE;
 	token->line = lexer->stream.line;
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
@@ -176,11 +174,11 @@ exit:
 
 static int
 dmg_assembler_lexer_token_parse_literal(
-	__inout dmg_assembler_lexer_t *lexer
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	)
 {
 	char value;
-	dmg_assembler_token_t *token;
 	int result = DMG_STATUS_SUCCESS, type;
 	dmg_assembler_string_t string_scalar = {}, string = {};
 	bool literal_character = false, literal_string = false;
@@ -210,7 +208,6 @@ dmg_assembler_lexer_token_parse_literal(
 		goto exit;
 	}
 
-	token = &(lexer->tokens.token[lexer->position]);
 	token->type = TOKEN_LITERAL;
 	token->subtype = 0;
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
@@ -379,12 +376,12 @@ exit:
 
 static int
 dmg_assembler_lexer_token_parse_scalar(
-	__inout dmg_assembler_lexer_t *lexer
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	)
 {
 	long scalar;
 	char *end, value;
-	dmg_assembler_token_t *token;
 	dmg_assembler_string_t string = {};
 	int base = BASE_DECIMAL, count = COUNT_DECIMAL_MAX, result = DMG_STATUS_SUCCESS, type;
 	bool binary = false, hexidecimal = false, negate = false, not = false, subtract = false;
@@ -393,7 +390,7 @@ dmg_assembler_lexer_token_parse_scalar(
 		goto exit;
 	}
 
-	if((token = &(lexer->tokens.token[lexer->position]))->type == TOKEN_OPERATOR) {
+	if(token->type == TOKEN_OPERATOR) {
 
 		switch(token->subtype) {
 			case OPERATOR_ARITHMETIC_SUBTRACT:
@@ -554,7 +551,8 @@ exit:
 
 static int
 dmg_assembler_lexer_token_parse_symbol(
-	__inout dmg_assembler_lexer_t *lexer
+	__inout dmg_assembler_lexer_t *lexer,
+	__inout dmg_assembler_token_t *token
 	)
 {
 	char value;
@@ -577,28 +575,25 @@ dmg_assembler_lexer_token_parse_symbol(
 
 	if((value == DELIMITER_BINARY[0]) || (value == DELIMITER_HEXIDECIMAL[0])) {
 
-		if((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_lexer_token_parse_scalar(lexer, token)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if(value == DELIMITER_DIRECTIVE[0]) {
 
-		if((result = dmg_assembler_lexer_token_parse_directive(lexer)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_lexer_token_parse_directive(lexer, token)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if(value == DELIMITER_IDENTIFIER[0]) {
 
-		if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_lexer_token_parse_alpha(lexer, token)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if((value == DELIMITER_LITERAL_CHARACTER[0]) || (value == DELIMITER_LITERAL_STRING[0])) {
 
-		if((result = dmg_assembler_lexer_token_parse_literal(lexer)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_lexer_token_parse_literal(lexer, token)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else {
-		dmg_assembler_token_t *token;
-
-		token = &(lexer->tokens.token[lexer->position]);
 		token->line = lexer->stream.line;
 		token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
 		token->literal.length = 1;
@@ -659,7 +654,8 @@ dmg_assembler_lexer_token_parse_symbol(
 					if((((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL)
 							|| (value == DELIMITER_BINARY[0])
 							|| (value == DELIMITER_HEXIDECIMAL[0]))
-							&& ((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS)) {
+							&& ((result = dmg_assembler_lexer_token_parse_scalar(lexer, token))
+								!= DMG_STATUS_SUCCESS)) {
 						goto exit;
 					}
 					break;
@@ -708,8 +704,9 @@ dmg_assembler_lexer_token_parse(
 	if(dmg_assembler_stream_has_next(&lexer->stream)) {
 		int type;
 		char value;
+		dmg_assembler_token_t *token;
 
-		if((result = dmg_assembler_tokens_resize(&lexer->tokens)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_token_add(&lexer->tokens, &token)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -722,17 +719,17 @@ dmg_assembler_lexer_token_parse(
 			}
 		} else if((type & CHARACTER_ALPHA) == CHARACTER_ALPHA) {
 
-			if((result = dmg_assembler_lexer_token_parse_alpha(lexer)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_lexer_token_parse_alpha(lexer, token)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		} else if((type & CHARACTER_DECIMAL) == CHARACTER_DECIMAL) {
 
-			if((result = dmg_assembler_lexer_token_parse_scalar(lexer)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_lexer_token_parse_scalar(lexer, token)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		} else if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
 
-			if((result = dmg_assembler_lexer_token_parse_symbol(lexer)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_lexer_token_parse_symbol(lexer, token)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		} else {
@@ -740,8 +737,6 @@ dmg_assembler_lexer_token_parse(
 							lexer->stream.path, lexer->stream.line);
 			goto exit;
 		}
-
-		++lexer->tokens.count;
 	}
 
 exit:

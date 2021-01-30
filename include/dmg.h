@@ -112,7 +112,7 @@ enum {
  * @param Input bit
  * @return Output bit
  */
-typedef unsigned (*dmg_serial_out)(unsigned);
+typedef uint8_t (*dmg_serial_out)(uint8_t);
 
 /**
  * Action struct
@@ -173,7 +173,7 @@ typedef struct {
 	/* Data pointer */
 	void *data;
 	/* Data length */
-	unsigned length;
+	uint32_t length;
 } __attribute__((packed)) dmg_buffer_t;
 
 /**
@@ -181,11 +181,11 @@ typedef struct {
  */
 typedef struct {
 	/* Major version */
-	unsigned major;
+	uint32_t major;
 	/* Minor version */
-	unsigned minor;
+	uint32_t minor;
 	/* Patch version */
-	unsigned patch;
+	uint32_t patch;
 } __attribute__((packed)) dmg_version_t;
 
 /**
@@ -199,13 +199,13 @@ typedef struct {
 	/* Serial transfer-out callback */
 	dmg_serial_out serial_out;
 	/* Button key-bindings */
-	unsigned button[DMG_BUTTON_MAX];
+	uint32_t button[DMG_BUTTON_MAX];
 	/* Direction key-bindings */
-	unsigned direction[DMG_DIRECTION_MAX];
+	uint32_t direction[DMG_DIRECTION_MAX];
 	/* Display palette */
-	unsigned palette[DMG_PALETTE_MAX];
+	uint32_t palette[DMG_PALETTE_MAX];
 	/* Display scale */
-	unsigned scale;
+	uint32_t scale;
 	/* Input save file path */
 	const char *save_in;
 	/* Output save file path */
@@ -250,7 +250,7 @@ int dmg_action(const dmg_action_t *, dmg_action_t *);
  * @param Breakpoint address count
  * @return Emulator status
  */
-int dmg_run(const unsigned short *, unsigned);
+int dmg_run(const uint16_t *, uint32_t);
 
 /**
  * Step emulator instance
@@ -259,7 +259,7 @@ int dmg_run(const unsigned short *, unsigned);
  * @param Breakpoint address count
  * @return Emulator status
  */
-int dmg_step(unsigned, const unsigned short *, unsigned);
+int dmg_step(uint32_t, const uint16_t *, uint32_t);
 
 /******************************************
  * Helper Routines

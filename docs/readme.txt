@@ -1,4 +1,4 @@
-DMG 0.2.27-alpha
+DMG 0.2.28-alpha
 Copyright (C) 2020-2021 David Jolly
 ==============================
 
@@ -12,15 +12,15 @@ Using the Library
 
 This project is implemented in C and exposes a simple API, described in include/dmg.h and lib/libdmg.a:
 
-|Name       |Description                          |Signature                                               |
-|-----------|-------------------------------------|--------------------------------------------------------|
-|dmg_load   |Load emulator instance               |int dmg_load(const dmg_t *)                             |
-|dmg_unload |Unload emulator instance             |void dmg_unload(void)                                   |
-|dmg_action |Send emulator instance action request|int dmg_action(const dmg_action_t *, dmg_action_t *)    |
-|dmg_run    |Run emulator instance                |int dmg_run(const unsigned short *, unsigned)           |
-|dmg_step   |Step emulator instance               |int dmg_step(unsigned, const unsigned short *, unsigned)|
-|dmg_error  |Retrieve emulator instance error     |const char *dmg_error(void)                             |
-|dmg_version|Retrieve emulator instance version   |const dmg_version_t *dmg_version(void)                  |
+|Name       |Description                          |Signature                                           |
+|-----------|-------------------------------------|----------------------------------------------------|
+|dmg_load   |Load emulator instance               |int dmg_load(const dmg_t *)                         |
+|dmg_unload |Unload emulator instance             |void dmg_unload(void)                               |
+|dmg_action |Send emulator instance action request|int dmg_action(const dmg_action_t *, dmg_action_t *)|
+|dmg_run    |Run emulator instance                |int dmg_run(const uint16_t *, uint32_t)             |
+|dmg_step   |Step emulator instance               |int dmg_step(uint32_t, const uint16_t *, uint32_t)  |
+|dmg_error  |Retrieve emulator instance error     |const char *dmg_error(void)                         |
+|dmg_version|Retrieve emulator instance version   |const dmg_version_t *dmg_version(void)              |
 
 
 Using the Tools

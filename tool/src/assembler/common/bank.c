@@ -24,6 +24,28 @@ extern "C" {
 
 // TODO
 
+int
+dmg_assembler_banks_allocate(
+	__inout dmg_assembler_banks_t *banks
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	// TODO
+
+	return result;
+}
+
+void
+dmg_assembler_banks_free(
+	__inout dmg_assembler_banks_t *banks
+	)
+{
+	// TODO
+
+	memset(banks, 0, sizeof(*banks));
+}
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

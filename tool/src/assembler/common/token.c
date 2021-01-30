@@ -41,6 +41,39 @@ exit:
 	return result;
 }
 
+static int
+dmg_assembler_tokens_resize(
+	__inout dmg_assembler_tokens_t *tokens
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if((tokens->count + 1) == tokens->capacity) {
+		result = dmg_assembler_tokens_reallocate(tokens);
+	}
+
+	return result;
+}
+
+int
+dmg_assembler_token_add(
+	__inout dmg_assembler_tokens_t *tokens,
+	__out dmg_assembler_token_t **token
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if((result = dmg_assembler_tokens_resize(tokens)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	*token = &(tokens->token[tokens->count]);
+	++tokens->count;
+
+exit:
+	return result;
+}
+
 int
 dmg_assembler_tokens_allocate(
 	__inout dmg_assembler_tokens_t *tokens
@@ -73,20 +106,6 @@ dmg_assembler_tokens_free(
 	}
 
 	memset(tokens, 0, sizeof(*tokens));
-}
-
-int
-dmg_assembler_tokens_resize(
-	__inout dmg_assembler_tokens_t *tokens
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if((tokens->count + 1) == tokens->capacity) {
-		result = dmg_assembler_tokens_reallocate(tokens);
-	}
-
-	return result;
 }
 
 #ifdef __cplusplus
