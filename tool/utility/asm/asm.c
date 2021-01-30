@@ -332,19 +332,9 @@ static int
 dmg_utility_asm_source_load(void)
 {
 	FILE *file = NULL;
-	int length, result = DMG_STATUS_SUCCESS;
+	int length = 0, result = DMG_STATUS_SUCCESS;
 
-	if(!(file = fopen(g_asm.source, "rb"))) {
-		result = DMG_STATUS_FAILURE;
-		goto exit;
-	}
-
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if(length < 0) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(g_asm.source, true, true, &file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -352,7 +342,7 @@ dmg_utility_asm_source_load(void)
 
 	if(length > 0) {
 
-		if(!(g_asm.buffer.data = (void *)malloc(length))) {
+		if(!(g_asm.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
 			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
@@ -366,11 +356,7 @@ dmg_utility_asm_source_load(void)
 	}
 
 exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
-	}
+	dmg_tool_file_close(&file);
 
 	return result;
 }

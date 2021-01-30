@@ -110,9 +110,8 @@ dmg_assembler_trees_add(
 		goto exit;
 	}
 
-	*tree = &trees->tree.ptr[trees->tree.count];
+	*tree = &trees->tree.ptr[trees->tree.count++];
 	(*tree)->parent = token;
-	++trees->tree.count;
 
 	if(root) {
 		trees->root = *tree;
@@ -141,16 +140,14 @@ dmg_assembler_trees_append_child_token(
 			goto exit;
 		}
 
-		*tree = &trees->tree.ptr[trees->tree.count];
-		++trees->tree.count;
+		*tree = &trees->tree.ptr[trees->tree.count++];
 		(*tree)->parent = token;
 
 		if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		parent->child[parent->count] = (const uintptr_t *)*tree;
-		++parent->count;
+		parent->child[parent->count++] = (const uintptr_t *)*tree;
 	} else {
 		*tree = parent;
 		(*tree)->parent = token;
@@ -174,8 +171,7 @@ dmg_assembler_trees_append_child_tree(
 			goto exit;
 		}
 
-		parent->child[parent->count] = (const uintptr_t *)child;
-		++parent->count;
+		parent->child[parent->count++] = (const uintptr_t *)child;
 	} else {
 		parent->parent = child->parent;
 

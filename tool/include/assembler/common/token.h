@@ -39,24 +39,26 @@ enum {
 };
 
 typedef struct {
+	const char *str;
+	uint32_t length;
+} dmg_assembler_literal_t;
+
+typedef union {
+
+	struct {
+		uint8_t low;
+		uint8_t high;
+	};
+
+	uint16_t word;
+} dmg_assembler_scalar_t;
+
+typedef struct {
 	int type;
 	int subtype;
 	uint32_t line;
-
-	struct {
-		const char *str;
-		uint32_t length;
-	} literal;
-
-	union {
-
-		struct {
-			uint8_t low;
-			uint8_t high;
-		};
-
-		uint16_t word;
-	} scalar;
+	dmg_assembler_literal_t literal;
+	dmg_assembler_scalar_t scalar;
 } dmg_assembler_token_t;
 
 typedef struct {

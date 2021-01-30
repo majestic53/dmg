@@ -29,7 +29,7 @@ dmg_assembler_tokens_reallocate(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((tokens->token = (dmg_assembler_token_t *)realloc(tokens->token, sizeof(dmg_assembler_token_t) * tokens->capacity * TOKEN_CAPACITY_SCALE)) == NULL) {
+	if(!(tokens->token = (dmg_assembler_token_t *)realloc(tokens->token, sizeof(dmg_assembler_token_t) * tokens->capacity * TOKEN_CAPACITY_SCALE))) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to reallocate token buffer");
 		goto exit;
 	}
@@ -67,8 +67,7 @@ dmg_assembler_token_add(
 		goto exit;
 	}
 
-	*token = &(tokens->token[tokens->count]);
-	++tokens->count;
+	*token = &(tokens->token[tokens->count++]);
 
 exit:
 	return result;
@@ -83,7 +82,7 @@ dmg_assembler_tokens_allocate(
 
 	dmg_assembler_tokens_free(tokens);
 
-	if((tokens->token = (dmg_assembler_token_t *)calloc(TOKEN_CAPACITY_INIT, sizeof(dmg_assembler_token_t))) == NULL) {
+	if(!(tokens->token = (dmg_assembler_token_t *)calloc(TOKEN_CAPACITY_INIT, sizeof(dmg_assembler_token_t)))) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate token buffer");
 		goto exit;
 	}

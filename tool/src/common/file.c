@@ -16,43 +16,60 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./buffer_type.h"
+#include "./file_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
 int
-dmg_buffer_allocate(
-	__inout dmg_buffer_t *buffer,
-	__in uint32_t length,
-	__in uint8_t value
+dmg_tool_file_open(
+	__in const char *path,
+	__in bool read_only,
+	__in bool allow_empty,
+	__out FILE **file,
+	__out int *length
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if(!(buffer->data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate buffer");
+	if(!(*file = fopen(path, read_only ? "rb" : "wb"))) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Failed to open file: %s", path);
 		goto exit;
 	}
 
-	buffer->length = length;
+	fseek(*file, 0, SEEK_END);
+	*length = ftell(*file);
+	fseek(*file, 0, SEEK_SET);
+
+	if(*length < 0) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Malformed file: %s", path);
+		goto exit;
+	} else if(read_only && !allow_empty && !*length) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Empty file: %s", path);
+		goto exit;
+	}
 
 exit:
+
+	if(result != DMG_STATUS_SUCCESS) {
+		dmg_tool_file_close(file);
+		*length = 0;
+	}
+
 	return result;
 }
 
 void
-dmg_buffer_free(
-	__inout dmg_buffer_t *buffer
+dmg_tool_file_close(
+	__inout FILE **file
 	)
 {
 
-	if(buffer->data) {
-		free(buffer->data);
+	if(*file) {
+		fclose(*file);
+		*file = NULL;
 	}
-
-	memset(buffer, 0, sizeof(*buffer));
 }
 
 #ifdef __cplusplus

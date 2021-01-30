@@ -29,7 +29,7 @@ dmg_assembler_string_reallocate(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((string->str = (char *)realloc(string->str, sizeof(char) * string->capacity * STRING_CAPACITY_SCALE)) == NULL) {
+	if(!(string->str = (char *)realloc(string->str, sizeof(char) * string->capacity * STRING_CAPACITY_SCALE))) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to reallocate string buffer");
 		goto exit;
 	}
@@ -50,7 +50,7 @@ dmg_assembler_string_allocate(
 
 	dmg_assembler_string_free(string);
 
-	if((string->str = (char *)calloc(STRING_CAPACITY_INIT, sizeof(char))) == NULL) {
+	if(!(string->str = (char *)calloc(STRING_CAPACITY_INIT, sizeof(char)))) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate string buffer");
 		goto exit;
 	}

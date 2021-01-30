@@ -16,45 +16,29 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./buffer_type.h"
+#ifndef DMG_TOOL_COMMON_FILE_H_
+#define DMG_TOOL_COMMON_FILE_H_
+
+#include "./define.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int
-dmg_buffer_allocate(
-	__inout dmg_buffer_t *buffer,
-	__in uint32_t length,
-	__in uint8_t value
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
+int dmg_tool_file_open(
+	__in const char *path,
+	__in bool read_only,
+	__in bool allow_empty,
+	__out FILE **file,
+	__out int *length
+	);
 
-	if(!(buffer->data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate buffer");
-		goto exit;
-	}
-
-	buffer->length = length;
-
-exit:
-	return result;
-}
-
-void
-dmg_buffer_free(
-	__inout dmg_buffer_t *buffer
-	)
-{
-
-	if(buffer->data) {
-		free(buffer->data);
-	}
-
-	memset(buffer, 0, sizeof(*buffer));
-}
+void dmg_tool_file_close(
+	__inout FILE **file
+	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#endif /* DMG_TOOL_COMMON_FILE_H_ */

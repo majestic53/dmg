@@ -63,23 +63,13 @@ static int
 dmg_utility_save_info_save_load(void)
 {
 	FILE *file = NULL;
-	int length, result = DMG_STATUS_SUCCESS;
+	int length = 0, result = DMG_STATUS_SUCCESS;
 
-	if(!(file = fopen(g_save_info.save, "rb"))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(g_save_info.save, true, false, &file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if(length <= 0) {
-		result = DMG_STATUS_FAILURE;
-		goto exit;
-	}
-
-	if(!(g_save_info.buffer.data = (void *)malloc(length))) {
+	if(!(g_save_info.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
@@ -92,11 +82,7 @@ dmg_utility_save_info_save_load(void)
 	g_save_info.buffer.length = length;
 
 exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
-	}
+	dmg_tool_file_close(&file);
 
 	return result;
 }
@@ -144,15 +130,15 @@ dmg_utility_save_info_save_parse(void)
 		TRACE_TOOL_MESSAGE(", MISMATCH (Expecting %.02f KB (%u bytes))\n", expected / (float)KBYTE, expected);
 	} else {
 		TRACE_TOOL_MESSAGE("%s", "\n");
-	}
 
-	for(address = 0; address < (header->length + sizeof(*header)); ++address) {
-		checksum += ((uint8_t *)g_save_info.buffer.data)[address];
-	}
+		for(address = 0; address < (header->length + sizeof(*header)); ++address) {
+			checksum += ((uint8_t *)g_save_info.buffer.data)[address];
+		}
 
-	if(checksum != (uint16_t)(((uint8_t *)g_save_info.buffer.data)[address] | (((uint8_t *)g_save_info.buffer.data)[address + 1] << CHAR_BIT))) {
-		TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
-		result = DMG_STATUS_FAILURE;
+		if(checksum != (uint16_t)(((uint8_t *)g_save_info.buffer.data)[address] | (((uint8_t *)g_save_info.buffer.data)[address + 1] << CHAR_BIT))) {
+			TRACE_TOOL_MESSAGE("Checksum  MISMATCH (Expecting %04x)\n", (uint16_t)checksum);
+			result = DMG_STATUS_FAILURE;
+		}
 	}
 
 exit:

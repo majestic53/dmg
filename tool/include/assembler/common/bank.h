@@ -19,11 +19,11 @@
 #ifndef DMG_TOOL_ASSEMBLER_COMMON_BANK_H_
 #define DMG_TOOL_ASSEMBLER_COMMON_BANK_H_
 
-#include "../../common.h"
+#include "./token.h"
 
 typedef struct {
 	uint8_t data[BANK_WIDTH];
-	uint16_t offset;
+	dmg_assembler_scalar_t origin;
 } dmg_assembler_bank_t;
 
 typedef struct {
@@ -37,21 +37,21 @@ extern "C" {
 
 int dmg_assembler_bank_add(
 	__inout dmg_assembler_banks_t *banks,
-	__in uint16_t offset
+	__in const dmg_assembler_scalar_t *origin
 	);
 
 int dmg_assembler_bank_set_byte(
 	__inout dmg_assembler_banks_t *banks,
 	__in uint32_t bank,
-	__in uint16_t address,
-	__in uint8_t value
+	__in const dmg_assembler_scalar_t *address,
+	__in const dmg_assembler_scalar_t *value
 	);
 
 int dmg_assembler_bank_set_word(
 	__inout dmg_assembler_banks_t *banks,
 	__in uint32_t bank,
-	__in uint16_t address,
-	__in uint16_t value
+	__in const dmg_assembler_scalar_t *address,
+	__in const dmg_assembler_scalar_t *value
 	);
 
 int dmg_assembler_banks_allocate(

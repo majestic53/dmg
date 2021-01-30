@@ -467,7 +467,7 @@ dmg_utility_dasm_output_load(
 	)
 {
 	char path_full[PATH_MAX] = {};
-	int result = DMG_STATUS_SUCCESS;
+	int length = 0, result = DMG_STATUS_SUCCESS;
 
 	if(!g_dasm.output || !strlen(g_dasm.output)) {
 		char *path_end;
@@ -481,8 +481,7 @@ dmg_utility_dasm_output_load(
 		strcpy(path_full, g_dasm.output);
 	}
 
-	if(!(g_dasm.file = fopen(path_full, "wb"))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(path_full, false, true, &g_dasm.file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -493,11 +492,7 @@ exit:
 static void
 dmg_utility_dasm_output_unload(void)
 {
-
-	if(g_dasm.file) {
-		fclose(g_dasm.file);
-		g_dasm.file = NULL;
-	}
+	dmg_tool_file_close(&g_dasm.file);
 }
 
 static int
@@ -542,23 +537,13 @@ static int
 dmg_utility_dasm_rom_load(void)
 {
 	FILE *file = NULL;
-	int length, result = DMG_STATUS_SUCCESS;
+	int length = 0, result = DMG_STATUS_SUCCESS;
 
-	if(!(file = fopen(g_dasm.rom, "rb"))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(g_dasm.rom, true, false, &file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if(length <= 0) {
-		result = DMG_STATUS_FAILURE;
-		goto exit;
-	}
-
-	if(!(g_dasm.buffer.data = (void *)malloc(length))) {
+	if(!(g_dasm.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
@@ -571,11 +556,7 @@ dmg_utility_dasm_rom_load(void)
 	g_dasm.buffer.length = length;
 
 exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
-	}
+	dmg_tool_file_close(&file);
 
 	return result;
 }

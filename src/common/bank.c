@@ -29,14 +29,12 @@ dmg_bank_allocate(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	uint32_t length = (count * sizeof(dmg_buffer_t));
 
-	if(!(bank->buffer = (dmg_buffer_t *)malloc(length))) {
+	if(!(bank->buffer = (dmg_buffer_t *)calloc(count, sizeof(dmg_buffer_t)))) {
 		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate bank");
 		goto exit;
 	}
 
-	memset(bank->buffer, 0, length);
 	bank->count = count;
 
 exit:

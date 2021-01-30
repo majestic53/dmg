@@ -22,7 +22,79 @@
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+int
+dmg_assembler_bank_add(
+	__inout dmg_assembler_banks_t *banks,
+	__in const dmg_assembler_scalar_t *origin
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(!(banks->bank = (dmg_assembler_bank_t *)realloc(banks->bank, sizeof(dmg_assembler_bank_t) * (banks->count + 1)))) {
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to reallocate bank buffer");
+		goto exit;
+	}
+
+	memset(&banks->bank[banks->count], 0, sizeof(dmg_assembler_bank_t));
+	banks->bank[banks->count].origin.word = origin->word;
+	++banks->count;
+
+exit:
+	return result;
+}
+
+int
+dmg_assembler_bank_set_byte(
+	__inout dmg_assembler_banks_t *banks,
+	__in uint32_t bank,
+	__in const dmg_assembler_scalar_t *address,
+	__in const dmg_assembler_scalar_t *value
+	)
+{
+	uint16_t offset;
+	int result = DMG_STATUS_SUCCESS;
+
+	if(bank >= banks->count) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid bank: %u (must not exceed %u)", bank, banks->count - 1);
+		goto exit;
+	} else if(address->word > ADDRESS_MAX) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid bank address: %04x (must not exceed %04x)", address->word, ADDRESS_MAX);
+		goto exit;
+	}
+
+	offset = (address->word - banks->bank[bank].origin.word);
+	banks->bank[bank].data[offset] = value->low;
+
+exit:
+	return result;
+}
+
+int
+dmg_assembler_bank_set_word(
+	__inout dmg_assembler_banks_t *banks,
+	__in uint32_t bank,
+	__in const dmg_assembler_scalar_t *address,
+	__in const dmg_assembler_scalar_t *value
+	)
+{
+	uint16_t offset;
+	int result = DMG_STATUS_SUCCESS;
+
+	if(bank >= banks->count) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid bank: %u (must not exceed %u)", bank, banks->count - 1);
+		goto exit;
+	} else if(address->word > ADDRESS_MAX) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Invalid bank address: %04x (must not exceed %04x)", address->word, ADDRESS_MAX);
+		goto exit;
+	}
+
+	offset = (address->word - banks->bank[bank].origin.word);
+	banks->bank[bank].data[offset] = value->low;
+	banks->bank[bank].data[(offset + 1) % BANK_WIDTH] = value->high;
+
+exit:
+	return result;
+}
 
 int
 dmg_assembler_banks_allocate(
@@ -30,9 +102,26 @@ dmg_assembler_banks_allocate(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t origin = {};
 
-	// TODO
+	dmg_assembler_banks_free(banks);
 
+	if(!(banks->bank = (dmg_assembler_bank_t *)calloc(BANK_COUNT_INIT, sizeof(dmg_assembler_bank_t)))) {
+		result = ERROR_SET(DMG_STATUS_FAILURE, "Failed to allocate bank buffer");
+		goto exit;
+	}
+
+	banks->count = BANK_COUNT_INIT;
+
+	for(uint32_t index = 0; index < banks->count; ++index) {
+		banks->bank[index].origin.word = origin.word;
+
+		if(!index) {
+			origin.word += BANK_WIDTH;
+		}
+	}
+
+exit:
 	return result;
 }
 
@@ -41,7 +130,10 @@ dmg_assembler_banks_free(
 	__inout dmg_assembler_banks_t *banks
 	)
 {
-	// TODO
+
+	if(banks->bank) {
+		free(banks->bank);
+	}
 
 	memset(banks, 0, sizeof(*banks));
 }

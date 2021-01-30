@@ -21,4 +21,8 @@
 
 #include "../../../include/assembler/common/bank.h"
 
+#define ADDRESS_MAX ((2 * BANK_WIDTH) - 1)
+
+#define BANK_COUNT_INIT 2
+
 #endif /* DMG_TOOL_ASSEMBLER_COMMON_BANK_TYPE_H_ */

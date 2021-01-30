@@ -22,8 +22,8 @@
 #include "./token.h"
 
 typedef struct {
-	dmg_assembler_token_t *token;
-	uint16_t value;
+	const dmg_assembler_token_t *token;
+	dmg_assembler_scalar_t value;
 	bool in_use;
 } dmg_assembler_global_t;
 
@@ -40,19 +40,19 @@ extern "C" {
 int dmg_assembler_global_add(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
-	__in uint16_t value
+	__in const dmg_assembler_scalar_t *value
 	);
 
 int dmg_assembler_global_get(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
-	__in uint16_t *value
+	__inout dmg_assembler_scalar_t *value
 	);
 
 int dmg_assembler_global_set(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
-	__in uint16_t value
+	__in const dmg_assembler_scalar_t *value
 	);
 
 void dmg_assembler_global_remove(

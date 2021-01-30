@@ -64,21 +64,11 @@ dmg_utility_rom_fix_rom_load(void)
 {
 	int length, result = DMG_STATUS_SUCCESS;
 
-	if(!(g_rom_fix.file = fopen(g_rom_fix.rom, "rb"))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(g_rom_fix.rom, true, false, &g_rom_fix.file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fseek(g_rom_fix.file, 0, SEEK_END);
-	length = ftell(g_rom_fix.file);
-	fseek(g_rom_fix.file, 0, SEEK_SET);
-
-	if(length <= 0) {
-		result = DMG_STATUS_FAILURE;
-		goto exit;
-	}
-
-	if(!(g_rom_fix.buffer.data = (void *)malloc(length))) {
+	if(!(g_rom_fix.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
@@ -91,11 +81,7 @@ dmg_utility_rom_fix_rom_load(void)
 	g_rom_fix.buffer.length = length;
 
 exit:
-
-	if(g_rom_fix.file) {
-		fclose(g_rom_fix.file);
-		g_rom_fix.file = NULL;
-	}
+	dmg_tool_file_close(&g_rom_fix.file);
 
 	return result;
 }
@@ -112,11 +98,12 @@ dmg_utility_rom_fix_rom_parse(void)
 	}
 
 	if((expected &= UINT8_MAX) != *found) {
+		int length = 0;
+
 		TRACE_TOOL_MESSAGE("Fixed checksum (%02x -> %02x)\n", *found, expected);
 		*found = expected;
 
-		if(!(g_rom_fix.file = fopen(g_rom_fix.rom, "wb"))) {
-			result = DMG_STATUS_FAILURE;
+		if((result = dmg_tool_file_open(g_rom_fix.rom, false, true, &g_rom_fix.file, &length)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -127,11 +114,7 @@ dmg_utility_rom_fix_rom_parse(void)
 	}
 
 exit:
-
-	if(g_rom_fix.file) {
-		fclose(g_rom_fix.file);
-		g_rom_fix.file = NULL;
-	}
+	dmg_tool_file_close(&g_rom_fix.file);
 
 	return result;
 }
@@ -139,11 +122,7 @@ exit:
 static void
 dmg_utility_rom_fix_rom_unload(void)
 {
-
-	if(g_rom_fix.file) {
-		fclose(g_rom_fix.file);
-		g_rom_fix.file = NULL;
-	}
+	dmg_tool_file_close(&g_rom_fix.file);
 
 	if(g_rom_fix.buffer.data) {
 		free(g_rom_fix.buffer.data);

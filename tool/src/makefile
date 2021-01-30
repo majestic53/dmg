@@ -65,7 +65,10 @@ tool_assembler_common_token.o: $(DIR_SRC_ASSEMBLER_COMMON)token.c $(DIR_INCLUDE_
 tool_assembler_common_tree.o: $(DIR_SRC_ASSEMBLER_COMMON)tree.c $(DIR_INCLUDE_ASSEMBLER_COMMON)tree.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_ASSEMBLER_COMMON)tree.c -o $(DIR_BUILD_TOOL)tool_assembler_common_tree.o
 
-build_tool_common: tool_common_syntax.o tool_common_trace.o tool_common_usage.o tool_common_version.o
+build_tool_common: tool_common_file.o tool_common_syntax.o tool_common_trace.o tool_common_usage.o tool_common_version.o
+
+tool_common_file.o: $(DIR_SRC_COMMON)file.c $(DIR_INCLUDE_COMMON)file.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)file.c -o $(DIR_BUILD_TOOL)tool_common_file.o
 
 tool_common_syntax.o: $(DIR_SRC_COMMON)syntax.c $(DIR_INCLUDE_COMMON)syntax.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC_COMMON)syntax.c -o $(DIR_BUILD_TOOL)tool_common_syntax.o
@@ -95,8 +98,8 @@ archive:
 		$(DIR_BUILD_TOOL)tool_assembler_common_bank.o $(DIR_BUILD_TOOL)tool_assembler_common_global.o \
 			$(DIR_BUILD_TOOL)tool_assembler_common_string.o $(DIR_BUILD_TOOL)tool_assembler_common_token.o \
 			$(DIR_BUILD_TOOL)tool_assembler_common_tree.o \
-		$(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o $(DIR_BUILD_TOOL)tool_common_usage.o \
-			$(DIR_BUILD_TOOL)tool_common_version.o \
+		$(DIR_BUILD_TOOL)tool_common_file.o $(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o \
+			$(DIR_BUILD_TOOL)tool_common_usage.o $(DIR_BUILD_TOOL)tool_common_version.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
 		$(DIR_BUILD_TOOL)tool_launcher_debug.o $(DIR_BUILD_TOOL)tool_launcher_socket.o
 	@echo '--- DONE -----------------------------------'

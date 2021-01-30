@@ -63,23 +63,13 @@ static int
 dmg_utility_rom_info_rom_load(void)
 {
 	FILE *file = NULL;
-	int length, result = DMG_STATUS_SUCCESS;
+	int length = 0, result = DMG_STATUS_SUCCESS;
 
-	if(!(file = fopen(g_rom_info.rom, "rb"))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_tool_file_open(g_rom_info.rom, true, false, &file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	fseek(file, 0, SEEK_END);
-	length = ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	if(length <= 0) {
-		result = DMG_STATUS_FAILURE;
-		goto exit;
-	}
-
-	if(!(g_rom_info.buffer.data = (void *)malloc(length))) {
+	if(!(g_rom_info.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
@@ -92,11 +82,7 @@ dmg_utility_rom_info_rom_load(void)
 	g_rom_info.buffer.length = length;
 
 exit:
-
-	if(file) {
-		fclose(file);
-		file = NULL;
-	}
+	dmg_tool_file_close(&file);
 
 	return result;
 }
