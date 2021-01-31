@@ -68,6 +68,8 @@ dmg_assembler_token_add(
 	}
 
 	*token = &(tokens->token[tokens->count++]);
+	(*token)->type = TOKEN_END;
+	(*token)->subtype = TOKEN_SUBTYPE_UNDEFINED;
 
 exit:
 	return result;

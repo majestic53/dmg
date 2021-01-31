@@ -21,6 +21,8 @@
 
 #include "../../common.h"
 
+#define TOKEN_SUBTYPE_UNDEFINED (-1)
+
 enum {
 	TOKEN_END = 0,
 	TOKEN_CONDITION,

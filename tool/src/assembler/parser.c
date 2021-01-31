@@ -1073,6 +1073,7 @@ dmg_assembler_parser_parse_operand_register_indirect(
 	}
 
 	if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_OPERATOR) {
+		root = child;
 
 		if((result = dmg_assembler_trees_append_child_token(&parser->trees, root, token, &child)) != DMG_STATUS_SUCCESS) {
 			result = PARSER_ERROR(parser, token, "Exceeded maximum list length");

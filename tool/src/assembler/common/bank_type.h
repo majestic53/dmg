@@ -21,7 +21,7 @@
 
 #include "../../../include/assembler/common/bank.h"
 
-#define ADDRESS_MAX ((2 * BANK_WIDTH) - 1)
+#define ADDRESS_MAX ((BANK_COUNT_INIT * BANK_WIDTH) - 1)
 
 #define BANK_COUNT_INIT 2
 

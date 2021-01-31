@@ -93,7 +93,13 @@ dmg_utility_asm_parse_tokens(void)
 	for(;;) {
 		const dmg_assembler_token_t *token = dmg_assembler_lexer_token(&lexer);
 
-		fprintf(stdout, "[%i:%i]", token->type, token->subtype);
+		fprintf(stdout, "[%i", token->type);
+
+		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
+			fprintf(stdout, ":%i", token->subtype);
+		}
+
+		fprintf(stdout, "]");
 
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
@@ -146,7 +152,13 @@ dmg_utility_asm_parse_tree(
 	if(tree && tree->parent) {
 		const dmg_assembler_token_t *token = tree->parent;
 
-		fprintf(stdout, "{%u} [%i:%i]", tree->count, token->type, token->subtype);
+		fprintf(stdout, "{%u} [%i", tree->count, token->type);
+
+		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
+			fprintf(stdout, ":%i", token->subtype);
+		}
+
+		fprintf(stdout, "]");
 
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
