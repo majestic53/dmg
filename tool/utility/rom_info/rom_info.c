@@ -55,6 +55,12 @@ dmg_utility_rom_info_parse(
 		}
 	}
 
+	if(!g_rom_info.rom) {
+		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_rom_info.rom);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	}
+
 exit:
 	return result;
 }

@@ -25,6 +25,9 @@ typedef struct {
 	dmg_assembler_parser_t parser;
 	dmg_assembler_banks_t banks;
 	dmg_assembler_globals_t globals;
+	uint32_t bank;
+	dmg_assembler_scalar_t offset;
+	FILE *file;
 } dmg_assembler_generator_t;
 
 #ifdef __cplusplus
@@ -36,6 +39,10 @@ int dmg_assembler_generator_load(
 	__in const dmg_buffer_t *buffer,
 	__in const char *path,
 	__in FILE *file
+	);
+
+int dmg_assembler_generator_run(
+	__inout dmg_assembler_generator_t *generator
 	);
 
 void dmg_assembler_generator_unload(

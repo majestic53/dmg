@@ -36,7 +36,9 @@ dmg_utility_asm_generate(void)
 		goto exit;
 	}
 
-	// TODO
+	if((result = dmg_assembler_generator_run(&generator)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	dmg_assembler_generator_unload(&generator);
@@ -334,6 +336,16 @@ dmg_utility_asm_parse(
 				result = DMG_STATUS_FAILURE;
 				goto exit;
 		}
+	}
+
+	if(!g_asm.output) {
+		TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_asm.output);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	} else if(!g_asm.source) {
+		TRACE_TOOL_ERROR("%s: Missing source path -- %s\n", argv[0], g_asm.source);
+		result = DMG_STATUS_INVALID;
+		goto exit;
 	}
 
 exit:

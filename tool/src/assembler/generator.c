@@ -22,6 +22,158 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
+static int
+dmg_assembler_generator_error_tree(
+	__in const dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree,
+	__in uint32_t depth
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	for(uint32_t index = 0; index < depth; ++index) {
+		fprintf(stdout, "\t");
+	}
+
+	if(tree && tree->parent) {
+		const dmg_assembler_token_t *token = tree->parent;
+
+		fprintf(stdout, "{%u} [%i", tree->count, token->type);
+
+		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
+			fprintf(stdout, ":%i", token->subtype);
+		}
+
+		fprintf(stdout, "]");
+
+		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
+			fprintf(stdout, " \"");
+
+			for(uint32_t index = 0; index < token->literal.length; ++index) {
+				fprintf(stdout, "%c", token->literal.str[index]);
+			}
+
+			fprintf(stdout, "\"");
+
+			if(token->type == TOKEN_SCALAR) {
+				fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
+			}
+		} else {
+			fprintf(stdout, " \'%c\' (%02x)", (isprint(token->scalar.low) && !isspace(token->scalar.low))
+				? token->scalar.low : CHARACTER_FILL, token->scalar.low);
+		}
+
+		fprintf(stdout, " (%s@%u)\n", generator->parser.lexer.stream.path, token->line);
+
+		for(uint32_t index = 0; index < tree->count; ++index) {
+
+			if((result = dmg_assembler_generator_error_tree(generator, (const dmg_assembler_tree_t *)tree->child[index], depth + 1))
+					!= DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		}
+	}
+
+exit:
+	return result;
+}
+
+#endif /* NDEBUG */
+
+static int
+dmg_assembler_generator_error(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree,
+	__in const char *message,
+	...
+	)
+{
+	dmg_assembler_string_t string = {};
+
+#ifndef NDEBUG
+	dmg_assembler_generator_error_tree(generator, tree, 0);
+#endif /* NDEBUG */
+
+	if(dmg_assembler_string_allocate(&string) == DMG_STATUS_SUCCESS) {
+
+		if(tree->parent->literal.length) {
+
+			for(uint32_t index = 0; index < tree->parent->literal.length; ++index) {
+
+				if(dmg_assembler_string_append(&string, tree->parent->literal.str[index]) != DMG_STATUS_SUCCESS) {
+					break;
+				}
+			}
+		} else {
+			strcpy(string.str, "EOF");
+		}
+	}
+
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)", message, string.str, generator->parser.lexer.stream.path, tree->parent->line);
+	dmg_assembler_string_free(&string);
+
+	return DMG_STATUS_FAILURE;
+}
+
+static int
+dmg_assembler_generator_generate_directive(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->type != TOKEN_DIRECTIVE) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_label(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->type != TOKEN_LABEL) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting label");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_opcode(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->type != TOKEN_OPCODE) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	// TODO
+
+exit:
+	return result;
+}
+
 int
 dmg_assembler_generator_load(
 	__inout dmg_assembler_generator_t *generator,
@@ -42,6 +194,61 @@ dmg_assembler_generator_load(
 
 	if((result = dmg_assembler_globals_allocate(&generator->globals)) != DMG_STATUS_SUCCESS) {
 		goto exit;
+	}
+
+	generator->file = file;
+
+exit:
+	return result;
+}
+
+int
+dmg_assembler_generator_run(
+	__inout dmg_assembler_generator_t *generator
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	for(;;) {
+		const dmg_assembler_tree_t *tree = dmg_assembler_parser_tree(&generator->parser);
+
+		switch(tree->parent->type) {
+			case TOKEN_DIRECTIVE:
+
+				if((result = dmg_assembler_generator_generate_directive(generator, tree)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+				break;
+			case TOKEN_LABEL:
+
+				if((result = dmg_assembler_generator_generate_label(generator, tree)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+				break;
+			case TOKEN_OPCODE:
+
+				if((result = dmg_assembler_generator_generate_opcode(generator, tree)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+				break;
+			default:
+				result = GENERATOR_ERROR(generator, tree, "Expecting statement");
+				goto exit;
+		}
+
+		if(!dmg_assembler_parser_has_next(&generator->parser)
+				|| ((result = dmg_assembler_parser_next(&generator->parser)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
+
+	for(uint32_t index = 0; index < generator->banks.count; ++index) {
+		dmg_assembler_bank_t *bank = &generator->banks.bank[index];
+
+		if(fwrite(bank->data, sizeof(uint8_t), sizeof(bank->data), generator->file) != sizeof(bank->data)) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Failed to write bank %u to file", index);
+			goto exit;
+		}
 	}
 
 exit:

@@ -82,6 +82,12 @@ dmg_launcher_parse(
 		}
 	}
 
+	if(!g_launcher.rom) {
+		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_launcher.rom);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	}
+
 exit:
 	return result;
 }

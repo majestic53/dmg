@@ -55,6 +55,12 @@ dmg_utility_save_info_parse(
 		}
 	}
 
+	if(!g_save_info.save) {
+		TRACE_TOOL_ERROR("%s: Missing save path -- %s\n", argv[0], g_save_info.save);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	}
+
 exit:
 	return result;
 }

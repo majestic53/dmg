@@ -529,6 +529,16 @@ dmg_utility_dasm_parse(
 		}
 	}
 
+	if(!g_dasm.output) {
+		TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_dasm.output);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	} else if(!g_dasm.rom) {
+		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_dasm.rom);
+		result = DMG_STATUS_INVALID;
+		goto exit;
+	}
+
 exit:
 	return result;
 }
