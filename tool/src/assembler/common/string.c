@@ -63,7 +63,7 @@ exit:
 }
 
 int
-dmg_assembler_string_append(
+dmg_assembler_string_append_character(
 	__inout dmg_assembler_string_t *string,
 	__in char value
 	)
@@ -76,6 +76,28 @@ dmg_assembler_string_append(
 	}
 
 	string->str[string->length++] = value;
+
+exit:
+	return result;
+}
+
+int
+dmg_assembler_string_append_string(
+	__inout dmg_assembler_string_t *string,
+	__in const char *value
+	)
+{
+	int length, result = DMG_STATUS_SUCCESS;
+
+	if((length = strlen(value)) > 0) {
+
+		for(int index = 0; index < length; ++index) {
+
+			if((result = dmg_assembler_string_append_character(string, value[index])) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		}
+	}
 
 exit:
 	return result;

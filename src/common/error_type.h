@@ -22,7 +22,7 @@
 #include "../../include/common.h"
 
 #define ERROR_MALFORMED "Malformed error"
-#define ERROR_LENGTH_MAX 256
+#define ERROR_LENGTH_MAX 4096
 
 typedef struct {
 	int error;

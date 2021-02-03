@@ -22,54 +22,88 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifndef NDEBUG
-
 static int
 dmg_assembler_generator_error_tree(
 	__in const dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_tree_t *tree,
+	__inout dmg_assembler_string_t *string,
 	__in uint32_t depth
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	char str[GENERATOR_ERROR_STR_MAX] = {};
 
 	for(uint32_t index = 0; index < depth; ++index) {
-		fprintf(stdout, "\t");
+
+		if((result = dmg_assembler_string_append_character(string, '\t')) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 	}
 
 	if(tree && tree->parent) {
 		const dmg_assembler_token_t *token = tree->parent;
 
-		fprintf(stdout, "{%u} [%i", tree->count, token->type);
+		snprintf(str, GENERATOR_ERROR_STR_MAX, "{%u} [%i", tree->count, token->type);
+
+		if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 
 		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
-			fprintf(stdout, ":%i", token->subtype);
+			snprintf(str, GENERATOR_ERROR_STR_MAX, ":%i", token->subtype);
+
+			if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
 		}
 
-		fprintf(stdout, "]");
+		if((result = dmg_assembler_string_append_character(string, ']')) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
-			fprintf(stdout, " \"");
+
+			if((result = dmg_assembler_string_append_character(string, '\"')) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
 
 			for(uint32_t index = 0; index < token->literal.length; ++index) {
-				fprintf(stdout, "%c", token->literal.str[index]);
+
+				if((result = dmg_assembler_string_append_character(string, token->literal.str[index]))
+						!= DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
 			}
 
-			fprintf(stdout, "\"");
+			if((result = dmg_assembler_string_append_character(string, '\"')) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
 
 			if(token->type == TOKEN_SCALAR) {
-				fprintf(stdout, " %04x (%u)", token->scalar.word, token->scalar.word);
+				snprintf(str, GENERATOR_ERROR_STR_MAX, " %04x (%u)", token->scalar.word, token->scalar.word);
+
+				if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
 			}
 		} else {
-			fprintf(stdout, " \'%c\' (%02x)", (isprint(token->scalar.low) && !isspace(token->scalar.low))
+			snprintf(str, GENERATOR_ERROR_STR_MAX, " \'%c\' (%02x)", (isprint(token->scalar.low) && !isspace(token->scalar.low))
 				? token->scalar.low : CHARACTER_FILL, token->scalar.low);
+
+			if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
 		}
 
-		fprintf(stdout, " (%s@%u)\n", generator->parser.lexer.stream.path, token->line);
+		snprintf(str, GENERATOR_ERROR_STR_MAX, " (%s@%u)\n", generator->parser.lexer.stream.path, token->line);
+
+		if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 
 		for(uint32_t index = 0; index < tree->count; ++index) {
 
-			if((result = dmg_assembler_generator_error_tree(generator, (const dmg_assembler_tree_t *)tree->child[index], depth + 1))
+			if((result = dmg_assembler_generator_error_tree(generator, (const dmg_assembler_tree_t *)tree->child[index], string, depth + 1))
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
@@ -80,8 +114,6 @@ exit:
 	return result;
 }
 
-#endif /* NDEBUG */
-
 static int
 dmg_assembler_generator_error(
 	__inout dmg_assembler_generator_t *generator,
@@ -90,11 +122,7 @@ dmg_assembler_generator_error(
 	...
 	)
 {
-	dmg_assembler_string_t string = {};
-
-#ifndef NDEBUG
-	dmg_assembler_generator_error_tree(generator, tree, 0);
-#endif /* NDEBUG */
+	dmg_assembler_string_t string = {}, tree_string = {};
 
 	if(dmg_assembler_string_allocate(&string) == DMG_STATUS_SUCCESS) {
 
@@ -102,7 +130,7 @@ dmg_assembler_generator_error(
 
 			for(uint32_t index = 0; index < tree->parent->literal.length; ++index) {
 
-				if(dmg_assembler_string_append(&string, tree->parent->literal.str[index]) != DMG_STATUS_SUCCESS) {
+				if(dmg_assembler_string_append_character(&string, tree->parent->literal.str[index]) != DMG_STATUS_SUCCESS) {
 					break;
 				}
 			}
@@ -111,7 +139,12 @@ dmg_assembler_generator_error(
 		}
 	}
 
-	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)", message, string.str, generator->parser.lexer.stream.path, tree->parent->line);
+	if(dmg_assembler_string_allocate(&tree_string) == DMG_STATUS_SUCCESS) {
+		dmg_assembler_generator_error_tree(generator, tree, &tree_string, 1);
+	}
+
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)\n%s", message, string.str, generator->parser.lexer.stream.path, tree->parent->line, tree_string);
+	dmg_assembler_string_free(&tree_string);
 	dmg_assembler_string_free(&string);
 
 	return DMG_STATUS_FAILURE;

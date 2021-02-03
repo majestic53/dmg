@@ -35,9 +35,14 @@ int dmg_assembler_string_allocate(
 	__inout dmg_assembler_string_t *string
 	);
 
-int dmg_assembler_string_append(
+int dmg_assembler_string_append_character(
 	__inout dmg_assembler_string_t *string,
 	__in char value
+	);
+
+int dmg_assembler_string_append_string(
+	__inout dmg_assembler_string_t *string,
+	__in const char *value
 	);
 
 void dmg_assembler_string_free(

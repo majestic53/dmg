@@ -37,7 +37,7 @@ dmg_assembler_global_error(
 
 			for(uint32_t index = 0; index < token->literal.length; ++index) {
 
-				if(dmg_assembler_string_append(&string, token->literal.str[index]) != DMG_STATUS_SUCCESS) {
+				if(dmg_assembler_string_append_character(&string, token->literal.str[index]) != DMG_STATUS_SUCCESS) {
 					break;
 				}
 			}

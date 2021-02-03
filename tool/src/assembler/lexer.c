@@ -40,7 +40,7 @@ dmg_assembler_lexer_token_parse_alpha(
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
 	token->literal.length = 0;
 
-	if((result = dmg_assembler_string_append(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_string_append_character(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -81,7 +81,7 @@ dmg_assembler_lexer_token_parse_alpha(
 			break;
 		}
 
-		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 			break;
 		}
 	}
@@ -127,7 +127,7 @@ dmg_assembler_lexer_token_parse_directive(
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
 	token->literal.length = 0;
 
-	if((result = dmg_assembler_string_append(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_string_append_character(&string, dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -153,7 +153,7 @@ dmg_assembler_lexer_token_parse_directive(
 			break;
 		}
 
-		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -187,7 +187,7 @@ dmg_assembler_lexer_token_parse_literal(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_string_append(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_string_append_character(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -215,7 +215,7 @@ dmg_assembler_lexer_token_parse_literal(
 
 	for(uint32_t length = 0;; ++length) {
 
-		if((result = dmg_assembler_string_append(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_character(&string, value = dmg_assembler_stream_character(&lexer->stream, &type))) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -267,11 +267,11 @@ dmg_assembler_lexer_token_parse_literal(
 				base = BASE_DECIMAL;
 				count = COUNT_DECIMAL_ESCAPE_MAX;
 
-				if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+				if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
 
-				if((result = dmg_assembler_string_append(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
+				if((result = dmg_assembler_string_append_character(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
 			}
@@ -309,11 +309,11 @@ dmg_assembler_lexer_token_parse_literal(
 						break;
 					}
 
-					if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+					if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
 
-					if((result = dmg_assembler_string_append(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
+					if((result = dmg_assembler_string_append_character(&string_scalar, value)) != DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
 
@@ -420,7 +420,7 @@ dmg_assembler_lexer_token_parse_scalar(
 
 	if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
 
-		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -471,7 +471,7 @@ dmg_assembler_lexer_token_parse_scalar(
 		++token->literal.length;
 	}
 
-	if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -500,7 +500,7 @@ dmg_assembler_lexer_token_parse_scalar(
 			break;
 		}
 
-		if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -563,7 +563,7 @@ dmg_assembler_lexer_token_parse_symbol(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_string_append(&string, (value = dmg_assembler_stream_character(&lexer->stream, &type)))) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_string_append_character(&string, (value = dmg_assembler_stream_character(&lexer->stream, &type)))) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -613,7 +613,7 @@ dmg_assembler_lexer_token_parse_symbol(
 
 		if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {
 
-			if((result = dmg_assembler_string_append(&string, value)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_string_append_character(&string, value)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 

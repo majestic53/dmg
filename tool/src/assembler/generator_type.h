@@ -21,6 +21,8 @@
 
 #include "../../include/assembler/generator.h"
 
+#define GENERATOR_ERROR_STR_MAX 256
+
 #define GENERATOR_ERROR(_GENERATOR_, _TREE_, _MESSAGE_) \
 	dmg_assembler_generator_error(_GENERATOR_, _TREE_, _MESSAGE_)
 
