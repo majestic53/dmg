@@ -33,6 +33,10 @@ dmg_assembler_generator_error_tree(
 	int result = DMG_STATUS_SUCCESS;
 	char str[GENERATOR_ERROR_STR_MAX] = {};
 
+	if((result = dmg_assembler_string_append_character(string, '\n')) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
 	for(uint32_t index = 0; index < depth; ++index) {
 
 		if((result = dmg_assembler_string_append_character(string, '\t')) != DMG_STATUS_SUCCESS) {
@@ -95,7 +99,7 @@ dmg_assembler_generator_error_tree(
 			}
 		}
 
-		snprintf(str, GENERATOR_ERROR_STR_MAX, " (%s@%u)\n", generator->parser.lexer.stream.path, token->line);
+		snprintf(str, GENERATOR_ERROR_STR_MAX, " (%s@%u)", generator->parser.lexer.stream.path, token->line);
 
 		if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
 			goto exit;
@@ -143,12 +147,90 @@ dmg_assembler_generator_error(
 		dmg_assembler_generator_error_tree(generator, tree, &tree_string, 1);
 	}
 
-	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)\n%s", message, string.str, generator->parser.lexer.stream.path, tree->parent->line, tree_string);
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, generator->parser.lexer.stream.path, tree->parent->line, tree_string);
 	dmg_assembler_string_free(&tree_string);
 	dmg_assembler_string_free(&string);
 
 	return DMG_STATUS_FAILURE;
 }
+
+/*static int
+dmg_assembler_generator_bank_set(
+	__inout dmg_assembler_generator_t *generator,
+	__in uint32_t bank,
+	__in const dmg_assembler_scalar_t *origin
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	for(; (generator->banks.count - 1) < bank;) {
+
+		if((result = dmg_assembler_bank_add(&generator->banks, origin)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	}
+
+	generator->bank = bank;
+	generator->offset.word = 0;
+
+exit:
+	return result;
+}*/
+
+static int
+dmg_assembler_generator_bank_set_byte(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_scalar_t *value
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if((result = dmg_assembler_bank_set_byte(&generator->banks, generator->bank, &generator->offset, value))
+			!= DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	generator->offset.word += sizeof(value->low);
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_bank_set_word(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_scalar_t *value
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if((result = dmg_assembler_bank_set_word(&generator->banks, generator->bank, &generator->offset, value))
+			!= DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	generator->offset.word += sizeof(value->word);
+
+exit:
+	return result;
+}
+
+static dmg_assembler_generator_hdlr DIRECTIVE_HANDLER[] = {
+	NULL, /* DIRECTIVE_BANK */
+	NULL, /* DIRECTIVE_DATA_BYTE */
+	NULL, /* DIRECTIVE_DATA_WORD */
+	NULL, /* DIRECTIVE_DEFINE */
+	NULL, /* DIRECTIVE_ELSE_IF */
+	NULL, /* DIRECTIVE_ELSE */
+	NULL, /* DIRECTIVE_END */
+	NULL, /* DIRECTIVE_IF */
+	NULL, /* DIRECTIVE_IF_DEFINE */
+	NULL, /* DIRECTIVE_INCLUDE */
+	NULL, /* DIRECTIVE_INCLUDE_BINARY */
+	NULL, /* DIRECTIVE_ORIGIN */
+	NULL, /* DIRECTIVE_RESERVE */
+	NULL, /* DIRECTIVE_UNDEFINE */
+	};
 
 static int
 dmg_assembler_generator_generate_directive(
@@ -157,13 +239,17 @@ dmg_assembler_generator_generate_directive(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_generator_hdlr handler;
 
-	if(tree->parent->type != TOKEN_DIRECTIVE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+	if((tree->parent->subtype >= DIRECTIVE_MAX)
+			|| !(handler = DIRECTIVE_HANDLER[tree->parent->subtype])) {
+		result = GENERATOR_ERROR(generator, tree, "Unsupported directive");
 		goto exit;
 	}
 
-	// TODO
+	if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
@@ -176,17 +262,165 @@ dmg_assembler_generator_generate_label(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
 
 	if(tree->parent->type != TOKEN_LABEL) {
 		result = GENERATOR_ERROR(generator, tree, "Expecting label");
 		goto exit;
 	}
 
-	// TODO
+	if(dmg_assembler_global_get(&generator->globals, tree->parent, &value) == DMG_STATUS_SUCCESS) {
+		result = GENERATOR_ERROR(generator, tree, "Duplicate label");
+		goto exit;
+	}
+
+	value.word = (generator->banks.bank[generator->bank].origin.word + generator->offset.word);
+
+	if((result = dmg_assembler_global_add(&generator->globals, tree->parent, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;
 }
+
+static int
+dmg_assembler_generate_opcode_halt(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_HALT) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	value.low = INSTRUCTION_HALT;
+
+	if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_stop(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_STOP) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	value.low = INSTRUCTION_STOP;
+	value.high = 0;
+
+	if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
+	NULL, /* OPCODE_ADC */
+	NULL, /* OPCODE_ADD */
+	NULL, /* OPCODE_AND */
+	NULL, /* OPCODE_CALL */
+	NULL, /* OPCODE_CCF */
+	NULL, /* OPCODE_CP */
+	NULL, /* OPCODE_CPL */
+	NULL, /* OPCODE_DAA */
+	NULL, /* OPCODE_DEC */
+	NULL, /* OPCODE_DI */
+	NULL, /* OPCODE_EI */
+	dmg_assembler_generate_opcode_halt, /* OPCODE_HALT */
+	NULL, /* OPCODE_INC */
+	NULL, /* OPCODE_JP */
+	NULL, /* OPCODE_JR */
+	NULL, /* OPCODE_LD */
+	NULL, /* OPCODE_NOP */
+	NULL, /* OPCODE_OR */
+	NULL, /* OPCODE_POP */
+	NULL, /* OPCODE_PUSH */
+	NULL, /* OPCODE_RET */
+	NULL, /* OPCODE_RETI */
+	NULL, /* OPCODE_RLA */
+	NULL, /* OPCODE_RLCA */
+	NULL, /* OPCODE_RRA */
+	NULL, /* OPCODE_RRCA */
+	NULL, /* OPCODE_RST */
+	NULL, /* OPCODE_SCF */
+	NULL, /* OPCODE_SBC */
+	dmg_assembler_generate_opcode_stop, /* OPCODE_STOP */
+	NULL, /* OPCODE_SUB */
+	NULL, /* OPCODE_XOR */
+	NULL, /* OPCODE_UNUSED_CB */
+	NULL, /* OPCODE_UNUSED_D3 */
+	NULL, /* OPCODE_UNUSED_DB */
+	NULL, /* OPCODE_UNUSED_DD */
+	NULL, /* OPCODE_UNUSED_E3 */
+	NULL, /* OPCODE_UNUSED_E4 */
+	NULL, /* OPCODE_UNUSED_EB */
+	NULL, /* OPCODE_UNUSED_EC */
+	NULL, /* OPCODE_UNUSED_ED */
+	NULL, /* OPCODE_UNUSED_F4 */
+	NULL, /* OPCODE_UNUSED_FC */
+	NULL, /* OPCODE_UNUSED_FD */
+	NULL, /* OPCODE_BIT0 */
+	NULL, /* OPCODE_BIT1 */
+	NULL, /* OPCODE_BIT2 */
+	NULL, /* OPCODE_BIT3 */
+	NULL, /* OPCODE_BIT4 */
+	NULL, /* OPCODE_BIT5 */
+	NULL, /* OPCODE_BIT6 */
+	NULL, /* OPCODE_BIT7 */
+	NULL, /* OPCODE_RES0 */
+	NULL, /* OPCODE_RES1 */
+	NULL, /* OPCODE_RES2 */
+	NULL, /* OPCODE_RES3 */
+	NULL, /* OPCODE_RES4 */
+	NULL, /* OPCODE_RES5 */
+	NULL, /* OPCODE_RES6 */
+	NULL, /* OPCODE_RES7 */
+	NULL, /* OPCODE_RL */
+	NULL, /* OPCODE_RLC */
+	NULL, /* OPCODE_RR */
+	NULL, /* OPCODE_RRC */
+	NULL, /* OPCODE_SET0 */
+	NULL, /* OPCODE_SET1 */
+	NULL, /* OPCODE_SET2 */
+	NULL, /* OPCODE_SET3 */
+	NULL, /* OPCODE_SET4 */
+	NULL, /* OPCODE_SET5 */
+	NULL, /* OPCODE_SET6 */
+	NULL, /* OPCODE_SET7 */
+	NULL, /* OPCODE_SLA */
+	NULL, /* OPCODE_SRA */
+	NULL, /* OPCODE_SRL */
+	NULL, /* OPCODE_SWAP */
+	};
 
 static int
 dmg_assembler_generator_generate_opcode(
@@ -195,13 +429,17 @@ dmg_assembler_generator_generate_opcode(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_generator_hdlr handler;
 
-	if(tree->parent->type != TOKEN_OPCODE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+	if((tree->parent->subtype >= OPCODE_MAX)
+			|| !(handler = OPCODE_HANDLER[tree->parent->subtype])) {
+		result = GENERATOR_ERROR(generator, tree, "Unsupported opcode");
 		goto exit;
 	}
 
-	// TODO
+	if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
 exit:
 	return result;

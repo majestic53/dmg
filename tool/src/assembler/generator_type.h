@@ -26,4 +26,9 @@
 #define GENERATOR_ERROR(_GENERATOR_, _TREE_, _MESSAGE_) \
 	dmg_assembler_generator_error(_GENERATOR_, _TREE_, _MESSAGE_)
 
+typedef int (*dmg_assembler_generator_hdlr)(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	);
+
 #endif /* DMG_TOOL_ASSEMBLER_GENERATOR_TYPE_H_ */

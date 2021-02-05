@@ -74,7 +74,7 @@ dmg_assembler_global_find(
 	}
 
 	if(index == globals->count) {
-		result = GLOBAL_ERROR(token, "Failed to final global");
+		result = GLOBAL_ERROR(token, "Failed to find global");
 		*global = NULL;
 		goto exit;
 	}
