@@ -463,6 +463,23 @@ exit:
 	return result;
 }
 
+static dmg_assembler_evaluator_hdlr OPERATOR_HANDLER[] = {
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_ARITHMETIC_ADD */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_ARITHMETIC_DIVIDE */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_ARITHMETIC_MODULUS */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_ARITHMETIC_MULTIPLY */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_ARITHMETIC_SUBTRACT */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_BINARY_AND */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_BINARY_OR */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_BINARY_XOR */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_LOGICAL_AND */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_LOGICAL_OR */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_LOGICAL_SHIFT_LEFT */
+	dmg_assembler_generator_evaluate_expression_operator_binary, /* OPERATOR_LOGICAL_SHIFT_RIGHT */
+	dmg_assembler_generator_evaluate_expression_operator_unary, /* OPERATOR_UNARY_NEGATE */
+	dmg_assembler_generator_evaluate_expression_operator_unary, /* OPERATOR_UNARY_NOT */
+	};
+
 static int
 dmg_assembler_generator_evaluate_expression_operator(
 	__inout dmg_assembler_generator_t *generator,
@@ -471,42 +488,21 @@ dmg_assembler_generator_evaluate_expression_operator(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_evaluator_hdlr handler;
 
 	if(tree->parent->type != TOKEN_OPERATOR) {
 		result = GENERATOR_ERROR(generator, tree, "Expecting operator");
 		goto exit;
 	}
 
-	switch(tree->parent->subtype) {
-		case OPERATOR_ARITHMETIC_ADD:
-		case OPERATOR_ARITHMETIC_DIVIDE:
-		case OPERATOR_ARITHMETIC_MODULUS:
-		case OPERATOR_ARITHMETIC_MULTIPLY:
-		case OPERATOR_ARITHMETIC_SUBTRACT:
-		case OPERATOR_BINARY_AND:
-		case OPERATOR_BINARY_OR:
-		case OPERATOR_BINARY_XOR:
-		case OPERATOR_LOGICAL_AND:
-		case OPERATOR_LOGICAL_OR:
-		case OPERATOR_LOGICAL_SHIFT_LEFT:
-		case OPERATOR_LOGICAL_SHIFT_RIGHT:
+	if((tree->parent->subtype >= OPERATOR_MAX)
+			|| !(handler = OPERATOR_HANDLER[tree->parent->subtype])) {
+		result = GENERATOR_ERROR(generator, tree, "Unsupported operator");
+		goto exit;
+	}
 
-			if((result = dmg_assembler_generator_evaluate_expression_operator_binary(generator, tree, value))
-					!= DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		case OPERATOR_UNARY_NEGATE:
-		case OPERATOR_UNARY_NOT:
-
-			if((result = dmg_assembler_generator_evaluate_expression_operator_unary(generator, tree, value))
-					!= DMG_STATUS_SUCCESS) {
-				goto exit;
-			}
-			break;
-		default:
-			result = GENERATOR_ERROR(generator, tree, "Unsupported operator");
-			goto exit;
+	if((result = handler(generator, tree, value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 exit:
@@ -1209,6 +1205,22 @@ exit:
 	return result;
 }
 
+static dmg_assembler_generator_hdlr STATEMENT_HANDLER[] = {
+	NULL, /* TOKEN_END */
+	NULL, /* TOKEN_CONDITION */
+	dmg_assembler_generator_generate_directive, /* TOKEN_DIRECTIVE */
+	NULL, /* TOKEN_IDENTIFIER */
+	NULL, /* TOKEN_INEQUALITY */
+	dmg_assembler_generator_generate_label, /* TOKEN_LABEL */
+	NULL, /* TOKEN_LITERAL */
+	NULL, /* TOKEN_MACRO */
+	dmg_assembler_generator_generate_opcode, /* TOKEN_OPCODE */
+	NULL, /* TOKEN_OPERATOR */
+	NULL, /* TOKEN_REGISTER */
+	NULL, /* TOKEN_SCALAR */
+	NULL, /* TOKEN_SYMBOL */
+	};
+
 int
 dmg_assembler_generator_run(
 	__inout dmg_assembler_generator_t *generator
@@ -1217,30 +1229,17 @@ dmg_assembler_generator_run(
 	int result = DMG_STATUS_SUCCESS;
 
 	for(;;) {
+		dmg_assembler_generator_hdlr handler;
 		const dmg_assembler_tree_t *tree = dmg_assembler_parser_tree(&generator->parser);
 
-		switch(tree->parent->type) {
-			case TOKEN_DIRECTIVE:
+		if((tree->parent->type >= TOKEN_MAX)
+				|| !(handler = STATEMENT_HANDLER[tree->parent->type])) {
+			result = GENERATOR_ERROR(generator, tree, "Unsupported statement");
+			goto exit;
+		}
 
-				if((result = dmg_assembler_generator_generate_directive(generator, tree)) != DMG_STATUS_SUCCESS) {
-					goto exit;
-				}
-				break;
-			case TOKEN_LABEL:
-
-				if((result = dmg_assembler_generator_generate_label(generator, tree)) != DMG_STATUS_SUCCESS) {
-					goto exit;
-				}
-				break;
-			case TOKEN_OPCODE:
-
-				if((result = dmg_assembler_generator_generate_opcode(generator, tree)) != DMG_STATUS_SUCCESS) {
-					goto exit;
-				}
-				break;
-			default:
-				result = GENERATOR_ERROR(generator, tree, "Expecting statement");
-				goto exit;
+		if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+			goto exit;
 		}
 
 		if(!dmg_assembler_parser_has_next(&generator->parser)
