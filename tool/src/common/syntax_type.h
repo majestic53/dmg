@@ -1186,7 +1186,6 @@ static const char *OPCODE_STR[] = {
 	"stop", /* OPCODE_STOP */
 	"sub", /* OPCODE_SUB */
 	"xor", /* OPCODE_XOR */
-	"unused_cb", /* OPCODE_UNUSED_CB */
 	"unused_d3", /* OPCODE_UNUSED_D3 */
 	"unused_db", /* OPCODE_UNUSED_DB */
 	"unused_dd", /* OPCODE_UNUSED_DD */

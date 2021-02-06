@@ -3128,8 +3128,7 @@ dmg_assembler_parser_parse_instruction_unused(
 	dmg_assembler_tree_t *child = NULL;
 
 	if((token->type != TOKEN_OPCODE)
-			|| ((token->subtype != OPCODE_UNUSED_CB)
-				&& (token->subtype != OPCODE_UNUSED_D3)
+			|| ((token->subtype != OPCODE_UNUSED_D3)
 				&& (token->subtype != OPCODE_UNUSED_DB)
 				&& (token->subtype != OPCODE_UNUSED_DD)
 				&& (token->subtype != OPCODE_UNUSED_E3)
@@ -3245,7 +3244,6 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_assembler_parser_parse_instruction_stop, /* OPCODE_STOP */
 	dmg_assembler_parser_parse_instruction_sub, /* OPCODE_SUB */
 	dmg_assembler_parser_parse_instruction_xor, /* OPCODE_XOR */
-	dmg_assembler_parser_parse_instruction_unused, /* OPCODE_UNUSED_CB */
 	dmg_assembler_parser_parse_instruction_unused, /* OPCODE_UNUSED_D3 */
 	dmg_assembler_parser_parse_instruction_unused, /* OPCODE_UNUSED_DB */
 	dmg_assembler_parser_parse_instruction_unused, /* OPCODE_UNUSED_DD */

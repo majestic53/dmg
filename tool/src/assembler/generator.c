@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
 static int
 dmg_assembler_generator_error_tree(
 	__in const dmg_assembler_generator_t *generator,
@@ -61,7 +63,7 @@ dmg_assembler_generator_error_tree(
 			}
 		}
 
-		if((result = dmg_assembler_string_append_character(string, ']')) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_string_append_string(string, "] ")) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -118,6 +120,8 @@ exit:
 	return result;
 }
 
+#endif /* NDEBUG */
+
 static int
 dmg_assembler_generator_error(
 	__inout dmg_assembler_generator_t *generator,
@@ -126,7 +130,7 @@ dmg_assembler_generator_error(
 	...
 	)
 {
-	dmg_assembler_string_t string = {}, tree_string = {};
+	dmg_assembler_string_t string = {};
 
 	if(dmg_assembler_string_allocate(&string) == DMG_STATUS_SUCCESS) {
 
@@ -143,12 +147,18 @@ dmg_assembler_generator_error(
 		}
 	}
 
-	if(dmg_assembler_string_allocate(&tree_string) == DMG_STATUS_SUCCESS) {
-		dmg_assembler_generator_error_tree(generator, tree, &tree_string, 1);
+#ifndef NDEBUG
+	dmg_assembler_string_t debug_string = {};
+
+	if(dmg_assembler_string_allocate(&debug_string) == DMG_STATUS_SUCCESS) {
+		dmg_assembler_generator_error_tree(generator, tree, &debug_string, 1);
 	}
 
-	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, generator->parser.lexer.stream.path, tree->parent->line, tree_string);
-	dmg_assembler_string_free(&tree_string);
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, generator->parser.lexer.stream.path, tree->parent->line, debug_string);
+	dmg_assembler_string_free(&debug_string);
+#else
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)", message, string.str, generator->parser.lexer.stream.path, tree->parent->line);
+#endif /* NDEBUG */
 	dmg_assembler_string_free(&string);
 
 	return DMG_STATUS_FAILURE;
@@ -171,7 +181,7 @@ dmg_assembler_generator_bank_set(
 	}
 
 	generator->bank = bank;
-	generator->offset.word = 0;
+	generator->offset.word = (origin % BANK_WIDTH);
 
 exit:
 	return result;
@@ -285,6 +295,177 @@ exit:
 }
 
 static int
+dmg_assembler_generate_instruction(
+	__inout dmg_assembler_generator_t *generator,
+	__in int instruction,
+	__in bool extended,
+	__in const dmg_assembler_scalar_t *operand
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	int length, result = DMG_STATUS_SUCCESS;
+
+	length = dmg_processor_instruction(instruction, extended)->operand;
+	value.low = instruction;
+
+	if(length > OPERAND_NONE) {
+		value.high = operand->low;
+
+		if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(length > OPERAND_BYTE) {
+			value.low = operand->high;
+
+			if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		}
+	} else if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_ccf(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_CCF) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CCF, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_cpl(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_CPL) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CPL, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_daa(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_DAA) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DAA, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_di(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_DI) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DI, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_ei(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_EI) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_EI, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_generate_opcode_halt(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_tree_t *tree
@@ -303,9 +484,196 @@ dmg_assembler_generate_opcode_halt(
 		goto exit;
 	}
 
-	value.low = INSTRUCTION_HALT;
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_HALT, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
-	if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_nop(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_NOP) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_NOP, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_reti(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_RETI) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RETI, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_rla(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_RLA) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLA, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_rlca(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_RLCA) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLCA, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_rra(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_RRA) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRA, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_rrca(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_RRCA) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRCA, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_scf(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_scalar_t value = {};
+
+	if(tree->parent->subtype != OPCODE_SCF) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_SCF, false, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -332,10 +700,68 @@ dmg_assembler_generate_opcode_stop(
 		goto exit;
 	}
 
-	value.low = INSTRUCTION_STOP;
-	value.high = 0;
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_STOP, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
-	if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_unused(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	int instruction, result = DMG_STATUS_SUCCESS;
+
+	switch(tree->parent->subtype) {
+		case OPCODE_UNUSED_D3:
+			instruction = INSTRUCTION_UNUSED_D3;
+			break;
+		case OPCODE_UNUSED_DB:
+			instruction = INSTRUCTION_UNUSED_DB;
+			break;
+		case OPCODE_UNUSED_DD:
+			instruction = INSTRUCTION_UNUSED_DD;
+			break;
+		case OPCODE_UNUSED_E3:
+			instruction = INSTRUCTION_UNUSED_E3;
+			break;
+		case OPCODE_UNUSED_E4:
+			instruction = INSTRUCTION_UNUSED_E4;
+			break;
+		case OPCODE_UNUSED_EB:
+			instruction = INSTRUCTION_UNUSED_EB;
+			break;
+		case OPCODE_UNUSED_EC:
+			instruction = INSTRUCTION_UNUSED_EC;
+			break;
+		case OPCODE_UNUSED_ED:
+			instruction = INSTRUCTION_UNUSED_ED;
+			break;
+		case OPCODE_UNUSED_F4:
+			instruction = INSTRUCTION_UNUSED_F4;
+			break;
+		case OPCODE_UNUSED_FC:
+			instruction = INSTRUCTION_UNUSED_FC;
+			break;
+		case OPCODE_UNUSED_FD:
+			instruction = INSTRUCTION_UNUSED_FD;
+			break;
+		default:
+			result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+			goto exit;
+	}
+
+	if(tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Unexpected parameters");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -348,46 +774,46 @@ static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
 	NULL, /* OPCODE_ADD */
 	NULL, /* OPCODE_AND */
 	NULL, /* OPCODE_CALL */
-	NULL, /* OPCODE_CCF */
+	dmg_assembler_generate_opcode_ccf, /* OPCODE_CCF */
 	NULL, /* OPCODE_CP */
-	NULL, /* OPCODE_CPL */
-	NULL, /* OPCODE_DAA */
+	dmg_assembler_generate_opcode_cpl, /* OPCODE_CPL */
+	dmg_assembler_generate_opcode_daa, /* OPCODE_DAA */
 	NULL, /* OPCODE_DEC */
-	NULL, /* OPCODE_DI */
-	NULL, /* OPCODE_EI */
+	dmg_assembler_generate_opcode_di, /* OPCODE_DI */
+	dmg_assembler_generate_opcode_ei, /* OPCODE_EI */
 	dmg_assembler_generate_opcode_halt, /* OPCODE_HALT */
 	NULL, /* OPCODE_INC */
 	NULL, /* OPCODE_JP */
 	NULL, /* OPCODE_JR */
 	NULL, /* OPCODE_LD */
-	NULL, /* OPCODE_NOP */
+	dmg_assembler_generate_opcode_nop, /* OPCODE_NOP */
 	NULL, /* OPCODE_OR */
 	NULL, /* OPCODE_POP */
 	NULL, /* OPCODE_PUSH */
 	NULL, /* OPCODE_RET */
-	NULL, /* OPCODE_RETI */
-	NULL, /* OPCODE_RLA */
-	NULL, /* OPCODE_RLCA */
-	NULL, /* OPCODE_RRA */
-	NULL, /* OPCODE_RRCA */
+	dmg_assembler_generate_opcode_reti, /* OPCODE_RETI */
+	dmg_assembler_generate_opcode_rla, /* OPCODE_RLA */
+	dmg_assembler_generate_opcode_rlca, /* OPCODE_RLCA */
+	dmg_assembler_generate_opcode_rra, /* OPCODE_RRA */
+	dmg_assembler_generate_opcode_rrca, /* OPCODE_RRCA */
 	NULL, /* OPCODE_RST */
-	NULL, /* OPCODE_SCF */
+	dmg_assembler_generate_opcode_scf, /* OPCODE_SCF */
 	NULL, /* OPCODE_SBC */
 	dmg_assembler_generate_opcode_stop, /* OPCODE_STOP */
 	NULL, /* OPCODE_SUB */
 	NULL, /* OPCODE_XOR */
-	NULL, /* OPCODE_UNUSED_CB */
-	NULL, /* OPCODE_UNUSED_D3 */
-	NULL, /* OPCODE_UNUSED_DB */
-	NULL, /* OPCODE_UNUSED_DD */
-	NULL, /* OPCODE_UNUSED_E3 */
-	NULL, /* OPCODE_UNUSED_E4 */
-	NULL, /* OPCODE_UNUSED_EB */
-	NULL, /* OPCODE_UNUSED_EC */
-	NULL, /* OPCODE_UNUSED_ED */
-	NULL, /* OPCODE_UNUSED_F4 */
-	NULL, /* OPCODE_UNUSED_FC */
-	NULL, /* OPCODE_UNUSED_FD */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_CB */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_D3 */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_DB */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_DD */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_E3 */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_E4 */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_EB */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_EC */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_ED */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_F4 */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_FC */
+	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_FD */
 	NULL, /* OPCODE_BIT0 */
 	NULL, /* OPCODE_BIT1 */
 	NULL, /* OPCODE_BIT2 */

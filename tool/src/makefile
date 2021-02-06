@@ -101,6 +101,7 @@ archive:
 		$(DIR_BUILD_TOOL)tool_common_file.o $(DIR_BUILD_TOOL)tool_common_syntax.o $(DIR_BUILD_TOOL)tool_common_trace.o \
 			$(DIR_BUILD_TOOL)tool_common_usage.o $(DIR_BUILD_TOOL)tool_common_version.o \
 		$(DIR_BUILD)common_error.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
-		$(DIR_BUILD_TOOL)tool_launcher_debug.o $(DIR_BUILD_TOOL)tool_launcher_socket.o
+		$(DIR_BUILD_TOOL)tool_launcher_debug.o $(DIR_BUILD_TOOL)tool_launcher_socket.o \
+		$(DIR_BUILD)system_processor_instruction.o
 	@echo '--- DONE -----------------------------------'
 	@echo ''
