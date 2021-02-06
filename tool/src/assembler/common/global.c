@@ -65,9 +65,7 @@ dmg_assembler_global_find(
 	for(; index < globals->count; ++index) {
 		*global = &globals->global[index];
 
-		if((token->type == (*global)->token->type)
-				&& (token->subtype == (*global)->token->subtype)
-				&& (token->literal.length == (*global)->token->literal.length)
+		if((token->literal.length == (*global)->token->literal.length)
 				&& !strncmp(token->literal.str, (*global)->token->literal.str, token->literal.length)) {
 			break;
 		}

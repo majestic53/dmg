@@ -45,6 +45,12 @@ typedef struct {
 extern "C" {
 #endif /* __cplusplus */
 
+int dmg_assembler_tree_child(
+	__in const dmg_assembler_tree_t *parent,
+	__in uint32_t index,
+	__out dmg_assembler_tree_t **child
+	);
+
 int dmg_assembler_trees_add(
 	__inout dmg_assembler_trees_t *trees,
 	__in bool root,

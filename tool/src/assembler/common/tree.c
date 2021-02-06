@@ -93,6 +93,26 @@ dmg_assembler_trees_resize_tree(
 }
 
 int
+dmg_assembler_tree_child(
+	__in const dmg_assembler_tree_t *parent,
+	__in uint32_t index,
+	__out dmg_assembler_tree_t **child
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(parent->count <= index) {
+		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Child tree does not exist: %u (must be less than %u)", index, parent->count);
+		goto exit;
+	}
+
+	*child = (dmg_assembler_tree_t *)parent->child[index];
+
+exit:
+	return result;
+}
+
+int
 dmg_assembler_trees_add(
 	__inout dmg_assembler_trees_t *trees,
 	__in bool root,

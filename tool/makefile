@@ -42,7 +42,9 @@ LIB_TOOL=libdmg_tool.a
 
 SHA256=sha256sum
 
-build: build_tool build_tool_utility link
+build_debug: build_tool build_tool_utility link
+
+build_release: build_tool build_tool_utility link strip checksum
 
 build_tool: tool_launcher.o
 
@@ -66,23 +68,35 @@ tool_utility_rom_info.o: $(DIR_UTILITY_ROM_INFO)rom_info.c
 tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_SAVE_INFO)save_info.c -o $(DIR_BUILD_TOOL)tool_utility_save_info.o
 
+checksum:
+	@echo ''
+	@echo '--- GENERATE CHECKSUMS ---------------------'
+	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(BIN_LAUNCHER) $(BIN_UTILITY_ASM) $(BIN_UTILITY_DASM) $(BIN_UTILITY_ROM_FIX) $(BIN_UTILITY_ROM_INFO) \
+		$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256).txt
+	@echo '--- DONE -----------------------------------'
+	@echo ''
+
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
 		-o $(DIR_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
-	strip -s $(DIR_BIN)$(BIN_LAUNCHER)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_asm.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ASM) $(FLAGS_BIN)
-	strip -s $(DIR_BIN)$(BIN_UTILITY_ASM)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_dasm.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_DASM) $(FLAGS_BIN)
-	strip -s $(DIR_BIN)$(BIN_UTILITY_DASM)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_fix.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ROM_FIX) $(FLAGS_BIN)
-	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_FIX)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
-	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_INFO)
 	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
+	@echo '--- DONE -----------------------------------'
+	@echo ''
+
+strip:
+	@echo ''
+	@echo '--- STRIP SYMBOLS --------------------------'
+	strip -s $(DIR_BIN)$(BIN_LAUNCHER)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_ASM)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_DASM)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_FIX)
+	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_INFO)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO)
-	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(BIN_LAUNCHER) $(BIN_UTILITY_ASM) $(BIN_UTILITY_DASM) $(BIN_UTILITY_ROM_FIX) $(BIN_UTILITY_ROM_INFO) \
-		$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256).txt
 	@echo '--- DONE -----------------------------------'
 	@echo ''

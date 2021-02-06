@@ -70,7 +70,7 @@ build_debug:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
 	cd $(DIR_TOOL_SRC) && make archive
-	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
 
 build_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
@@ -84,7 +84,7 @@ build_release:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TOOL_SRC) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TOOL_SRC) && make archive
-	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build
+	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build_release
 
 analyze:
 	@echo ''

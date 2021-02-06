@@ -44,6 +44,7 @@ link:
 	@echo ''
 
 run:
+	@echo ''
 	@echo '--- RUNNING AUDIO TEST ---------------------'
 	@cd $(DIR_BUILD_TEST) && if ./$(BIN) $(FLAGS_BIN); \
 	then \
