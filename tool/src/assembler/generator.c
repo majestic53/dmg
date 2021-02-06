@@ -317,7 +317,7 @@ dmg_assembler_generator_evaluate_expression_macro(
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expressiom");
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
 		goto exit;
 	}
 
@@ -357,7 +357,7 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 	dmg_assembler_scalar_t child_left_value = {}, child_right_value = {};
 
 	if(tree->count < 2) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting binary expressiom");
+		result = GENERATOR_ERROR(generator, tree, "Expecting binary expression");
 		goto exit;
 	}
 
@@ -435,7 +435,7 @@ dmg_assembler_generator_evaluate_expression_operator_unary(
 	dmg_assembler_scalar_t child_value = {};
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expressiom");
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
 		goto exit;
 	}
 
@@ -589,7 +589,7 @@ dmg_assembler_generator_generate_directive_bank(
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expressiom");
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
 		goto exit;
 	}
 
