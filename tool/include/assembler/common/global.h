@@ -40,7 +40,8 @@ extern "C" {
 int dmg_assembler_global_add(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
-	__in const dmg_assembler_scalar_t *value
+	__in const dmg_assembler_scalar_t *value,
+	__in bool allow_duplicate
 	);
 
 int dmg_assembler_global_get(
@@ -55,7 +56,7 @@ int dmg_assembler_global_set(
 	__in const dmg_assembler_scalar_t *value
 	);
 
-void dmg_assembler_global_remove(
+int dmg_assembler_global_remove(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token
 	);

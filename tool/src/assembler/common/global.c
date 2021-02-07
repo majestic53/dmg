@@ -118,7 +118,8 @@ int
 dmg_assembler_global_add(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
-	__in const dmg_assembler_scalar_t *value
+	__in const dmg_assembler_scalar_t *value,
+	__in bool allow_duplicate
 	)
 {
 	uint32_t index = 0;
@@ -130,6 +131,11 @@ dmg_assembler_global_add(
 		if(!(global = &globals->global[index])->in_use) {
 			break;
 		}
+	}
+
+	if(!allow_duplicate && (dmg_assembler_global_find(globals, token, &global) == DMG_STATUS_SUCCESS)) {
+		result = GLOBAL_ERROR(token, "Redefined global");
+		goto exit;
 	}
 
 	if(index == globals->count) {
@@ -188,19 +194,26 @@ exit:
 	return result;
 }
 
-void
+int
 dmg_assembler_global_remove(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token
 	)
 {
+	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_global_t *global = NULL;
 
-	if(dmg_assembler_global_find(globals, token, &global) == DMG_STATUS_SUCCESS) {
-		global->token = NULL;
-		global->value.word = 0;
-		global->in_use = false;
+	if(dmg_assembler_global_find(globals, token, &global) != DMG_STATUS_SUCCESS) {
+		result = GLOBAL_ERROR(token, "Undefined global");
+		goto exit;
 	}
+
+	global->token = NULL;
+	global->value.word = 0;
+	global->in_use = false;
+
+exit:
+	return result;
 }
 
 int

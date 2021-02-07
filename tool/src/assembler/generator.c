@@ -599,7 +599,162 @@ dmg_assembler_generator_generate_directive_bank(
 	}
 
 	if((result = dmg_assembler_generator_bank_set(generator, value.word, &origin)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
 
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_directive_data_byte(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->subtype != DIRECTIVE_DATA_BYTE) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		goto exit;
+	}
+
+	for(uint32_t index = 0; index < tree->count; ++index) {
+		dmg_assembler_scalar_t value = {};
+		dmg_assembler_tree_t *child = NULL;
+
+		if((result = dmg_assembler_tree_child(tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value))
+				!= DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_directive_data_word(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->subtype != DIRECTIVE_DATA_WORD) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		goto exit;
+	}
+
+	for(uint32_t index = 0; index < tree->count; ++index) {
+		dmg_assembler_scalar_t value = {};
+		dmg_assembler_tree_t *child = NULL;
+
+		if((result = dmg_assembler_tree_child(tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value))
+				!= DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_directive_define(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	dmg_assembler_tree_t *child = NULL;
+	const dmg_assembler_token_t *token = NULL;
+	int index = 0, result = DMG_STATUS_SUCCESS;
+
+	if(tree->parent->subtype != DIRECTIVE_DEFINE) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(tree, index++, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	token = child->parent;
+
+	if((result = dmg_assembler_tree_child(tree, index, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value))
+			!= DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_global_add(&generator->globals, token, &value, false)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_directive_undefine(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if(tree->parent->subtype != DIRECTIVE_UNDEFINE) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_global_remove(&generator->globals, child->parent)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 exit:
@@ -608,9 +763,9 @@ exit:
 
 static dmg_assembler_generator_hdlr DIRECTIVE_HANDLER[] = {
 	dmg_assembler_generator_generate_directive_bank, /* DIRECTIVE_BANK */
-	NULL, /* DIRECTIVE_DATA_BYTE */
-	NULL, /* DIRECTIVE_DATA_WORD */
-	NULL, /* DIRECTIVE_DEFINE */
+	dmg_assembler_generator_generate_directive_data_byte, /* DIRECTIVE_DATA_BYTE */
+	dmg_assembler_generator_generate_directive_data_word, /* DIRECTIVE_DATA_WORD */
+	dmg_assembler_generator_generate_directive_define, /* DIRECTIVE_DEFINE */
 	NULL, /* DIRECTIVE_ELSE_IF */
 	NULL, /* DIRECTIVE_ELSE */
 	NULL, /* DIRECTIVE_END */
@@ -620,7 +775,7 @@ static dmg_assembler_generator_hdlr DIRECTIVE_HANDLER[] = {
 	NULL, /* DIRECTIVE_INCLUDE_BINARY */
 	NULL, /* DIRECTIVE_ORIGIN */
 	NULL, /* DIRECTIVE_RESERVE */
-	NULL, /* DIRECTIVE_UNDEFINE */
+	dmg_assembler_generator_generate_directive_undefine, /* DIRECTIVE_UNDEFINE */
 	};
 
 static int
@@ -667,7 +822,7 @@ dmg_assembler_generator_generate_label(
 
 	value.word = (generator->banks.bank[generator->bank].origin.word + generator->offset.word);
 
-	if((result = dmg_assembler_global_add(&generator->globals, tree->parent, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_global_add(&generator->globals, tree->parent, &value, false)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
