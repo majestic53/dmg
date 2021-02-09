@@ -19,6 +19,7 @@
 #ifndef DMG_TOOL_ASSEMBLER_COMMON_H_
 #define DMG_TOOL_ASSEMBLER_COMMON_H_
 
+#include <libgen.h>
 #include "../common.h"
 #include "./common/bank.h"
 #include "./common/global.h"

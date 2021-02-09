@@ -28,6 +28,7 @@ typedef struct {
 	uint32_t bank;
 	dmg_assembler_scalar_t offset;
 	FILE *file;
+	const char *root;
 } dmg_assembler_generator_t;
 
 #ifdef __cplusplus
