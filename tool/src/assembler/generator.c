@@ -224,6 +224,83 @@ dmg_assembler_generator_evaluate_expression(
 	__inout dmg_assembler_scalar_t *value
 	);
 
+/*static int
+dmg_assembler_generator_evaluate_conditional(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree,
+	__inout bool *value
+	)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_scalar_t child_value = {};
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(child->parent->type == TOKEN_INEQUALITY) {
+		int subtype = child->parent->subtype;
+		dmg_assembler_tree_t *child_left = NULL, *child_right = NULL;
+		dmg_assembler_scalar_t child_left_value = {}, child_right_value = {};
+
+		if((result = dmg_assembler_tree_child(child, 0, &child_left)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_evaluate_expression(generator, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_tree_child(child, 1, &child_right)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_evaluate_expression(generator, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		switch(subtype) {
+			case INEQUALITY_EQUALS:
+				*value = (child_left_value.word == child_right_value.word);
+				break;
+			case INEQUALITY_GREATER_THAN:
+				*value = (child_left_value.word > child_right_value.word);
+				break;
+			case INEQUALITY_GREATER_THAN_EQUALS:
+				*value = (child_left_value.word >= child_right_value.word);
+				break;
+			case INEQUALITY_LESS_THAN:
+				*value = (child_left_value.word < child_right_value.word);
+				break;
+			case INEQUALITY_LESS_THAN_EQUALS:
+				*value = (child_left_value.word <= child_right_value.word);
+				break;
+			case INEQUALITY_NOT_EQUALS:
+				*value = (child_left_value.word != child_right_value.word);
+				break;
+			default:
+				result = GENERATOR_ERROR(generator, tree, "Unsupported inequality");
+				goto exit;
+		}
+	} else {
+
+		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &child_value)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		*value = (child_value.word != 0);
+	}
+
+exit:
+	return result;
+}*/
+
 static int
 dmg_assembler_generator_evaluate_expression_global(
 	__inout dmg_assembler_generator_t *generator,
