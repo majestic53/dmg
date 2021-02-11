@@ -224,7 +224,7 @@ dmg_assembler_generator_evaluate_expression(
 	__inout dmg_assembler_scalar_t *value
 	);
 
-/*static int
+static int
 dmg_assembler_generator_evaluate_conditional(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_tree_t *tree,
@@ -232,7 +232,6 @@ dmg_assembler_generator_evaluate_conditional(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	dmg_assembler_tree_t *child = NULL;
 	dmg_assembler_scalar_t child_value = {};
 
 	if(!tree->count) {
@@ -240,16 +239,12 @@ dmg_assembler_generator_evaluate_conditional(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(tree, 0, &child)) != DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
-	if(child->parent->type == TOKEN_INEQUALITY) {
-		int subtype = child->parent->subtype;
+	if(tree->parent->type == TOKEN_INEQUALITY) {
+		int subtype = tree->parent->subtype;
 		dmg_assembler_tree_t *child_left = NULL, *child_right = NULL;
 		dmg_assembler_scalar_t child_left_value = {}, child_right_value = {};
 
-		if((result = dmg_assembler_tree_child(child, 0, &child_left)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -257,7 +252,7 @@ dmg_assembler_generator_evaluate_conditional(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_tree_child(child, 1, &child_right)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -290,7 +285,7 @@ dmg_assembler_generator_evaluate_conditional(
 		}
 	} else {
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &child_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, tree, &child_value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -299,7 +294,7 @@ dmg_assembler_generator_evaluate_conditional(
 
 exit:
 	return result;
-}*/
+}
 
 static int
 dmg_assembler_generator_evaluate_expression_global(
@@ -796,6 +791,91 @@ exit:
 }
 
 static int
+dmg_assembler_generator_generate_directive_if(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	bool value = false;
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if(tree->parent->subtype != DIRECTIVE_IF) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generator_evaluate_conditional(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+// TODO
+fprintf(stdout, "CONDITION -> %x\n", value);
+// ---
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generator_generate_directive_if_define(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	bool condition = false;
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child = NULL;
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	switch(tree->parent->subtype) {
+		case DIRECTIVE_IF_DEFINE:
+			condition = dmg_assembler_global_defined(&generator->globals, child->parent);
+			break;
+		case DIRECTIVE_IF_NOT_DEFINE:
+			condition = !dmg_assembler_global_defined(&generator->globals, child->parent);
+			break;
+		default:
+			result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+			goto exit;
+	}
+
+	if(condition) {
+
+// TODO
+fprintf(stdout, "CONDITION -> TRUE\n");
+// ---
+
+	} else {
+
+// TODO
+fprintf(stdout, "CONDITION -> FALSE\n");
+// ---
+
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_generator_generate_directive_include_binary(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_tree_t *tree
@@ -1004,8 +1084,9 @@ static dmg_assembler_generator_hdlr DIRECTIVE_HANDLER[] = {
 	NULL, /* DIRECTIVE_ELSE_IF */
 	NULL, /* DIRECTIVE_ELSE */
 	NULL, /* DIRECTIVE_END */
-	NULL, /* DIRECTIVE_IF */
-	NULL, /* DIRECTIVE_IF_DEFINE */
+	dmg_assembler_generator_generate_directive_if, /* DIRECTIVE_IF */
+	dmg_assembler_generator_generate_directive_if_define, /* DIRECTIVE_IF_DEFINE */
+	dmg_assembler_generator_generate_directive_if_define, /* DIRECTIVE_IF_NOT_DEFINE */
 	NULL, /* DIRECTIVE_INCLUDE */
 	dmg_assembler_generator_generate_directive_include_binary, /* DIRECTIVE_INCLUDE_BINARY */
 	dmg_assembler_generator_generate_directive_origin, /* DIRECTIVE_ORIGIN */

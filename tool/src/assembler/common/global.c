@@ -154,6 +154,26 @@ exit:
 	return result;
 }
 
+bool
+dmg_assembler_global_defined(
+	__inout dmg_assembler_globals_t *globals,
+	__in const dmg_assembler_token_t *token
+	)
+{
+	uint32_t index = 0;
+
+	for(; index < globals->count; ++index) {
+		dmg_assembler_global_t *global = &globals->global[index];
+
+		if((token->literal.length == global->token->literal.length)
+				&& !strncmp(token->literal.str, global->token->literal.str, token->literal.length)) {
+			break;
+		}
+	}
+
+	return (index < globals->count);
+}
+
 int
 dmg_assembler_global_get(
 	__inout dmg_assembler_globals_t *globals,

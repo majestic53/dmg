@@ -688,7 +688,8 @@ dmg_assembler_parser_parse_directive_if_define(
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_tree_t *child = NULL;
 
-	if(token->subtype != DIRECTIVE_IF_DEFINE) {
+	if((token->subtype != DIRECTIVE_IF_DEFINE)
+			&& (token->subtype != DIRECTIVE_IF_NOT_DEFINE)) {
 		result = PARSER_ERROR(parser, token, "Expecting directive");
 		goto exit;
 	}
@@ -925,6 +926,7 @@ static dmg_assembler_parser_hdlr DIRECTIVE_HANDLER[] = {
 	NULL, /* DIRECTIVE_END */
 	dmg_assembler_parser_parse_directive_if, /* DIRECTIVE_IF */
 	dmg_assembler_parser_parse_directive_if_define, /* DIRECTIVE_IF_DEFINE */
+	dmg_assembler_parser_parse_directive_if_define, /* DIRECTIVE_IF_NOT_DEFINE */
 	dmg_assembler_parser_parse_directive_include, /* DIRECTIVE_INCLUDE */
 	dmg_assembler_parser_parse_directive_include, /* DIRECTIVE_INCLUDE_BINARY */
 	dmg_assembler_parser_parse_directive_origin, /* DIRECTIVE_ORIGIN */

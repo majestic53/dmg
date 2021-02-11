@@ -2,8 +2,8 @@ tree ::= <statement_list>
 
 conditional ::= <expression><inequality><expression>|<expression>
 
-directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_include>
-		| <directive_origin>|<directive_reserve>|<directive_undefine>
+directive ::= <directive_bank>|<directive_data>|<directive_define>|<directive_if>|<directive_if_define>|<directive_if_not_define>
+		|<directive_include>|<directive_origin>|<directive_reserve>|<directive_undefine>
 
 directive_bank ::= .bank<expression>
 
@@ -20,6 +20,8 @@ directive_end ::= .end
 directive_if ::= .if<conditional><statement_list><directive_else_if>*<directive_else>?<directive_end>
 
 directive_if_define ::= .ifdef<identifier><statement_list><directive_else>?<directive_end>
+
+directive_if_not_define ::= .ifndef<identifier><statement_list><directive_else>?<directive_end>
 
 directive_include ::= .[inc|incb]<literal>
 

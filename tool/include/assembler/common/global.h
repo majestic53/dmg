@@ -44,6 +44,11 @@ int dmg_assembler_global_add(
 	__in bool allow_duplicate
 	);
 
+bool dmg_assembler_global_defined(
+	__inout dmg_assembler_globals_t *globals,
+	__in const dmg_assembler_token_t *token
+	);
+
 int dmg_assembler_global_get(
 	__inout dmg_assembler_globals_t *globals,
 	__in const dmg_assembler_token_t *token,
