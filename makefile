@@ -44,8 +44,16 @@ BUILD_RELEASE=BUILD_FLAGS=-O3\ -DNDEBUG\ -DCOLOR\ -D$(SERVICE)\ -DLEVEL=
 BUILD_RELEASE_TEST=BUILD_FLAGS=-O3\ -DNDEBUG\ -DCOLOR\ -DUNITTEST\ -DLEVEL=
 
 all: release
-debug: clean setup build_debug
-release: clean setup build_release
+debug: clean setup library_debug tool_debug
+debug_test: clean setup library_debug test_debug
+release: clean setup library_release tool_release
+release_test: clean setup library_release test_release
+
+analyze:
+	@echo ''
+	cloc $(DIR_ROOT)
+	@echo ''
+	cppcheck --enable=all --std=c11 $(DIR_ROOT)
 
 clean:
 	rm -rf $(DIR_BIN)
@@ -58,9 +66,15 @@ setup:
 	mkdir -p $(DIR_BUILD_TEST)
 	mkdir -p $(DIR_BUILD_TOOL)
 
-build_debug:
+library_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+
+library_release:
+	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
+	cd $(DIR_SRC) && make archive
+
+test_debug:
 	cd $(DIR_TEST_AUDIO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
@@ -68,13 +82,8 @@ build_debug:
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
-	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
-	cd $(DIR_TOOL_SRC) && make archive
-	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
 
-build_release:
-	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
-	cd $(DIR_SRC) && make archive
+test_release:
 	cd $(DIR_TEST_AUDIO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
@@ -82,12 +91,13 @@ build_release:
 	cd $(DIR_TEST_SERIAL) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_TIMER) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+
+tool_debug:
+	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make archive
+	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
+
+tool_release:
 	cd $(DIR_TOOL_SRC) && make $(BUILD_RELEASE)$(LEVEL) build
 	cd $(DIR_TOOL_SRC) && make archive
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build_release
-
-analyze:
-	@echo ''
-	cloc $(DIR_ROOT)
-	@echo ''
-	cppcheck --enable=all --std=c11 $(DIR_ROOT)
