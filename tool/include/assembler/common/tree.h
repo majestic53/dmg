@@ -24,7 +24,7 @@
 #define TREE_CHILD_MAX 32
 
 typedef struct {
-	const dmg_assembler_token_t *parent;
+	const dmg_assembler_token_t *token;
 	const uintptr_t *child[TREE_CHILD_MAX];
 	uint32_t capacity;
 	uint32_t count;

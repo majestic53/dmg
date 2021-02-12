@@ -37,7 +37,10 @@ LIB=libdmg.a
 
 build: build_base build_common build_common_mapper build_service build_system build_system_processor
 
-build_base: base_dmg.o base_runtime.o base_service.o
+build_base: base_action.o base_dmg.o base_runtime.o base_service.o
+
+base_action.o: $(DIR_SRC)action.c $(DIR_INCLUDE)action.h
+	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)action.c -o $(DIR_BUILD)base_action.o
 
 base_dmg.o: $(DIR_SRC)dmg.c $(DIR_INCLUDE)dmg.h
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_SRC)dmg.c -o $(DIR_BUILD)base_dmg.o
@@ -124,7 +127,7 @@ system_processor_instruction.o: $(DIR_SRC_SYSTEM_PROCESSOR)instruction.c $(DIR_I
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
-	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o $(DIR_BUILD)base_service.o \
+	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_action.o $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o $(DIR_BUILD)base_service.o \
 		$(DIR_BUILD)common_bank.o $(DIR_BUILD)common_bootrom.o $(DIR_BUILD)common_buffer.o $(DIR_BUILD)common_cartridge.o \
 			$(DIR_BUILD)common_error.o $(DIR_BUILD)common_mapper.o $(DIR_BUILD)common_mapper_mbc1.o $(DIR_BUILD)common_mapper_mbc2.o \
 			$(DIR_BUILD)common_mapper_mbc3.o $(DIR_BUILD)common_mapper_mbc5.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \

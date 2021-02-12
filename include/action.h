@@ -16,13 +16,23 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_COMMON_VERSION_TYPE_H_
-#define DMG_COMMON_VERSION_TYPE_H_
+#ifndef DMG_ACTION_H_
+#define DMG_ACTION_H_
 
-#include "../../include/common.h"
+#include "./common.h"
 
-#define VERSION_MAJOR 0
-#define VERSION_MINOR 2
-#define VERSION_PATCH 31
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-#endif /* DMG_COMMON_VERSION_TYPE_H_ */
+int dmg_action_handler(
+	__in const dmg_action_t *request,
+	__in dmg_action_t *response,
+	__in void *context
+	);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* DMG_ACTION_H_ */

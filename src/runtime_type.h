@@ -26,10 +26,14 @@
 #include "../include/system/serial.h"
 #include "../include/system/timer.h"
 #include "../include/system/video.h"
+#include "../include/action.h"
 #include "../include/runtime.h"
 #include "../include/service.h"
 
 typedef struct {
+	uint32_t cycle;
+	uint32_t cycle_last;
+	const dmg_t *configuration;
 	dmg_audio_t audio;
 	dmg_joypad_t joypad;
 	dmg_memory_t memory;
@@ -37,11 +41,6 @@ typedef struct {
 	dmg_serial_t serial;
 	dmg_timer_t timer;
 	dmg_video_t video;
-} __attribute__((packed)) dmg_runtime_t;
-
-typedef int (*dmg_runtime_action_hdlr)(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	);
+} dmg_runtime_t;
 
 #endif /* DMG_RUNTIME_TYPE_H_ */

@@ -2,7 +2,7 @@ DMG 0.2.30-alpha
 Copyright (C) 2020-2021 David Jolly
 ==============================
 
-A simple GameBoy emulator, written in C.
+A GameBoy emulator, written in C.
 
 Source: https://github.com/majestic53/dmg.git
 

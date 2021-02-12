@@ -151,8 +151,8 @@ dmg_utility_asm_parse_tree(
 		fprintf(stdout, "\t");
 	}
 
-	if(tree && tree->parent) {
-		const dmg_assembler_token_t *token = tree->parent;
+	if(tree && tree->token) {
+		const dmg_assembler_token_t *token = tree->token;
 
 		fprintf(stdout, "{%u} [%i", tree->count, token->type);
 

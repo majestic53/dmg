@@ -18,110 +18,20 @@
 
 #include "./runtime_type.h"
 
-static uint32_t g_cycle = 0;
-static uint32_t g_cycle_last = 0;
-static const dmg_t *g_configuration = NULL;
 static dmg_runtime_t g_runtime = {};
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-static int
-dmg_runtime_action_cycle(
+int
+dmg_runtime_action(
 	__in const dmg_action_t *request,
 	__in dmg_action_t *response
 	)
 {
-	response->data.dword = g_cycle;
-	response->length = sizeof(request->data.dword);
-
-	return DMG_STATUS_SUCCESS;
+	return dmg_action_handler(request, response, &g_runtime);
 }
-
-static int
-dmg_runtime_action_nop(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	return DMG_STATUS_SUCCESS;
-}
-
-static int
-dmg_runtime_action_read(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if(request->data.dword > UINT16_MAX) {
-
-		switch(request->address) {
-			case DMG_REGISTER_PROCESSOR_A ... DMG_REGISTER_PROCESSOR_STOP:
-				dmg_processor_read_register(&g_runtime.processor, request, response);
-				break;
-			default:
-				TRACE_FORMAT(LEVEL_WARNING, "Unsupported register read %04x", request->address);
-				result = DMG_STATUS_INVALID;
-				goto exit;
-		}
-	} else {
-		response->data.byte = dmg_runtime_read(request->address);
-		response->length = sizeof(request->data.byte);
-	}
-
-exit:
-	return result;
-}
-
-static int
-dmg_runtime_action_serial_in(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	response->data.byte = dmg_runtime_serial_in(request->data.byte);
-	response->length = sizeof(request->data.byte);
-
-	return DMG_STATUS_SUCCESS;
-}
-
-static int
-dmg_runtime_action_write(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	int result = DMG_STATUS_SUCCESS;
-
-	if(request->data.dword > UINT16_MAX) {
-
-		switch(request->address) {
-			case DMG_REGISTER_PROCESSOR_A ... DMG_REGISTER_PROCESSOR_STOP:
-				dmg_processor_write_register(&g_runtime.processor, request, response);
-				break;
-			default:
-				TRACE_FORMAT(LEVEL_WARNING, "Unsupported register write %04x", request->address);
-				result = DMG_STATUS_INVALID;
-				goto exit;
-		}
-	} else {
-		dmg_runtime_write(request->address, request->data.byte);
-	}
-
-exit:
-	return result;
-}
-
-static const dmg_runtime_action_hdlr ACTION_HANDLER[] = {
-	dmg_runtime_action_nop, /* DMG_ACTION_NOP */
-	dmg_runtime_action_cycle, /* DMG_ACTION_CYCLE */
-	dmg_runtime_action_read,/* DMG_ACTION_READ */
-	dmg_runtime_action_serial_in, /* DMG_ACTION_SERIAL_IN */
-	dmg_runtime_action_write, /* DMG_ACTION_WRITE */
-	};
 
 static int
 dmg_runtime_export(
@@ -209,38 +119,6 @@ exit:
 	return result;
 }
 
-int
-dmg_runtime_action(
-	__in const dmg_action_t *request,
-	__in dmg_action_t *response
-	)
-{
-	int result;
-
-	if(!request) {
-		result = ERROR_SET(DMG_STATUS_INVALID, "Request is NULL");
-		goto exit;
-	}
-
-	if(request->type >= DMG_ACTION_MAX) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_INVALID, "Unsupported action [%u]->%u", request->id, request->type);
-		goto exit;
-	}
-
-	if(!response) {
-		result = ERROR_SET(DMG_STATUS_INVALID, "Response is NULL");
-		goto exit;
-	}
-
-	memset(response, 0, sizeof(*response));
-	response->id = request->id;
-	response->type = request->type;
-	result = ACTION_HANDLER[request->type](request, response);
-
-exit:
-	return result;
-}
-
 void
 dmg_runtime_interrupt(
 	__in int type
@@ -257,7 +135,7 @@ dmg_runtime_load(
 	int result = DMG_STATUS_SUCCESS;
 	char title[CARTRIDGE_HEADER_TITLE_LENGTH + 1] = {};
 
-	TRACE_ENABLE(&g_cycle);
+	TRACE_ENABLE(&g_runtime.cycle);
 	ERROR_CLEAR();
 
 	TRACE_FORMAT(LEVEL_INFORMATION, "Runtime loading ver.%u.%u.%u",
@@ -268,33 +146,33 @@ dmg_runtime_load(
 		goto exit;
 	}
 
-	g_configuration = configuration;
+	g_runtime.configuration = configuration;
 
-	if((result = dmg_audio_load(&g_runtime.audio, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_audio_load(&g_runtime.audio, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_joypad_load(&g_runtime.joypad, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_joypad_load(&g_runtime.joypad, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_memory_load(&g_runtime.memory, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_memory_load(&g_runtime.memory, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_processor_load(&g_runtime.processor, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_processor_load(&g_runtime.processor, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_serial_load(&g_runtime.serial, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_serial_load(&g_runtime.serial, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_timer_load(&g_runtime.timer, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_timer_load(&g_runtime.timer, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_video_load(&g_runtime.video, g_configuration)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_video_load(&g_runtime.video, g_runtime.configuration)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -308,11 +186,11 @@ dmg_runtime_load(
 		title[address] = ((isprint(value) || isspace(value)) ? value : '?');
 	}
 
-	if((result = dmg_service_load(g_configuration, title)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_service_load(g_runtime.configuration, title)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_service_import(dmg_runtime_import, g_configuration->save_in)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_service_import(dmg_runtime_import, g_runtime.configuration->save_in)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -433,13 +311,13 @@ dmg_runtime_run(
 				}
 			}
 
-			g_cycle_last = dmg_processor_step(&g_runtime.processor);
-			dmg_audio_step(&g_runtime.audio, g_cycle_last);
-			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
-			dmg_serial_step(&g_runtime.serial, g_cycle_last);
-			dmg_timer_step(&g_runtime.timer, g_cycle_last);
-			g_cycle += g_cycle_last;
-		} while(!dmg_video_step(&g_runtime.video, g_cycle_last));
+			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_audio_step(&g_runtime.audio, g_runtime.cycle_last);
+			dmg_joypad_step(&g_runtime.joypad, g_runtime.cycle_last);
+			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
+			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
+			g_runtime.cycle += g_runtime.cycle_last;
+		} while(!dmg_video_step(&g_runtime.video, g_runtime.cycle_last));
 
 		dmg_service_sync();
 	}
@@ -492,14 +370,14 @@ dmg_runtime_step(
 				}
 			}
 
-			g_cycle_last = dmg_processor_step(&g_runtime.processor);
-			dmg_audio_step(&g_runtime.audio, g_cycle_last);
-			dmg_joypad_step(&g_runtime.joypad, g_cycle_last);
-			dmg_serial_step(&g_runtime.serial, g_cycle_last);
-			dmg_timer_step(&g_runtime.timer, g_cycle_last);
-			g_cycle += g_cycle_last;
+			g_runtime.cycle_last = dmg_processor_step(&g_runtime.processor);
+			dmg_audio_step(&g_runtime.audio, g_runtime.cycle_last);
+			dmg_joypad_step(&g_runtime.joypad, g_runtime.cycle_last);
+			dmg_serial_step(&g_runtime.serial, g_runtime.cycle_last);
+			dmg_timer_step(&g_runtime.timer, g_runtime.cycle_last);
+			g_runtime.cycle += g_runtime.cycle_last;
 
-			if(dmg_video_step(&g_runtime.video, g_cycle_last)) {
+			if(dmg_video_step(&g_runtime.video, g_runtime.cycle_last)) {
 				dmg_service_sync();
 			}
 		}
@@ -513,7 +391,7 @@ void
 dmg_runtime_unload(void)
 {
 	TRACE(LEVEL_INFORMATION, "Runtime unloading");
-	dmg_service_export(dmg_runtime_export, g_configuration->save_out);
+	dmg_service_export(dmg_runtime_export, g_runtime.configuration->save_out);
 	dmg_service_unload();
 	dmg_video_unload(&g_runtime.video);
 	dmg_timer_unload(&g_runtime.timer);
