@@ -25,7 +25,7 @@ jobs:
           make release
       - name: Build Test Debug
         run: |
-          make debug-test LEVEL=4
+          make debug_test LEVEL=4
           make debug LEVEL=4
         env:
           CC: gcc
@@ -43,7 +43,7 @@ jobs:
           echo "sdl2 `sdl2-config --version`"
       - name: Build Test Release
         run: |
-          make release-test
+          make release_test
           make release
       - name: Build Test Debug
         run: |
