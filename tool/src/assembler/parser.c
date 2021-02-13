@@ -3467,7 +3467,7 @@ dmg_assembler_tree_t *dmg_assembler_parser_tree(
 	__in const dmg_assembler_parser_t *parser
 	)
 {
-	return parser->trees.root;
+	return &parser->trees.tree.ptr[parser->trees.root];
 }
 
 void

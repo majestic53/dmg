@@ -25,9 +25,10 @@
 
 typedef struct {
 	const dmg_assembler_token_t *token;
-	const uintptr_t *child[TREE_CHILD_MAX];
+	uint32_t child[TREE_CHILD_MAX];
 	uint32_t capacity;
 	uint32_t count;
+	uint32_t index;
 } dmg_assembler_tree_t;
 
 typedef struct {
@@ -38,7 +39,7 @@ typedef struct {
 		uint32_t count;
 	} tree;
 
-	const dmg_assembler_tree_t *root;
+	uint32_t root;
 } dmg_assembler_trees_t;
 
 #ifdef __cplusplus
@@ -46,6 +47,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 int dmg_assembler_tree_child(
+	__in const dmg_assembler_trees_t *trees,
 	__in const dmg_assembler_tree_t *parent,
 	__in uint32_t index,
 	__out dmg_assembler_tree_t **child

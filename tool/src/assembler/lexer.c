@@ -209,7 +209,6 @@ dmg_assembler_lexer_token_parse_literal(
 	}
 
 	token->type = TOKEN_LITERAL;
-	token->subtype = 0;
 	token->literal.str = dmg_assembler_stream_character_str(&lexer->stream);
 	token->literal.length = 0;
 
@@ -415,7 +414,6 @@ dmg_assembler_lexer_token_parse_scalar(
 	}
 
 	token->type = TOKEN_SCALAR;
-	token->subtype = 0;
 	value = dmg_assembler_stream_character(&lexer->stream, &type);
 
 	if((type & CHARACTER_SYMBOL) == CHARACTER_SYMBOL) {

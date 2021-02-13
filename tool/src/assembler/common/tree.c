@@ -94,6 +94,7 @@ dmg_assembler_trees_resize_tree(
 
 int
 dmg_assembler_tree_child(
+	__in const dmg_assembler_trees_t *trees,
 	__in const dmg_assembler_tree_t *parent,
 	__in uint32_t index,
 	__out dmg_assembler_tree_t **child
@@ -106,7 +107,7 @@ dmg_assembler_tree_child(
 		goto exit;
 	}
 
-	*child = (dmg_assembler_tree_t *)parent->child[index];
+	*child = (dmg_assembler_tree_t *)&trees->tree.ptr[parent->child[index]];
 
 exit:
 	return result;
@@ -130,12 +131,15 @@ dmg_assembler_trees_add(
 		goto exit;
 	}
 
-	*tree = &trees->tree.ptr[trees->tree.count++];
+	*tree = &trees->tree.ptr[trees->tree.count];
 	(*tree)->token = token;
+	(*tree)->index = trees->tree.count;
 
 	if(root) {
-		trees->root = *tree;
+		trees->root = trees->tree.count;
 	}
+
+	++trees->tree.count;
 
 exit:
 	return result;
@@ -160,14 +164,16 @@ dmg_assembler_trees_append_child_token(
 			goto exit;
 		}
 
-		*tree = &trees->tree.ptr[trees->tree.count++];
+		*tree = &trees->tree.ptr[trees->tree.count];
 		(*tree)->token = token;
+		(*tree)->index = trees->tree.count;
+		++trees->tree.count;
 
 		if((result = dmg_assembler_tree_resize(parent)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		parent->child[parent->count++] = (const uintptr_t *)*tree;
+		parent->child[parent->count++] = (*tree)->index;
 	} else {
 		*tree = parent;
 		(*tree)->token = token;
@@ -191,7 +197,7 @@ dmg_assembler_trees_append_child_tree(
 			goto exit;
 		}
 
-		parent->child[parent->count++] = (const uintptr_t *)child;
+		parent->child[parent->count++] = child->index;
 	} else {
 		parent->token = child->token;
 

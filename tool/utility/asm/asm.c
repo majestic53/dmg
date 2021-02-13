@@ -63,7 +63,7 @@ dmg_utility_asm_parse_characters(void)
 		int type;
 		char value = dmg_assembler_stream_character(&stream, &type);
 
-		fprintf(stdout, "[%u/%u] {%i} \'%c\' (%02x)\n", stream.position, stream.buffer->length, type,
+		fprintf(stdout, "[%u/%u] <%i> \'%c\' (%02x)\n", stream.position, stream.buffer->length, type,
 			(isprint(value) && !isspace(value)) ? value : CHARACTER_FILL, value);
 
 		if(!dmg_assembler_stream_has_next(&stream)
@@ -95,13 +95,14 @@ dmg_utility_asm_parse_tokens(void)
 	for(;;) {
 		const dmg_assembler_token_t *token = dmg_assembler_lexer_token(&lexer);
 
-		fprintf(stdout, "[%i", token->type);
+		fprintf(stdout, "<%i", token->type);
 
-		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
+		if((token->type != TOKEN_END)
+				&& (token->subtype != TOKEN_SUBTYPE_UNDEFINED)) {
 			fprintf(stdout, ":%i", token->subtype);
 		}
 
-		fprintf(stdout, "]");
+		fprintf(stdout, ">");
 
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
@@ -152,20 +153,37 @@ dmg_utility_asm_parse_tree(
 	}
 
 	if(tree && tree->token) {
+		uint32_t index;
 		const dmg_assembler_token_t *token = tree->token;
 
-		fprintf(stdout, "{%u} [%i", tree->count, token->type);
+		fprintf(stdout, "<%i", token->type);
 
-		if(token->subtype != TOKEN_SUBTYPE_UNDEFINED) {
+		if((token->type != TOKEN_END)
+				&& (token->subtype != TOKEN_SUBTYPE_UNDEFINED)) {
 			fprintf(stdout, ":%i", token->subtype);
 		}
 
-		fprintf(stdout, "]");
+		fprintf(stdout, "> %u", tree->index);
+
+		if(tree->count) {
+			fprintf(stdout, "[%u]={", tree->count);
+
+			for(index = 0; index < tree->count; ++index) {
+
+				if(index) {
+					fprintf(stdout, ",");
+				}
+
+				fprintf(stdout, "%u", tree->child[index]);
+			}
+
+			fprintf(stdout, "}");
+		}
 
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
 
-			for(uint32_t index = 0; index < token->literal.length; ++index) {
+			for(index = 0; index < token->literal.length; ++index) {
 				fprintf(stdout, "%c", token->literal.str[index]);
 			}
 
@@ -181,9 +199,14 @@ dmg_utility_asm_parse_tree(
 
 		fprintf(stdout, " (%s@%u)\n", parser->lexer.stream.path, token->line);
 
-		for(uint32_t index = 0; index < tree->count; ++index) {
+		for(index = 0; index < tree->count; ++index) {
+			dmg_assembler_tree_t *child = NULL;
 
-			if((result = dmg_utility_asm_parse_tree(parser, (const dmg_assembler_tree_t *)tree->child[index], depth + 1))
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			if((result = dmg_utility_asm_parse_tree(parser, child, depth + 1))
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
