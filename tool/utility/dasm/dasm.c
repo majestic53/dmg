@@ -529,14 +529,17 @@ dmg_utility_dasm_parse(
 		}
 	}
 
-	if(!g_dasm.output) {
-		TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_dasm.output);
-		result = DMG_STATUS_INVALID;
-		goto exit;
-	} else if(!g_dasm.rom) {
-		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_dasm.rom);
-		result = DMG_STATUS_INVALID;
-		goto exit;
+	if(!g_dasm.help && !g_dasm.version) {
+
+		if(!g_dasm.output) {
+			TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_dasm.output);
+			result = DMG_STATUS_INVALID;
+			goto exit;
+		} else if(!g_dasm.rom) {
+			TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_dasm.rom);
+			result = DMG_STATUS_INVALID;
+			goto exit;
+		}
 	}
 
 exit:
@@ -553,8 +556,7 @@ dmg_utility_dasm_rom_load(void)
 		goto exit;
 	}
 
-	if(!(g_dasm.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_buffer_allocate(&g_dasm.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -562,8 +564,6 @@ dmg_utility_dasm_rom_load(void)
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
-
-	g_dasm.buffer.length = length;
 
 exit:
 	dmg_tool_file_close(&file);
@@ -574,11 +574,7 @@ exit:
 static void
 dmg_utility_dasm_rom_unload(void)
 {
-
-	if(g_dasm.buffer.data) {
-		free(g_dasm.buffer.data);
-	}
-
+	dmg_buffer_free(&g_dasm.buffer);
 	memset(&g_dasm.buffer, 0, sizeof(g_dasm.buffer));
 }
 

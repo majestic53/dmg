@@ -82,7 +82,7 @@ dmg_launcher_parse(
 		}
 	}
 
-	if(!g_launcher.rom) {
+	if(!g_launcher.help && !g_launcher.version && !g_launcher.rom) {
 		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_launcher.rom);
 		result = DMG_STATUS_INVALID;
 		goto exit;
@@ -105,8 +105,7 @@ dmg_launcher_rom_load(
 		goto exit;
 	}
 
-	if(!(buffer->data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_buffer_allocate(buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -114,8 +113,6 @@ dmg_launcher_rom_load(
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
-
-	buffer->length = length;
 
 exit:
 	dmg_tool_file_close(&file);
@@ -128,11 +125,7 @@ dmg_launcher_rom_unload(
 	__inout dmg_buffer_t *buffer
 	)
 {
-
-	if(buffer->data) {
-		free(buffer->data);
-	}
-
+	dmg_buffer_free(buffer);
 	memset(buffer, 0, sizeof(*buffer));
 }
 

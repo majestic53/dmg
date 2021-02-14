@@ -361,14 +361,17 @@ dmg_utility_asm_parse(
 		}
 	}
 
-	if(!g_asm.output) {
-		TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_asm.output);
-		result = DMG_STATUS_INVALID;
-		goto exit;
-	} else if(!g_asm.source) {
-		TRACE_TOOL_ERROR("%s: Missing source path -- %s\n", argv[0], g_asm.source);
-		result = DMG_STATUS_INVALID;
-		goto exit;
+	if(!g_asm.help && !g_asm.version) {
+
+		if(!g_asm.output) {
+			TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_asm.output);
+			result = DMG_STATUS_INVALID;
+			goto exit;
+		} else if(!g_asm.source) {
+			TRACE_TOOL_ERROR("%s: Missing source path -- %s\n", argv[0], g_asm.source);
+			result = DMG_STATUS_INVALID;
+			goto exit;
+		}
 	}
 
 exit:
@@ -389,8 +392,7 @@ dmg_utility_asm_source_load(void)
 
 	if(length > 0) {
 
-		if(!(g_asm.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
-			result = DMG_STATUS_FAILURE;
+		if((result = dmg_buffer_allocate(&g_asm.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -398,8 +400,6 @@ dmg_utility_asm_source_load(void)
 			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
-
-		g_asm.buffer.length = length;
 	}
 
 exit:
@@ -411,11 +411,7 @@ exit:
 static void
 dmg_utility_asm_source_unload(void)
 {
-
-	if(g_asm.buffer.data) {
-		free(g_asm.buffer.data);
-	}
-
+	dmg_buffer_free(&g_asm.buffer);
 	memset(&g_asm.buffer, 0, sizeof(g_asm.buffer));
 }
 

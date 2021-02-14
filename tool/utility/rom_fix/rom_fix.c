@@ -55,7 +55,7 @@ dmg_utility_rom_fix_parse(
 		}
 	}
 
-	if(!g_rom_fix.rom) {
+	if(!g_rom_fix.help && !g_rom_fix.version && !g_rom_fix.rom) {
 		TRACE_TOOL_ERROR("%s: Missing rom path -- %s\n", argv[0], g_rom_fix.rom);
 		result = DMG_STATUS_INVALID;
 		goto exit;
@@ -74,8 +74,7 @@ dmg_utility_rom_fix_rom_load(void)
 		goto exit;
 	}
 
-	if(!(g_rom_fix.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_buffer_allocate(&g_rom_fix.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -83,8 +82,6 @@ dmg_utility_rom_fix_rom_load(void)
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
-
-	g_rom_fix.buffer.length = length;
 
 exit:
 	dmg_tool_file_close(&g_rom_fix.file);
@@ -129,11 +126,7 @@ static void
 dmg_utility_rom_fix_rom_unload(void)
 {
 	dmg_tool_file_close(&g_rom_fix.file);
-
-	if(g_rom_fix.buffer.data) {
-		free(g_rom_fix.buffer.data);
-	}
-
+	dmg_buffer_free(&g_rom_fix.buffer);
 	memset(&g_rom_fix.buffer, 0, sizeof(g_rom_fix.buffer));
 }
 

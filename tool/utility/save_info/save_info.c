@@ -55,7 +55,7 @@ dmg_utility_save_info_parse(
 		}
 	}
 
-	if(!g_save_info.save) {
+	if(!g_save_info.help && !g_save_info.version && !g_save_info.save) {
 		TRACE_TOOL_ERROR("%s: Missing save path -- %s\n", argv[0], g_save_info.save);
 		result = DMG_STATUS_INVALID;
 		goto exit;
@@ -75,8 +75,7 @@ dmg_utility_save_info_save_load(void)
 		goto exit;
 	}
 
-	if(!(g_save_info.buffer.data = (void *)calloc(length, sizeof(uint8_t)))) {
-		result = DMG_STATUS_FAILURE;
+	if((result = dmg_buffer_allocate(&g_save_info.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -84,8 +83,6 @@ dmg_utility_save_info_save_load(void)
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
-
-	g_save_info.buffer.length = length;
 
 exit:
 	dmg_tool_file_close(&file);
@@ -154,11 +151,7 @@ exit:
 static void
 dmg_utility_save_info_save_unload(void)
 {
-
-	if(g_save_info.buffer.data) {
-		free(g_save_info.buffer.data);
-	}
-
+	dmg_buffer_free(&g_save_info.buffer);
 	memset(&g_save_info.buffer, 0, sizeof(g_save_info.buffer));
 }
 

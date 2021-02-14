@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "../../include/common/buffer.h"
 #include "./common/file.h"
 #include "./common/syntax.h"
 #include "./common/trace.h"

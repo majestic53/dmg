@@ -24,7 +24,7 @@ extern "C" {
 
 static int
 dmg_assembler_generator_error_tree(
-	__in const dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_string_t *string,
 	__in uint32_t depth
@@ -135,7 +135,7 @@ dmg_assembler_generator_error_tree(
 			}
 		}
 
-		snprintf(str, GENERATOR_ERROR_STR_MAX, " (%s@%u)", generator->parser.lexer.stream.path, token->line);
+		snprintf(str, GENERATOR_ERROR_STR_MAX, " (%s@%u)", parser->lexer.stream.path, token->line);
 
 		if((result = dmg_assembler_string_append_string(string, str)) != DMG_STATUS_SUCCESS) {
 			goto exit;
@@ -144,11 +144,11 @@ dmg_assembler_generator_error_tree(
 		for(index = 0; index < tree->count; ++index) {
 			dmg_assembler_tree_t *child = NULL;
 
-			if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 
-			if((result = dmg_assembler_generator_error_tree(generator, child, string, depth + 1)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_error_tree(parser, child, string, depth + 1)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -160,13 +160,13 @@ exit:
 
 static int
 dmg_assembler_generator_error(
-	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__in const char *message,
 	...
 	)
 {
-	dmg_assembler_string_t string = {};
+	dmg_assembler_string_t debug_string = {}, string = {};
 
 	if(dmg_assembler_string_allocate(&string) == DMG_STATUS_SUCCESS) {
 
@@ -183,31 +183,16 @@ dmg_assembler_generator_error(
 		}
 	}
 
-	dmg_assembler_string_t debug_string = {};
-
 	if(dmg_assembler_string_allocate(&debug_string) == DMG_STATUS_SUCCESS) {
-		dmg_assembler_generator_error_tree(generator, tree, &debug_string, 1);
+		dmg_assembler_generator_error_tree(parser, tree, &debug_string, 1);
 	}
 
-	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, generator->parser.lexer.stream.path, tree->token->line, debug_string);
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, parser->lexer.stream.path, tree->token->line, debug_string);
 	dmg_assembler_string_free(&debug_string);
 	dmg_assembler_string_free(&string);
 
 	return DMG_STATUS_FAILURE;
 }
-
-static int
-dmg_assembler_generator_evaluate_expression(
-	__inout dmg_assembler_generator_t *generator,
-	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
-	);
-
-static int
-dmg_assembler_generator_generate_statement(
-	__inout dmg_assembler_generator_t *generator,
-	__in const dmg_assembler_tree_t *tree
-	);
 
 static int
 dmg_assembler_generator_bank_set(
@@ -271,8 +256,24 @@ exit:
 }
 
 static int
+dmg_assembler_generator_evaluate_expression(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree,
+	__inout dmg_assembler_scalar_t *value
+	);
+
+static int
+dmg_assembler_generator_generate_statement(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree
+	);
+
+static int
 dmg_assembler_generator_evaluate_conditional(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout bool *value
 	)
@@ -281,7 +282,7 @@ dmg_assembler_generator_evaluate_conditional(
 	dmg_assembler_scalar_t child_value = {};
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		result = GENERATOR_ERROR(parser, tree, "Expecting conditional");
 		goto exit;
 	}
 
@@ -290,19 +291,19 @@ dmg_assembler_generator_evaluate_conditional(
 		dmg_assembler_tree_t *child_left = NULL, *child_right = NULL;
 		dmg_assembler_scalar_t child_left_value = {}, child_right_value = {};
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -326,12 +327,12 @@ dmg_assembler_generator_evaluate_conditional(
 				*value = (child_left_value.word != child_right_value.word);
 				break;
 			default:
-				result = GENERATOR_ERROR(generator, tree, "Unsupported inequality");
+				result = GENERATOR_ERROR(parser, tree, "Unsupported inequality");
 				goto exit;
 		}
 	} else {
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, tree, &child_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, tree, &child_value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -345,6 +346,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_global(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -360,7 +362,7 @@ dmg_assembler_generator_evaluate_expression_global(
 			}
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Expecting global");
+			result = GENERATOR_ERROR(parser, tree, "Expecting global");
 			goto exit;
 	}
 
@@ -371,6 +373,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_literal(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -378,7 +381,7 @@ dmg_assembler_generator_evaluate_expression_literal(
 	int result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->type != TOKEN_LITERAL) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting literal");
+		result = GENERATOR_ERROR(parser, tree, "Expecting literal");
 		goto exit;
 	}
 
@@ -386,16 +389,16 @@ dmg_assembler_generator_evaluate_expression_literal(
 		dmg_assembler_tree_t *child = NULL;
 		dmg_assembler_scalar_t child_value = {};
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &child_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
 		if(child_value.word >= tree->token->literal.length) {
-			result = GENERATOR_ERROR(generator, tree, "Literal index out-of-range");
+			result = GENERATOR_ERROR(parser, tree, "Literal index out-of-range");
 			goto exit;
 		}
 
@@ -413,6 +416,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_macro(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -422,20 +426,20 @@ dmg_assembler_generator_evaluate_expression_macro(
 	dmg_assembler_scalar_t child_value = {};
 
 	if(tree->token->type != TOKEN_MACRO) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting macro");
+		result = GENERATOR_ERROR(parser, tree, "Expecting macro");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &child_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -447,7 +451,7 @@ dmg_assembler_generator_evaluate_expression_macro(
 			value->word = child_value.low;
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Unsupported macro");
+			result = GENERATOR_ERROR(parser, tree, "Unsupported macro");
 			goto exit;
 	}
 
@@ -458,6 +462,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_operator_binary(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -467,23 +472,23 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 	dmg_assembler_scalar_t child_left_value = {}, child_right_value = {};
 
 	if(tree->count < 2) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting binary expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting binary expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -525,7 +530,7 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 			value->word = (child_left_value.word >> child_right_value.word);
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Expecting binary operator");
+			result = GENERATOR_ERROR(parser, tree, "Expecting binary operator");
 			goto exit;
 	}
 
@@ -536,6 +541,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_operator_unary(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -545,15 +551,15 @@ dmg_assembler_generator_evaluate_expression_operator_unary(
 	dmg_assembler_scalar_t child_value = {};
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &child_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -565,7 +571,7 @@ dmg_assembler_generator_evaluate_expression_operator_unary(
 			value->word = !child_value.word;
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Expecting unary operator");
+			result = GENERATOR_ERROR(parser, tree, "Expecting unary operator");
 			goto exit;
 	}
 
@@ -593,6 +599,7 @@ static dmg_assembler_evaluator_hdlr OPERATOR_HANDLER[] = {
 static int
 dmg_assembler_generator_evaluate_expression_operator(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -601,17 +608,17 @@ dmg_assembler_generator_evaluate_expression_operator(
 	dmg_assembler_evaluator_hdlr handler;
 
 	if(tree->token->type != TOKEN_OPERATOR) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting operator");
+		result = GENERATOR_ERROR(parser, tree, "Expecting operator");
 		goto exit;
 	}
 
 	if((tree->token->subtype >= OPERATOR_MAX)
 			|| !(handler = OPERATOR_HANDLER[tree->token->subtype])) {
-		result = GENERATOR_ERROR(generator, tree, "Unsupported operator");
+		result = GENERATOR_ERROR(parser, tree, "Unsupported operator");
 		goto exit;
 	}
 
-	if((result = handler(generator, tree, value)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -622,6 +629,7 @@ exit:
 static int
 dmg_assembler_generator_evaluate_expression_scalar(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -629,7 +637,7 @@ dmg_assembler_generator_evaluate_expression_scalar(
 	int result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->type != TOKEN_SCALAR) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting scalar");
+		result = GENERATOR_ERROR(parser, tree, "Expecting scalar");
 		goto exit;
 	}
 
@@ -658,6 +666,7 @@ static dmg_assembler_evaluator_hdlr EXPRESSION_HANDLER[] = {
 static int
 dmg_assembler_generator_evaluate_expression(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__inout dmg_assembler_scalar_t *value
 	)
@@ -667,11 +676,11 @@ dmg_assembler_generator_evaluate_expression(
 
 	if((tree->token->type >= TOKEN_MAX)
 			|| !(handler = EXPRESSION_HANDLER[tree->token->type])) {
-		result = GENERATOR_ERROR(generator, tree, "Unsupported expression");
+		result = GENERATOR_ERROR(parser, tree, "Unsupported expression");
 		goto exit;
 	}
 
-	if((result = handler(generator, tree, value)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -682,6 +691,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_bank(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -690,20 +700,20 @@ dmg_assembler_generator_generate_directive_bank(
 	dmg_assembler_scalar_t origin = {}, value = {};
 
 	if(tree->token->subtype != DIRECTIVE_BANK) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -718,18 +728,19 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_data_byte(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_DATA_BYTE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
@@ -737,11 +748,11 @@ dmg_assembler_generator_generate_directive_data_byte(
 		dmg_assembler_scalar_t value = {};
 		dmg_assembler_tree_t *child = NULL;
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -757,18 +768,19 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_data_word(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_DATA_WORD) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
@@ -776,11 +788,11 @@ dmg_assembler_generator_generate_directive_data_word(
 		dmg_assembler_scalar_t value = {};
 		dmg_assembler_tree_t *child = NULL;
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -796,6 +808,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_define(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -805,26 +818,26 @@ dmg_assembler_generator_generate_directive_define(
 	int index = 0, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_DEFINE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index++, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, index++, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	token = child->token;
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -839,24 +852,25 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_else(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
 	int index, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_ELSE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	for(index = 0; index < tree->count; ++index) {
 		dmg_assembler_tree_t *child = NULL;
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -868,24 +882,25 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_else_if(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
 	int index, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_ELSE_IF) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	for(index = 1; index < tree->count; ++index) {
 		dmg_assembler_tree_t *child = NULL;
 
-		if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -897,6 +912,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_if(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -905,28 +921,28 @@ dmg_assembler_generator_generate_directive_if(
 	int index, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_IF) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		result = GENERATOR_ERROR(parser, tree, "Expecting conditional");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(child->token->type == TOKEN_INEQUALITY) {
 
-		if((result = dmg_assembler_generator_evaluate_conditional(generator, child, &condition)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, child, &condition)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else {
 		dmg_assembler_scalar_t value = {};
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -937,7 +953,7 @@ dmg_assembler_generator_generate_directive_if(
 
 		for(index = 1; index < tree->count; ++index) {
 
-			if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 
@@ -947,7 +963,7 @@ dmg_assembler_generator_generate_directive_if(
 				break;
 			}
 
-			if((result = dmg_assembler_generator_generate_statement(generator, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -955,7 +971,7 @@ dmg_assembler_generator_generate_directive_if(
 
 		for(index = 1; index < tree->count; ++index) {
 
-			if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 
@@ -970,7 +986,7 @@ dmg_assembler_generator_generate_directive_if(
 
 			for(; index < tree->count; ++index) {
 
-				if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+				if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
 
@@ -978,25 +994,25 @@ dmg_assembler_generator_generate_directive_if(
 					dmg_assembler_tree_t *else_child = NULL;
 
 					if(!child->count) {
-						result = GENERATOR_ERROR(generator, child, "Expecting conditional");
+						result = GENERATOR_ERROR(parser, child, "Expecting conditional");
 						goto exit;
 					}
 
-					if((result = dmg_assembler_tree_child(&generator->parser.trees, child, 0, &else_child))
+					if((result = dmg_assembler_tree_child(&parser->trees, child, 0, &else_child))
 							!= DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
 
 					if(else_child->token->type == TOKEN_INEQUALITY) {
 
-						if((result = dmg_assembler_generator_evaluate_conditional(generator, else_child, &condition))
+						if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, else_child, &condition))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
 					} else {
 						dmg_assembler_scalar_t value = {};
 
-						if((result = dmg_assembler_generator_evaluate_expression(generator, else_child, &value))
+						if((result = dmg_assembler_generator_evaluate_expression(generator, parser, else_child, &value))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
@@ -1006,7 +1022,7 @@ dmg_assembler_generator_generate_directive_if(
 
 					if(condition) {
 
-						if((result = dmg_assembler_generator_generate_directive_else_if(generator, child))
+						if((result = dmg_assembler_generator_generate_directive_else_if(generator, parser, child))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
@@ -1015,7 +1031,7 @@ dmg_assembler_generator_generate_directive_if(
 					}
 				} else if(child->token->subtype == DIRECTIVE_ELSE) {
 
-					if((result = dmg_assembler_generator_generate_directive_else(generator, child))
+					if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child))
 							!= DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
@@ -1033,6 +1049,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_if_define(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1041,11 +1058,11 @@ dmg_assembler_generator_generate_directive_if_define(
 	int index, result = DMG_STATUS_SUCCESS;
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting conditional");
+		result = GENERATOR_ERROR(parser, tree, "Expecting conditional");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1057,7 +1074,7 @@ dmg_assembler_generator_generate_directive_if_define(
 			condition = !dmg_assembler_global_defined(&generator->globals, child->token);
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+			result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 			goto exit;
 	}
 
@@ -1065,7 +1082,7 @@ dmg_assembler_generator_generate_directive_if_define(
 
 		for(index = 1; index < tree->count; ++index) {
 
-			if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 
@@ -1074,7 +1091,7 @@ dmg_assembler_generator_generate_directive_if_define(
 				break;
 			}
 
-			if((result = dmg_assembler_generator_generate_statement(generator, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -1082,7 +1099,7 @@ dmg_assembler_generator_generate_directive_if_define(
 
 		for(index = 1; index < tree->count; ++index) {
 
-			if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_tree_child(&parser->trees, tree, index, &child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 
@@ -1094,7 +1111,7 @@ dmg_assembler_generator_generate_directive_if_define(
 
 		if(index < tree->count) {
 
-			if((result = dmg_assembler_generator_generate_directive_else(generator, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -1107,30 +1124,33 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_include(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
 	FILE *file = NULL;
+	dmg_buffer_t buffer = {};
 	dmg_assembler_string_t path = {};
 	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_parser_t child_parser = {};
 	int index, length = 0, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_INCLUDE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting literal");
+		result = GENERATOR_ERROR(parser, tree, "Expecting literal");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(!child->token->literal.length) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting file path");
+		result = GENERATOR_ERROR(parser, tree, "Expecting file path");
 		goto exit;
 	}
 
@@ -1162,9 +1182,35 @@ dmg_assembler_generator_generate_directive_include(
 		goto exit;
 	}
 
-	// TODO: CREATE CHILD PARSER AND HANDLE STATEMENTS
+	if((result = dmg_buffer_allocate(&buffer, length, 0)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(fread(buffer.data, sizeof(uint8_t), length, file) != length) {
+		result = GENERATOR_ERROR(parser, child, "Failed to read file");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_parser_load(&child_parser, &buffer, path.str)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	for(;;) {
+
+		if((result = dmg_assembler_generator_generate_statement(generator, &child_parser, dmg_assembler_parser_tree(&child_parser)))
+				!= DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(!dmg_assembler_parser_has_next(&child_parser)
+				|| ((result = dmg_assembler_parser_next(&child_parser)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
 
 exit:
+	dmg_assembler_parser_unload(&child_parser);
+	dmg_buffer_free(&buffer);
 	dmg_tool_file_close(&file);
 	dmg_assembler_string_free(&path);
 
@@ -1174,6 +1220,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_include_binary(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1183,21 +1230,21 @@ dmg_assembler_generator_generate_directive_include_binary(
 	int index, length = 0, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != DIRECTIVE_INCLUDE_BINARY) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting literal");
+		result = GENERATOR_ERROR(parser, tree, "Expecting literal");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(!child->token->literal.length) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting file path");
+		result = GENERATOR_ERROR(parser, tree, "Expecting file path");
 		goto exit;
 	}
 
@@ -1230,7 +1277,7 @@ dmg_assembler_generator_generate_directive_include_binary(
 	}
 
 	if(length > (BANK_WIDTH - generator->offset.word)) {
-		result = GENERATOR_ERROR(generator, tree, "Binary file exceeds remaining bank size");
+		result = GENERATOR_ERROR(parser, tree, "Binary file exceeds remaining bank size");
 		goto exit;
 	}
 
@@ -1238,7 +1285,7 @@ dmg_assembler_generator_generate_directive_include_binary(
 		dmg_assembler_scalar_t value = {};
 
 		if(fread(&value.low, sizeof(uint8_t), sizeof(uint8_t), file) != sizeof(uint8_t)) {
-			result = GENERATOR_ERROR(generator, tree, "Failed to read file");
+			result = GENERATOR_ERROR(parser, child, "Failed to read file");
 			goto exit;
 		}
 
@@ -1257,6 +1304,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_origin(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1265,25 +1313,25 @@ dmg_assembler_generator_generate_directive_origin(
 	dmg_assembler_tree_t *child = NULL;
 
 	if(tree->token->subtype != DIRECTIVE_ORIGIN) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(value.word > ORIGIN_MAX) {
-		result = GENERATOR_ERROR(generator, tree, "Origin out-of-range");
+		result = GENERATOR_ERROR(parser, tree, "Origin out-of-range");
 		goto exit;
 	}
 
@@ -1297,6 +1345,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_reserve(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1305,33 +1354,33 @@ dmg_assembler_generator_generate_directive_reserve(
 	dmg_assembler_scalar_t length = {}, value = {};
 
 	if(tree->token->subtype != DIRECTIVE_RESERVE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &length)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	if(length.word > (BANK_WIDTH - generator->offset.word)) {
-		result = GENERATOR_ERROR(generator, tree, "Reserve out-of-range");
+		result = GENERATOR_ERROR(parser, tree, "Reserve out-of-range");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 1, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1349,6 +1398,7 @@ exit:
 static int
 dmg_assembler_generator_generate_directive_undefine(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1356,16 +1406,16 @@ dmg_assembler_generator_generate_directive_undefine(
 	dmg_assembler_tree_t *child = NULL;
 
 	if(tree->token->subtype != DIRECTIVE_UNDEFINE) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting directive");
+		result = GENERATOR_ERROR(parser, tree, "Expecting directive");
 		goto exit;
 	}
 
 	if(!tree->count) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting expression");
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&generator->parser.trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1398,6 +1448,7 @@ static dmg_assembler_generator_hdlr DIRECTIVE_HANDLER[] = {
 static int
 dmg_assembler_generator_generate_directive(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1406,11 +1457,11 @@ dmg_assembler_generator_generate_directive(
 
 	if((tree->token->subtype >= DIRECTIVE_MAX)
 			|| !(handler = DIRECTIVE_HANDLER[tree->token->subtype])) {
-		result = GENERATOR_ERROR(generator, tree, "Unsupported directive");
+		result = GENERATOR_ERROR(parser, tree, "Unsupported directive");
 		goto exit;
 	}
 
-	if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1421,6 +1472,7 @@ exit:
 static int
 dmg_assembler_generator_generate_label(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1428,12 +1480,12 @@ dmg_assembler_generator_generate_label(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->type != TOKEN_LABEL) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting label");
+		result = GENERATOR_ERROR(parser, tree, "Expecting label");
 		goto exit;
 	}
 
 	if(dmg_assembler_global_get(&generator->globals, tree->token, &value) == DMG_STATUS_SUCCESS) {
-		result = GENERATOR_ERROR(generator, tree, "Duplicate label");
+		result = GENERATOR_ERROR(parser, tree, "Duplicate label");
 		goto exit;
 	}
 
@@ -1486,6 +1538,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_ccf(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1493,7 +1546,7 @@ dmg_assembler_generate_opcode_ccf(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_CCF) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1508,6 +1561,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_cpl(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1515,7 +1569,7 @@ dmg_assembler_generate_opcode_cpl(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_CPL) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1530,6 +1584,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_daa(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1537,7 +1592,7 @@ dmg_assembler_generate_opcode_daa(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_DAA) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1552,6 +1607,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_di(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1559,7 +1615,7 @@ dmg_assembler_generate_opcode_di(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_DI) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1574,6 +1630,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_ei(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1581,7 +1638,7 @@ dmg_assembler_generate_opcode_ei(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_EI) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1596,6 +1653,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_halt(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1603,7 +1661,7 @@ dmg_assembler_generate_opcode_halt(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_HALT) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1618,6 +1676,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_nop(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1625,7 +1684,7 @@ dmg_assembler_generate_opcode_nop(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_NOP) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1640,6 +1699,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_reti(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1647,7 +1707,7 @@ dmg_assembler_generate_opcode_reti(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_RETI) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1662,6 +1722,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_rla(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1669,7 +1730,7 @@ dmg_assembler_generate_opcode_rla(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_RLA) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1684,6 +1745,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_rlca(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1691,7 +1753,7 @@ dmg_assembler_generate_opcode_rlca(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_RLCA) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1706,6 +1768,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_rra(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1713,7 +1776,7 @@ dmg_assembler_generate_opcode_rra(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_RRA) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1728,6 +1791,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_rrca(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1735,7 +1799,7 @@ dmg_assembler_generate_opcode_rrca(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_RRCA) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1750,6 +1814,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_scf(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1757,7 +1822,7 @@ dmg_assembler_generate_opcode_scf(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_SCF) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1772,6 +1837,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_stop(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1779,7 +1845,7 @@ dmg_assembler_generate_opcode_stop(
 	dmg_assembler_scalar_t value = {};
 
 	if(tree->token->subtype != OPCODE_STOP) {
-		result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
 
@@ -1794,6 +1860,7 @@ exit:
 static int
 dmg_assembler_generate_opcode_unused(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1835,7 +1902,7 @@ dmg_assembler_generate_opcode_unused(
 			instruction = INSTRUCTION_UNUSED_FD;
 			break;
 		default:
-			result = GENERATOR_ERROR(generator, tree, "Expecting opcode");
+			result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 			goto exit;
 	}
 
@@ -1929,6 +1996,7 @@ static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
 static int
 dmg_assembler_generator_generate_opcode(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1937,11 +2005,11 @@ dmg_assembler_generator_generate_opcode(
 
 	if((tree->token->subtype >= OPCODE_MAX)
 			|| !(handler = OPCODE_HANDLER[tree->token->subtype])) {
-		result = GENERATOR_ERROR(generator, tree, "Unsupported opcode");
+		result = GENERATOR_ERROR(parser, tree, "Unsupported opcode");
 		goto exit;
 	}
 
-	if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1968,6 +2036,7 @@ static dmg_assembler_generator_hdlr STATEMENT_HANDLER[] = {
 static int
 dmg_assembler_generator_generate_statement(
 	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree
 	)
 {
@@ -1976,11 +2045,11 @@ dmg_assembler_generator_generate_statement(
 
 	if((tree->token->type >= TOKEN_MAX)
 			|| !(handler = STATEMENT_HANDLER[tree->token->type])) {
-		result = GENERATOR_ERROR(generator, tree, "Unsupported statement");
+		result = GENERATOR_ERROR(parser, tree, "Unsupported statement");
 		goto exit;
 	}
 
-	if((result = handler(generator, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2026,7 +2095,7 @@ dmg_assembler_generator_run(
 
 	for(;;) {
 
-		if((result = dmg_assembler_generator_generate_statement(generator, dmg_assembler_parser_tree(&generator->parser)))
+		if((result = dmg_assembler_generator_generate_statement(generator, &generator->parser, dmg_assembler_parser_tree(&generator->parser)))
 				!= DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
