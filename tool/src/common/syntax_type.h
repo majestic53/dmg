@@ -1164,10 +1164,12 @@ static const char *OPCODE_STR[] = {
 	"cpl", /* OPCODE_CPL */
 	"daa", /* OPCODE_DAA */
 	"dec", /* OPCODE_DEC */
+	"", /* OPCODE_DEC_U16 */
 	"di", /* OPCODE_DI */
 	"ei", /* OPCODE_EI */
 	"halt", /* OPCODE_HALT */
 	"inc", /* OPCODE_INC */
+	"", /* OPCODE_INC_U16 */
 	"jp", /* OPCODE_JP */
 	"jr", /* OPCODE_JR */
 	"ld", /* OPCODE_LD */

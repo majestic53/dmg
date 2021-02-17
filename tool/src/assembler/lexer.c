@@ -825,7 +825,7 @@ exit:
 	return result;
 }
 
-const dmg_assembler_token_t *
+dmg_assembler_token_t *
 dmg_assembler_lexer_token(
 	__in const dmg_assembler_lexer_t *lexer
 	)

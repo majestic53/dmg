@@ -53,7 +53,7 @@ int dmg_assembler_lexer_previous(
 	__inout dmg_assembler_lexer_t *lexer
 	);
 
-const dmg_assembler_token_t *dmg_assembler_lexer_token(
+dmg_assembler_token_t *dmg_assembler_lexer_token(
 	__in const dmg_assembler_lexer_t *lexer
 	);
 

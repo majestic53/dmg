@@ -56,14 +56,14 @@ dmg_assembler_parser_error(
 static int
 dmg_assembler_parser_parse_expression(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	);
 
 static int
 dmg_assembler_parser_parse_expression_factor(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -210,7 +210,7 @@ exit:
 static int
 dmg_assembler_parser_parse_expression(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -262,7 +262,7 @@ exit:
 static int
 dmg_assembler_parser_parse_expression_list(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -298,7 +298,7 @@ exit:
 static int
 dmg_assembler_parser_parse_conditional(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -356,7 +356,7 @@ dmg_assembler_parser_parse_statement(
 static int
 dmg_assembler_parser_parse_statement_list(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -390,7 +390,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_bank(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -426,7 +426,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_data(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -463,7 +463,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_define(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -515,7 +515,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_else(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -551,7 +551,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_else_if(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -592,7 +592,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_end(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -615,7 +615,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_if(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -681,7 +681,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_if_define(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -750,7 +750,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_include(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -797,7 +797,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_origin(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -833,7 +833,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_reserve(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -873,7 +873,7 @@ exit:
 static int
 dmg_assembler_parser_parse_directive_undefine(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -937,7 +937,7 @@ static dmg_assembler_parser_hdlr DIRECTIVE_HANDLER[] = {
 static int
 dmg_assembler_parser_parse_directive(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -966,7 +966,7 @@ exit:
 static int
 dmg_assembler_parser_parse_operand_condition(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -994,7 +994,7 @@ exit:
 static int
 dmg_assembler_parser_parse_operand_expression_indirect(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1023,7 +1023,7 @@ exit:
 static int
 dmg_assembler_parser_parse_operand_register(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1051,7 +1051,7 @@ exit:
 static int
 dmg_assembler_parser_parse_operand_register_indirect(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1108,7 +1108,7 @@ exit:
 static int
 dmg_assembler_parser_parse_operand_seperator(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1131,7 +1131,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_adc(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1196,7 +1196,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_add(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1261,7 +1261,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_and(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1316,7 +1316,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_bit(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1373,7 +1373,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_call(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1424,7 +1424,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_ccf(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1453,7 +1453,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_cp(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1508,7 +1508,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_cpl(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1537,7 +1537,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_daa(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1566,12 +1566,13 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_dec(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_token_t *parent = token;
 
 	if((token->type != TOKEN_OPCODE)
 			|| (token->subtype != OPCODE_DEC)) {
@@ -1596,6 +1597,17 @@ dmg_assembler_parser_parse_instruction_dec(
 
 		if((result = dmg_assembler_parser_parse_operand_register(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
+		}
+
+		switch(token->subtype) {
+			case REGISTER_BC:
+			case REGISTER_DE:
+			case REGISTER_HL:
+			case REGISTER_SP:
+				parent->subtype = OPCODE_DEC_U16;
+				break;
+			default:
+				break;
 		}
 	} else if((token->type == TOKEN_SYMBOL)
 			&& (token->subtype == SYMBOL_BRACE_OPEN)) {
@@ -1622,7 +1634,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_di(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1651,7 +1663,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_ei(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1680,7 +1692,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_halt(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1709,12 +1721,13 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_inc(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_token_t *parent = token;
 
 	if((token->type != TOKEN_OPCODE)
 			|| (token->subtype != OPCODE_INC)) {
@@ -1739,6 +1752,17 @@ dmg_assembler_parser_parse_instruction_inc(
 
 		if((result = dmg_assembler_parser_parse_operand_register(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
+		}
+
+		switch(token->subtype) {
+			case REGISTER_BC:
+			case REGISTER_DE:
+			case REGISTER_HL:
+			case REGISTER_SP:
+				parent->subtype = OPCODE_INC_U16;
+				break;
+			default:
+				break;
 		}
 	} else if((token->type == TOKEN_SYMBOL)
 			&& (token->subtype == SYMBOL_BRACE_OPEN)) {
@@ -1765,7 +1789,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_jp(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1830,7 +1854,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_jr(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1882,7 +1906,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_ld(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -1990,7 +2014,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_nop(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2019,7 +2043,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_or(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2074,7 +2098,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_pop(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2117,7 +2141,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_push(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2160,7 +2184,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_res(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2217,7 +2241,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_ret(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2257,7 +2281,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_reti(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2286,7 +2310,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rl(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2342,7 +2366,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rla(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2371,7 +2395,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rlc(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2427,7 +2451,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rlca(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2456,7 +2480,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rr(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2512,7 +2536,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rra(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2541,7 +2565,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rrc(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2597,7 +2621,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rrca(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2626,7 +2650,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_rst(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2663,7 +2687,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_sbc(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2728,7 +2752,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_scf(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2757,7 +2781,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_set(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2814,7 +2838,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_sla(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2870,7 +2894,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_sra(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2926,7 +2950,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_srl(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -2982,7 +3006,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_stop(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3011,7 +3035,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_sub(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3066,7 +3090,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_swap(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3122,7 +3146,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_unused(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3161,7 +3185,7 @@ exit:
 static int
 dmg_assembler_parser_parse_instruction_xor(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3223,10 +3247,12 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_assembler_parser_parse_instruction_cpl, /* OPCODE_CPL */
 	dmg_assembler_parser_parse_instruction_daa, /* OPCODE_DAA */
 	dmg_assembler_parser_parse_instruction_dec, /* OPCODE_DEC */
+	NULL, /* OPCODE_DEC_U16 */
 	dmg_assembler_parser_parse_instruction_di, /* OPCODE_DI */
 	dmg_assembler_parser_parse_instruction_ei, /* OPCODE_EI */
 	dmg_assembler_parser_parse_instruction_halt, /* OPCODE_HALT */
 	dmg_assembler_parser_parse_instruction_inc, /* OPCODE_INC */
+	NULL, /* OPCODE_INC_U16 */
 	dmg_assembler_parser_parse_instruction_jp, /* OPCODE_JP */
 	dmg_assembler_parser_parse_instruction_jr, /* OPCODE_JR */
 	dmg_assembler_parser_parse_instruction_ld, /* OPCODE_LD */
@@ -3294,7 +3320,7 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 static int
 dmg_assembler_parser_parse_instruction(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3318,7 +3344,7 @@ exit:
 static int
 dmg_assembler_parser_parse_label(
 	__inout dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_token_t *token,
+	__inout dmg_assembler_token_t *token,
 	__inout dmg_assembler_tree_t *root
 	)
 {
@@ -3350,7 +3376,7 @@ dmg_assembler_parser_parse_statement(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
-	const dmg_assembler_token_t *token;
+	dmg_assembler_token_t *token;
 
 	switch((token = dmg_assembler_lexer_token(&parser->lexer))->type) {
 		case TOKEN_DIRECTIVE:
