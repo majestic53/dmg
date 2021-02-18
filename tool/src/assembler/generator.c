@@ -1551,6 +1551,189 @@ exit:
 }
 
 static int
+dmg_assembler_generate_opcode_adc(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	dmg_assembler_tree_t *child = NULL;
+	int instruction = INSTRUCTION_ADC_U8, result = DMG_STATUS_SUCCESS;
+
+	if(tree->token->subtype != OPCODE_ADC) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(child->token->type == TOKEN_REGISTER) {
+
+		switch(child->token->subtype) {
+			case REGISTER_A:
+				instruction = INSTRUCTION_ADC_A;
+				break;
+			case REGISTER_B:
+				instruction = INSTRUCTION_ADC_B;
+				break;
+			case REGISTER_C:
+				instruction = INSTRUCTION_ADC_C;
+				break;
+			case REGISTER_D:
+				instruction = INSTRUCTION_ADC_D;
+				break;
+			case REGISTER_E:
+				instruction = INSTRUCTION_ADC_E;
+				break;
+			case REGISTER_H:
+				instruction = INSTRUCTION_ADC_H;
+				break;
+			case REGISTER_HL:
+				instruction = INSTRUCTION_ADC_HL_IND;
+				break;
+			case REGISTER_L:
+				instruction = INSTRUCTION_ADC_L;
+				break;
+			default:
+				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+				goto exit;
+		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
+dmg_assembler_generate_opcode_add(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	dmg_assembler_tree_t *child = NULL;
+	int instruction = INSTRUCTION_ADD_U8, result = DMG_STATUS_SUCCESS;
+
+	if(tree->token->subtype != OPCODE_ADD) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(child->token->type == TOKEN_REGISTER) {
+
+		switch(child->token->subtype) {
+			case REGISTER_A:
+				instruction = INSTRUCTION_ADD_A;
+				break;
+			case REGISTER_B:
+				instruction = INSTRUCTION_ADD_B;
+				break;
+			case REGISTER_C:
+				instruction = INSTRUCTION_ADD_C;
+				break;
+			case REGISTER_D:
+				instruction = INSTRUCTION_ADD_D;
+				break;
+			case REGISTER_E:
+				instruction = INSTRUCTION_ADD_E;
+				break;
+			case REGISTER_H:
+				instruction = INSTRUCTION_ADD_H;
+				break;
+			case REGISTER_HL:
+
+				if(tree->count > 1) {
+
+					if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child)) != DMG_STATUS_SUCCESS) {
+						goto exit;
+					}
+
+					if(child->token->type != TOKEN_REGISTER) {
+						result = GENERATOR_ERROR(parser, tree, "Expecting register");
+						goto exit;
+					}
+
+					switch(child->token->subtype) {
+						case REGISTER_BC:
+							instruction = INSTRUCTION_ADD_HL_BC;
+							break;
+						case REGISTER_DE:
+							instruction = INSTRUCTION_ADD_HL_DE;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_ADD_HL_HL;
+							break;
+						case REGISTER_SP:
+							instruction = INSTRUCTION_ADD_HL_SP;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_ADD_HL_IND;
+				}
+				break;
+			case REGISTER_L:
+				instruction = INSTRUCTION_ADD_L;
+				break;
+			case REGISTER_SP:
+				instruction = INSTRUCTION_ADD_SP_I8;
+
+				if(tree->count < 1) {
+					result = GENERATOR_ERROR(parser, tree, "Expecting expression");
+					goto exit;
+				}
+
+				if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+
+				if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+					goto exit;
+				}
+				break;
+			default:
+				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+				goto exit;
+		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_generate_opcode_and(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
@@ -1559,7 +1742,7 @@ dmg_assembler_generate_opcode_and(
 {
 	dmg_assembler_scalar_t value = {};
 	dmg_assembler_tree_t *child = NULL;
-	int instruction = 0, result = DMG_STATUS_SUCCESS;
+	int instruction = INSTRUCTION_AND_U8, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != OPCODE_AND) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
@@ -1579,39 +1762,35 @@ dmg_assembler_generate_opcode_and(
 
 		switch(child->token->subtype) {
 			case REGISTER_A:
-				instruction = INSTRUCTION_AND_A_A;
+				instruction = INSTRUCTION_AND_A;
 				break;
 			case REGISTER_B:
-				instruction = INSTRUCTION_AND_A_B;
+				instruction = INSTRUCTION_AND_B;
 				break;
 			case REGISTER_C:
-				instruction = INSTRUCTION_AND_A_C;
+				instruction = INSTRUCTION_AND_C;
 				break;
 			case REGISTER_D:
-				instruction = INSTRUCTION_AND_A_D;
+				instruction = INSTRUCTION_AND_D;
 				break;
 			case REGISTER_E:
-				instruction = INSTRUCTION_AND_A_E;
+				instruction = INSTRUCTION_AND_E;
 				break;
 			case REGISTER_H:
-				instruction = INSTRUCTION_AND_A_H;
+				instruction = INSTRUCTION_AND_H;
 				break;
 			case REGISTER_HL:
-				instruction = INSTRUCTION_AND_A_HL_IND;
+				instruction = INSTRUCTION_AND_HL_IND;
 				break;
 			case REGISTER_L:
-				instruction = INSTRUCTION_AND_A_L;
+				instruction = INSTRUCTION_AND_L;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else {
-		instruction = INSTRUCTION_AND_A_U8;
-
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
@@ -1796,7 +1975,7 @@ dmg_assembler_generate_opcode_cp(
 {
 	dmg_assembler_scalar_t value = {};
 	dmg_assembler_tree_t *child = NULL;
-	int instruction = 0, result = DMG_STATUS_SUCCESS;
+	int instruction = INSTRUCTION_CP_U8, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != OPCODE_CP) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
@@ -1816,39 +1995,35 @@ dmg_assembler_generate_opcode_cp(
 
 		switch(child->token->subtype) {
 			case REGISTER_A:
-				instruction = INSTRUCTION_CP_A_A;
+				instruction = INSTRUCTION_CP_A;
 				break;
 			case REGISTER_B:
-				instruction = INSTRUCTION_CP_A_B;
+				instruction = INSTRUCTION_CP_B;
 				break;
 			case REGISTER_C:
-				instruction = INSTRUCTION_CP_A_C;
+				instruction = INSTRUCTION_CP_C;
 				break;
 			case REGISTER_D:
-				instruction = INSTRUCTION_CP_A_D;
+				instruction = INSTRUCTION_CP_D;
 				break;
 			case REGISTER_E:
-				instruction = INSTRUCTION_CP_A_E;
+				instruction = INSTRUCTION_CP_E;
 				break;
 			case REGISTER_H:
-				instruction = INSTRUCTION_CP_A_H;
+				instruction = INSTRUCTION_CP_H;
 				break;
 			case REGISTER_HL:
-				instruction = INSTRUCTION_CP_A_HL_IND;
+				instruction = INSTRUCTION_CP_HL_IND;
 				break;
 			case REGISTER_L:
-				instruction = INSTRUCTION_CP_A_L;
+				instruction = INSTRUCTION_CP_L;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else {
-		instruction = INSTRUCTION_CP_A_U8;
-
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
@@ -2344,7 +2519,7 @@ dmg_assembler_generate_opcode_or(
 {
 	dmg_assembler_scalar_t value = {};
 	dmg_assembler_tree_t *child = NULL;
-	int instruction = 0, result = DMG_STATUS_SUCCESS;
+	int instruction = INSTRUCTION_OR_U8, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != OPCODE_OR) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
@@ -2364,39 +2539,35 @@ dmg_assembler_generate_opcode_or(
 
 		switch(child->token->subtype) {
 			case REGISTER_A:
-				instruction = INSTRUCTION_OR_A_A;
+				instruction = INSTRUCTION_OR_A;
 				break;
 			case REGISTER_B:
-				instruction = INSTRUCTION_OR_A_B;
+				instruction = INSTRUCTION_OR_B;
 				break;
 			case REGISTER_C:
-				instruction = INSTRUCTION_OR_A_C;
+				instruction = INSTRUCTION_OR_C;
 				break;
 			case REGISTER_D:
-				instruction = INSTRUCTION_OR_A_D;
+				instruction = INSTRUCTION_OR_D;
 				break;
 			case REGISTER_E:
-				instruction = INSTRUCTION_OR_A_E;
+				instruction = INSTRUCTION_OR_E;
 				break;
 			case REGISTER_H:
-				instruction = INSTRUCTION_OR_A_H;
+				instruction = INSTRUCTION_OR_H;
 				break;
 			case REGISTER_HL:
-				instruction = INSTRUCTION_OR_A_HL_IND;
+				instruction = INSTRUCTION_OR_HL_IND;
 				break;
 			case REGISTER_L:
-				instruction = INSTRUCTION_OR_A_L;
+				instruction = INSTRUCTION_OR_L;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else {
-		instruction = INSTRUCTION_OR_A_U8;
-
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
@@ -3099,6 +3270,74 @@ exit:
 }
 
 static int
+dmg_assembler_generate_opcode_sbc(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	dmg_assembler_tree_t *child = NULL;
+	int instruction = INSTRUCTION_SBC_U8, result = DMG_STATUS_SUCCESS;
+
+	if(tree->token->subtype != OPCODE_SBC) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(child->token->type == TOKEN_REGISTER) {
+
+		switch(child->token->subtype) {
+			case REGISTER_A:
+				instruction = INSTRUCTION_SBC_A;
+				break;
+			case REGISTER_B:
+				instruction = INSTRUCTION_SBC_B;
+				break;
+			case REGISTER_C:
+				instruction = INSTRUCTION_SBC_C;
+				break;
+			case REGISTER_D:
+				instruction = INSTRUCTION_SBC_D;
+				break;
+			case REGISTER_E:
+				instruction = INSTRUCTION_SBC_E;
+				break;
+			case REGISTER_H:
+				instruction = INSTRUCTION_SBC_H;
+				break;
+			case REGISTER_HL:
+				instruction = INSTRUCTION_SBC_HL_IND;
+				break;
+			case REGISTER_L:
+				instruction = INSTRUCTION_SBC_L;
+				break;
+			default:
+				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+				goto exit;
+		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_generate_opcode_scf(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
@@ -3420,6 +3659,74 @@ exit:
 }
 
 static int
+dmg_assembler_generate_opcode_sub(
+	__inout dmg_assembler_generator_t *generator,
+	__in const dmg_assembler_parser_t *parser,
+	__in const dmg_assembler_tree_t *tree
+	)
+{
+	dmg_assembler_scalar_t value = {};
+	dmg_assembler_tree_t *child = NULL;
+	int instruction = INSTRUCTION_SUB_U8, result = DMG_STATUS_SUCCESS;
+
+	if(tree->token->subtype != OPCODE_SUB) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
+		goto exit;
+	}
+
+	if(!tree->count) {
+		result = GENERATOR_ERROR(parser, tree, "Expecting expression");
+		goto exit;
+	}
+
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if(child->token->type == TOKEN_REGISTER) {
+
+		switch(child->token->subtype) {
+			case REGISTER_A:
+				instruction = INSTRUCTION_SUB_A;
+				break;
+			case REGISTER_B:
+				instruction = INSTRUCTION_SUB_B;
+				break;
+			case REGISTER_C:
+				instruction = INSTRUCTION_SUB_C;
+				break;
+			case REGISTER_D:
+				instruction = INSTRUCTION_SUB_D;
+				break;
+			case REGISTER_E:
+				instruction = INSTRUCTION_SUB_E;
+				break;
+			case REGISTER_H:
+				instruction = INSTRUCTION_SUB_H;
+				break;
+			case REGISTER_HL:
+				instruction = INSTRUCTION_SUB_HL_IND;
+				break;
+			case REGISTER_L:
+				instruction = INSTRUCTION_SUB_L;
+				break;
+			default:
+				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+				goto exit;
+		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+exit:
+	return result;
+}
+
+static int
 dmg_assembler_generate_opcode_swap(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
@@ -3553,7 +3860,7 @@ dmg_assembler_generate_opcode_xor(
 {
 	dmg_assembler_scalar_t value = {};
 	dmg_assembler_tree_t *child = NULL;
-	int instruction = 0, result = DMG_STATUS_SUCCESS;
+	int instruction = INSTRUCTION_XOR_U8, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != OPCODE_XOR) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
@@ -3573,39 +3880,35 @@ dmg_assembler_generate_opcode_xor(
 
 		switch(child->token->subtype) {
 			case REGISTER_A:
-				instruction = INSTRUCTION_XOR_A_A;
+				instruction = INSTRUCTION_XOR_A;
 				break;
 			case REGISTER_B:
-				instruction = INSTRUCTION_XOR_A_B;
+				instruction = INSTRUCTION_XOR_B;
 				break;
 			case REGISTER_C:
-				instruction = INSTRUCTION_XOR_A_C;
+				instruction = INSTRUCTION_XOR_C;
 				break;
 			case REGISTER_D:
-				instruction = INSTRUCTION_XOR_A_D;
+				instruction = INSTRUCTION_XOR_D;
 				break;
 			case REGISTER_E:
-				instruction = INSTRUCTION_XOR_A_E;
+				instruction = INSTRUCTION_XOR_E;
 				break;
 			case REGISTER_H:
-				instruction = INSTRUCTION_XOR_A_H;
+				instruction = INSTRUCTION_XOR_H;
 				break;
 			case REGISTER_HL:
-				instruction = INSTRUCTION_XOR_A_HL_IND;
+				instruction = INSTRUCTION_XOR_HL_IND;
 				break;
 			case REGISTER_L:
-				instruction = INSTRUCTION_XOR_A_L;
+				instruction = INSTRUCTION_XOR_L;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else {
-		instruction = INSTRUCTION_XOR_A_U8;
-
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
-			goto exit;
-		}
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		goto exit;
 	}
 
 	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
@@ -3617,8 +3920,8 @@ exit:
 }
 
 static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
-	NULL, /* OPCODE_ADC */
-	NULL, /* OPCODE_ADD */
+	dmg_assembler_generate_opcode_adc, /* OPCODE_ADC */
+	dmg_assembler_generate_opcode_add, /* OPCODE_ADD */
 	dmg_assembler_generate_opcode_and, /* OPCODE_AND */
 	dmg_assembler_generate_opcode_call, /* OPCODE_CALL */
 	dmg_assembler_generate_opcode_ccf, /* OPCODE_CCF */
@@ -3647,9 +3950,9 @@ static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
 	dmg_assembler_generate_opcode_rrca, /* OPCODE_RRCA */
 	dmg_assembler_generate_opcode_rst, /* OPCODE_RST */
 	dmg_assembler_generate_opcode_scf, /* OPCODE_SCF */
-	NULL, /* OPCODE_SBC */
+	dmg_assembler_generate_opcode_sbc, /* OPCODE_SBC */
 	dmg_assembler_generate_opcode_stop, /* OPCODE_STOP */
-	NULL, /* OPCODE_SUB */
+	dmg_assembler_generate_opcode_sub, /* OPCODE_SUB */
 	dmg_assembler_generate_opcode_xor, /* OPCODE_XOR */
 	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_D3 */
 	dmg_assembler_generate_opcode_unused, /* OPCODE_UNUSED_DB */

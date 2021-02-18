@@ -1157,16 +1157,6 @@ dmg_assembler_parser_parse_instruction_adc(
 
 	root = child;
 
-	if((result = dmg_assembler_parser_parse_operand_register(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_assembler_parser_parse_operand_seperator(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
 	if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
 
 		if((result = dmg_assembler_parser_parse_operand_register(parser, token, root)) != DMG_STATUS_SUCCESS) {
@@ -1222,16 +1212,6 @@ dmg_assembler_parser_parse_instruction_add(
 
 	root = child;
 
-	if((result = dmg_assembler_parser_parse_operand_register(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_assembler_parser_parse_operand_seperator(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
 	if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
 
 		if((result = dmg_assembler_parser_parse_operand_register(parser, token, root)) != DMG_STATUS_SUCCESS) {
@@ -1252,6 +1232,38 @@ dmg_assembler_parser_parse_instruction_add(
 		}
 	} else if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
+	}
+
+	token = dmg_assembler_lexer_token(&parser->lexer);
+	if((token->type == TOKEN_SYMBOL)
+			&& (token->subtype == SYMBOL_SEPERATOR)) {
+
+		if((result = dmg_assembler_parser_parse_operand_seperator(parser, dmg_assembler_lexer_token(&parser->lexer), root))
+				!= DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
+
+			if((result = dmg_assembler_parser_parse_operand_register(parser, token, root)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		} else if((token->type == TOKEN_SYMBOL)
+				&& (token->subtype == SYMBOL_BRACE_OPEN)) {
+
+			if(!dmg_assembler_lexer_has_next(&parser->lexer)
+					|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+				result = PARSER_ERROR(parser, token, "Unterminated opcode");
+				goto exit;
+			}
+
+			if((result = dmg_assembler_parser_parse_operand_register_indirect(parser, dmg_assembler_lexer_token(&parser->lexer), root))
+					!= DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+		} else if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 	}
 
 exit:
@@ -2712,16 +2724,6 @@ dmg_assembler_parser_parse_instruction_sbc(
 	}
 
 	root = child;
-
-	if((result = dmg_assembler_parser_parse_operand_register(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
-
-	if((result = dmg_assembler_parser_parse_operand_seperator(parser, dmg_assembler_lexer_token(&parser->lexer), root))
-			!= DMG_STATUS_SUCCESS) {
-		goto exit;
-	}
 
 	if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
 

@@ -83,31 +83,31 @@ dmg_processor_instruction_adc(
 	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_ADC_A_A:
+		case INSTRUCTION_ADC_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_ADC_A_B:
+		case INSTRUCTION_ADC_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_ADC_A_C:
+		case INSTRUCTION_ADC_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_ADC_A_D:
+		case INSTRUCTION_ADC_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_ADC_A_E:
+		case INSTRUCTION_ADC_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_ADC_A_H:
+		case INSTRUCTION_ADC_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_ADC_A_HL_IND:
+		case INSTRUCTION_ADC_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_ADC_A_L:
+		case INSTRUCTION_ADC_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_ADC_A_U8:
+		case INSTRUCTION_ADC_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -136,28 +136,28 @@ dmg_processor_instruction_add(
 	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_ADD_A_A:
+		case INSTRUCTION_ADD_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_ADD_A_B:
+		case INSTRUCTION_ADD_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_ADD_A_C:
+		case INSTRUCTION_ADD_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_ADD_A_D:
+		case INSTRUCTION_ADD_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_ADD_A_E:
+		case INSTRUCTION_ADD_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_ADD_A_H:
+		case INSTRUCTION_ADD_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_ADD_A_L:
+		case INSTRUCTION_ADD_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_ADD_A_U8:
+		case INSTRUCTION_ADD_U8:
 			value.low = operand->low;
 			break;
 		case INSTRUCTION_ADD_HL_BC:
@@ -169,7 +169,7 @@ dmg_processor_instruction_add(
 		case INSTRUCTION_ADD_HL_HL:
 			value.word = processor->hl.word;
 			break;
-		case INSTRUCTION_ADD_A_HL_IND:
+		case INSTRUCTION_ADD_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
 		case INSTRUCTION_ADD_HL_SP:
@@ -184,15 +184,15 @@ dmg_processor_instruction_add(
 	}
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_ADD_A_A:
-		case INSTRUCTION_ADD_A_B:
-		case INSTRUCTION_ADD_A_C:
-		case INSTRUCTION_ADD_A_D:
-		case INSTRUCTION_ADD_A_E:
-		case INSTRUCTION_ADD_A_H:
-		case INSTRUCTION_ADD_A_HL_IND:
-		case INSTRUCTION_ADD_A_L:
-		case INSTRUCTION_ADD_A_U8:
+		case INSTRUCTION_ADD_A:
+		case INSTRUCTION_ADD_B:
+		case INSTRUCTION_ADD_C:
+		case INSTRUCTION_ADD_D:
+		case INSTRUCTION_ADD_E:
+		case INSTRUCTION_ADD_H:
+		case INSTRUCTION_ADD_HL_IND:
+		case INSTRUCTION_ADD_L:
+		case INSTRUCTION_ADD_U8:
 			sum.word = (processor->af.high + value.low);
 			carry.word = (processor->af.high ^ sum.word ^ value.low);
 			processor->af.high = sum.low;
@@ -238,31 +238,31 @@ dmg_processor_instruction_and(
 	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_AND_A_A:
+		case INSTRUCTION_AND_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_AND_A_B:
+		case INSTRUCTION_AND_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_AND_A_C:
+		case INSTRUCTION_AND_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_AND_A_D:
+		case INSTRUCTION_AND_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_AND_A_E:
+		case INSTRUCTION_AND_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_AND_A_H:
+		case INSTRUCTION_AND_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_AND_A_HL_IND:
+		case INSTRUCTION_AND_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_AND_A_L:
+		case INSTRUCTION_AND_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_AND_A_U8:
+		case INSTRUCTION_AND_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -341,31 +341,31 @@ dmg_processor_instruction_cp(
 	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_CP_A_A:
+		case INSTRUCTION_CP_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_CP_A_B:
+		case INSTRUCTION_CP_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_CP_A_C:
+		case INSTRUCTION_CP_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_CP_A_D:
+		case INSTRUCTION_CP_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_CP_A_E:
+		case INSTRUCTION_CP_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_CP_A_H:
+		case INSTRUCTION_CP_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_CP_A_HL_IND:
+		case INSTRUCTION_CP_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_CP_A_L:
+		case INSTRUCTION_CP_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_CP_A_U8:
+		case INSTRUCTION_CP_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -1013,31 +1013,31 @@ dmg_processor_instruction_or(
 	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_OR_A_A:
+		case INSTRUCTION_OR_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_OR_A_B:
+		case INSTRUCTION_OR_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_OR_A_C:
+		case INSTRUCTION_OR_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_OR_A_D:
+		case INSTRUCTION_OR_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_OR_A_E:
+		case INSTRUCTION_OR_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_OR_A_H:
+		case INSTRUCTION_OR_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_OR_A_HL_IND:
+		case INSTRUCTION_OR_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_OR_A_L:
+		case INSTRUCTION_OR_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_OR_A_U8:
+		case INSTRUCTION_OR_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -1282,31 +1282,31 @@ dmg_processor_instruction_sbc(
 	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_SBC_A_A:
+		case INSTRUCTION_SBC_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_SBC_A_B:
+		case INSTRUCTION_SBC_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_SBC_A_C:
+		case INSTRUCTION_SBC_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_SBC_A_D:
+		case INSTRUCTION_SBC_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_SBC_A_E:
+		case INSTRUCTION_SBC_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_SBC_A_H:
+		case INSTRUCTION_SBC_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_SBC_A_HL_IND:
+		case INSTRUCTION_SBC_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_SBC_A_L:
+		case INSTRUCTION_SBC_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_SBC_A_U8:
+		case INSTRUCTION_SBC_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -1363,31 +1363,31 @@ dmg_processor_instruction_sub(
 	dmg_processor_register_t carry = {}, sum = {}, value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_SUB_A_A:
+		case INSTRUCTION_SUB_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_SUB_A_B:
+		case INSTRUCTION_SUB_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_SUB_A_C:
+		case INSTRUCTION_SUB_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_SUB_A_D:
+		case INSTRUCTION_SUB_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_SUB_A_E:
+		case INSTRUCTION_SUB_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_SUB_A_H:
+		case INSTRUCTION_SUB_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_SUB_A_HL_IND:
+		case INSTRUCTION_SUB_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_SUB_A_L:
+		case INSTRUCTION_SUB_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_SUB_A_U8:
+		case INSTRUCTION_SUB_U8:
 			value.low = operand->low;
 			break;
 		default:
@@ -1447,31 +1447,31 @@ dmg_processor_instruction_xor(
 	dmg_processor_register_t value = {};
 
 	switch(instruction->opcode) {
-		case INSTRUCTION_XOR_A_A:
+		case INSTRUCTION_XOR_A:
 			value.low = processor->af.high;
 			break;
-		case INSTRUCTION_XOR_A_B:
+		case INSTRUCTION_XOR_B:
 			value.low = processor->bc.high;
 			break;
-		case INSTRUCTION_XOR_A_C:
+		case INSTRUCTION_XOR_C:
 			value.low = processor->bc.low;
 			break;
-		case INSTRUCTION_XOR_A_D:
+		case INSTRUCTION_XOR_D:
 			value.low = processor->de.high;
 			break;
-		case INSTRUCTION_XOR_A_E:
+		case INSTRUCTION_XOR_E:
 			value.low = processor->de.low;
 			break;
-		case INSTRUCTION_XOR_A_H:
+		case INSTRUCTION_XOR_H:
 			value.low = processor->hl.high;
 			break;
-		case INSTRUCTION_XOR_A_HL_IND:
+		case INSTRUCTION_XOR_HL_IND:
 			value.low = dmg_runtime_read(processor->hl.word);
 			break;
-		case INSTRUCTION_XOR_A_L:
+		case INSTRUCTION_XOR_L:
 			value.low = processor->hl.low;
 			break;
-		case INSTRUCTION_XOR_A_U8:
+		case INSTRUCTION_XOR_U8:
 			value.low = operand->low;
 			break;
 		default:
