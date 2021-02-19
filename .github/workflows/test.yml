@@ -1,4 +1,4 @@
-name: Build
+name: Test
 
 on:
   push:
@@ -19,12 +19,12 @@ jobs:
         run: |
           echo "gcc `gcc --version | grep gcc | awk '{print $3}'`"
           echo "sdl2 `sdl2-config --version`"
-      - name: Build Release
+      - name: Test Release
         run: |
-          make release
-      - name: Build Debug
+          make release_test
+      - name: Test Debug
         run: |
-          make debug LEVEL=4
+          make debug_test LEVEL=4
         env:
           CC: gcc
   clang:
@@ -39,11 +39,11 @@ jobs:
         run: |
           echo "clang `clang --version | grep clang | awk '{print $3}'`"
           echo "sdl2 `sdl2-config --version`"
-      - name: Build Release
+      - name: Test Release
         run: |
-          make release
-      - name: Build Debug
+          make release_test
+      - name: Test Debug
         run: |
-          make debug LEVEL=4
+          make debug_test LEVEL=4
         env:
           CC: clang
