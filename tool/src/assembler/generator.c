@@ -3950,8 +3950,6 @@ static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
 	NULL, /* OPCODE_LD */
 	NULL, /* OPCODE_LD_HL_SP_I8 */
 	NULL, /* OPCODE_LD_IND_C */
-	NULL, /* OPCODE_LD_IND_HL_DEC */
-	NULL, /* OPCODE_LD_IND_HL_INC */
 	NULL, /* OPCODE_LD_IND_U16 */
 	dmg_assembler_generate_opcode_nop, /* OPCODE_NOP */
 	dmg_assembler_generate_opcode_or, /* OPCODE_OR */

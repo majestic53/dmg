@@ -1175,8 +1175,6 @@ static const char *OPCODE_STR[] = {
 	"ld", /* OPCODE_LD */
 	"", /* OPCODE_LD_HL_SP_I8 */
 	"", /* OPCODE_LD_IND_C */
-	"", /* OPCODE_LD_IND_HL_DEC */
-	"", /* OPCODE_LD_IND_HL_INC */
 	"", /* OPCODE_LD_IND_U16 */
 	"nop", /* OPCODE_NOP */
 	"or", /* OPCODE_OR */

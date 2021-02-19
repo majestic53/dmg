@@ -1964,39 +1964,8 @@ dmg_assembler_parser_parse_instruction_ld(
 				goto exit;
 			}
 
-			switch(child_register->token->subtype) {
-				case REGISTER_C:
-					parent->subtype = OPCODE_LD_IND_C;
-					break;
-				case REGISTER_HL:
-
-					if(child_register->count) {
-						dmg_assembler_tree_t *child_operator = NULL;
-
-						if((result = dmg_assembler_tree_child(&parser->trees, child_register, 0, &child_operator))
-								!= DMG_STATUS_SUCCESS) {
-							goto exit;
-						}
-
-						if(child_operator->token->type == TOKEN_OPERATOR) {
-
-							switch(child_operator->token->subtype) {
-								case OPERATOR_ARITHMETIC_ADD:
-									parent->subtype = OPCODE_LD_IND_HL_INC;
-									break;
-								case OPERATOR_ARITHMETIC_SUBTRACT:
-									parent->subtype = OPCODE_LD_IND_HL_DEC;
-									break;
-								default:
-									result = PARSER_ERROR(parser, child_operator->token,
-												"Unsupported operator");
-									goto exit;
-							}
-						}
-					}
-					break;
-				default:
-					break;
+			if(child_register->token->subtype == REGISTER_C) {
+				parent->subtype = OPCODE_LD_IND_C;
 			}
 		} else {
 
@@ -2072,39 +2041,8 @@ dmg_assembler_parser_parse_instruction_ld(
 				goto exit;
 			}
 
-			switch(child_register->token->subtype) {
-				case REGISTER_C:
-					parent->subtype = OPCODE_LD_IND_C;
-					break;
-				case REGISTER_HL:
-
-					if(child_register->count) {
-						dmg_assembler_tree_t *child_operator = NULL;
-
-						if((result = dmg_assembler_tree_child(&parser->trees, child_register, 0, &child_operator))
-								!= DMG_STATUS_SUCCESS) {
-							goto exit;
-						}
-
-						if(child_operator->token->type == TOKEN_OPERATOR) {
-
-							switch(child_operator->token->subtype) {
-								case OPERATOR_ARITHMETIC_ADD:
-									parent->subtype = OPCODE_LD_IND_HL_INC;
-									break;
-								case OPERATOR_ARITHMETIC_SUBTRACT:
-									parent->subtype = OPCODE_LD_IND_HL_DEC;
-									break;
-								default:
-									result = PARSER_ERROR(parser, child_operator->token,
-												"Unsupported operator");
-									goto exit;
-							}
-						}
-					}
-					break;
-				default:
-					break;
+			if(child_register->token->subtype == REGISTER_C) {
+				parent->subtype = OPCODE_LD_IND_C;
 			}
 		} else {
 
@@ -3360,8 +3298,6 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_assembler_parser_parse_instruction_ld, /* OPCODE_LD */
 	NULL, /* OPCODE_LD_HL_SP_I8 */
 	NULL, /* OPCODE_LD_IND_C */
-	NULL, /* OPCODE_LD_IND_HL_DEC */
-	NULL, /* OPCODE_LD_IND_HL_INC */
 	NULL, /* OPCODE_LD_IND_U16 */
 	dmg_assembler_parser_parse_instruction_nop, /* OPCODE_NOP */
 	dmg_assembler_parser_parse_instruction_or, /* OPCODE_OR */
