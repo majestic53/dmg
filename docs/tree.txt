@@ -47,7 +47,7 @@ instruction ::= <instruction_adc>|<instruction_add>|<instruction_and>|<instructi
 
 instruction_adc ::= adc <register>(,<expression>)?
 
-instruction_add ::= add <register>,(<register>|<expression>)
+instruction_add ::= add <register>|<expression>
 
 instruction_and ::= and <register>|<expression>
 
@@ -111,7 +111,7 @@ instruction_rrca ::= rrca
 
 instruction_rst ::= rst <expression>
 
-instruction_sbc ::= sbc <register>(,<expression>)?
+instruction_sbc ::= sbc <register>|<expression>
 
 instruction_scf ::= scf
 

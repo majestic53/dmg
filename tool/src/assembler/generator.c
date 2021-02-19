@@ -22,6 +22,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef NDEBUG
+
 static int
 dmg_assembler_generator_error_tree(
 	__in const dmg_assembler_parser_t *parser,
@@ -158,6 +160,8 @@ exit:
 	return result;
 }
 
+#endif /* NDEBUG */
+
 static int
 dmg_assembler_generator_error(
 	__in const dmg_assembler_parser_t *parser,
@@ -166,7 +170,7 @@ dmg_assembler_generator_error(
 	...
 	)
 {
-	dmg_assembler_string_t debug_string = {}, string = {};
+	dmg_assembler_string_t string = {};
 
 	if(dmg_assembler_string_allocate(&string) == DMG_STATUS_SUCCESS) {
 
@@ -183,12 +187,18 @@ dmg_assembler_generator_error(
 		}
 	}
 
+#ifndef NDEBUG
+	dmg_assembler_string_t debug_string = {};
+
 	if(dmg_assembler_string_allocate(&debug_string) == DMG_STATUS_SUCCESS) {
 		dmg_assembler_generator_error_tree(parser, tree, &debug_string, 1);
 	}
 
-	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, parser->lexer.stream.path, tree->token->line, debug_string);
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)%s", message, string.str, parser->lexer.stream.path, tree->token->line, debug_string.str);
 	dmg_assembler_string_free(&debug_string);
+#else
+	ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s \"%s\" (%s@%u)", message, string.str, parser->lexer.stream.path, tree->token->line);
+#endif /* NDEBUG */
 	dmg_assembler_string_free(&string);
 
 	return DMG_STATUS_FAILURE;
@@ -2115,7 +2125,7 @@ dmg_assembler_generate_opcode_dec(
 	int instruction = 0, result = DMG_STATUS_SUCCESS, subtype = tree->token->subtype;
 
 	if((subtype != OPCODE_DEC)
-			&& (subtype != OPCODE_DEC_U16)) {
+			&& (subtype != OPCODE_DEC_HL)) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
@@ -2143,11 +2153,17 @@ dmg_assembler_generate_opcode_dec(
 			case REGISTER_B:
 				instruction = INSTRUCTION_DEC_B;
 				break;
+			case REGISTER_BC:
+				instruction = INSTRUCTION_DEC_BC;
+				break;
 			case REGISTER_C:
 				instruction = INSTRUCTION_DEC_C;
 				break;
 			case REGISTER_D:
 				instruction = INSTRUCTION_DEC_D;
+				break;
+			case REGISTER_DE:
+				instruction = INSTRUCTION_DEC_DE;
 				break;
 			case REGISTER_E:
 				instruction = INSTRUCTION_DEC_E;
@@ -2161,6 +2177,9 @@ dmg_assembler_generate_opcode_dec(
 			case REGISTER_L:
 				instruction = INSTRUCTION_DEC_L;
 				break;
+			case REGISTER_SP:
+				instruction = INSTRUCTION_DEC_SP;
+				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
@@ -2168,17 +2187,8 @@ dmg_assembler_generate_opcode_dec(
 	} else {
 
 		switch(child->token->subtype) {
-			case REGISTER_BC:
-				instruction = INSTRUCTION_DEC_BC;
-				break;
-			case REGISTER_DE:
-				instruction = INSTRUCTION_DEC_DE;
-				break;
 			case REGISTER_HL:
 				instruction = INSTRUCTION_DEC_HL;
-				break;
-			case REGISTER_SP:
-				instruction = INSTRUCTION_DEC_SP;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
@@ -2252,7 +2262,7 @@ dmg_assembler_generate_opcode_inc(
 	int instruction = 0, result = DMG_STATUS_SUCCESS, subtype = tree->token->subtype;
 
 	if((subtype != OPCODE_INC)
-			&& (subtype != OPCODE_INC_U16)) {
+			&& (subtype != OPCODE_INC_HL)) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
 		goto exit;
 	}
@@ -2280,11 +2290,17 @@ dmg_assembler_generate_opcode_inc(
 			case REGISTER_B:
 				instruction = INSTRUCTION_INC_B;
 				break;
+			case REGISTER_BC:
+				instruction = INSTRUCTION_INC_BC;
+				break;
 			case REGISTER_C:
 				instruction = INSTRUCTION_INC_C;
 				break;
 			case REGISTER_D:
 				instruction = INSTRUCTION_INC_D;
+				break;
+			case REGISTER_DE:
+				instruction = INSTRUCTION_INC_DE;
 				break;
 			case REGISTER_E:
 				instruction = INSTRUCTION_INC_E;
@@ -2298,6 +2314,9 @@ dmg_assembler_generate_opcode_inc(
 			case REGISTER_L:
 				instruction = INSTRUCTION_INC_L;
 				break;
+			case REGISTER_SP:
+				instruction = INSTRUCTION_INC_SP;
+				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
@@ -2305,17 +2324,8 @@ dmg_assembler_generate_opcode_inc(
 	} else {
 
 		switch(child->token->subtype) {
-			case REGISTER_BC:
-				instruction = INSTRUCTION_INC_BC;
-				break;
-			case REGISTER_DE:
-				instruction = INSTRUCTION_INC_DE;
-				break;
 			case REGISTER_HL:
 				instruction = INSTRUCTION_INC_HL;
-				break;
-			case REGISTER_SP:
-				instruction = INSTRUCTION_INC_SP;
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
@@ -3929,15 +3939,20 @@ static dmg_assembler_generator_hdlr OPCODE_HANDLER[] = {
 	dmg_assembler_generate_opcode_cpl, /* OPCODE_CPL */
 	dmg_assembler_generate_opcode_daa, /* OPCODE_DAA */
 	dmg_assembler_generate_opcode_dec, /* OPCODE_DEC */
-	dmg_assembler_generate_opcode_dec, /* OPCODE_DEC_U16 */
+	dmg_assembler_generate_opcode_dec, /* OPCODE_DEC_HL */
 	dmg_assembler_generate_opcode_di, /* OPCODE_DI */
 	dmg_assembler_generate_opcode_ei, /* OPCODE_EI */
 	dmg_assembler_generate_opcode_halt, /* OPCODE_HALT */
 	dmg_assembler_generate_opcode_inc, /* OPCODE_INC */
-	dmg_assembler_generate_opcode_inc, /* OPCODE_INC_U16 */
+	dmg_assembler_generate_opcode_inc, /* OPCODE_INC_HL */
 	dmg_assembler_generate_opcode_jp, /* OPCODE_JP */
 	dmg_assembler_generate_opcode_jr, /* OPCODE_JR */
 	NULL, /* OPCODE_LD */
+	NULL, /* OPCODE_LD_HL_SP_I8 */
+	NULL, /* OPCODE_LD_IND_C */
+	NULL, /* OPCODE_LD_IND_HL_DEC */
+	NULL, /* OPCODE_LD_IND_HL_INC */
+	NULL, /* OPCODE_LD_IND_U16 */
 	dmg_assembler_generate_opcode_nop, /* OPCODE_NOP */
 	dmg_assembler_generate_opcode_or, /* OPCODE_OR */
 	dmg_assembler_generate_opcode_pop, /* OPCODE_POP */

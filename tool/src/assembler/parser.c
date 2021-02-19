@@ -1611,15 +1611,8 @@ dmg_assembler_parser_parse_instruction_dec(
 			goto exit;
 		}
 
-		switch(token->subtype) {
-			case REGISTER_BC:
-			case REGISTER_DE:
-			case REGISTER_HL:
-			case REGISTER_SP:
-				parent->subtype = OPCODE_DEC_U16;
-				break;
-			default:
-				break;
+		if(token->subtype == REGISTER_HL) {
+			parent->subtype = OPCODE_DEC_HL;
 		}
 	} else if((token->type == TOKEN_SYMBOL)
 			&& (token->subtype == SYMBOL_BRACE_OPEN)) {
@@ -1766,15 +1759,8 @@ dmg_assembler_parser_parse_instruction_inc(
 			goto exit;
 		}
 
-		switch(token->subtype) {
-			case REGISTER_BC:
-			case REGISTER_DE:
-			case REGISTER_HL:
-			case REGISTER_SP:
-				parent->subtype = OPCODE_INC_U16;
-				break;
-			default:
-				break;
+		if(token->subtype == REGISTER_HL) {
+			parent->subtype = OPCODE_INC_HL;
 		}
 	} else if((token->type == TOKEN_SYMBOL)
 			&& (token->subtype == SYMBOL_BRACE_OPEN)) {
@@ -1924,6 +1910,7 @@ dmg_assembler_parser_parse_instruction_ld(
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_tree_t *child = NULL;
+	dmg_assembler_token_t *parent = token;
 
 	if((token->type != TOKEN_OPCODE)
 			|| (token->subtype != OPCODE_LD)) {
@@ -1966,10 +1953,50 @@ dmg_assembler_parser_parse_instruction_ld(
 		}
 
 		if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
+			dmg_assembler_tree_t *child_register = NULL;
 
 			if((result = dmg_assembler_parser_parse_operand_register_indirect(parser, token, root))
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
+			}
+
+			if((result = dmg_assembler_tree_child(&parser->trees, root, 0, &child_register)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			switch(child_register->token->subtype) {
+				case REGISTER_C:
+					parent->subtype = OPCODE_LD_IND_C;
+					break;
+				case REGISTER_HL:
+
+					if(child_register->count) {
+						dmg_assembler_tree_t *child_operator = NULL;
+
+						if((result = dmg_assembler_tree_child(&parser->trees, child_register, 0, &child_operator))
+								!= DMG_STATUS_SUCCESS) {
+							goto exit;
+						}
+
+						if(child_operator->token->type == TOKEN_OPERATOR) {
+
+							switch(child_operator->token->subtype) {
+								case OPERATOR_ARITHMETIC_ADD:
+									parent->subtype = OPCODE_LD_IND_HL_INC;
+									break;
+								case OPERATOR_ARITHMETIC_SUBTRACT:
+									parent->subtype = OPCODE_LD_IND_HL_DEC;
+									break;
+								default:
+									result = PARSER_ERROR(parser, child_operator->token,
+												"Unsupported operator");
+									goto exit;
+							}
+						}
+					}
+					break;
+				default:
+					break;
 			}
 		} else {
 
@@ -1977,6 +2004,8 @@ dmg_assembler_parser_parse_instruction_ld(
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
+
+			parent->subtype = OPCODE_LD_IND_U16;
 		}
 	} else {
 		result = PARSER_ERROR(parser, token, "Expecting register");
@@ -1990,7 +2019,36 @@ dmg_assembler_parser_parse_instruction_ld(
 
 	if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
 
-		if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
+		if(token->subtype == REGISTER_SP) {
+			dmg_assembler_tree_t *child_register = NULL;
+
+			if((result = dmg_assembler_trees_append_child_token(&parser->trees, child, token, &child_register)) != DMG_STATUS_SUCCESS) {
+				result = PARSER_ERROR(parser, token, "Exceeded maximum list length");
+				goto exit;
+			}
+
+			if(dmg_assembler_lexer_has_next(&parser->lexer)
+					&& ((result = dmg_assembler_lexer_next(&parser->lexer)) == DMG_STATUS_SUCCESS)) {
+				token = dmg_assembler_lexer_token(&parser->lexer);
+
+				if((token->type == TOKEN_OPERATOR)
+						&& (token->subtype == OPERATOR_ARITHMETIC_ADD)) {
+
+					if(!dmg_assembler_lexer_has_next(&parser->lexer)
+							|| ((result = dmg_assembler_lexer_next(&parser->lexer)) != DMG_STATUS_SUCCESS)) {
+						result = PARSER_ERROR(parser, token, "Unterminated opcode");
+						goto exit;
+					}
+
+					if((result = dmg_assembler_parser_parse_expression_factor(parser, dmg_assembler_lexer_token(&parser->lexer),
+							child_register)) != DMG_STATUS_SUCCESS) {
+						goto exit;
+					}
+
+					parent->subtype = OPCODE_LD_HL_SP_I8;
+				}
+			}
+		} else if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if((token->type == TOKEN_SYMBOL)
@@ -2003,10 +2061,50 @@ dmg_assembler_parser_parse_instruction_ld(
 		}
 
 		if((token = dmg_assembler_lexer_token(&parser->lexer))->type == TOKEN_REGISTER) {
+			dmg_assembler_tree_t *child_register = NULL;
 
 			if((result = dmg_assembler_parser_parse_operand_register_indirect(parser, token, root))
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
+			}
+
+			if((result = dmg_assembler_tree_child(&parser->trees, root, 1, &child_register)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
+
+			switch(child_register->token->subtype) {
+				case REGISTER_C:
+					parent->subtype = OPCODE_LD_IND_C;
+					break;
+				case REGISTER_HL:
+
+					if(child_register->count) {
+						dmg_assembler_tree_t *child_operator = NULL;
+
+						if((result = dmg_assembler_tree_child(&parser->trees, child_register, 0, &child_operator))
+								!= DMG_STATUS_SUCCESS) {
+							goto exit;
+						}
+
+						if(child_operator->token->type == TOKEN_OPERATOR) {
+
+							switch(child_operator->token->subtype) {
+								case OPERATOR_ARITHMETIC_ADD:
+									parent->subtype = OPCODE_LD_IND_HL_INC;
+									break;
+								case OPERATOR_ARITHMETIC_SUBTRACT:
+									parent->subtype = OPCODE_LD_IND_HL_DEC;
+									break;
+								default:
+									result = PARSER_ERROR(parser, child_operator->token,
+												"Unsupported operator");
+									goto exit;
+							}
+						}
+					}
+					break;
+				default:
+					break;
 			}
 		} else {
 
@@ -2014,6 +2112,8 @@ dmg_assembler_parser_parse_instruction_ld(
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
+
+			parent->subtype = OPCODE_LD_IND_U16;
 		}
 	} else if((result = dmg_assembler_parser_parse_expression(parser, token, root)) != DMG_STATUS_SUCCESS) {
 		goto exit;
@@ -3249,15 +3349,20 @@ static dmg_assembler_parser_hdlr INSTRUCTION_HANDLER[] = {
 	dmg_assembler_parser_parse_instruction_cpl, /* OPCODE_CPL */
 	dmg_assembler_parser_parse_instruction_daa, /* OPCODE_DAA */
 	dmg_assembler_parser_parse_instruction_dec, /* OPCODE_DEC */
-	NULL, /* OPCODE_DEC_U16 */
+	NULL, /* OPCODE_DEC_HL */
 	dmg_assembler_parser_parse_instruction_di, /* OPCODE_DI */
 	dmg_assembler_parser_parse_instruction_ei, /* OPCODE_EI */
 	dmg_assembler_parser_parse_instruction_halt, /* OPCODE_HALT */
 	dmg_assembler_parser_parse_instruction_inc, /* OPCODE_INC */
-	NULL, /* OPCODE_INC_U16 */
+	NULL, /* OPCODE_INC_HL */
 	dmg_assembler_parser_parse_instruction_jp, /* OPCODE_JP */
 	dmg_assembler_parser_parse_instruction_jr, /* OPCODE_JR */
 	dmg_assembler_parser_parse_instruction_ld, /* OPCODE_LD */
+	NULL, /* OPCODE_LD_HL_SP_I8 */
+	NULL, /* OPCODE_LD_IND_C */
+	NULL, /* OPCODE_LD_IND_HL_DEC */
+	NULL, /* OPCODE_LD_IND_HL_INC */
+	NULL, /* OPCODE_LD_IND_U16 */
 	dmg_assembler_parser_parse_instruction_nop, /* OPCODE_NOP */
 	dmg_assembler_parser_parse_instruction_or, /* OPCODE_OR */
 	dmg_assembler_parser_parse_instruction_pop, /* OPCODE_POP */
