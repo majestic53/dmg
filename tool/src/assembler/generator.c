@@ -2490,9 +2490,9 @@ dmg_assembler_generate_opcode_ld(
 	__in const dmg_assembler_tree_t *tree
 	)
 {
-	dmg_assembler_tree_t *child = NULL;
+	int instruction = 0, result = DMG_STATUS_SUCCESS;
+	dmg_assembler_tree_t *child_left = NULL, *child_right = NULL;
 	dmg_assembler_scalar_t value = {}, value_left = {}, value_right = {};
-	int instruction = 0, register_left = REGISTER_MAX, register_right = REGISTER_MAX, result = DMG_STATUS_SUCCESS;
 
 	if(tree->token->subtype != OPCODE_LD) {
 		result = GENERATOR_ERROR(parser, tree, "Expecting opcode");
@@ -2504,87 +2504,496 @@ dmg_assembler_generate_opcode_ld(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 0, &child_left)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if(child->token->type == TOKEN_REGISTER) {
-		register_left = child->token->subtype;
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value_left)) != DMG_STATUS_SUCCESS) {
+	if((child_left->token->type != TOKEN_REGISTER)
+			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &value_left)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_tree_child(&parser->trees, tree, 1, &child_right)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if(child->token->type == TOKEN_REGISTER) {
-		register_right = child->token->subtype;
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value_right)) != DMG_STATUS_SUCCESS) {
+	if((child_right->token->type != TOKEN_REGISTER)
+			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &value_right)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
 	if(!tree->token->indirect) {
 
-		/*
-		   TODO: MAP THE FOLLOWING INSTRUCTION OPCODES
-		   ***
-		   ld a,U8 ld b,U8 ld c,U8 ld d,U8 ld e,U8 ld h,U8 ld l,U8 ld (hl),U8
-		   ld a,(c) ld (c),a
-		   ld a,(bc) ld a,(de)
-		   ld a,(hl-) ld (hl-),a
-		   ld a,(hl+) ld (hl+),a
-		   ld a,a ld a,b ld a,c ld a,d ld a,e ld a,h ld a,l ld a,(hl)
-		   ld b,a ld b,b ld b,c ld b,d ld b,e ld b,h ld b,l ld b,(hl)
-		   ld c,a ld c,b ld c,c ld c,d ld c,e ld c,h ld a,l ld c,(hl)
-		   ld d,a ld d,b ld d,c ld d,d ld d,e ld d,h ld a,l ld d,(hl)
-		   ld e,a ld e,b ld e,c ld e,d ld e,e ld e,h ld a,l ld e,(hl)
-		   ld h,a ld h,b ld h,c ld h,d ld h,e ld h,h ld a,l ld h,(hl)
-		   ld l,a ld l,b ld l,c ld l,d ld l,e ld l,h ld a,l ld l,(hl)
-		   ld (hl),a ld (hl),b ld (hl),c ld (hl),d ld (hl),e ld (hl),h ld (hl),l
-		   ld bc,U16 ld de,U16 ld hl,U16 ld sp,U16
-		   ld hl,sp+I8
-		   ld sp,hl
-		 */
+		if(child_left->token->type != TOKEN_REGISTER) {
+			result = GENERATOR_ERROR(parser, tree, "Expecting register");
+			goto exit;
+		}
 
-	} else {
-
-		switch(register_left) {
+		switch(child_left->token->subtype) {
 			case REGISTER_A:
 
-				if(value_right.word >= ADDRESS_IO_BASE) {
-					instruction = INSTRUCTION_LD_A_FF00_U8_IND;
-					value.word = (value_right.word - ADDRESS_IO_BASE);
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_A_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_A_B;
+							break;
+						case REGISTER_BC:
+							instruction = INSTRUCTION_LD_A_BC_IND;
+							break;
+						case REGISTER_C:
+							instruction = (child_right->token->indirect ? INSTRUCTION_LD_A_FF00_C_IND : INSTRUCTION_LD_A_C);
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_A_D;
+							break;
+						case REGISTER_DE:
+							instruction = INSTRUCTION_LD_A_DE_IND;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_A_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_A_H;
+							break;
+						case REGISTER_HL:
+
+							if(child_right->count) {
+
+								if((result = dmg_assembler_tree_child(&parser->trees, child_right, 0, &child_left))
+										!= DMG_STATUS_SUCCESS) {
+									goto exit;
+								}
+
+								if(child_left->token->type != TOKEN_OPERATOR) {
+									result = GENERATOR_ERROR(parser, tree, "Expecting operator");
+									goto exit;
+								}
+
+								switch(child_left->token->subtype) {
+									case OPERATOR_ARITHMETIC_ADD:
+										instruction = INSTRUCTION_LD_A_HL_IND_INC;
+										break;
+									case OPERATOR_ARITHMETIC_SUBTRACT:
+										instruction = INSTRUCTION_LD_A_HL_IND_DEC;
+										break;
+									default:
+										result = GENERATOR_ERROR(parser, tree, "Unsupported operator");
+										goto exit;
+										break;
+								}
+							} else {
+								instruction = INSTRUCTION_LD_HL_IND_A;
+							}
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_A_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
 				} else {
-					instruction = INSTRUCTION_LD_A_U16_IND;
-					value.word = value_right.word;
+					instruction = INSTRUCTION_LD_A_U8;
+					value.word = value_right.low;
 				}
 				break;
-			case REGISTER_MAX:
+			case REGISTER_B:
 
-				switch(register_right) {
-					case REGISTER_A:
+				if(child_right->token->type == TOKEN_REGISTER) {
 
-						if(value_left.word >= ADDRESS_IO_BASE) {
-							instruction = INSTRUCTION_LD_FF00_U8_IND_A;
-							value.word = (value_left.word - ADDRESS_IO_BASE);
-						} else {
-							instruction = INSTRUCTION_LD_U16_IND_A;
-							value.word = value_left.word;
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_B_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_B_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_B_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_B_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_B_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_B_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_B_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_B_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_B_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_BC:
+				instruction = INSTRUCTION_LD_BC_U16;
+				value.word = value_right.word;
+				break;
+			case REGISTER_C:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = (child_left->token->indirect ? INSTRUCTION_LD_FF00_C_IND_A : INSTRUCTION_LD_C_A);
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_C_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_C_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_C_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_C_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_C_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_C_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_C_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_C_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_D:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_D_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_D_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_D_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_D_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_D_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_D_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_D_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_D_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_D_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_DE:
+				instruction = INSTRUCTION_LD_DE_U16;
+				value.word = value_right.word;
+				break;
+			case REGISTER_E:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_E_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_E_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_E_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_E_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_E_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_E_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_E_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_E_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_E_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_H:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_H_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_H_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_H_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_H_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_H_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_H_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_H_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_H_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_H_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_HL:
+
+				if(child_left->token->indirect) {
+
+					if(child_right->token->type == TOKEN_REGISTER) {
+
+						switch(child_right->token->subtype) {
+							case REGISTER_A:
+
+								if(child_left->count) {
+
+									if((result = dmg_assembler_tree_child(&parser->trees, child_left, 0, &child_right))
+											!= DMG_STATUS_SUCCESS) {
+										goto exit;
+									}
+
+									if(child_right->token->type != TOKEN_OPERATOR) {
+										result = GENERATOR_ERROR(parser, tree, "Expecting operator");
+										goto exit;
+									}
+
+									switch(child_right->token->subtype) {
+										case OPERATOR_ARITHMETIC_ADD:
+											instruction = INSTRUCTION_LD_HL_IND_INC_A;
+											break;
+										case OPERATOR_ARITHMETIC_SUBTRACT:
+											instruction = INSTRUCTION_LD_HL_IND_DEC_A;
+											break;
+										default:
+											result = GENERATOR_ERROR(parser, tree, "Unsupported operator");
+											goto exit;
+											break;
+									}
+								} else {
+									instruction = INSTRUCTION_LD_HL_IND_A;
+								}
+								break;
+							case REGISTER_B:
+								instruction = INSTRUCTION_LD_HL_IND_B;
+								break;
+							case REGISTER_C:
+								instruction = INSTRUCTION_LD_HL_IND_C;
+								break;
+							case REGISTER_D:
+								instruction = INSTRUCTION_LD_HL_IND_D;
+								break;
+							case REGISTER_E:
+								instruction = INSTRUCTION_LD_HL_IND_E;
+								break;
+							case REGISTER_H:
+								instruction = INSTRUCTION_LD_HL_IND_H;
+								break;
+							case REGISTER_L:
+								instruction = INSTRUCTION_LD_HL_IND_L;
+								break;
+							default:
+								result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+								goto exit;
 						}
-						break;
-					case REGISTER_SP:
-						instruction = INSTRUCTION_LD_U16_IND_SP;
-						value.word = value_left.word;
-						break;
-					default:
-						result = GENERATOR_ERROR(parser, tree, "Unsupported register");
-						goto exit;
+					} else {
+						instruction = INSTRUCTION_LD_HL_IND_U8;
+						value.word = value_right.low;
+					}
+				} else {
+
+					if(child_right->token->type == TOKEN_REGISTER) {
+
+						switch(child_right->token->subtype) {
+							case REGISTER_SP:
+
+								if((result = dmg_assembler_tree_child(&parser->trees, child_right, 0, &child_left))
+										!= DMG_STATUS_SUCCESS) {
+									goto exit;
+								}
+
+								if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left,
+										&value_left)) != DMG_STATUS_SUCCESS) {
+									goto exit;
+								}
+
+								instruction = INSTRUCTION_LD_HL_SP_I8;
+								value.word = value_left.low;
+								break;
+							default:
+								result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+								goto exit;
+						}
+					} else {
+						instruction = INSTRUCTION_LD_HL_U16;
+						value.word = value_right.word;
+					}
+				}
+				break;
+			case REGISTER_L:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_A:
+							instruction = INSTRUCTION_LD_L_A;
+							break;
+						case REGISTER_B:
+							instruction = INSTRUCTION_LD_L_B;
+							break;
+						case REGISTER_C:
+							instruction = INSTRUCTION_LD_L_C;
+							break;
+						case REGISTER_D:
+							instruction = INSTRUCTION_LD_L_D;
+							break;
+						case REGISTER_E:
+							instruction = INSTRUCTION_LD_L_E;
+							break;
+						case REGISTER_H:
+							instruction = INSTRUCTION_LD_L_H;
+							break;
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_L_HL_IND;
+							break;
+						case REGISTER_L:
+							instruction = INSTRUCTION_LD_L_L;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_L_U8;
+					value.word = value_right.low;
+				}
+				break;
+			case REGISTER_SP:
+
+				if(child_right->token->type == TOKEN_REGISTER) {
+
+					switch(child_right->token->subtype) {
+						case REGISTER_HL:
+							instruction = INSTRUCTION_LD_SP_HL;
+							break;
+						default:
+							result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+							goto exit;
+					}
+				} else {
+					instruction = INSTRUCTION_LD_SP_U16;
+					value.word = value_right.word;
 				}
 				break;
 			default:
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
+		}
+	} else {
+
+		if(child_left->token->type == TOKEN_REGISTER) {
+
+			switch(child_left->token->subtype) {
+				case REGISTER_A:
+
+					if(value_right.word >= ADDRESS_IO_BASE) {
+						instruction = INSTRUCTION_LD_A_FF00_U8_IND;
+						value.word = (value_right.word - ADDRESS_IO_BASE);
+					} else {
+						instruction = INSTRUCTION_LD_A_U16_IND;
+						value.word = value_right.word;
+					}
+					break;
+				default:
+					result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+					goto exit;
+			}
+		} else if(child_right->token->type == TOKEN_REGISTER) {
+
+			switch(child_right->token->subtype) {
+				case REGISTER_A:
+
+					if(value_left.word >= ADDRESS_IO_BASE) {
+						instruction = INSTRUCTION_LD_FF00_U8_IND_A;
+						value.word = (value_left.word - ADDRESS_IO_BASE);
+					} else {
+						instruction = INSTRUCTION_LD_U16_IND_A;
+						value.word = value_left.word;
+					}
+					break;
+				case REGISTER_SP:
+					instruction = INSTRUCTION_LD_U16_IND_SP;
+					value.word = value_left.word;
+					break;
+				default:
+					result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+					goto exit;
+			}
+		} else {
+			result = GENERATOR_ERROR(parser, tree, "Expecting register");
+			goto exit;
 		}
 	}
 

@@ -131,14 +131,6 @@ instruction_swap ::= swap <register>
 
 instruction_xor ::= xor <register>|<expression>
 
-operator_binary ::= +|-|*|/|%|<<|>>|&|||^|&&|||
-
-operator_condition ::= ==|!=|<|<=|>|>=
-
-operator_unary ::= ~|!|-
-
-register ::= a|af|b|bc|c|d|de|e|h|hl|l|sp
-
 statement ::= <directive>|<instruction>|<label>|<register>
 
 statement_list ::= <statement>*

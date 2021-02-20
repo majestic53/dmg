@@ -34,7 +34,7 @@ typedef struct {
 typedef struct {
 
 	struct {
-		dmg_assembler_tree_t *ptr;
+		dmg_assembler_tree_t *root;
 		uint32_t capacity;
 		uint32_t count;
 	} tree;
@@ -48,7 +48,7 @@ extern "C" {
 
 int dmg_assembler_tree_child(
 	__in const dmg_assembler_trees_t *trees,
-	__in const dmg_assembler_tree_t *parent,
+	__in const dmg_assembler_tree_t *root,
 	__in uint32_t index,
 	__out dmg_assembler_tree_t **child
 	);
@@ -62,13 +62,13 @@ int dmg_assembler_trees_add(
 
 int dmg_assembler_trees_append_child_token(
 	__inout dmg_assembler_trees_t *trees,
-	__inout dmg_assembler_tree_t *parent,
+	__inout dmg_assembler_tree_t *root,
 	__in const dmg_assembler_token_t *token,
 	__out dmg_assembler_tree_t **tree
 	);
 
 int dmg_assembler_trees_append_child_tree(
-	__inout dmg_assembler_tree_t *parent,
+	__inout dmg_assembler_tree_t *root,
 	__in const dmg_assembler_tree_t *child
 	);
 
