@@ -572,7 +572,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"rst " DELIMITER_HEXIDECIMAL "18",
 	"ld (" DELIMITER_HEXIDECIMAL "ff00+" DELIMITER_HEXIDECIMAL "%02x), a", /* 0xe0 */
 	"pop hl",
-	"ld (" DELIMITER_HEXIDECIMAL "ff00+c), a",
+	"ld (c), a",
 	"unused_e3",
 	"unused_e4",
 	"push hl",
@@ -588,7 +588,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"rst " DELIMITER_HEXIDECIMAL "28",
 	"ld a, (" DELIMITER_HEXIDECIMAL "ff00+" DELIMITER_HEXIDECIMAL "%02x)", /* 0xf0 */
 	"pop af",
-	"ld a, (" DELIMITER_HEXIDECIMAL "ff00+c)",
+	"ld a, (c)",
 	"di",
 	"unused_f4",
 	"push af",
@@ -1164,18 +1164,13 @@ static const char *OPCODE_STR[] = {
 	"cpl", /* OPCODE_CPL */
 	"daa", /* OPCODE_DAA */
 	"dec", /* OPCODE_DEC */
-	"", /* OPCODE_DEC_HL */
 	"di", /* OPCODE_DI */
 	"ei", /* OPCODE_EI */
 	"halt", /* OPCODE_HALT */
 	"inc", /* OPCODE_INC */
-	"", /* OPCODE_INC_HL */
 	"jp", /* OPCODE_JP */
 	"jr", /* OPCODE_JR */
 	"ld", /* OPCODE_LD */
-	"", /* OPCODE_LD_HL_SP_I8 */
-	"", /* OPCODE_LD_IND_C */
-	"", /* OPCODE_LD_IND_U16 */
 	"nop", /* OPCODE_NOP */
 	"or", /* OPCODE_OR */
 	"pop", /* OPCODE_POP */

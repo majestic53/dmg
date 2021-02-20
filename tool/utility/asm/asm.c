@@ -107,8 +107,16 @@ dmg_utility_asm_parse_tokens(void)
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
 
+			if(token->indirect) {
+				fprintf(stdout, "(");
+			}
+
 			for(uint32_t index = 0; index < token->literal.length; ++index) {
 				fprintf(stdout, "%c", token->literal.str[index]);
+			}
+
+			if(token->indirect) {
+				fprintf(stdout, ")");
 			}
 
 			fprintf(stdout, "\"");
@@ -183,8 +191,16 @@ dmg_utility_asm_parse_tree(
 		if((token->type > TOKEN_END) && (token->type < TOKEN_MAX)) {
 			fprintf(stdout, " \"");
 
+			if(token->indirect) {
+				fprintf(stdout, "(");
+			}
+
 			for(index = 0; index < token->literal.length; ++index) {
 				fprintf(stdout, "%c", token->literal.str[index]);
+			}
+
+			if(token->indirect) {
+				fprintf(stdout, ")");
 			}
 
 			fprintf(stdout, "\"");

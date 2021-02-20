@@ -58,6 +58,7 @@ typedef union {
 typedef struct {
 	int type;
 	int subtype;
+	bool indirect;
 	uint32_t line;
 	dmg_assembler_literal_t literal;
 	dmg_assembler_scalar_t scalar;
