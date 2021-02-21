@@ -9,7 +9,7 @@ Interface
 Launch from the project root directory:
 
 ```
-$ ./bin/dmg-save-info [args]
+$ dmg-save-info [args]
 ```
 
 #### Arguments
@@ -29,7 +29,7 @@ dmg-save-info [args]
 The following example shows how to launch dmg-save-info with a save file:
 
 ```
-$ ./bin/dmg-save-info -s save.dmg
+$ dmg-save-info -s save.dmg
 ```
 
 Trademark

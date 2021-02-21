@@ -9,7 +9,7 @@ Interface
 Launch from the project root directory:
 
 ```
-$ ./bin/dmg-asm [args]
+$ dmg-asm [args]
 ```
 
 #### Arguments
@@ -30,13 +30,13 @@ dmg-asm [args]
 The following example shows how to launch dmg-asm with a source file:
 
 ```
-$ ./bin/dmg-asm -s source.s
+$ dmg-asm -s source.s
 ```
 
 The following example shows how to launch dmg-asm with a source file and output to a specified file:
 
 ```
-$ ./bin/dmg-asm -s source.s -o path/to/output/file.gb
+$ dmg-asm -s source.s -o path/to/output/file.gb
 ```
 
 Trademark

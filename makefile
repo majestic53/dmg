@@ -20,6 +20,7 @@ SLOTS=12
 
 DIR_BIN=./bin/
 DIR_BIN_INCLUDE=./bin/include/
+DIR_BIN_BIN=./bin/bin/
 DIR_BIN_LIB=./bin/lib/
 DIR_BUILD=./build/
 DIR_BUILD_TEST=./build/test/
@@ -100,12 +101,14 @@ test_release:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 
 tool_debug:
+	mkdir -p $(DIR_BIN_BIN)
 	mkdir -p $(DIR_BIN_INCLUDE)
 	mkdir -p $(DIR_BIN_LIB)
 	cd $(DIR_SRC) && make output
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
 
 tool_release:
+	mkdir -p $(DIR_BIN_BIN)
 	mkdir -p $(DIR_BIN_INCLUDE)
 	mkdir -p $(DIR_BIN_LIB)
 	cd $(DIR_SRC) && make output

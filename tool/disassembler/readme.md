@@ -9,7 +9,7 @@ Interface
 Launch from the project root directory:
 
 ```
-$ ./bin/dmg-dasm [args]
+$ dmg-dasm [args]
 ```
 
 #### Arguments
@@ -30,13 +30,13 @@ dmg-dasm [args]
 The following example shows how to launch dmg-dasm with a rom file:
 
 ```
-$ ./bin/dmg-dasm -r rom.gb
+$ dmg-dasm -r rom.gb
 ```
 
 The following example shows how to launch dmg-dasm with a rom file and output to a specified file:
 
 ```
-$ ./bin/dmg-dasm -r rom.gb -o path/to/output/file.s
+$ dmg-dasm -r rom.gb -o path/to/output/file.s
 ```
 
 Trademark

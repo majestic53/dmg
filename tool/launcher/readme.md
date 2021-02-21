@@ -11,7 +11,7 @@ Interface
 Launch from the project root directory:
 
 ```
-$ ./bin/dmg [args]
+$ dmg [args]
 ```
 
 #### Arguments
@@ -40,59 +40,59 @@ dmg [args]
 The following example shows how to launch dmg with a rom file:
 
 ```
-$ ./bin/dmg -r rom.gb
+$ dmg -r rom.gb
 ```
 
 The following example shows how to launch dmg with a rom/bootrom file:
 
 ```
-$ ./bin/dmg -r rom.gb -b bootrom.gb
+$ dmg -r rom.gb -b bootrom.gb
 ```
 
 The following example shows how to launch dmg with the serial capture enabled:
 
 ```
-$ ./bin/dmg -r rom.gb -c
+$ dmg -r rom.gb -c
 ```
 
 The following example shows how to launch dmg with the debug prompt enabled:
 
 ```
-$ ./bin/dmg -r rom.gb -d
+$ dmg -r rom.gb -d
 ```
 
 The following example shows how to launch dmg and import a save file:
 
 ```
-$ ./bin/dmg -r rom.gb -i save.dmg
+$ dmg -r rom.gb -i save.dmg
 ```
 
 The following example shows how to launch dmg and export a save file:
 
 ```
-$ ./bin/dmg -r rom.gb -o save.dmg
+$ dmg -r rom.gb -o save.dmg
 ```
 
 The following example shows how to launch dmg with an alternative color palette:
 
 ```
-$ ./bin/dmg -r rom.gb -p 1
+$ dmg -r rom.gb -p 1
 ```
 
 The following example shows how to launch dmg with the display scaled by 2x:
 
 ```
-$ ./bin/dmg -r rom.gb -s 2
+$ dmg -r rom.gb -s 2
 ```
 
 The following example shows how to launch dmg with as a serial server, using port ```1234```
 ```
-$ ./bin/dmg -r rom.gb -m 1234
+$ dmg -r rom.gb -m 1234
 ```
 
 The following example shows how to launch dmg with as a serial client, using port ```1234```
 ```
-$ ./bin/dmg -r rom.gb -n 1234
+$ dmg -r rom.gb -n 1234
 ```
 
 #### Debug Prompt

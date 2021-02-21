@@ -9,7 +9,7 @@ Interface
 Launch from the project root directory:
 
 ```
-$ ./bin/dmg-rom-fix [args]
+$ dmg-rom-fix [args]
 ```
 
 #### Arguments
@@ -29,7 +29,7 @@ dmg-rom-fix [args]
 The following example shows how to launch dmg-rom-fix with a rom file:
 
 ```
-$ ./bin/dmg-rom-fix -r rom.gb
+$ dmg-rom-fix -r rom.gb
 ```
 
 Trademark
