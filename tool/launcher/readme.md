@@ -19,8 +19,6 @@ $ dmg [args]
 The following arguments are available:
 
 ```
-dmg [args]
-
 -b	Specify bootrom binary
 -c	Enable serial capture
 -d	Enable debug prompt

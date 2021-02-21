@@ -17,8 +17,6 @@ $ dmg-rom-fix [args]
 The following arguments are available:
 
 ```
-dmg-rom-fix [args]
-
 -h	Display help information
 -r	Specify rom file
 -v	Display version information

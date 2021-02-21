@@ -17,8 +17,6 @@ $ dmg-save-info [args]
 The following arguments are available:
 
 ```
-dmg-save-info [args]
-
 -h	Display help information
 -s	Specify save file
 -v	Display version information

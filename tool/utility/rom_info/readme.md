@@ -17,8 +17,6 @@ $ dmg-rom-info [args]
 The following arguments are available:
 
 ```
-dmg-rom-info [args]
-
 -h	Display help information
 -r	Specify rom file
 -v	Display version information

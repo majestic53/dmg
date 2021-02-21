@@ -17,8 +17,6 @@ $ dmg-asm [args]
 The following arguments are available:
 
 ```
-dmg-asm [args]
-
 -h	Display help information
 -o	Specify output file
 -s	Specify source file

@@ -27,7 +27,7 @@ extern "C" {
 #define SOURCE_MAX 64
 
 static int
-dmg_test_geneator_instruction(void)
+dmg_test_generator_instruction(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_generator_t generator = {};
@@ -107,7 +107,7 @@ exit:
 }
 
 static int
-dmg_test_generate_instruction_extended(void)
+dmg_test_generator_instruction_extended(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_generator_t generator = {};
@@ -145,8 +145,8 @@ exit:
 }
 
 static const dmg_test TEST[] = {
-	dmg_test_geneator_instruction,
-	dmg_test_generate_instruction_extended,
+	dmg_test_generator_instruction,
+	dmg_test_generator_instruction_extended,
 	};
 
 int

@@ -17,8 +17,6 @@ $ dmg-dasm [args]
 The following arguments are available:
 
 ```
-dmg-dasm [args]
-
 -h	Display help information
 -o	Specify output file
 -r	Specify rom file
