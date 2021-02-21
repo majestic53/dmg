@@ -27,6 +27,7 @@ DIR_BUILD_TOOL=./build/tool/
 DIR_ROOT=./
 DIR_SRC=./src/
 DIR_TEST_AUDIO=./test/audio/
+DIR_TEST_GENERATOR=./test/generator/
 DIR_TEST_JOYPAD=./test/joypad/
 DIR_TEST_MEMORY=./test/memory/
 DIR_TEST_PROCESSOR=./test/processor/
@@ -48,6 +49,7 @@ debug: clean setup library_debug tool_debug
 debug_test: clean setup library_debug test_debug
 release: clean setup library_release tool_release
 release_test: clean setup library_release test_release
+release_zip: release zip_release
 
 analyze:
 	@echo ''
@@ -60,22 +62,25 @@ clean:
 	rm -rf $(DIR_BUILD)
 
 setup:
-	mkdir -p $(DIR_BIN_INCLUDE)
-	mkdir -p $(DIR_BIN_LIB)
 	mkdir -p $(DIR_BUILD)
-	mkdir -p $(DIR_BUILD_TEST)
 	mkdir -p $(DIR_BUILD_TOOL)
 
 library_debug:
 	cd $(DIR_SRC) && make $(BUILD_DEBUG)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make archive
 
 library_release:
 	cd $(DIR_SRC) && make $(BUILD_RELEASE)$(LEVEL) build -j$(SLOTS)
 	cd $(DIR_SRC) && make archive
+	cd $(DIR_TOOL_SRC) && make $(BUILD_RELEASE)$(LEVEL) build
+	cd $(DIR_TOOL_SRC) && make archive
 
 test_debug:
+	mkdir -p $(DIR_BUILD_TEST)
 	cd $(DIR_TEST_AUDIO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
+	cd $(DIR_TEST_GENERATOR) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
@@ -84,7 +89,9 @@ test_debug:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_DEBUG_TEST)$(LEVEL) build
 
 test_release:
+	mkdir -p $(DIR_BUILD_TEST)
 	cd $(DIR_TEST_AUDIO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
+	cd $(DIR_TEST_GENERATOR) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_JOYPAD) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_MEMORY) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 	cd $(DIR_TEST_PROCESSOR) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
@@ -93,11 +100,16 @@ test_release:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 
 tool_debug:
-	cd $(DIR_TOOL_SRC) && make $(BUILD_DEBUG)$(LEVEL) build
-	cd $(DIR_TOOL_SRC) && make archive
+	mkdir -p $(DIR_BIN_INCLUDE)
+	mkdir -p $(DIR_BIN_LIB)
+	cd $(DIR_SRC) && make output
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
 
 tool_release:
-	cd $(DIR_TOOL_SRC) && make $(BUILD_RELEASE)$(LEVEL) build
-	cd $(DIR_TOOL_SRC) && make archive
+	mkdir -p $(DIR_BIN_INCLUDE)
+	mkdir -p $(DIR_BIN_LIB)
+	cd $(DIR_SRC) && make output
 	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build_release
+
+zip_release:
+	cd $(DIR_TOOL) && make release

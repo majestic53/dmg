@@ -19,12 +19,12 @@ jobs:
         run: |
           echo "gcc `gcc --version | grep gcc | awk '{print $3}'`"
           echo "sdl2 `sdl2-config --version`"
-      - name: Build Release
-        run: |
-          make release
       - name: Build Debug
         run: |
           make debug LEVEL=4
+      - name: Build Release
+        run: |
+          make release
         env:
           CC: gcc
   clang:
@@ -39,11 +39,11 @@ jobs:
         run: |
           echo "clang `clang --version | grep clang | awk '{print $3}'`"
           echo "sdl2 `sdl2-config --version`"
-      - name: Build Release
-        run: |
-          make release
       - name: Build Debug
         run: |
           make debug LEVEL=4
+      - name: Build Release
+        run: |
+          make release
         env:
           CC: clang

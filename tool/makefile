@@ -20,6 +20,7 @@ DIR_BUILD=../build/
 DIR_BUILD_TOOL=../build/tool/
 DIR_LAUNCHER=./launcher/
 DIR_LIB=./lib/
+DIR_RELEASE=./release/
 DIR_UTILITY_ASM=./utility/asm/
 DIR_UTILITY_DASM=./utility/dasm/
 DIR_UTILITY_ROM_FIX=./utility/rom_fix/
@@ -40,11 +41,14 @@ FLAGS_LIB=-lpthread -lreadline -lSDL2 -lSDL2main
 LIB=libdmg.a
 LIB_TOOL=libdmg_tool.a
 
+RELEASE_PRE="dmg_"
+RELEASE_EXT=".zip"
+
 SHA256=sha256sum
 
 build_debug: build_tool build_tool_utility link
 
-build_release: build_tool build_tool_utility link strip checksum
+build_release: build_tool build_tool_utility link
 
 build_tool: tool_launcher.o
 
@@ -68,14 +72,6 @@ tool_utility_rom_info.o: $(DIR_UTILITY_ROM_INFO)rom_info.c
 tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 	$(CC) $(FLAGS) $(BUILD_FLAGS) -c $(DIR_UTILITY_SAVE_INFO)save_info.c -o $(DIR_BUILD_TOOL)tool_utility_save_info.o
 
-checksum:
-	@echo ''
-	@echo '--- GENERATE CHECKSUMS ---------------------'
-	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(BIN_LAUNCHER) $(BIN_UTILITY_ASM) $(BIN_UTILITY_DASM) $(BIN_UTILITY_ROM_FIX) $(BIN_UTILITY_ROM_INFO) \
-		$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256).txt
-	@echo '--- DONE -----------------------------------'
-	@echo ''
-
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
@@ -89,14 +85,18 @@ link:
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 
-strip:
+release:
 	@echo ''
-	@echo '--- STRIP SYMBOLS --------------------------'
+	@echo '--- BUILDING RELEASE -----------------------'
+	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(BIN_LAUNCHER) $(BIN_UTILITY_ASM) $(BIN_UTILITY_DASM) $(BIN_UTILITY_ROM_FIX) $(BIN_UTILITY_ROM_INFO) \
+		$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256)
 	strip -s $(DIR_BIN)$(BIN_LAUNCHER)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_ASM)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_DASM)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_FIX)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_ROM_INFO)
 	strip -s $(DIR_BIN)$(BIN_UTILITY_SAVE_INFO)
+	cd $(DIR_BIN) && zip -r "$(RELEASE_PRE)`head -n 1 readme.txt | grep DMG | awk '{print $$2}'`$(RELEASE_EXT)" . && mkdir -p $(DIR_RELEASE) \
+		&& mv $(RELEASE_PRE)*$(RELEASE_EXT) $(DIR_RELEASE)
 	@echo '--- DONE -----------------------------------'
 	@echo ''

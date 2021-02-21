@@ -127,7 +127,7 @@ system_processor_instruction.o: $(DIR_SRC_SYSTEM_PROCESSOR)instruction.c $(DIR_I
 archive:
 	@echo ''
 	@echo '--- BUILDING LIBRARY -----------------------'
-	ar rcs $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD)base_action.o $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o $(DIR_BUILD)base_service.o \
+	ar rcs $(DIR_BUILD)$(LIB) $(DIR_BUILD)base_action.o $(DIR_BUILD)base_dmg.o $(DIR_BUILD)base_runtime.o $(DIR_BUILD)base_service.o \
 		$(DIR_BUILD)common_bank.o $(DIR_BUILD)common_bootrom.o $(DIR_BUILD)common_buffer.o $(DIR_BUILD)common_cartridge.o \
 			$(DIR_BUILD)common_error.o $(DIR_BUILD)common_mapper.o $(DIR_BUILD)common_mapper_mbc1.o $(DIR_BUILD)common_mapper_mbc2.o \
 			$(DIR_BUILD)common_mapper_mbc3.o $(DIR_BUILD)common_mapper_mbc5.o $(DIR_BUILD)common_trace.o $(DIR_BUILD)common_version.o \
@@ -135,7 +135,11 @@ archive:
 		$(DIR_BUILD)system_audio.o $(DIR_BUILD)system_joypad.o $(DIR_BUILD)system_memory.o $(DIR_BUILD)system_processor.o \
 			$(DIR_BUILD)system_serial.o $(DIR_BUILD)system_timer.o $(DIR_BUILD)system_video.o \
 		$(DIR_BUILD)system_processor_instruction.o
-	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
-	cp $(DIR_DOCS)readme.txt $(DIR_BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
+
+output:
+	cp $(DIR_BUILD)$(LIB) $(DIR_BIN_LIB)
+	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
+	cp $(DIR_DOCS)readme.txt $(DIR_BIN)
+	cp ../license $(DIR_BIN)
