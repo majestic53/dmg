@@ -24,7 +24,7 @@
 typedef struct {
 	dmg_assembler_parser_t parser;
 	dmg_assembler_banks_t banks;
-	dmg_assembler_globals_t globals;
+	dmg_assembler_constants_t constants;
 	uint32_t bank;
 	dmg_assembler_scalar_t offset;
 	FILE *file;

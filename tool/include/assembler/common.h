@@ -22,7 +22,7 @@
 #include <libgen.h>
 #include "../common.h"
 #include "./common/bank.h"
-#include "./common/global.h"
+#include "./common/constant.h"
 #include "./common/string.h"
 #include "./common/token.h"
 #include "./common/tree.h"

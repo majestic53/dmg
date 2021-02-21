@@ -46,8 +46,8 @@ dmg [args]
 
 For details see: https://github.com/majestic53/dmg/blob/master/tool/launcher/readme.md
 
-Utilities
----------
+Assembler/Disassembler
+----------------------
 
 dmg-asm [args]
 
@@ -56,7 +56,7 @@ dmg-asm [args]
 -s	Specify source file
 -v	Display version information
 
-For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/asm/readme.md
+For details see: https://github.com/majestic53/dmg/blob/master/tool/assembler/readme.md
 
 dmg-dasm [args]
 
@@ -65,7 +65,10 @@ dmg-dasm [args]
 -r	Specify rom file
 -v	Display version information
 
-For details see: https://github.com/majestic53/dmg/blob/master/tool/utility/dasm/readme.md
+For details see: https://github.com/majestic53/dmg/blob/master/tool/disassembler/readme.md
+
+Utilities
+---------
 
 dmg-rom-fix [args]
 

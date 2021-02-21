@@ -16,8 +16,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_H_
-#define DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_H_
 
 #include "./token.h"
 
@@ -25,57 +25,57 @@ typedef struct {
 	const dmg_assembler_token_t *token;
 	dmg_assembler_scalar_t value;
 	bool in_use;
-} dmg_assembler_global_t;
+} dmg_assembler_constant_t;
 
 typedef struct {
-	dmg_assembler_global_t *global;
+	dmg_assembler_constant_t *constant;
 	uint32_t capacity;
 	uint32_t count;
-} dmg_assembler_globals_t;
+} dmg_assembler_constants_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-int dmg_assembler_global_add(
-	__inout dmg_assembler_globals_t *globals,
+int dmg_assembler_constant_add(
+	__inout dmg_assembler_constants_t *constants,
 	__in const dmg_assembler_token_t *token,
 	__in const dmg_assembler_scalar_t *value,
 	__in bool allow_duplicate
 	);
 
-bool dmg_assembler_global_defined(
-	__inout dmg_assembler_globals_t *globals,
+bool dmg_assembler_constant_defined(
+	__inout dmg_assembler_constants_t *constants,
 	__in const dmg_assembler_token_t *token
 	);
 
-int dmg_assembler_global_get(
-	__inout dmg_assembler_globals_t *globals,
+int dmg_assembler_constant_get(
+	__inout dmg_assembler_constants_t *constants,
 	__in const dmg_assembler_token_t *token,
 	__inout dmg_assembler_scalar_t *value
 	);
 
-int dmg_assembler_global_set(
-	__inout dmg_assembler_globals_t *globals,
+int dmg_assembler_constant_set(
+	__inout dmg_assembler_constants_t *constants,
 	__in const dmg_assembler_token_t *token,
 	__in const dmg_assembler_scalar_t *value
 	);
 
-int dmg_assembler_global_remove(
-	__inout dmg_assembler_globals_t *globals,
+int dmg_assembler_constant_remove(
+	__inout dmg_assembler_constants_t *constants,
 	__in const dmg_assembler_token_t *token
 	);
 
-int dmg_assembler_globals_allocate(
-	__inout dmg_assembler_globals_t *globals
+int dmg_assembler_constants_allocate(
+	__inout dmg_assembler_constants_t *constants
 	);
 
-void dmg_assembler_globals_free(
-	__inout dmg_assembler_globals_t *globals
+void dmg_assembler_constants_free(
+	__inout dmg_assembler_constants_t *constants
 	);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif /* DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_H_ */

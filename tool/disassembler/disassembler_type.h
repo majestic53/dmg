@@ -16,14 +16,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_DASM_TYPE_H_
-#define DMG_TOOL_UTILITY_DASM_TYPE_H_
+#ifndef DMG_TOOL_DISASSEMBLER_TYPE_H_
+#define DMG_TOOL_DISASSEMBLER_TYPE_H_
 
-#include "../../../src/common/cartridge_type.h"
-#include "../../../src/common/mapper_type.h"
-#include "../../../include/common/cartridge.h"
-#include "../../src/common/version_type.h"
-#include "../../include/common.h"
+#include "../../src/common/cartridge_type.h"
+#include "../../src/common/mapper_type.h"
+#include "../../include/common/cartridge.h"
+#include "../src/common/version_type.h"
+#include "../include/common.h"
 
 #define DMG_USAGE "dmg-dasm [args]"
 
@@ -94,6 +94,6 @@ typedef struct {
 	FILE *file;
 	bool help;
 	bool version;
-} dmg_dasm_t;
+} dmg_disassembler_t;
 
-#endif /* DMG_TOOL_UTILITY_DASM_TYPE_H_ */
+#endif /* DMG_TOOL_DISASSEMBLER_TYPE_H_ */

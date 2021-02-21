@@ -16,16 +16,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_TYPE_H_
-#define DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_TYPE_H_
+#ifndef DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_TYPE_H_
+#define DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_TYPE_H_
 
-#include "../../../include/assembler/common/global.h"
+#include "../../../include/assembler/common/constant.h"
 #include "../../../include/assembler/common/string.h"
 
-#define GLOBAL_CAPACITY_INIT 128
-#define GLOBAL_CAPACITY_SCALE 2
+#define CONSTANT_CAPACITY_INIT 128
+#define CONSTANT_CAPACITY_SCALE 2
 
-#define GLOBAL_ERROR(_TOKEN_, _MESSAGE_) \
-	dmg_assembler_global_error(_TOKEN_, _MESSAGE_)
+#define CONSTANT_ERROR(_TOKEN_, _MESSAGE_) \
+	dmg_assembler_constant_error(_TOKEN_, _MESSAGE_)
 
-#endif /* DMG_TOOL_ASSEMBLER_COMMON_GLOBAL_TYPE_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_COMMON_CONSTANT_TYPE_H_ */

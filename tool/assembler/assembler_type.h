@@ -16,10 +16,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DMG_TOOL_UTILITY_ASM_H_
-#define DMG_TOOL_UTILITY_ASM_H_
+#ifndef DMG_TOOL_ASSEMBLER_H_
+#define DMG_TOOL_ASSEMBLER_H_
 
-#include "../../include/assembler/generator.h"
+#include "../include/assembler/generator.h"
 
 #define ASM_GENERATE
 #ifndef ASM_GENERATE
@@ -69,6 +69,6 @@ typedef struct {
 	FILE *file;
 	bool help;
 	bool version;
-} dmg_asm_t;
+} dmg_assembler_t;
 
-#endif /* DMG_TOOL_UTILITY_ASM_H_ */
+#endif /* DMG_TOOL_ASSEMBLER_H_ */

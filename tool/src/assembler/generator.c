@@ -368,7 +368,7 @@ exit:
 }
 
 static int
-dmg_assembler_generator_evaluate_expression_global(
+dmg_assembler_generator_evaluate_expression_constant(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
@@ -381,12 +381,12 @@ dmg_assembler_generator_evaluate_expression_global(
 		case TOKEN_IDENTIFIER:
 		case TOKEN_LABEL:
 
-			if((result = dmg_assembler_global_get(&generator->globals, tree->token, value)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_constant_get(&generator->constants, tree->token, value)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
 		default:
-			result = GENERATOR_ERROR(parser, tree, "Expecting global");
+			result = GENERATOR_ERROR(parser, tree, "Expecting constant");
 			goto exit;
 	}
 
@@ -675,9 +675,9 @@ static dmg_assembler_evaluator_hdlr EXPRESSION_HANDLER[] = {
 	NULL, /* TOKEN_END */
 	NULL, /* TOKEN_CONDITION */
 	NULL, /* TOKEN_DIRECTIVE */
-	dmg_assembler_generator_evaluate_expression_global, /* TOKEN_IDENTIFIER */
+	dmg_assembler_generator_evaluate_expression_constant, /* TOKEN_IDENTIFIER */
 	NULL, /* TOKEN_INEQUALITY */
-	dmg_assembler_generator_evaluate_expression_global, /* TOKEN_LABEL */
+	dmg_assembler_generator_evaluate_expression_constant, /* TOKEN_LABEL */
 	dmg_assembler_generator_evaluate_expression_literal, /* TOKEN_LITERAL */
 	dmg_assembler_generator_evaluate_expression_macro, /* TOKEN_MACRO */
 	NULL, /* TOKEN_OPCODE */
@@ -865,7 +865,7 @@ dmg_assembler_generator_generate_directive_define(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_global_add(&generator->globals, token, &value, false)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constant_add(&generator->constants, token, &value, false)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1092,10 +1092,10 @@ dmg_assembler_generator_generate_directive_if_define(
 
 	switch(tree->token->subtype) {
 		case DIRECTIVE_IF_DEFINE:
-			condition = dmg_assembler_global_defined(&generator->globals, child->token);
+			condition = dmg_assembler_constant_defined(&generator->constants, child->token);
 			break;
 		case DIRECTIVE_IF_NOT_DEFINE:
-			condition = !dmg_assembler_global_defined(&generator->globals, child->token);
+			condition = !dmg_assembler_constant_defined(&generator->constants, child->token);
 			break;
 		default:
 			result = GENERATOR_ERROR(parser, tree, "Expecting directive");
@@ -1447,7 +1447,7 @@ dmg_assembler_generator_generate_directive_undefine(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_global_remove(&generator->globals, child->token)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constant_remove(&generator->constants, child->token)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1512,14 +1512,14 @@ dmg_assembler_generator_generate_label(
 		goto exit;
 	}
 
-	if(dmg_assembler_global_get(&generator->globals, tree->token, &value) == DMG_STATUS_SUCCESS) {
+	if(dmg_assembler_constant_get(&generator->constants, tree->token, &value) == DMG_STATUS_SUCCESS) {
 		result = GENERATOR_ERROR(parser, tree, "Duplicate label");
 		goto exit;
 	}
 
 	value.word = (generator->banks.bank[generator->bank].origin.word + generator->offset.word);
 
-	if((result = dmg_assembler_global_add(&generator->globals, tree->token, &value, false)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constant_add(&generator->constants, tree->token, &value, false)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4593,7 +4593,7 @@ dmg_assembler_generator_load(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_globals_allocate(&generator->globals)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constants_allocate(&generator->constants)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4652,7 +4652,7 @@ dmg_assembler_generator_unload(
 	)
 {
 	dmg_assembler_parser_unload(&generator->parser);
-	dmg_assembler_globals_free(&generator->globals);
+	dmg_assembler_constants_free(&generator->constants);
 	dmg_assembler_banks_free(&generator->banks);
 	memset(generator, 0, sizeof(*generator));
 }

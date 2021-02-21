@@ -16,9 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "./asm_type.h"
+#include "./assembler_type.h"
 
-static dmg_asm_t g_asm = {};
+static dmg_assembler_t g_assembler = {};
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,12 +27,13 @@ extern "C" {
 #ifdef ASM_GENERATE
 
 static int
-dmg_utility_asm_generate(void)
+dmg_assembler_generate(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_generator_t generator = {};
 
-	if((result = dmg_assembler_generator_load(&generator, &g_asm.buffer, g_asm.source, g_asm.file)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_load(&generator, &g_assembler.buffer, g_assembler.source, g_assembler.file))
+			!= DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -50,12 +51,12 @@ exit:
 #ifdef ASM_PARSE_CHARACTERS
 
 static int
-dmg_utility_asm_parse_characters(void)
+dmg_assembler_parse_characters(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_stream_t stream = {};
 
-	if((result = dmg_assembler_stream_load(&stream, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_stream_load(&stream, &g_assembler.buffer, g_assembler.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -83,12 +84,12 @@ exit:
 #ifdef ASM_PARSE_TOKENS
 
 static int
-dmg_utility_asm_parse_tokens(void)
+dmg_assembler_parse_tokens(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_lexer_t lexer = {};
 
-	if((result = dmg_assembler_lexer_load(&lexer, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_lexer_load(&lexer, &g_assembler.buffer, g_assembler.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -148,7 +149,7 @@ exit:
 #ifdef ASM_PARSE_TREES
 
 static int
-dmg_utility_asm_parse_tree(
+dmg_assembler_parse_tree(
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
 	__in uint32_t depth
@@ -222,7 +223,7 @@ dmg_utility_asm_parse_tree(
 				goto exit;
 			}
 
-			if((result = dmg_utility_asm_parse_tree(parser, child, depth + 1))
+			if((result = dmg_assembler_parse_tree(parser, child, depth + 1))
 					!= DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
@@ -234,18 +235,18 @@ exit:
 }
 
 static int
-dmg_utility_asm_parse_trees(void)
+dmg_assembler_parse_trees(void)
 {
 	int result = DMG_STATUS_SUCCESS;
 	dmg_assembler_parser_t parser = {};
 
-	if((result = dmg_assembler_parser_load(&parser, &g_asm.buffer, g_asm.source)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parser_load(&parser, &g_assembler.buffer, g_assembler.source)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(;;) {
 
-		if((result = dmg_utility_asm_parse_tree(&parser, dmg_assembler_parser_tree(&parser), 0)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_parse_tree(&parser, dmg_assembler_parser_tree(&parser), 0)) != DMG_STATUS_SUCCESS) {
 			break;
 		}
 
@@ -265,64 +266,64 @@ exit:
 #endif /* ASM_GENERATE */
 
 static int
-dmg_utility_asm_assemble(void)
+dmg_assembler_assemble(void)
 {
 	int length, result = DMG_STATUS_SUCCESS;
 
-	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_asm.source, g_asm.buffer.length / (float)KBYTE, g_asm.buffer.length);
+	TRACE_TOOL_MESSAGE("%s -- %.02f KB (%u bytes)\n\n", g_assembler.source, g_assembler.buffer.length / (float)KBYTE, g_assembler.buffer.length);
 
 #ifdef ASM_GENERATE
-	if((result = dmg_utility_asm_generate()) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 #else
 #ifdef ASM_PARSE_CHARACTERS
-	if((result = dmg_utility_asm_parse_characters()) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parse_characters()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 #endif /* ASM_PARSE_CHARACTERS */
 
 #ifdef ASM_PARSE_TOKENS
-	if((result = dmg_utility_asm_parse_tokens()) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parse_tokens()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 #endif /* ASM_PARSE_TOKENS */
 
 #ifdef ASM_PARSE_TREES
-	if((result = dmg_utility_asm_parse_trees()) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parse_trees()) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 #endif /* ASM_PARSE_TOKENS */
 #endif /* ASM_GENERATE */
 
-	fseek(g_asm.file, 0, SEEK_END);
-	length = ftell(g_asm.file);
-	fseek(g_asm.file, 0, SEEK_SET);
-	TRACE_TOOL_MESSAGE("\n%s -- %.02f KB (%u bytes)\n", g_asm.output, length / (float)KBYTE, length);
+	fseek(g_assembler.file, 0, SEEK_END);
+	length = ftell(g_assembler.file);
+	fseek(g_assembler.file, 0, SEEK_SET);
+	TRACE_TOOL_MESSAGE("\n%s -- %.02f KB (%u bytes)\n", g_assembler.output, length / (float)KBYTE, length);
 
 exit:
 	return result;
 }
 
 static void
-dmg_utility_asm_output_unload(void)
+dmg_assembler_output_unload(void)
 {
 
-	if(g_asm.file) {
-		fclose(g_asm.file);
-		g_asm.file = NULL;
+	if(g_assembler.file) {
+		fclose(g_assembler.file);
+		g_assembler.file = NULL;
 	}
 }
 
 static int
-dmg_utility_asm_output_load(
+dmg_assembler_output_load(
 	__in const char *path
 	)
 {
 	char path_full[PATH_MAX] = {};
 	int result = DMG_STATUS_SUCCESS;
 
-	if(!g_asm.output || !strlen(g_asm.output)) {
+	if(!g_assembler.output || !strlen(g_assembler.output)) {
 		char *path_end;
 
 		if((path_end = strrchr(path, PATH_DELIMITER))) {
@@ -331,10 +332,10 @@ dmg_utility_asm_output_load(
 
 		strcat(path_full, PATH_OUTPUT);
 	} else {
-		strcpy(path_full, g_asm.output);
+		strcpy(path_full, g_assembler.output);
 	}
 
-	if(!(g_asm.file = fopen(path_full, "wb"))) {
+	if(!(g_assembler.file = fopen(path_full, "wb"))) {
 		result = DMG_STATUS_FAILURE;
 		goto exit;
 	}
@@ -344,7 +345,7 @@ exit:
 }
 
 static int
-dmg_utility_asm_parse(
+dmg_assembler_parse(
 	__in int argc,
 	__in char *argv[]
 	)
@@ -357,16 +358,16 @@ dmg_utility_asm_parse(
 
 		switch(option) {
 			case OPTION_HELP:
-				g_asm.help = true;
+				g_assembler.help = true;
 				break;
 			case OPTION_OUTPUT:
-				g_asm.output = optarg;
+				g_assembler.output = optarg;
 				break;
 			case OPTION_SOURCE:
-				g_asm.source = optarg;
+				g_assembler.source = optarg;
 				break;
 			case OPTION_VERSION:
-				g_asm.version = true;
+				g_assembler.version = true;
 				break;
 			case '?':
 				result = DMG_STATUS_FAILURE;
@@ -377,14 +378,14 @@ dmg_utility_asm_parse(
 		}
 	}
 
-	if(!g_asm.help && !g_asm.version) {
+	if(!g_assembler.help && !g_assembler.version) {
 
-		if(!g_asm.output) {
-			TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_asm.output);
+		if(!g_assembler.output) {
+			TRACE_TOOL_ERROR("%s: Missing output path -- %s\n", argv[0], g_assembler.output);
 			result = DMG_STATUS_INVALID;
 			goto exit;
-		} else if(!g_asm.source) {
-			TRACE_TOOL_ERROR("%s: Missing source path -- %s\n", argv[0], g_asm.source);
+		} else if(!g_assembler.source) {
+			TRACE_TOOL_ERROR("%s: Missing source path -- %s\n", argv[0], g_assembler.source);
 			result = DMG_STATUS_INVALID;
 			goto exit;
 		}
@@ -395,24 +396,24 @@ exit:
 }
 
 static int
-dmg_utility_asm_source_load(void)
+dmg_assembler_source_load(void)
 {
 	FILE *file = NULL;
 	int length = 0, result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_tool_file_open(g_asm.source, true, true, &file, &length)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_tool_file_open(g_assembler.source, true, true, &file, &length)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	memset(&g_asm.buffer, 0, sizeof(g_asm.buffer));
+	memset(&g_assembler.buffer, 0, sizeof(g_assembler.buffer));
 
 	if(length > 0) {
 
-		if((result = dmg_buffer_allocate(&g_asm.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_buffer_allocate(&g_assembler.buffer, length, 0)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if(fread(g_asm.buffer.data, sizeof(uint8_t), length, file) != length) {
+		if(fread(g_assembler.buffer.data, sizeof(uint8_t), length, file) != length) {
 			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
@@ -425,10 +426,10 @@ exit:
 }
 
 static void
-dmg_utility_asm_source_unload(void)
+dmg_assembler_source_unload(void)
 {
-	dmg_buffer_free(&g_asm.buffer);
-	memset(&g_asm.buffer, 0, sizeof(g_asm.buffer));
+	dmg_buffer_free(&g_assembler.buffer);
+	memset(&g_assembler.buffer, 0, sizeof(g_assembler.buffer));
 }
 
 int
@@ -439,36 +440,36 @@ main(
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_utility_asm_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_parse(argc, argv)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if(g_asm.help) {
+	if(g_assembler.help) {
 		dmg_tool_usage(stdout, true, DMG_USAGE, FLAG_STR, FLAG_DESCRIPTION_STR, FLAG_MAX);
-	} else if(g_asm.version) {
+	} else if(g_assembler.version) {
 		dmg_tool_version(stdout, false);
 	} else {
 
-		if((result = dmg_utility_asm_source_load()) != DMG_STATUS_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to load source file -- %s\n", argv[0], g_asm.source);
+		if((result = dmg_assembler_source_load()) != DMG_STATUS_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to load source file -- %s\n", argv[0], g_assembler.source);
 			goto exit;
 		}
 
-		if((result = dmg_utility_asm_output_load(argv[0])) != DMG_STATUS_SUCCESS) {
-			TRACE_TOOL_ERROR("%s: Failed to create output file -- %s\n", argv[0], g_asm.output);
+		if((result = dmg_assembler_output_load(argv[0])) != DMG_STATUS_SUCCESS) {
+			TRACE_TOOL_ERROR("%s: Failed to create output file -- %s\n", argv[0], g_assembler.output);
 			goto exit;
 		}
 
-		if((result = dmg_utility_asm_assemble()) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_assemble()) != DMG_STATUS_SUCCESS) {
 			TRACE_TOOL_ERROR("%s: Failed to assemble source file -- %s\n", argv[0], dmg_error_get());
 			goto exit;
 		}
 	}
 
 exit:
-	dmg_utility_asm_output_unload();
-	dmg_utility_asm_source_unload();
-	memset(&g_asm, 0, sizeof(g_asm));
+	dmg_assembler_output_unload();
+	dmg_assembler_source_unload();
+	memset(&g_assembler, 0, sizeof(g_assembler));
 
 	return result;
 }
