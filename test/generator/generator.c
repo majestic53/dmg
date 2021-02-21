@@ -20,24 +20,133 @@
 #include "../../tool/src/assembler/generator_type.h"
 #include "../include/common.h"
 
-/*typedef struct {
-
-	// TODO
-
-} dmg_generator_test_t;
-
-static dmg_generator_test_t g_generator = {};*/
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-// TODO
+#define SOURCE_MAX 64
+
+static int
+dmg_test_geneator_instruction(void)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_generator_t generator = {};
+
+	for(uint32_t opcode = 0; opcode <= UINT8_MAX; ++opcode) {
+		const char *format;
+		dmg_buffer_t buffer = {};
+		char source[SOURCE_MAX] = {};
+		dmg_assembler_scalar_t operand = {};
+		const dmg_tool_syntax_instruction_t *instruction;
+
+		if(opcode == INSTRUCTION_EXTENDED_PREFIX) {
+			continue;
+		}
+
+		format = dmg_tool_syntax_instruction_string(opcode, false);
+		instruction = dmg_tool_syntax_instruction(opcode, false);
+
+		switch(instruction->operand) {
+			case OPERAND_WORD:
+				operand.word = rand();
+				snprintf(source, SOURCE_MAX, format, operand.word);
+				break;
+			case OPERAND_BYTE:
+				operand.low = rand();
+				snprintf(source, SOURCE_MAX, format, operand.low);
+				break;
+			default:
+				snprintf(source, SOURCE_MAX, format, "");
+				break;
+		}
+
+		buffer.data = source;
+		buffer.length = strlen(source);
+
+		if((result = dmg_assembler_generator_load(&generator, &buffer, NULL, NULL)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_run(&generator)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(ASSERT(generator.banks.bank[0].data[0] == opcode)) {
+			result = DMG_STATUS_FAILURE;
+			goto exit;
+		}
+
+		switch(instruction->operand) {
+			case OPERAND_WORD:
+
+				if(ASSERT(generator.banks.bank[0].data[1] == operand.low)
+						&& ASSERT(generator.banks.bank[0].data[2] == operand.high)) {
+					result = DMG_STATUS_FAILURE;
+					goto exit;
+				}
+				break;
+			case OPERAND_BYTE:
+
+				if(ASSERT(generator.banks.bank[0].data[1] == ((opcode != INSTRUCTION_STOP) ? operand.low : 0))) {
+					result = DMG_STATUS_FAILURE;
+					goto exit;
+				}
+				break;
+			default:
+				break;
+		}
+
+		dmg_assembler_generator_unload(&generator);
+	}
+
+exit:
+	dmg_assembler_generator_unload(&generator);
+	TRACE_TEST(result);
+
+	return result;
+}
+
+static int
+dmg_test_generate_instruction_extended(void)
+{
+	int result = DMG_STATUS_SUCCESS;
+	dmg_assembler_generator_t generator = {};
+
+	for(uint32_t opcode = 0; opcode <= UINT8_MAX; ++opcode) {
+		dmg_buffer_t buffer = {};
+		char source[SOURCE_MAX] = {};
+
+		snprintf(source, SOURCE_MAX, dmg_tool_syntax_instruction_string(opcode, true), "");
+		buffer.data = source;
+		buffer.length = strlen(source);
+
+		if((result = dmg_assembler_generator_load(&generator, &buffer, NULL, NULL)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if((result = dmg_assembler_generator_run(&generator)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(ASSERT(generator.banks.bank[0].data[0] == INSTRUCTION_EXTENDED_PREFIX)
+				&& ASSERT(generator.banks.bank[0].data[1] == opcode)) {
+			result = DMG_STATUS_FAILURE;
+			goto exit;
+		}
+
+		dmg_assembler_generator_unload(&generator);
+	}
+
+exit:
+	dmg_assembler_generator_unload(&generator);
+	TRACE_TEST(result);
+
+	return result;
+}
 
 static const dmg_test TEST[] = {
-
-	// TODO
-
+	dmg_test_geneator_instruction,
+	dmg_test_generate_instruction_extended,
 	};
 
 int

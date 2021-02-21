@@ -21,7 +21,7 @@ DIR_BUILD_TOOL=../../build/tool/
 DIR_ROOT=./
 DIR_SRC_TOOL_ASSEMBLER=../../tool/src/assembler/
 
-BIN=test-audio
+BIN=test-generator
 
 FLAGS=-std=c11 -Wall -Werror
 FLAGS_BIN=

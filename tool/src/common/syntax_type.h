@@ -362,7 +362,7 @@ static const char *INSTRUCTION_STR[] =  {
 	"dec c",
 	"ld c, " DELIMITER_HEXIDECIMAL "%02x",
 	"rrca",
-	"stop " DELIMITER_HEXIDECIMAL "%02x", /* 0x10 */
+	"stop", /* 0x10 */
 	"ld de, " DELIMITER_HEXIDECIMAL "%04x",
 	"ld (de), a",
 	"inc de",

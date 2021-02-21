@@ -2586,7 +2586,7 @@ dmg_assembler_generate_opcode_ld(
 										break;
 								}
 							} else {
-								instruction = INSTRUCTION_LD_HL_IND_A;
+								instruction = INSTRUCTION_LD_A_HL_IND;
 							}
 							break;
 						case REGISTER_L:
@@ -2640,8 +2640,20 @@ dmg_assembler_generate_opcode_ld(
 				}
 				break;
 			case REGISTER_BC:
-				instruction = INSTRUCTION_LD_BC_U16;
-				value.word = value_right.word;
+
+				if(child_left->token->indirect) {
+
+					if((child_right->token->type != TOKEN_REGISTER)
+							&& (child_right->token->subtype != REGISTER_A)) {
+						result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+						goto exit;
+					}
+
+					instruction = INSTRUCTION_LD_BC_IND_A;
+				} else {
+					instruction = INSTRUCTION_LD_BC_U16;
+					value.word = value_right.word;
+				}
 				break;
 			case REGISTER_C:
 
@@ -2720,8 +2732,20 @@ dmg_assembler_generate_opcode_ld(
 				}
 				break;
 			case REGISTER_DE:
-				instruction = INSTRUCTION_LD_DE_U16;
-				value.word = value_right.word;
+
+				if(child_left->token->indirect) {
+
+					if((child_right->token->type != TOKEN_REGISTER)
+							&& (child_right->token->subtype != REGISTER_A)) {
+						result = GENERATOR_ERROR(parser, tree, "Unsupported register");
+						goto exit;
+					}
+
+					instruction = INSTRUCTION_LD_DE_IND_A;
+				} else {
+					instruction = INSTRUCTION_LD_DE_U16;
+					value.word = value_right.word;
+				}
 				break;
 			case REGISTER_E:
 
@@ -4633,12 +4657,15 @@ dmg_assembler_generator_run(
 		}
 	}
 
-	for(uint32_t index = 0; index < generator->banks.count; ++index) {
-		dmg_assembler_bank_t *bank = &generator->banks.bank[index];
+	if(generator->file) {
 
-		if(fwrite(bank->data, sizeof(uint8_t), sizeof(bank->data), generator->file) != sizeof(bank->data)) {
-			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Failed to write bank %u to file", index);
-			goto exit;
+		for(uint32_t index = 0; index < generator->banks.count; ++index) {
+			dmg_assembler_bank_t *bank = &generator->banks.bank[index];
+
+			if(fwrite(bank->data, sizeof(uint8_t), sizeof(bank->data), generator->file) != sizeof(bank->data)) {
+				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Failed to write bank %u to file", index);
+				goto exit;
+			}
 		}
 	}
 
