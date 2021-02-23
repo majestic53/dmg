@@ -5,7 +5,7 @@ DMG
 
 A GameBoy emulator and assembler/disassembler, written in C.
 
-Features supported
+Features
 =
 
 #### Emulator
