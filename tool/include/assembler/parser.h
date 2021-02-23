@@ -45,6 +45,10 @@ int dmg_assembler_parser_next(
 	__inout dmg_assembler_parser_t *parser
 	);
 
+int dmg_assembler_parser_reset(
+	__inout dmg_assembler_parser_t *parser
+	);
+
 const dmg_assembler_tree_t *dmg_assembler_parser_tree(
 	__in const dmg_assembler_parser_t *parser
 	);

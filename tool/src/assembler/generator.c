@@ -222,15 +222,19 @@ static int
 dmg_assembler_generator_bank_set(
 	__inout dmg_assembler_generator_t *generator,
 	__in uint32_t bank,
-	__in const dmg_assembler_scalar_t *origin
+	__in const dmg_assembler_scalar_t *origin,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	for(; (generator->banks.count - 1) < bank;) {
+	if(!first_pass) {
 
-		if((result = dmg_assembler_bank_add(&generator->banks, origin)) != DMG_STATUS_SUCCESS) {
-			goto exit;
+		for(; (generator->banks.count - 1) < bank;) {
+
+			if((result = dmg_assembler_bank_add(&generator->banks, origin)) != DMG_STATUS_SUCCESS) {
+				goto exit;
+			}
 		}
 	}
 
@@ -244,13 +248,14 @@ exit:
 static int
 dmg_assembler_generator_bank_set_byte(
 	__inout dmg_assembler_generator_t *generator,
-	__in const dmg_assembler_scalar_t *value
+	__in const dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_assembler_bank_set_byte(&generator->banks, generator->bank, &generator->offset, value))
-			!= DMG_STATUS_SUCCESS) {
+	if(!first_pass && ((result = dmg_assembler_bank_set_byte(&generator->banks, generator->bank, &generator->offset, value))
+			!= DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
@@ -263,13 +268,14 @@ exit:
 static int
 dmg_assembler_generator_bank_set_word(
 	__inout dmg_assembler_generator_t *generator,
-	__in const dmg_assembler_scalar_t *value
+	__in const dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
 
-	if((result = dmg_assembler_bank_set_word(&generator->banks, generator->bank, &generator->offset, value))
-			!= DMG_STATUS_SUCCESS) {
+	if(!first_pass && ((result = dmg_assembler_bank_set_word(&generator->banks, generator->bank, &generator->offset, value))
+			!= DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
@@ -284,14 +290,16 @@ dmg_assembler_generator_evaluate_expression(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	);
 
 static int
 dmg_assembler_generator_generate_statement(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	);
 
 static int
@@ -299,7 +307,8 @@ dmg_assembler_generator_evaluate_conditional(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout bool *value
+	__inout bool *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -319,7 +328,7 @@ dmg_assembler_generator_evaluate_conditional(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -327,7 +336,7 @@ dmg_assembler_generator_evaluate_conditional(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -356,7 +365,7 @@ dmg_assembler_generator_evaluate_conditional(
 		}
 	} else {
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, tree, &child_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, tree, &child_value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -372,7 +381,8 @@ dmg_assembler_generator_evaluate_expression_constant(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -381,8 +391,16 @@ dmg_assembler_generator_evaluate_expression_constant(
 		case TOKEN_IDENTIFIER:
 		case TOKEN_LABEL:
 
-			if((result = dmg_assembler_constant_get(&generator->constants, tree->token, value)) != DMG_STATUS_SUCCESS) {
-				goto exit;
+			if((result = dmg_assembler_constant_get(&generator->defines, tree->token, value)) != DMG_STATUS_SUCCESS) {
+
+				if((result = dmg_assembler_constant_get(&generator->labels, tree->token, value)) != DMG_STATUS_SUCCESS) {
+
+					if(first_pass) {
+						result = DMG_STATUS_SUCCESS;
+					}
+
+					goto exit;
+				}
 			}
 			break;
 		default:
@@ -399,7 +417,8 @@ dmg_assembler_generator_evaluate_expression_literal(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -417,7 +436,7 @@ dmg_assembler_generator_evaluate_expression_literal(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -442,7 +461,8 @@ dmg_assembler_generator_evaluate_expression_macro(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -463,7 +483,7 @@ dmg_assembler_generator_evaluate_expression_macro(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -488,7 +508,8 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_tree_t *child_left = NULL, *child_right = NULL;
@@ -504,7 +525,7 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &child_left_value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -512,7 +533,7 @@ dmg_assembler_generator_evaluate_expression_operator_binary(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &child_right_value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -567,7 +588,8 @@ dmg_assembler_generator_evaluate_expression_operator_unary(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -583,7 +605,7 @@ dmg_assembler_generator_evaluate_expression_operator_unary(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &child_value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -625,7 +647,8 @@ dmg_assembler_generator_evaluate_expression_operator(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -642,7 +665,7 @@ dmg_assembler_generator_evaluate_expression_operator(
 		goto exit;
 	}
 
-	if((result = handler(generator, parser, tree, value)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -655,7 +678,8 @@ dmg_assembler_generator_evaluate_expression_scalar(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -692,7 +716,8 @@ dmg_assembler_generator_evaluate_expression(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -704,7 +729,7 @@ dmg_assembler_generator_evaluate_expression(
 		goto exit;
 	}
 
-	if((result = handler(generator, parser, tree, value)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -716,7 +741,8 @@ static int
 dmg_assembler_generator_generate_directive_bank(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -737,11 +763,11 @@ dmg_assembler_generator_generate_directive_bank(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_bank_set(generator, value.word, &origin)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_bank_set(generator, value.word, &origin, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -753,7 +779,8 @@ static int
 dmg_assembler_generator_generate_directive_data_byte(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -776,11 +803,11 @@ dmg_assembler_generator_generate_directive_data_byte(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_byte(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -793,7 +820,8 @@ static int
 dmg_assembler_generator_generate_directive_data_word(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -816,11 +844,11 @@ dmg_assembler_generator_generate_directive_data_word(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_word(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -833,7 +861,8 @@ static int
 dmg_assembler_generator_generate_directive_define(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -861,11 +890,11 @@ dmg_assembler_generator_generate_directive_define(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_constant_add(&generator->constants, token, &value, false)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constant_add(&generator->defines, token, &value, false)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -877,7 +906,8 @@ static int
 dmg_assembler_generator_generate_directive_else(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int index, result = DMG_STATUS_SUCCESS;
@@ -894,7 +924,7 @@ dmg_assembler_generator_generate_directive_else(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_generate_statement(generator, parser, child, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -907,7 +937,8 @@ static int
 dmg_assembler_generator_generate_directive_else_if(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int index, result = DMG_STATUS_SUCCESS;
@@ -924,7 +955,7 @@ dmg_assembler_generator_generate_directive_else_if(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_generate_statement(generator, parser, child, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -937,7 +968,8 @@ static int
 dmg_assembler_generator_generate_directive_if(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	bool condition = false;
@@ -960,13 +992,13 @@ dmg_assembler_generator_generate_directive_if(
 
 	if(child->token->type == TOKEN_INEQUALITY) {
 
-		if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, child, &condition)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, child, &condition, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else {
 		dmg_assembler_scalar_t value = {};
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -987,7 +1019,7 @@ dmg_assembler_generator_generate_directive_if(
 				break;
 			}
 
-			if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_statement(generator, parser, child, first_pass)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -1029,14 +1061,14 @@ dmg_assembler_generator_generate_directive_if(
 
 					if(else_child->token->type == TOKEN_INEQUALITY) {
 
-						if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, else_child, &condition))
+						if((result = dmg_assembler_generator_evaluate_conditional(generator, parser, else_child, &condition, first_pass))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
 					} else {
 						dmg_assembler_scalar_t value = {};
 
-						if((result = dmg_assembler_generator_evaluate_expression(generator, parser, else_child, &value))
+						if((result = dmg_assembler_generator_evaluate_expression(generator, parser, else_child, &value, first_pass))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
@@ -1046,7 +1078,7 @@ dmg_assembler_generator_generate_directive_if(
 
 					if(condition) {
 
-						if((result = dmg_assembler_generator_generate_directive_else_if(generator, parser, child))
+						if((result = dmg_assembler_generator_generate_directive_else_if(generator, parser, child, first_pass))
 								!= DMG_STATUS_SUCCESS) {
 							goto exit;
 						}
@@ -1055,7 +1087,7 @@ dmg_assembler_generator_generate_directive_if(
 					}
 				} else if(child->token->subtype == DIRECTIVE_ELSE) {
 
-					if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child))
+					if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child, first_pass))
 							!= DMG_STATUS_SUCCESS) {
 						goto exit;
 					}
@@ -1074,7 +1106,8 @@ static int
 dmg_assembler_generator_generate_directive_if_define(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	bool condition = false;
@@ -1092,10 +1125,10 @@ dmg_assembler_generator_generate_directive_if_define(
 
 	switch(tree->token->subtype) {
 		case DIRECTIVE_IF_DEFINE:
-			condition = dmg_assembler_constant_defined(&generator->constants, child->token);
+			condition = dmg_assembler_constant_defined(&generator->defines, child->token);
 			break;
 		case DIRECTIVE_IF_NOT_DEFINE:
-			condition = !dmg_assembler_constant_defined(&generator->constants, child->token);
+			condition = !dmg_assembler_constant_defined(&generator->defines, child->token);
 			break;
 		default:
 			result = GENERATOR_ERROR(parser, tree, "Expecting directive");
@@ -1115,7 +1148,7 @@ dmg_assembler_generator_generate_directive_if_define(
 				break;
 			}
 
-			if((result = dmg_assembler_generator_generate_statement(generator, parser, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_statement(generator, parser, child, first_pass)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -1135,7 +1168,7 @@ dmg_assembler_generator_generate_directive_if_define(
 
 		if(index < tree->count) {
 
-			if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_generate_directive_else(generator, parser, child, first_pass)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 		}
@@ -1149,13 +1182,15 @@ static int
 dmg_assembler_generator_generate_directive_include(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	FILE *file = NULL;
 	dmg_buffer_t buffer = {};
 	dmg_assembler_string_t path = {};
 	dmg_assembler_tree_t *child = NULL;
+	const dmg_assembler_tree_t *child_tree;
 	dmg_assembler_parser_t child_parser = {};
 	int index, length = 0, result = DMG_STATUS_SUCCESS;
 
@@ -1220,13 +1255,43 @@ dmg_assembler_generator_generate_directive_include(
 	}
 
 	for(;;) {
-		const dmg_assembler_tree_t *child_tree;
 
-		if(!(child_tree = dmg_assembler_parser_tree(&generator->parser))) {
+		if(!(child_tree = dmg_assembler_parser_tree(&child_parser))) {
 			break;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, &child_parser, child_tree)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_generate_statement(generator, &child_parser, child_tree, true)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(!dmg_assembler_parser_has_next(&child_parser)
+				|| ((result = dmg_assembler_parser_next(&child_parser)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
+
+	dmg_assembler_parser_unload(&child_parser);
+
+	if((result = dmg_assembler_parser_load(&child_parser, &buffer, path.str)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	dmg_assembler_constants_free(&generator->defines);
+
+	if((result = dmg_assembler_constants_allocate(&generator->defines)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	generator->bank = 0;
+	generator->offset.word = 0;
+
+	for(;;) {
+
+		if(!(child_tree = dmg_assembler_parser_tree(&child_parser))) {
+			break;
+		}
+
+		if((result = dmg_assembler_generator_generate_statement(generator, &child_parser, child_tree, false)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 
@@ -1249,7 +1314,8 @@ static int
 dmg_assembler_generator_generate_directive_include_binary(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	FILE *file = NULL;
@@ -1317,7 +1383,7 @@ dmg_assembler_generator_generate_directive_include_binary(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_byte(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -1333,7 +1399,8 @@ static int
 dmg_assembler_generator_generate_directive_origin(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1354,7 +1421,7 @@ dmg_assembler_generator_generate_directive_origin(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1374,7 +1441,8 @@ static int
 dmg_assembler_generator_generate_directive_reserve(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1395,7 +1463,7 @@ dmg_assembler_generator_generate_directive_reserve(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &length)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &length, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1408,13 +1476,13 @@ dmg_assembler_generator_generate_directive_reserve(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
 	for(uint32_t index = 0; index < length.word; ++index) {
 
-		if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_byte(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -1427,7 +1495,8 @@ static int
 dmg_assembler_generator_generate_directive_undefine(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1447,7 +1516,7 @@ dmg_assembler_generator_generate_directive_undefine(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_constant_remove(&generator->constants, child->token)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constant_remove(&generator->defines, child->token)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1477,7 +1546,8 @@ static int
 dmg_assembler_generator_generate_directive(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1489,7 +1559,7 @@ dmg_assembler_generator_generate_directive(
 		goto exit;
 	}
 
-	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1501,7 +1571,8 @@ static int
 dmg_assembler_generator_generate_label(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1512,15 +1583,18 @@ dmg_assembler_generator_generate_label(
 		goto exit;
 	}
 
-	if(dmg_assembler_constant_get(&generator->constants, tree->token, &value) == DMG_STATUS_SUCCESS) {
-		result = GENERATOR_ERROR(parser, tree, "Duplicate label");
-		goto exit;
-	}
+	if(first_pass) {
 
-	value.word = (generator->banks.bank[generator->bank].origin.word + generator->offset.word);
+		if(dmg_assembler_constant_get(&generator->labels, tree->token, &value) == DMG_STATUS_SUCCESS) {
+			result = GENERATOR_ERROR(parser, tree, "Duplicate label");
+			goto exit;
+		}
 
-	if((result = dmg_assembler_constant_add(&generator->constants, tree->token, &value, false)) != DMG_STATUS_SUCCESS) {
-		goto exit;
+		value.word = (generator->banks.bank[generator->bank].origin.word + generator->offset.word);
+
+		if((result = dmg_assembler_constant_add(&generator->labels, tree->token, &value, false)) != DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
 	}
 
 exit:
@@ -1532,7 +1606,8 @@ dmg_assembler_generate_instruction(
 	__inout dmg_assembler_generator_t *generator,
 	__in int instruction,
 	__in bool extended,
-	__in const dmg_assembler_scalar_t *operand
+	__in const dmg_assembler_scalar_t *operand,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1542,13 +1617,13 @@ dmg_assembler_generate_instruction(
 		value.low = INSTRUCTION_EXTENDED_PREFIX;
 		value.high = instruction;
 
-		if((result = dmg_assembler_generator_bank_set_word(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_word(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else {
 		value.low = instruction;
 
-		if((result = dmg_assembler_generator_bank_set_byte(generator, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_bank_set_byte(generator, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	}
@@ -1556,13 +1631,13 @@ dmg_assembler_generate_instruction(
 	switch(dmg_processor_instruction(instruction, extended)->operand) {
 		case OPERAND_WORD:
 
-			if((result = dmg_assembler_generator_bank_set_word(generator, operand)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_bank_set_word(generator, operand, first_pass)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
 		case OPERAND_BYTE:
 
-			if((result = dmg_assembler_generator_bank_set_byte(generator, operand)) != DMG_STATUS_SUCCESS) {
+			if((result = dmg_assembler_generator_bank_set_byte(generator, operand, first_pass)) != DMG_STATUS_SUCCESS) {
 				goto exit;
 			}
 			break;
@@ -1578,7 +1653,8 @@ static int
 dmg_assembler_generate_opcode_adc(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -1630,11 +1706,11 @@ dmg_assembler_generate_opcode_adc(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1646,7 +1722,8 @@ static int
 dmg_assembler_generate_opcode_add(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -1737,7 +1814,7 @@ dmg_assembler_generate_opcode_add(
 					goto exit;
 				}
 
-				if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+				if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 					goto exit;
 				}
 				break;
@@ -1745,11 +1822,11 @@ dmg_assembler_generate_opcode_add(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1761,7 +1838,8 @@ static int
 dmg_assembler_generate_opcode_and(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -1813,11 +1891,11 @@ dmg_assembler_generate_opcode_and(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1829,7 +1907,8 @@ static int
 dmg_assembler_generate_opcode_bit(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -1888,7 +1967,7 @@ dmg_assembler_generate_opcode_bit(
 
 	instruction += ((tree->token->subtype - OPCODE_BIT0) * CHAR_BIT);
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1900,7 +1979,8 @@ static int
 dmg_assembler_generate_opcode_call(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -1934,7 +2014,7 @@ dmg_assembler_generate_opcode_call(
 		}
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1959,7 +2039,7 @@ dmg_assembler_generate_opcode_call(
 		}
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1971,7 +2051,8 @@ static int
 dmg_assembler_generate_opcode_ccf(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -1982,7 +2063,7 @@ dmg_assembler_generate_opcode_ccf(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CCF, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CCF, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -1994,7 +2075,8 @@ static int
 dmg_assembler_generate_opcode_cp(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -2046,11 +2128,11 @@ dmg_assembler_generate_opcode_cp(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2062,7 +2144,8 @@ static int
 dmg_assembler_generate_opcode_cpl(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -2073,7 +2156,7 @@ dmg_assembler_generate_opcode_cpl(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CPL, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_CPL, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2085,7 +2168,8 @@ static int
 dmg_assembler_generate_opcode_daa(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -2096,7 +2180,7 @@ dmg_assembler_generate_opcode_daa(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DAA, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DAA, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2108,7 +2192,8 @@ static int
 dmg_assembler_generate_opcode_di(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -2119,7 +2204,7 @@ dmg_assembler_generate_opcode_di(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DI, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_DI, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2131,7 +2216,8 @@ static int
 dmg_assembler_generate_opcode_dec(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -2196,7 +2282,7 @@ dmg_assembler_generate_opcode_dec(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2208,7 +2294,8 @@ static int
 dmg_assembler_generate_opcode_ei(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -2219,7 +2306,7 @@ dmg_assembler_generate_opcode_ei(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_EI, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_EI, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2231,7 +2318,8 @@ static int
 dmg_assembler_generate_opcode_halt(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -2242,7 +2330,7 @@ dmg_assembler_generate_opcode_halt(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_HALT, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_HALT, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2254,7 +2342,8 @@ static int
 dmg_assembler_generate_opcode_inc(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -2319,7 +2408,7 @@ dmg_assembler_generate_opcode_inc(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2331,7 +2420,8 @@ static int
 dmg_assembler_generate_opcode_jp(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -2364,12 +2454,12 @@ dmg_assembler_generate_opcode_jp(
 			goto exit;
 		}
 
-		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+		if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
 	} else if(child->token->type == TOKEN_REGISTER) {
 		reg = child->token->subtype;
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2404,7 +2494,7 @@ dmg_assembler_generate_opcode_jp(
 		}
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2416,7 +2506,8 @@ static int
 dmg_assembler_generate_opcode_jr(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -2450,9 +2541,11 @@ dmg_assembler_generate_opcode_jr(
 		}
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
+
+	value.low -= (generator->offset.low + OPERAND_WORD);
 
 	if(condition < CONDITION_MAX) {
 
@@ -2475,7 +2568,7 @@ dmg_assembler_generate_opcode_jr(
 		}
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -2487,7 +2580,8 @@ static int
 dmg_assembler_generate_opcode_ld(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int instruction = 0, result = DMG_STATUS_SUCCESS;
@@ -2509,7 +2603,7 @@ dmg_assembler_generate_opcode_ld(
 	}
 
 	if((child_left->token->type != TOKEN_REGISTER)
-			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &value_left)) != DMG_STATUS_SUCCESS)) {
+			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left, &value_left, first_pass)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
@@ -2518,7 +2612,7 @@ dmg_assembler_generate_opcode_ld(
 	}
 
 	if((child_right->token->type != TOKEN_REGISTER)
-			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &value_right)) != DMG_STATUS_SUCCESS)) {
+			&& ((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_right, &value_right, first_pass)) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
@@ -2899,7 +2993,7 @@ dmg_assembler_generate_opcode_ld(
 								}
 
 								if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child_left,
-										&value_left)) != DMG_STATUS_SUCCESS) {
+										&value_left, first_pass)) != DMG_STATUS_SUCCESS) {
 									goto exit;
 								}
 
@@ -3021,7 +3115,7 @@ dmg_assembler_generate_opcode_ld(
 		}
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3033,7 +3127,8 @@ static int
 dmg_assembler_generate_opcode_nop(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3044,7 +3139,7 @@ dmg_assembler_generate_opcode_nop(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_NOP, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_NOP, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3056,7 +3151,8 @@ static int
 dmg_assembler_generate_opcode_or(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3108,11 +3204,11 @@ dmg_assembler_generate_opcode_or(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3124,7 +3220,8 @@ static int
 dmg_assembler_generate_opcode_pop(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3168,7 +3265,7 @@ dmg_assembler_generate_opcode_pop(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3180,7 +3277,8 @@ static int
 dmg_assembler_generate_opcode_push(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3224,7 +3322,7 @@ dmg_assembler_generate_opcode_push(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3236,7 +3334,8 @@ static int
 dmg_assembler_generate_opcode_res(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3295,7 +3394,7 @@ dmg_assembler_generate_opcode_res(
 
 	instruction += ((tree->token->subtype - OPCODE_RES0) * CHAR_BIT);
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3307,7 +3406,8 @@ static int
 dmg_assembler_generate_opcode_ret(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3349,7 +3449,7 @@ dmg_assembler_generate_opcode_ret(
 		}
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3361,7 +3461,8 @@ static int
 dmg_assembler_generate_opcode_reti(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3372,7 +3473,7 @@ dmg_assembler_generate_opcode_reti(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RETI, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RETI, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3384,7 +3485,8 @@ static int
 dmg_assembler_generate_opcode_rl(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3440,7 +3542,7 @@ dmg_assembler_generate_opcode_rl(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3452,7 +3554,8 @@ static int
 dmg_assembler_generate_opcode_rla(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3463,7 +3566,7 @@ dmg_assembler_generate_opcode_rla(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLA, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLA, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3475,7 +3578,8 @@ static int
 dmg_assembler_generate_opcode_rlc(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3531,7 +3635,7 @@ dmg_assembler_generate_opcode_rlc(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3543,7 +3647,8 @@ static int
 dmg_assembler_generate_opcode_rlca(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3554,7 +3659,7 @@ dmg_assembler_generate_opcode_rlca(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLCA, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RLCA, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3566,7 +3671,8 @@ static int
 dmg_assembler_generate_opcode_rr(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3622,7 +3728,7 @@ dmg_assembler_generate_opcode_rr(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3634,7 +3740,8 @@ static int
 dmg_assembler_generate_opcode_rra(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3645,7 +3752,7 @@ dmg_assembler_generate_opcode_rra(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRA, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRA, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3657,7 +3764,8 @@ static int
 dmg_assembler_generate_opcode_rrc(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3713,7 +3821,7 @@ dmg_assembler_generate_opcode_rrc(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3725,7 +3833,8 @@ static int
 dmg_assembler_generate_opcode_rrca(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3736,7 +3845,7 @@ dmg_assembler_generate_opcode_rrca(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRCA, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_RRCA, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3748,7 +3857,8 @@ static int
 dmg_assembler_generate_opcode_rst(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3769,7 +3879,7 @@ dmg_assembler_generate_opcode_rst(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3803,7 +3913,7 @@ dmg_assembler_generate_opcode_rst(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3815,7 +3925,8 @@ static int
 dmg_assembler_generate_opcode_sbc(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3867,11 +3978,11 @@ dmg_assembler_generate_opcode_sbc(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3883,7 +3994,8 @@ static int
 dmg_assembler_generate_opcode_scf(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -3894,7 +4006,7 @@ dmg_assembler_generate_opcode_scf(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_SCF, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_SCF, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3906,7 +4018,8 @@ static int
 dmg_assembler_generate_opcode_set(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -3965,7 +4078,7 @@ dmg_assembler_generate_opcode_set(
 
 	instruction += ((tree->token->subtype - OPCODE_SET0) * CHAR_BIT);
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -3977,7 +4090,8 @@ static int
 dmg_assembler_generate_opcode_sla(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4033,7 +4147,7 @@ dmg_assembler_generate_opcode_sla(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4045,7 +4159,8 @@ static int
 dmg_assembler_generate_opcode_sra(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4101,7 +4216,7 @@ dmg_assembler_generate_opcode_sra(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4113,7 +4228,8 @@ static int
 dmg_assembler_generate_opcode_srl(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4169,7 +4285,7 @@ dmg_assembler_generate_opcode_srl(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4181,7 +4297,8 @@ static int
 dmg_assembler_generate_opcode_stop(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -4192,7 +4309,7 @@ dmg_assembler_generate_opcode_stop(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_STOP, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, INSTRUCTION_STOP, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4204,7 +4321,8 @@ static int
 dmg_assembler_generate_opcode_sub(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4256,11 +4374,11 @@ dmg_assembler_generate_opcode_sub(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4272,7 +4390,8 @@ static int
 dmg_assembler_generate_opcode_swap(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4328,7 +4447,7 @@ dmg_assembler_generate_opcode_swap(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, true, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4340,7 +4459,8 @@ static int
 dmg_assembler_generate_opcode_unused(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4385,7 +4505,7 @@ dmg_assembler_generate_opcode_unused(
 			goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4397,7 +4517,8 @@ static int
 dmg_assembler_generate_opcode_xor(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	dmg_assembler_scalar_t value = {};
@@ -4449,11 +4570,11 @@ dmg_assembler_generate_opcode_xor(
 				result = GENERATOR_ERROR(parser, tree, "Unsupported register");
 				goto exit;
 		}
-	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value)) != DMG_STATUS_SUCCESS) {
+	} else if((result = dmg_assembler_generator_evaluate_expression(generator, parser, child, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
-	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_generate_instruction(generator, instruction, false, &value, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4543,7 +4664,8 @@ static int
 dmg_assembler_generator_generate_opcode(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -4555,7 +4677,7 @@ dmg_assembler_generator_generate_opcode(
 		goto exit;
 	}
 
-	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4583,7 +4705,8 @@ static int
 dmg_assembler_generator_generate_statement(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
@@ -4595,7 +4718,7 @@ dmg_assembler_generator_generate_statement(
 		goto exit;
 	}
 
-	if((result = handler(generator, parser, tree)) != DMG_STATUS_SUCCESS) {
+	if((result = handler(generator, parser, tree, first_pass)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4617,7 +4740,11 @@ dmg_assembler_generator_load(
 		goto exit;
 	}
 
-	if((result = dmg_assembler_constants_allocate(&generator->constants)) != DMG_STATUS_SUCCESS) {
+	if((result = dmg_assembler_constants_allocate(&generator->defines)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	if((result = dmg_assembler_constants_allocate(&generator->labels)) != DMG_STATUS_SUCCESS) {
 		goto exit;
 	}
 
@@ -4625,7 +4752,9 @@ dmg_assembler_generator_load(
 		goto exit;
 	}
 
+	generator->buffer = buffer;
 	generator->file = file;
+	generator->path = path;
 	generator->root = dirname((char *)path);
 
 exit:
@@ -4638,15 +4767,47 @@ dmg_assembler_generator_run(
 	)
 {
 	int result = DMG_STATUS_SUCCESS;
+	const dmg_assembler_tree_t *tree;
 
 	for(;;) {
-		const dmg_assembler_tree_t *tree;
 
 		if(!(tree = dmg_assembler_parser_tree(&generator->parser))) {
 			break;
 		}
 
-		if((result = dmg_assembler_generator_generate_statement(generator, &generator->parser, tree))
+		if((result = dmg_assembler_generator_generate_statement(generator, &generator->parser, tree, true))
+				!= DMG_STATUS_SUCCESS) {
+			goto exit;
+		}
+
+		if(!dmg_assembler_parser_has_next(&generator->parser)
+				|| ((result = dmg_assembler_parser_next(&generator->parser)) != DMG_STATUS_SUCCESS)) {
+			break;
+		}
+	}
+
+	dmg_assembler_parser_unload(&generator->parser);
+
+	if((result = dmg_assembler_parser_load(&generator->parser, generator->buffer, generator->path)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	dmg_assembler_constants_free(&generator->defines);
+
+	if((result = dmg_assembler_constants_allocate(&generator->defines)) != DMG_STATUS_SUCCESS) {
+		goto exit;
+	}
+
+	generator->bank = 0;
+	generator->offset.word = 0;
+
+	for(;;) {
+
+		if(!(tree = dmg_assembler_parser_tree(&generator->parser))) {
+			break;
+		}
+
+		if((result = dmg_assembler_generator_generate_statement(generator, &generator->parser, tree, false))
 				!= DMG_STATUS_SUCCESS) {
 			goto exit;
 		}
@@ -4661,6 +4822,9 @@ dmg_assembler_generator_run(
 
 		for(uint32_t index = 0; index < generator->banks.count; ++index) {
 			dmg_assembler_bank_t *bank = &generator->banks.bank[index];
+
+			fprintf(stdout, "Writing bank[%u] %.02f%% full (%u/%u)\n", index, 100.f * (bank->size.word / (float)BANK_WIDTH),
+				bank->size.word, BANK_WIDTH);
 
 			if(fwrite(bank->data, sizeof(uint8_t), sizeof(bank->data), generator->file) != sizeof(bank->data)) {
 				result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "Failed to write bank %u to file", index);
@@ -4679,7 +4843,8 @@ dmg_assembler_generator_unload(
 	)
 {
 	dmg_assembler_parser_unload(&generator->parser);
-	dmg_assembler_constants_free(&generator->constants);
+	dmg_assembler_constants_free(&generator->labels);
+	dmg_assembler_constants_free(&generator->defines);
 	dmg_assembler_banks_free(&generator->banks);
 	memset(generator, 0, sizeof(*generator));
 }

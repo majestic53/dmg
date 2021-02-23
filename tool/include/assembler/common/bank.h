@@ -24,6 +24,7 @@
 typedef struct {
 	uint8_t data[BANK_WIDTH];
 	dmg_assembler_scalar_t origin;
+	dmg_assembler_scalar_t size;
 } dmg_assembler_bank_t;
 
 typedef struct {

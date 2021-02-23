@@ -43,13 +43,15 @@ typedef int (*dmg_assembler_evaluator_hdlr)(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
 	__in const dmg_assembler_tree_t *tree,
-	__inout dmg_assembler_scalar_t *value
+	__inout dmg_assembler_scalar_t *value,
+	__in bool first_pass
 	);
 
 typedef int (*dmg_assembler_generator_hdlr)(
 	__inout dmg_assembler_generator_t *generator,
 	__in const dmg_assembler_parser_t *parser,
-	__in const dmg_assembler_tree_t *tree
+	__in const dmg_assembler_tree_t *tree,
+	__in bool first_pass
 	);
 
 #endif /* DMG_TOOL_ASSEMBLER_GENERATOR_TYPE_H_ */

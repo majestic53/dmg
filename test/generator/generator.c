@@ -100,7 +100,23 @@ dmg_test_generator_instruction(void)
 				break;
 			case OPERAND_BYTE:
 
-				if(ASSERT(generator.banks.bank[0].data[1] == ((opcode != INSTRUCTION_STOP) ? operand.low : 0))) {
+				switch(opcode) {
+					case INSTRUCTION_JR_C_I8:
+					case INSTRUCTION_JR_I8:
+					case INSTRUCTION_JR_NC_I8:
+					case INSTRUCTION_JR_NZ_I8:
+					case INSTRUCTION_JR_Z_I8:
+						operand.low -= OPERAND_WORD;
+						break;
+					case INSTRUCTION_STOP:
+						operand.low = 0;
+						break;
+					default:
+
+						break;
+				}
+
+				if(ASSERT(generator.banks.bank[0].data[1] == operand.low)) {
 					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}

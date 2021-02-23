@@ -65,6 +65,10 @@ dmg_assembler_bank_set_byte(
 	offset = (address->word - banks->bank[bank].origin.word);
 	banks->bank[bank].data[offset] = value->low;
 
+	if(banks->bank[bank].size.word < BANK_WIDTH) {
+		banks->bank[bank].size.word += sizeof(uint8_t);
+	}
+
 exit:
 	return result;
 }
@@ -91,6 +95,10 @@ dmg_assembler_bank_set_word(
 	offset = (address->word - banks->bank[bank].origin.word);
 	banks->bank[bank].data[offset] = value->low;
 	banks->bank[bank].data[(offset + 1) % BANK_WIDTH] = value->high;
+
+	if(banks->bank[bank].size.word < BANK_WIDTH) {
+		banks->bank[bank].size.word += sizeof(uint16_t);
+	}
 
 exit:
 	return result;

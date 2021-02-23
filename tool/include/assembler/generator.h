@@ -24,10 +24,13 @@
 typedef struct {
 	dmg_assembler_parser_t parser;
 	dmg_assembler_banks_t banks;
-	dmg_assembler_constants_t constants;
+	dmg_assembler_constants_t defines;
+	dmg_assembler_constants_t labels;
 	uint32_t bank;
 	dmg_assembler_scalar_t offset;
+	const dmg_buffer_t *buffer;
 	FILE *file;
+	const char *path;
 	const char *root;
 } dmg_assembler_generator_t;
 
