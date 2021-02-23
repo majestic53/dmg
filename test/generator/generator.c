@@ -85,9 +85,6 @@ dmg_test_generator_instruction(void)
 		}
 
 		if(ASSERT(generator.banks.bank[0].data[0] == opcode)) {
-
-fprintf(stdout, "[%02x] %s (%02x != %02x)\n", opcode, source, generator.banks.bank[0].data[0], opcode);
-
 			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
@@ -97,9 +94,6 @@ fprintf(stdout, "[%02x] %s (%02x != %02x)\n", opcode, source, generator.banks.ba
 
 				if(ASSERT(generator.banks.bank[0].data[1] == operand.low)
 						&& ASSERT(generator.banks.bank[0].data[2] == operand.high)) {
-
-fprintf(stdout, "%02x\n", opcode);
-
 					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}
@@ -107,9 +101,6 @@ fprintf(stdout, "%02x\n", opcode);
 			case OPERAND_BYTE:
 
 				if(ASSERT(generator.banks.bank[0].data[1] == ((opcode != INSTRUCTION_STOP) ? operand.low : 0))) {
-
-fprintf(stdout, "%02x\n", opcode);
-
 					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}
