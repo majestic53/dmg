@@ -49,6 +49,19 @@ dmg_test_generator_instruction(void)
 		switch(instruction->operand) {
 			case OPERAND_WORD:
 				operand.word = rand();
+
+				switch(opcode) {
+					case INSTRUCTION_LD_A_U16_IND:
+					case INSTRUCTION_LD_U16_IND_A:
+
+						if(operand.word >= ADDRESS_IO_BASE) {
+							operand.word = (ADDRESS_IO_BASE - 1);
+						}
+						break;
+					default:
+						break;
+				}
+
 				snprintf(source, SOURCE_MAX, format, operand.word);
 				break;
 			case OPERAND_BYTE:
@@ -72,6 +85,9 @@ dmg_test_generator_instruction(void)
 		}
 
 		if(ASSERT(generator.banks.bank[0].data[0] == opcode)) {
+
+fprintf(stdout, "[%02x] %s (%02x != %02x)\n", opcode, source, generator.banks.bank[0].data[0], opcode);
+
 			result = DMG_STATUS_FAILURE;
 			goto exit;
 		}
@@ -81,6 +97,9 @@ dmg_test_generator_instruction(void)
 
 				if(ASSERT(generator.banks.bank[0].data[1] == operand.low)
 						&& ASSERT(generator.banks.bank[0].data[2] == operand.high)) {
+
+fprintf(stdout, "%02x\n", opcode);
+
 					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}
@@ -88,6 +107,9 @@ dmg_test_generator_instruction(void)
 			case OPERAND_BYTE:
 
 				if(ASSERT(generator.banks.bank[0].data[1] == ((opcode != INSTRUCTION_STOP) ? operand.low : 0))) {
+
+fprintf(stdout, "%02x\n", opcode);
+
 					result = DMG_STATUS_FAILURE;
 					goto exit;
 				}
