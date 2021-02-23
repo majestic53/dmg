@@ -18,7 +18,6 @@ DIR_BIN=../bin/
 DIR_BIN_INCLUDE=../bin/include/
 DIR_BIN_LIB=../bin/lib/
 DIR_BUILD=../build/
-DIR_DOCS=../docs/
 DIR_INCLUDE=../include/
 DIR_INCLUDE_COMMON=../include/common/
 DIR_INCLUDE_COMMON_MAPPER=../include/common/mapper/
@@ -137,9 +136,3 @@ archive:
 		$(DIR_BUILD)system_processor_instruction.o
 	@echo '--- DONE -----------------------------------'
 	@echo ''
-
-output:
-	cp $(DIR_BUILD)$(LIB) $(DIR_BIN_LIB)
-	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
-	cp $(DIR_DOCS)readme.txt $(DIR_BIN)
-	cp ../license $(DIR_BIN)

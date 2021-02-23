@@ -17,14 +17,17 @@
 DIR_ASSEMBLER=./assembler/
 DIR_BIN=../bin/
 DIR_BIN_BIN=../bin/bin/
+DIR_BIN_INCLUDE=../bin/include/
 DIR_BIN_LIB=../bin/lib/
-DIR_BIN_REL=./bin/
 DIR_BUILD=../build/
 DIR_BUILD_TOOL=../build/tool/
 DIR_DISASSEMBLER=./disassembler/
+DIR_DOCS=../docs/
+DIR_INCLUDE=../include/
 DIR_LAUNCHER=./launcher/
-DIR_LIB=./lib/
-DIR_RELEASE=./release/
+DIR_PACKAGE_BIN=bin/
+DIR_PACKAGE_LIB=lib/
+DIR_ROOT=../
 DIR_UTILITY_ROM_FIX=./utility/rom_fix/
 DIR_UTILITY_ROM_INFO=./utility/rom_info/
 DIR_UTILITY_SAVE_INFO=./utility/save_info/
@@ -77,28 +80,31 @@ tool_utility_save_info.o: $(DIR_UTILITY_SAVE_INFO)save_info.c
 link:
 	@echo ''
 	@echo '--- BUILDING TOOL --------------------------'
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_assembler.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN_BIN)$(BIN_ASSEMBLER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_disassembler.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN_BIN)$(BIN_DISASSEMBLER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BIN_LIB)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
-		-o $(DIR_BIN_BIN)$(BIN_LAUNCHER) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_fix.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN_BIN)$(BIN_UTILITY_ROM_FIX) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN_BIN)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
-	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BIN_BIN)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_assembler.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BUILD)$(BIN_ASSEMBLER) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_disassembler.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BUILD)$(BIN_DISASSEMBLER) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_launcher.o $(DIR_BUILD)$(LIB) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(DIR_BUILD_TOOL)$(LIB_TOOL) $(FLAGS_LIB) \
+		-o $(DIR_BUILD)$(BIN_LAUNCHER) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_fix.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BUILD)$(BIN_UTILITY_ROM_FIX) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_rom_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BUILD)$(BIN_UTILITY_ROM_INFO) $(FLAGS_BIN)
+	$(CC) $(FLAGS) $(BUILD_FLAGS) $(DIR_BUILD_TOOL)tool_utility_save_info.o $(DIR_BUILD_TOOL)$(LIB_TOOL) -o $(DIR_BUILD)$(BIN_UTILITY_SAVE_INFO) $(FLAGS_BIN)
 	@echo '--- DONE -----------------------------------'
 	@echo ''
 
-release:
+package:
 	@echo ''
-	@echo '--- BUILDING RELEASE -----------------------'
-	strip -s $(DIR_BIN_BIN)$(BIN_ASSEMBLER)
-	strip -s $(DIR_BIN_BIN)$(BIN_DISASSEMBLER)
-	strip -s $(DIR_BIN_BIN)$(BIN_LAUNCHER)
-	strip -s $(DIR_BIN_BIN)$(BIN_UTILITY_ROM_FIX)
-	strip -s $(DIR_BIN_BIN)$(BIN_UTILITY_ROM_INFO)
-	strip -s $(DIR_BIN_BIN)$(BIN_UTILITY_SAVE_INFO)
-	cd $(DIR_BIN) && $(SHA256) $(DIR_LIB)$(LIB) $(DIR_BIN_REL)$(BIN_ASSEMBLER) $(DIR_BIN_REL)$(BIN_DISASSEMBLER) $(DIR_BIN_REL)$(BIN_LAUNCHER) \
-		$(DIR_BIN_REL)$(BIN_UTILITY_ROM_FIX) $(DIR_BIN_REL)$(BIN_UTILITY_ROM_INFO) $(DIR_BIN_REL)$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256)
-	cd $(DIR_BIN) && zip -r "$(RELEASE_PRE)`head -n 1 readme.txt | grep DMG | awk '{print $$2}'`$(RELEASE_EXT)" . && mkdir -p $(DIR_RELEASE) \
-		&& mv $(RELEASE_PRE)*$(RELEASE_EXT) $(DIR_RELEASE)
+	@echo '--- PACKAGING RELEASE ----------------------'
+	strip -s $(DIR_BUILD)$(BIN_ASSEMBLER) && cp $(DIR_BUILD)$(BIN_ASSEMBLER) $(DIR_BIN_BIN)
+	strip -s $(DIR_BUILD)$(BIN_DISASSEMBLER) && cp $(DIR_BUILD)$(BIN_DISASSEMBLER) $(DIR_BIN_BIN)
+	strip -s $(DIR_BUILD)$(BIN_LAUNCHER) && cp $(DIR_BUILD)$(BIN_LAUNCHER) $(DIR_BIN_BIN)
+	strip -s $(DIR_BUILD)$(BIN_UTILITY_ROM_FIX) && cp $(DIR_BUILD)$(BIN_UTILITY_ROM_FIX) $(DIR_BIN_BIN)
+	strip -s $(DIR_BUILD)$(BIN_UTILITY_ROM_INFO) && cp $(DIR_BUILD)$(BIN_UTILITY_ROM_INFO) $(DIR_BIN_BIN)
+	strip -s $(DIR_BUILD)$(BIN_UTILITY_SAVE_INFO) && cp $(DIR_BUILD)$(BIN_UTILITY_SAVE_INFO) $(DIR_BIN_BIN)
+	cp $(DIR_BUILD)$(LIB) $(DIR_BIN_LIB)
+	cp $(DIR_INCLUDE)dmg.h $(DIR_BIN_INCLUDE)
+	cp $(DIR_DOCS)readme.txt $(DIR_BIN)
+	cp $(DIR_ROOT)license $(DIR_BIN)
+	cd $(DIR_BIN) && $(SHA256) $(DIR_PACKAGE_LIB)$(LIB) $(DIR_PACKAGE_BIN)$(BIN_LAUNCHER) $(DIR_PACKAGE_BIN)$(BIN_ASSEMBLER) $(DIR_PACKAGE_BIN)$(BIN_DISASSEMBLER) \
+		$(DIR_PACKAGE_BIN)$(BIN_UTILITY_ROM_FIX) $(DIR_PACKAGE_BIN)$(BIN_UTILITY_ROM_INFO) $(DIR_PACKAGE_BIN)$(BIN_UTILITY_SAVE_INFO) > $(DIR_BIN)$(SHA256)
+	cd $(DIR_BIN) && zip -r "$(RELEASE_PRE)`head -n 1 readme.txt | grep DMG | awk '{print $$2}'`$(RELEASE_EXT)" .
 	@echo '--- DONE -----------------------------------'
 	@echo ''

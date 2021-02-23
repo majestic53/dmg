@@ -50,7 +50,7 @@ debug: clean setup library_debug tool_debug
 debug_test: clean setup library_debug test_debug
 release: clean setup library_release tool_release
 release_test: clean setup library_release test_release
-release_zip: release zip_release
+package: release tool_package
 
 analyze:
 	@echo ''
@@ -101,18 +101,13 @@ test_release:
 	cd $(DIR_TEST_VIDEO) && make $(BUILD_RELEASE_TEST)$(LEVEL) build
 
 tool_debug:
-	mkdir -p $(DIR_BIN_BIN)
-	mkdir -p $(DIR_BIN_INCLUDE)
-	mkdir -p $(DIR_BIN_LIB)
-	cd $(DIR_SRC) && make output
 	cd $(DIR_TOOL) && make $(BUILD_DEBUG)$(LEVEL) build_debug
 
 tool_release:
+	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build_release
+
+tool_package:
 	mkdir -p $(DIR_BIN_BIN)
 	mkdir -p $(DIR_BIN_INCLUDE)
 	mkdir -p $(DIR_BIN_LIB)
-	cd $(DIR_SRC) && make output
-	cd $(DIR_TOOL) && make $(BUILD_RELEASE)$(LEVEL) build_release
-
-zip_release:
-	cd $(DIR_TOOL) && make release
+	cd $(DIR_TOOL) && make package
