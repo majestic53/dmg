@@ -5,12 +5,14 @@ DMG
 
 A GameBoy emulator and assembler/disassembler, written in C.
 
-### Features supported
+Features supported
+=
 
 #### Emulator
 
 * Support for all processor instructions
-* Support for all hardware peripherals (joypad/serial/timer)
+* Support for hardware peripherals (joypad/serial/timer)
+	* No audio support at the moment
 * Support for save states
 * Support for multiple color-palettes
 * Support for common cartridge types:
@@ -32,12 +34,6 @@ A GameBoy emulator and assembler/disassembler, written in C.
 
 * ROM header parsing/checksum validation/correction
 * Save state parsing/validation
-
-### Features not supported
-
-#### Emulator
-
-* No audio support at the moment
 
 Latest Release
 =
