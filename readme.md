@@ -3,13 +3,17 @@ DMG
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions)
 
-A GameBoy emulator, written in C.
+A GameBoy emulator and assembler/disassembler, written in C.
 
 ### Features supported
 
-* All processor instructions
-* Hardware peripherals (joypad/serial/timer)
-* Common cartridge types:
+#### Emulator
+
+* Support for all processor instructions
+* Support for all hardware peripherals (joypad/serial/timer)
+* Support for save states
+* Support for multiple color-palettes
+* Support for common cartridge types:
 
 |Cartridge type|Value |
 |:-------------|:-----|
@@ -19,9 +23,21 @@ A GameBoy emulator, written in C.
 |MBC3          |15-19 |
 |MBC5          |25-30 |
 
+#### Assembler/Disassembler
+
+* Support for all processor instructions
+* Basic preprocessor directives
+
+#### Utilities
+
+* ROM header parsing/checksum validation/correction
+* Save state parsing/validation
+
 ### Features not supported
 
-* Audio
+#### Emulator
+
+* No audio support at the moment
 
 Latest Release
 =
