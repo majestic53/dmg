@@ -38,7 +38,7 @@ Features
 Latest Release
 =
 
-The latest release can be found here: [v0.2.38-alpha](https://github.com/majestic53/dmg/releases/tag/v0.2.38-alpha)
+The latest release can be found here: [v0.3.0-alpha](https://github.com/majestic53/dmg/releases/tag/v0.3.0-alpha)
 
 Building from Source
 =
