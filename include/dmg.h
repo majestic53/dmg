@@ -206,6 +206,8 @@ typedef struct {
 	uint32_t palette[DMG_PALETTE_MAX];
 	/* Display scale */
 	uint32_t scale;
+	/* Display fullscreen mode */
+	uint32_t fullscreen;
 	/* Input save file path */
 	const char *save_in;
 	/* Output save file path */

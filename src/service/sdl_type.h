@@ -32,6 +32,7 @@
 #define AUDIO_PLAY 0
 #define AUDIO_SAMPLES 256
 
+#define FRAME_FREQUENCY (MS_PER_SEC / FRAMES_PER_SEC)
 #define FRAMES_PER_SEC 60
 
 #define KEY_FULLSCREEN SDL_SCANCODE_F11
@@ -83,12 +84,10 @@ typedef struct {
 	SDL_Texture *texture;
 	char title[TITLE_LENGTH_MAX];
 	SDL_Window *window;
-	uint64_t frame_begin;
-	float frame_elapsed;
-#ifndef NDEBUG
-	uint32_t frame_count;
-	float frame_rate;
-#endif /* NDEBUG */
+	uint32_t frame;
+	uint32_t frame_start;
+	float framerate;
+	uint32_t framerate_start;
 } dmg_sdl_video_t;
 
 typedef struct {

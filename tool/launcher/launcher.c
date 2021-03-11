@@ -46,6 +46,9 @@ dmg_launcher_parse(
 			case OPTION_DEBUG:
 				g_launcher.debug = true;
 				break;
+			case OPTION_FULLSCREEN:
+				g_launcher.configuration.fullscreen = true;
+				break;
 			case OPTION_HELP:
 				g_launcher.help = true;
 				break;

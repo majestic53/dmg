@@ -34,6 +34,7 @@
 #define OPTION_BOOTROM 'b'
 #define OPTION_CAPTURE 'c'
 #define OPTION_DEBUG 'd'
+#define OPTION_FULLSCREEN 'f'
 #define OPTION_HELP 'h'
 #define OPTION_INPUT 'i'
 #define OPTION_OUTPUT 'o'
@@ -43,12 +44,13 @@
 #define OPTION_SERIAL_CLIENT 'n'
 #define OPTION_SERIAL_SERVER 'm'
 #define OPTION_VERSION 'v'
-#define OPTIONS "b:cdhi:m:n:o:p:r:s:v"
+#define OPTIONS "b:cdfhi:m:n:o:p:r:s:v"
 
 enum {
 	FLAG_BOOTROM = 0,
 	FLAG_CAPTURE,
 	FLAG_DEBUG,
+	FLAG_FULLSCREEN,
 	FLAG_HELP,
 	FLAG_INPUT,
 	FLAG_OUTPUT,
@@ -65,6 +67,7 @@ static const char *FLAG_STR[] = {
 	"-b", /* FLAG_BOOTROM */
 	"-c", /* FLAG_CAPTURE */
 	"-d", /* FLAG_DEBUG */
+	"-f", /* FLAG_FULLSCREEN */
 	"-h", /* FLAG_HELP */
 	"-i", /* FLAG_INPUT */
 	"-o", /* FLAG_OUTPUT */
@@ -81,6 +84,7 @@ static const char *FLAG_DESCRIPTION_STR[] = {
 	"Specify bootrom binary", /* FLAG_BOOTROM */
 	"Enable serial capture", /* FLAG_CAPTURE */
 	"Enable debug prompt", /* FLAG_DEBUG */
+	"Specify fullscreen mode", /* FLAG_FULLSCREEN */
 	"Display help information", /* FLAG_HELP */
 	"Specify input save file path", /* FLAG_INPUT */
 	"Specify output save file path", /* FLAG_OUTPUT */

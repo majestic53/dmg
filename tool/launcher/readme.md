@@ -22,6 +22,7 @@ The following arguments are available:
 -b	Specify bootrom binary
 -c	Enable serial capture
 -d	Enable debug prompt
+-f	Specify fullscreen mode
 -h	Display help information
 -i	Specify input save file path
 -o	Specify output save file path
@@ -57,6 +58,12 @@ The following example shows how to launch dmg with the debug prompt enabled:
 
 ```
 $ dmg -r rom.gb -d
+```
+
+The following example shows how to launch dmg with the fullscreen mode enabled:
+
+```
+$ dmg -r rom.gb -f
 ```
 
 The following example shows how to launch dmg and import a save file:

@@ -100,11 +100,11 @@ dmg_sdl_display_show(void)
 			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 			goto exit;
 		}
-	}
 
-	if(SDL_RenderCopy(g_sdl.video.renderer, g_sdl.video.texture, NULL, NULL)) {
-		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
-		goto exit;
+		if(SDL_RenderCopy(g_sdl.video.renderer, g_sdl.video.texture, NULL, NULL)) {
+			result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
+			goto exit;
+		}
 	}
 
 	SDL_RenderPresent(g_sdl.video.renderer);
@@ -155,14 +155,7 @@ dmg_sdl_display_load(
 		goto exit;
 	}
 
-#ifndef NDEBUG
-	char title_debug[TITLE_LENGTH_MAX * 2] = {};
-
-	snprintf(title_debug, sizeof(title_debug), "[%.02f] %s", g_sdl.video.frame_rate, g_sdl.video.title);
-	SDL_SetWindowTitle(g_sdl.video.window, title_debug);
-#endif /* NDEBUG */
-
-	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC))) {
+	if(!(g_sdl.video.renderer = SDL_CreateRenderer(g_sdl.video.window, -1, SDL_RENDERER_ACCELERATED))) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
 		goto exit;
 	}
@@ -186,6 +179,10 @@ dmg_sdl_display_load(
 	if(!(g_sdl.video.texture = SDL_CreateTexture(g_sdl.video.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
 			WINDOW_WIDTH, WINDOW_HEIGHT))) {
 		result = ERROR_SET_FORMAT(DMG_STATUS_FAILURE, "%s", SDL_GetError());
+		goto exit;
+	}
+
+	if(configuration->fullscreen && ((result = dmg_sdl_display_fullscreen()) != DMG_STATUS_SUCCESS)) {
 		goto exit;
 	}
 
@@ -321,8 +318,6 @@ dmg_sdl_poll(void)
 		}
 	}
 
-	g_sdl.video.frame_begin = SDL_GetPerformanceCounter();
-
 exit:
 	return result;
 }
@@ -346,24 +341,29 @@ exit:
 void
 dmg_sdl_sync(void)
 {
-	g_sdl.video.frame_elapsed = ((SDL_GetPerformanceCounter() - g_sdl.video.frame_begin) / (float)SDL_GetPerformanceFrequency() * (float)MS_PER_SEC);
-#ifndef NDEBUG
-	g_sdl.video.frame_rate += (1.f / (g_sdl.video.frame_elapsed / (float)MS_PER_SEC));
-
-	if(g_sdl.video.frame_count == FRAMES_PER_SEC) {
-		g_sdl.video.frame_count = 0;
-		g_sdl.video.frame_rate /= (float)FRAMES_PER_SEC;
-		char title_debug[TITLE_LENGTH_MAX * 2] = {};
-
-		snprintf(title_debug, sizeof(title_debug), "[%.02f] %s", g_sdl.video.frame_rate, g_sdl.video.title);
-		SDL_SetWindowTitle(g_sdl.video.window, title_debug);
-	} else {
-		++g_sdl.video.frame_count;
-	}
-#endif /* NDEBUG */
+	uint32_t elapsed;
 
 	dmg_sdl_display_show();
-	SDL_Delay((MS_PER_SEC / (float)FRAMES_PER_SEC) - g_sdl.video.frame_elapsed);
+
+	if((elapsed = (SDL_GetTicks() - g_sdl.video.frame_start)) < FRAME_FREQUENCY) {
+		SDL_Delay(FRAME_FREQUENCY - elapsed);
+	}
+
+	g_sdl.video.frame_start = SDL_GetTicks();
+
+	if(g_sdl.video.frame >= FRAMES_PER_SEC) {
+		g_sdl.video.framerate = (g_sdl.video.frame / ((SDL_GetTicks() - g_sdl.video.framerate_start) / (float)MS_PER_SEC));
+		g_sdl.video.framerate_start = SDL_GetTicks();
+		g_sdl.video.frame = 0;
+#ifndef NDEBUG
+		char title_debug[TITLE_LENGTH_MAX * 2] = {};
+
+		snprintf(title_debug, sizeof(title_debug), "%s [%.02f]", g_sdl.video.title, g_sdl.video.framerate);
+		SDL_SetWindowTitle(g_sdl.video.window, title_debug);
+#endif /* NDEBUG */
+	} else {
+		++g_sdl.video.frame;
+	}
 }
 
 void
