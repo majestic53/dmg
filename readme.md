@@ -45,7 +45,7 @@ The latest release can be found here: [v0.3.0-alpha](https://github.com/majestic
 Building from Source
 =
 
-__NOTE__: This project was tested under Linux with the GCC/Clang C compilers. Some modifications to the makefiles will be required to build with a different OS/compiler.
+__NOTE__: This project is tested under GNU/Linux, using the GCC C compiler. Some modifications will be required to build with a different OS/compiler.
 
 ### Preparing to build
 
@@ -68,7 +68,7 @@ $ make <BUILD>
 
 |Field   |Supported values          |Note                                                        |
 |:-------|:-------------------------|:-----------------------------------------------------------|
-|COMPILER|```gcc```, ```clang```    |                                                            |
+|COMPILER|```gcc```                 |                                                            |
 |BUILD   |```release```, ```debug```|If no argument is specified, a release build will be created|
 
 #### Examples
