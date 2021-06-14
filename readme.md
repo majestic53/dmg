@@ -3,6 +3,8 @@ DMG
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions)
 
+![Demo](https://github.com/majestic53/dmg/blob/master/docs/demo.png)
+
 A GameBoy emulator and assembler/disassembler, written in C.
 
 Features
@@ -83,7 +85,7 @@ Using the Library
 
 This project is implemented in C and exposes a simple API, described in ```include/dmg.h``` and ```lib/libdmg.a```:
 
-For an example of how to use this interface, see the [launcher tool](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/launcher```
+For an example of how to use this interface, see the [launcher](https://github.com/majestic53/dmg/tree/master/tool/launcher) under ```tool/launcher```
 
 #### Routines
 
