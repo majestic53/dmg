@@ -27,23 +27,3 @@ jobs:
           make release_test
         env:
           CC: gcc
-  clang:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install libreadline-dev libsdl2-dev clang
-      - name: Dependency Information
-        run: |
-          echo "clang `clang --version | grep clang | awk '{print $3}'`"
-          echo "sdl2 `sdl2-config --version`"
-      - name: Test Debug
-        run: |
-          make debug_test LEVEL=4
-      - name: Test Release
-        run: |
-          make release_test
-        env:
-          CC: clang
