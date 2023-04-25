@@ -10,7 +10,7 @@ endif
 
 .PHONY: all
 all: clean
-	#@make --no-print-directory -C src patch
+	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_RELEASE) -j$(THREADS)
 	@make --no-print-directory -C src strip
 
@@ -20,5 +20,5 @@ clean:
 
 .PHONY: debug
 debug: clean
-	#@make --no-print-directory -C src patch
+	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_DEBUG) -j$(THREADS)
