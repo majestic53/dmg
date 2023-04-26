@@ -1,8 +1,8 @@
-# DMG (DMG Gameboy emulator)
+## DMG (DMG Gameboy emulator)
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
-## Build
+### Build
 
 `DMG` is dependant on the `SDL2` library. Once all dependencies are met, clone the repo and build:
 
@@ -12,7 +12,7 @@ cd dmg
 make
 ```
 
-## Usage
+### Usage
 
 The following interface is supported:
 
@@ -29,7 +29,7 @@ Options:
 ./dmg cartridge.gb
 ```
 
-## Keybindings
+### Keybindings
 
 The following keybindings are supported:
 
@@ -44,7 +44,7 @@ The following keybindings are supported:
 |Up     |W       |
 |Down   |S       |
 
-## Mappers
+### Mappers
 
 The following mappers are supported:
 
@@ -56,6 +56,6 @@ The following mappers are supported:
 |15-19|[MBC3](https://gbdev.io/pandocs/MBC3.html) |2MB ROM/32KB RAM  |
 |25-30|[MBC5](https://gbdev.io/pandocs/MBC5.html) |8MB ROM/128KB RAM |
 
-## License
+### License
 
 Copyright (C) 2023 David Jolly. Released under the [MIT License](LICENSE).
