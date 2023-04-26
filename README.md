@@ -2,12 +2,6 @@
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
-### A lightweight Gameboy emulator, written in C.
-
-__NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs.
-
-![DMG](docs/dmg.png)
-
 ## Build
 
 `DMG` is dependant on the `SDL2` library. Once all dependencies are met, clone the repo and build:

@@ -22,7 +22,7 @@
 #ifndef DMG_MEMORY_H_
 #define DMG_MEMORY_H_
 
-#include <common.h>
+#include <dmg.h>
 
 typedef enum
 {

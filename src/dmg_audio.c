@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <system.h>
+#include <dmg_internal.h>
 
 static void dmg_audio_buffer_read(dmg_handle_t const handle, int16_t *buffer, uint32_t length)
 {
@@ -227,7 +227,7 @@ void dmg_audio_update(void *context, uint8_t *data, int length)
     int16_t *buffer = (int16_t *)data;
     uint32_t buffer_length = length / sizeof(int16_t);
     dmg_handle_t const handle = context;
-    memset(data, handle->sdl.audio.spec.silence, length);
+    memset(data, dmg_get_silence(handle), length);
     if (dmg_audio_buffer_readable(handle) >= buffer_length)
     {
         dmg_audio_buffer_read(handle, buffer, buffer_length);

@@ -22,7 +22,7 @@
 #ifndef DMG_INPUT_H_
 #define DMG_INPUT_H_
 
-#include <common.h>
+#include <dmg.h>
 
 typedef enum
 {

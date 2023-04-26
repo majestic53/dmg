@@ -22,7 +22,7 @@
 #ifndef DMG_AUDIO_H_
 #define DMG_AUDIO_H_
 
-#include <common.h>
+#include <dmg.h>
 
 typedef union
 {

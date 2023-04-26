@@ -22,7 +22,7 @@
 #ifndef DMG_VIDEO_H_
 #define DMG_VIDEO_H_
 
-#include <common.h>
+#include <dmg.h>
 
 typedef struct
 {

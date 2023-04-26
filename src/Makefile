@@ -1,3 +1,5 @@
+INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
+	$(subst .,-I.,$(shell find . -type d))
 OBJECTS:=$(patsubst %.c,%.o,$(shell find . -name "*.c"))
 TARGET:=../dmg
 
@@ -10,7 +12,7 @@ clean:
 
 .PHONY: patch
 patch:
-	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" common.h
+	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" dmg_internal.h
 
 .PHONY: strip
 strip:
@@ -20,4 +22,4 @@ $(TARGET): $(OBJECTS)
 	$(CC) $(CFLAGS) $(OBJECTS) $(shell sdl2-config --libs) -o $@
 
 %.o: %.c
-	$(CC) $(CFLAGS) $(subst .,-I.,$(shell find . -type d)) $(shell sdl2-config --cflags) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) $(shell sdl2-config --cflags) -c $< -o $@

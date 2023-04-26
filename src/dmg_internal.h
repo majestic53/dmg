@@ -22,13 +22,24 @@
 #ifndef DMG_SYSTEM_H_
 #define DMG_SYSTEM_H_
 
-#include <audio.h>
-#include <input.h>
-#include <memory.h>
-#include <processor.h>
-#include <serial.h>
-#include <timer.h>
-#include <video.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dmg_audio.h>
+#include <dmg_input.h>
+#include <dmg_memory.h>
+#include <dmg_processor.h>
+#include <dmg_serial.h>
+#include <dmg_timer.h>
+#include <dmg_video.h>
+#include <SDL.h>
+
+#define DMG_MAJOR 0
+#define DMG_MINOR 1
+#define DMG_PATCH 0x9194a4c
 
 typedef enum
 {
@@ -39,7 +50,7 @@ typedef enum
     DMG_COLOR_MAX,
 } dmg_color_e;
 
-typedef struct dmg_s
+struct dmg_s
 {
     char error[256];
     bool initialized;
@@ -63,17 +74,17 @@ typedef struct dmg_s
             SDL_AudioDeviceID id;
             SDL_AudioSpec spec;
         } audio;
-    } sdl;
-} dmg_system_t;
+    } service;
+};
 
-dmg_color_e dmg_system_get_pixel(dmg_handle_t const handle, uint8_t x, uint8_t y);
-dmg_error_e dmg_system_initialize(dmg_handle_t const handle, const dmg_data_t *const data);
-dmg_error_e dmg_system_load(dmg_handle_t const handle, const dmg_data_t *const data);
-uint8_t dmg_system_read(dmg_handle_t const handle, uint16_t address);
-dmg_error_e dmg_system_run(dmg_handle_t const handle);
-dmg_error_e dmg_system_save(dmg_handle_t const handle, dmg_data_t *const data);
-void dmg_system_set_pixel(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y);
-void dmg_system_uninitialize(dmg_handle_t const handle);
-void dmg_system_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+#define DMG_ERROR(_HANDLE_, _FORMAT_, ...) \
+    dmg_set_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
+
+dmg_color_e dmg_get_pixel(dmg_handle_t const handle, uint8_t x, uint8_t y);
+uint8_t dmg_get_silence(dmg_handle_t const handle);
+uint8_t dmg_read(dmg_handle_t const handle, uint16_t address);
+dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
+void dmg_set_pixel(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y);
+void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_SYSTEM_H_ */
