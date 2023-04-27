@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <dmg_internal.h>
+#include <system.h>
 
 uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
 {

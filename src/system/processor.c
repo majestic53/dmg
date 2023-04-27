@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <dmg_internal.h>
+#include <system.h>
 
 typedef dmg_error_e (*dmg_processor_f)(dmg_handle_t const handle);
 

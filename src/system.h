@@ -28,18 +28,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dmg_audio.h>
-#include <dmg_input.h>
-#include <dmg_memory.h>
-#include <dmg_processor.h>
-#include <dmg_serial.h>
-#include <dmg_timer.h>
-#include <dmg_video.h>
 #include <SDL.h>
+#include <audio.h>
+#include <input.h>
+#include <memory.h>
+#include <processor.h>
+#include <serial.h>
+#include <timer.h>
+#include <video.h>
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xb3a3385
+#define DMG_PATCH 0x521c3b0
 
 typedef enum
 {

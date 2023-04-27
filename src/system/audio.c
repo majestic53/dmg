@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <dmg_internal.h>
+#include <system.h>
 
 static void dmg_audio_buffer_read(dmg_handle_t const handle, int16_t *buffer, uint32_t length)
 {

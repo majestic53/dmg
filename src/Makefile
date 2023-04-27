@@ -11,7 +11,7 @@ clean:
 
 .PHONY: patch
 patch:
-	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" dmg_internal.h
+	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" system.h
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(shell sdl2-config --cflags) -c $< -o $@
