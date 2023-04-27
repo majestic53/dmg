@@ -1,3 +1,5 @@
+CC?=gcc
+
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
 	$(subst .,-I.,$(shell find . -type d))
 OBJECTS:=$(patsubst %.c,%.o,$(shell find . -name "*.c"))
