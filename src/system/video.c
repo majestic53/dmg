@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <system.h>
+#include <common.h>
 
 static uint8_t dmg_video_background_color(dmg_handle_t const handle, bool map, uint8_t x, uint8_t y)
 {

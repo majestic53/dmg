@@ -19,7 +19,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include <system.h>
+#include <common.h>
 
 void dmg_serial_clock(dmg_handle_t const handle)
 {

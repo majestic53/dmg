@@ -19,8 +19,8 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef DMG_SYSTEM_H_
-#define DMG_SYSTEM_H_
+#ifndef DMG_COMMON_H_
+#define DMG_COMMON_H_
 
 #include <ctype.h>
 #include <stdarg.h>
@@ -39,7 +39,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0x521c3b0
+#define DMG_PATCH 0xd3969e5
 
 typedef enum
 {
@@ -87,4 +87,4 @@ dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t 
 void dmg_set_pixel(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y);
 void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
-#endif /* DMG_SYSTEM_H_ */
+#endif /* DMG_COMMON_H_ */
