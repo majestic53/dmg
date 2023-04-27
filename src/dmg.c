@@ -53,7 +53,36 @@ static dmg_error_e dmg_clock(dmg_handle_t const handle)
     return result;
 }
 
-static dmg_error_e dmg_service_initialize(dmg_handle_t const handle)
+static bool dmg_service_poll(dmg_handle_t const handle)
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event))
+    {
+        switch (event.type) {
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                if (!event.key.repeat)
+                {
+                    for (dmg_button_e button = 0; button < DMG_BUTTON_MAX; ++button)
+                    {
+                        if (SCANCODE[button] == event.key.keysym.scancode)
+                        {
+                            dmg_input_update(handle, button, event.type == SDL_KEYDOWN);
+                            break;
+                        }
+                    }
+                }
+                break;
+            case SDL_QUIT:
+                return false;
+            default:
+                break;
+        }
+    }
+    return true;
+}
+
+static dmg_error_e dmg_service_setup(dmg_handle_t const handle)
 {
     SDL_AudioSpec desired =
     {
@@ -105,35 +134,6 @@ static dmg_error_e dmg_service_initialize(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static bool dmg_service_poll(dmg_handle_t const handle)
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event))
-    {
-        switch (event.type) {
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-                if (!event.key.repeat)
-                {
-                    for (dmg_button_e button = 0; button < DMG_BUTTON_MAX; ++button)
-                    {
-                        if (SCANCODE[button] == event.key.keysym.scancode)
-                        {
-                            dmg_input_update(handle, button, event.type == SDL_KEYDOWN);
-                            break;
-                        }
-                    }
-                }
-                break;
-            case SDL_QUIT:
-                return false;
-            default:
-                break;
-        }
-    }
-    return true;
-}
-
 static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
 {
     uint32_t elapsed, pixel[144][160] = {};
@@ -165,7 +165,7 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static void dmg_service_uninitialize(dmg_handle_t const handle)
+static void dmg_service_teardown(dmg_handle_t const handle)
 {
     if (handle->service.audio.id)
     {
@@ -234,7 +234,7 @@ dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data)
     {
         return result;
     }
-    if ((result = dmg_service_initialize(*handle)) != DMG_SUCCESS)
+    if ((result = dmg_service_setup(*handle)) != DMG_SUCCESS)
     {
         return result;
     }
@@ -349,7 +349,7 @@ void dmg_uninitialize(dmg_handle_t *handle)
     if (handle && *handle)
     {
         (*handle)->initialized = false;
-        dmg_service_uninitialize(*handle);
+        dmg_service_teardown(*handle);
         dmg_memory_uninitialize(*handle);
         free(*handle);
         *handle = NULL;

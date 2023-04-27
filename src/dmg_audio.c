@@ -142,7 +142,7 @@ void dmg_audio_clock(dmg_handle_t const handle)
             float sample = dmg_audio_sample_mixer(handle) * dmg_audio_sample_volume(handle);
             dmg_audio_buffer_write(handle, sample * INT16_MAX);
         }
-        handle->audio.delay = 96;
+        handle->audio.delay = 96; /* 44.1KHz */
     }
     --handle->audio.delay;
 }

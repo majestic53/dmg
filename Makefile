@@ -1,5 +1,5 @@
 FLAGS:=-mtune=native\ -std=c11\ -Wall\ -Werror\ -Wextra
-FLAGS_DEBUG:=CFLAGS=$(FLAGS)\ -g
+FLAGS_DEBUG:=CFLAGS=$(FLAGS)\ -g3\ -fsanitize=address,undefined
 FLAGS_RELEASE:=CFLAGS=$(FLAGS)\ -O3
 
 ifeq ($(shell uname -s),Linux)
@@ -12,13 +12,16 @@ endif
 all: clean
 	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_RELEASE) -j$(THREADS)
-	@make --no-print-directory -C src strip
+	@make --no-print-directory -C tool $(FLAGS_RELEASE) -j$(THREADS)
+	@make --no-print-directory -C tool strip
 
 .PHONY: clean
 clean:
 	@make --no-print-directory -C src clean
+	@make --no-print-directory -C tool clean
 
 .PHONY: debug
 debug: clean
 	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_DEBUG) -j$(THREADS)
+	@make --no-print-directory -C tool $(FLAGS_DEBUG) -j$(THREADS)
