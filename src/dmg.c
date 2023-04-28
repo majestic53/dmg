@@ -82,17 +82,23 @@ static bool dmg_service_poll(dmg_handle_t const handle)
     return true;
 }
 
-static dmg_error_e dmg_service_setup(dmg_handle_t const handle)
+static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
 {
     SDL_AudioSpec desired =
     {
         .freq = 44100, .format = AUDIO_S16SYS, .channels = 1, .samples = 4096,
         .callback = dmg_audio_update, .userdata = handle
     };
-    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
+    if (!(handle->service.audio.id = SDL_OpenAudioDevice(NULL, false, &desired, &handle->service.audio.spec, 0)))
     {
-        return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
+        return DMG_ERROR(handle, "SDL_OpenAudioDevice failed -- %s", SDL_GetError());
     }
+    SDL_PauseAudioDevice(handle->service.audio.id, false);
+    return DMG_SUCCESS;
+}
+
+static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle)
+{
     if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
@@ -126,12 +132,21 @@ static dmg_error_e dmg_service_setup(dmg_handle_t const handle)
         return DMG_ERROR(handle, "SDL_CreateSystemCursor failed -- %s", SDL_GetError());
     }
     SDL_SetCursor(handle->service.cursor);
-    if (!(handle->service.audio.id = SDL_OpenAudioDevice(NULL, false, &desired, &handle->service.audio.spec, 0)))
-    {
-        return DMG_ERROR(handle, "SDL_OpenAudioDevice failed -- %s", SDL_GetError());
-    }
-    SDL_PauseAudioDevice(handle->service.audio.id, false);
     return DMG_SUCCESS;
+}
+
+static dmg_error_e dmg_service_setup(dmg_handle_t const handle)
+{
+    dmg_error_e result;
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
+    {
+        return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
+    }
+    if ((result = dmg_service_setup_video(handle)) == DMG_SUCCESS)
+    {
+        result = dmg_service_setup_audio(handle);
+    }
+    return result;
 }
 
 static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
@@ -165,13 +180,17 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static void dmg_service_teardown(dmg_handle_t const handle)
+static void dmg_service_teardown_audio(dmg_handle_t const handle)
 {
     if (handle->service.audio.id)
     {
         SDL_PauseAudioDevice(handle->service.audio.id, true);
         SDL_CloseAudioDevice(handle->service.audio.id);
     }
+}
+
+static void dmg_service_teardown_video(dmg_handle_t const handle)
+{
     if (handle->service.cursor)
     {
         SDL_FreeCursor(handle->service.cursor);
@@ -188,6 +207,12 @@ static void dmg_service_teardown(dmg_handle_t const handle)
     {
         SDL_DestroyWindow(handle->service.window);
     }
+}
+
+static void dmg_service_teardown(dmg_handle_t const handle)
+{
+    dmg_service_teardown_audio(handle);
+    dmg_service_teardown_video(handle);
     SDL_Quit();
 }
 

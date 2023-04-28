@@ -2,17 +2,37 @@
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
-### Build
+### A lightweight Gameboy emulator, written in C.
 
-`DMG` is dependant on the `SDL2` library. Once all dependencies are met, clone the repo and build:
+__NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs.
+
+## Latest release
+
+The latest release can be found [here](https://github.com/majestic53/dmg/releases).
+
+## Build from source
+
+`DMG` is dependant on the `SDL2` library. If you are on a Debian-based systems, install this library using apt:
 
 ```bash
-git clone https://github.com/majestic53/dmg.git
+sudo apt-get install libsdl2-dev
+```
+
+If you are on an Arch-based systems, install this library using pacman:
+
+```bash
+sudo pacman -S sdl2
+```
+
+Once all dependencies are met, clone the repo and build:
+
+```bash
+git clone https://github.com/majestic53/dmg
 cd dmg
 make
 ```
 
-### Usage
+## Usage
 
 The following interface is supported:
 
@@ -23,6 +43,8 @@ Options:
    -h, --help        Show help information
    -v, --version     Show version information
 ```
+
+### Example
 
 ```bash
 # To launch with a cartridge, run the following command
