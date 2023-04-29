@@ -39,7 +39,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xcf5daea
+#define DMG_PATCH 0x2cb3984
 
 typedef enum
 {
@@ -64,6 +64,7 @@ struct dmg_s
     struct
     {
         uint32_t tick;
+        dmg_palette_e palette;
         dmg_color_e pixel[144][160];
         SDL_Cursor *cursor;
         SDL_Renderer *renderer;

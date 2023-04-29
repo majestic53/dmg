@@ -21,10 +21,16 @@
 
 #include <common.h>
 
-static const uint32_t PALETTE[] =
+static const uint32_t PALETTE[][DMG_COLOR_MAX] =
 {
-    /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-    0xFFFFFFFF, 0xFF949494, 0xFF525252, 0xFF000000,
+    { /* GREY */
+        /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+        0xFFFFFFFF, 0xFF949494, 0xFF525252, 0xFF000000,
+    },
+    { /* GREEN */
+        /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+        0xFF9BBC0F, 0xFF8BAC0F, 0xFF306230, 0xFF0F380F,
+    },
 };
 
 static const SDL_Scancode SCANCODE[] =
@@ -97,7 +103,7 @@ static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle)
+static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palette_e palette)
 {
     if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
     {
@@ -132,17 +138,18 @@ static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle)
         return DMG_ERROR(handle, "SDL_CreateSystemCursor failed -- %s", SDL_GetError());
     }
     SDL_SetCursor(handle->service.cursor);
+    handle->service.palette = (palette >= DMG_PALETTE_MAX) ? 0 : palette;
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_service_setup(dmg_handle_t const handle)
+static dmg_error_e dmg_service_setup(dmg_handle_t const handle, dmg_palette_e palette)
 {
     dmg_error_e result;
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
     {
         return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
     }
-    if ((result = dmg_service_setup_video(handle)) == DMG_SUCCESS)
+    if ((result = dmg_service_setup_video(handle, palette)) == DMG_SUCCESS)
     {
         result = dmg_service_setup_audio(handle);
     }
@@ -156,7 +163,7 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
     {
         for (uint8_t x = 0; x < 160; ++x)
         {
-            pixel[y][x] = PALETTE[handle->service.pixel[y][x]];
+            pixel[y][x] = PALETTE[handle->service.palette][handle->service.pixel[y][x]];
         }
     }
     if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 160 * sizeof(uint32_t)))
@@ -244,7 +251,7 @@ const dmg_version_t *dmg_get_version(void)
     return &VERSION;
 }
 
-dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output)
+dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
 {
     dmg_error_e result;
     if (!handle || (!*handle && !(*handle = calloc(1, sizeof(**handle)))))
@@ -263,7 +270,7 @@ dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, c
     {
         return result;
     }
-    if ((result = dmg_service_setup(*handle)) != DMG_SUCCESS)
+    if ((result = dmg_service_setup(*handle, palette)) != DMG_SUCCESS)
     {
         return result;
     }

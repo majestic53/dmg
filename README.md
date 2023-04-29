@@ -41,14 +41,22 @@ Usage: dmg [options] file
 
 Options:
    -h, --help        Show help information
+   -p, --palette     Set color palette
    -v, --version     Show version information
 ```
 
-### Example
+### Examples
 
 ```bash
 # To launch with a cartridge, run the following command
 ./dmg cartridge.gb
+```
+
+```bash
+# To launch with a grey color palette, run the following command
+./dmg cartridge.gb --palette 0
+# To launch with a green color palette, run the following command
+./dmg cartridge.gb --palette 1
 ```
 
 ### Keybindings
