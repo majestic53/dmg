@@ -21,26 +21,38 @@
 
 #include <common.h>
 
-static const uint32_t PALETTE[][DMG_PALETTE_MAX][DMG_COLOR_MAX] =
+typedef union
+{
+    struct
+    {
+        uint8_t alpha;
+        uint8_t red;
+        uint8_t green;
+        uint8_t blue;
+    };
+    uint32_t raw;
+} dmg_color_t;
+
+static const dmg_color_t PALETTE[][DMG_PALETTE_MAX][DMG_COLOR_MAX] =
 {
     { /* FOREGROUND */
         { /* DMG */
-            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-            0xFF939905, 0xFF4D7D2C, 0xFF296341, 0xFF0C3B1C,
+            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+            { .raw = 0xFF939905 }, { .raw = 0xFF4D7D2C }, { .raw = 0xFF296341 }, { .raw = 0xFF0C3B1C },
         },
         { /* GBP */
-            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-            0xFFFEFEFE, 0xFFAEBBAA, 0xFF889683, 0xFF5C5F5C,
+            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+            { .raw = 0xFFE5E5E5 }, { .raw = 0xFFAEBBAA }, { .raw = 0xFF889683 }, { .raw = 0xFF5C5F5C },
         },
     },
     { /* BACKGROUND */
         { /* DMG */
-            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-            0xFFAAB10F, 0xFF5C9136, 0xFF33714C, 0xFF0F4222,
+            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+            { .raw = 0xFFAAB10F }, { .raw = 0xFF5C9136 }, { .raw = 0xFF33714C }, { .raw = 0xFF0F4222 },
         },
         { /* GBP */
-            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-            0xFFFEFEFE, 0xFFC1CFBE, 0xFF97A791, 0xFF656865,
+            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+            { .raw = 0xFFFEFEFE }, { .raw = 0xFFC1CFBE }, { .raw = 0xFF97A791 }, { .raw = 0xFF656865 },
         },
     }
 };
@@ -176,12 +188,23 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
         for (uint8_t x = 0; x < 160; ++x)
         {
             uint16_t x_base = x * 3, y_base = y * 3;
-            dmg_color_e color = handle->service.pixel[y][x];
+            dmg_color_e color = handle->service.pixel[y][x], color_above = color;
+            if (y)
+            {
+                color_above = handle->service.pixel[y - 1][x];
+            }
             for (uint8_t y_off = 0; y_off < 3; ++y_off)
             {
                 for (uint8_t x_off = 0; x_off < 3; ++x_off)
                 {
-                    pixel[y_base + y_off][x_base + x_off] = PALETTE[((x_off > 0) && (y_off > 0))][handle->service.palette][color];
+                    dmg_color_t value = PALETTE[((x_off > 0) && (y_off > 0))][handle->service.palette][color];
+                    if (color_above > color)
+                    {
+                        value.red *= 0.75;
+                        value.green *= 0.75;
+                        value.blue *= 0.75;
+                    }
+                    pixel[y_base + y_off][x_base + x_off] = value.raw;
                 }
             }
         }
