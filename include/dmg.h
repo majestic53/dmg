@@ -33,8 +33,8 @@ typedef enum
 
 typedef enum
 {
-    DMG_PALETTE_GREY = 0,
-    DMG_PALETTE_GREEN,
+    DMG_PALETTE_DMG = 0,
+    DMG_PALETTE_GBP,
     DMG_PALETTE_MAX,
 } dmg_palette_e;
 

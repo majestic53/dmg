@@ -53,9 +53,9 @@ Options:
 ```
 
 ```bash
-# To launch with a grey color palette, run the following command
+# To launch with the DMG color palette, run the following command
 ./dmg cartridge.gb --palette 0
-# To launch with a green color palette, run the following command
+# To launch with the GBP color palette, run the following command
 ./dmg cartridge.gb --palette 1
 ```
 

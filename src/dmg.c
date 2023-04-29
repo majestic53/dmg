@@ -21,16 +21,28 @@
 
 #include <common.h>
 
-static const uint32_t PALETTE[][DMG_COLOR_MAX] =
+static const uint32_t PALETTE[][DMG_PALETTE_MAX][DMG_COLOR_MAX] =
 {
-    { /* GREY */
-        /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-        0xFFFFFFFF, 0xFF949494, 0xFF525252, 0xFF000000,
+    { /* FOREGROUND */
+        { /* DMG */
+            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+            0xFF939905, 0xFF4D7D2C, 0xFF296341, 0xFF0C3B1C,
+        },
+        { /* GBP */
+            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+            0xFFFEFEFE, 0xFFAEBBAA, 0xFF889683, 0xFF5C5F5C,
+        },
     },
-    { /* GREEN */
-        /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
-        0xFF9BBC0F, 0xFF8BAC0F, 0xFF306230, 0xFF0F380F,
-    },
+    { /* BACKGROUND */
+        { /* DMG */
+            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+            0xFFAAB10F, 0xFF5C9136, 0xFF33714C, 0xFF0F4222,
+        },
+        { /* GBP */
+            /* WHITE    LIGHT-GREY  DARK-GREY   BLACK */
+            0xFFFEFEFE, 0xFFC1CFBE, 0xFF97A791, 0xFF656865,
+        },
+    }
 };
 
 static const SDL_Scancode SCANCODE[] =
@@ -105,7 +117,7 @@ static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
 
 static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palette_e palette)
 {
-    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
+    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 432, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
     }
@@ -113,7 +125,7 @@ static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palett
     {
         return DMG_ERROR(handle, "SDL_CreateRenderer failed -- %s", SDL_GetError());
     }
-    if (SDL_RenderSetLogicalSize(handle->service.renderer, 160, 144))
+    if (SDL_RenderSetLogicalSize(handle->service.renderer, 480, 432))
     {
         return DMG_ERROR(handle, "SDL_RenderSetLogicalSize failed -- %s", SDL_GetError());
     }
@@ -129,7 +141,7 @@ static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palett
     {
         return DMG_ERROR(handle, "SDL_SetHint failed -- %s", SDL_GetError());
     }
-    if (!(handle->service.texture = SDL_CreateTexture(handle->service.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 160, 144)))
+    if (!(handle->service.texture = SDL_CreateTexture(handle->service.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, 480, 432)))
     {
         return DMG_ERROR(handle, "SDL_CreateTexture failed -- %s", SDL_GetError());
     }
@@ -158,15 +170,23 @@ static dmg_error_e dmg_service_setup(dmg_handle_t const handle, dmg_palette_e pa
 
 static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
 {
-    uint32_t elapsed, pixel[144][160] = {};
+    uint32_t elapsed, pixel[432][480] = {};
     for (uint8_t y = 0; y < 144; ++y)
     {
         for (uint8_t x = 0; x < 160; ++x)
         {
-            pixel[y][x] = PALETTE[handle->service.palette][handle->service.pixel[y][x]];
+            uint16_t x_base = x * 3, y_base = y * 3;
+            dmg_color_e color = handle->service.pixel[y][x];
+            for (uint8_t y_off = 0; y_off < 3; ++y_off)
+            {
+                for (uint8_t x_off = 0; x_off < 3; ++x_off)
+                {
+                    pixel[y_base + y_off][x_base + x_off] = PALETTE[((x_off > 0) && (y_off > 0))][handle->service.palette][color];
+                }
+            }
         }
     }
-    if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 160 * sizeof (uint32_t)))
+    if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 480 * sizeof (uint32_t)))
     {
         return DMG_ERROR(handle, "SDL_UpdateTexture failed -- %s", SDL_GetError());
     }
