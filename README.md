@@ -2,6 +2,8 @@
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
+![DMG](docs/dmg.png)
+
 ### A lightweight Gameboy emulator, written in C.
 
 __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs.
@@ -50,9 +52,6 @@ Options:
 ```bash
 # To launch with a cartridge, run the following command
 ./dmg cartridge.gb
-```
-
-```bash
 # To launch with the DMG color palette, run the following command
 ./dmg cartridge.gb --palette 0
 # To launch with the GBP color palette, run the following command
