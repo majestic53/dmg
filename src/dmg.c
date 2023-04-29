@@ -166,7 +166,7 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
             pixel[y][x] = PALETTE[handle->service.palette][handle->service.pixel[y][x]];
         }
     }
-    if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 160 * sizeof(uint32_t)))
+    if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 160 * sizeof (uint32_t)))
     {
         return DMG_ERROR(handle, "SDL_UpdateTexture failed -- %s", SDL_GetError());
     }
@@ -254,7 +254,7 @@ const dmg_version_t *dmg_get_version(void)
 dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
 {
     dmg_error_e result;
-    if (!handle || (!*handle && !(*handle = calloc(1, sizeof(**handle)))))
+    if (!handle || (!*handle && !(*handle = calloc(1, sizeof (**handle)))))
     {
         return EXIT_FAILURE;
     }
@@ -383,9 +383,9 @@ dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t 
 {
     va_list arguments;
     va_start(arguments, format);
-    vsnprintf(handle->error, sizeof(handle->error), format, arguments);
+    vsnprintf(handle->error, sizeof (handle->error), format, arguments);
     va_end(arguments);
-    snprintf(handle->error + strlen(handle->error), sizeof(handle->error) - strlen(handle->error), " (%s:%u)", file, line);
+    snprintf(handle->error + strlen(handle->error), sizeof (handle->error) - strlen(handle->error), " (%s:%u)", file, line);
     return DMG_FAILURE;
 }
 

@@ -39,14 +39,14 @@ dmg_error_e file_load(file_t *const file)
         fclose(fp);
         return DMG_FAILURE;
     }
-    if (!(file->data.buffer = calloc(length, sizeof(uint8_t))))
+    if (!(file->data.buffer = calloc(length, sizeof (uint8_t))))
     {
         fprintf(stderr, "Failed to allocate read buffer\n");
         fclose(fp);
         return DMG_FAILURE;
     }
     file->data.length = length;
-    if (fread(file->data.buffer, sizeof(uint8_t), file->data.length, fp) != file->data.length)
+    if (fread(file->data.buffer, sizeof (uint8_t), file->data.length, fp) != file->data.length)
     {
         fprintf(stderr, "Failed to read file -- %s\n", file->path);
         fclose(fp);
@@ -64,7 +64,7 @@ dmg_error_e file_save(const file_t *const file)
         fprintf(stderr, "File does not exist -- %s\n", file->path);
         return DMG_FAILURE;
     }
-    if (fwrite(file->data.buffer, sizeof(uint8_t), file->data.length, fp) != file->data.length)
+    if (fwrite(file->data.buffer, sizeof (uint8_t), file->data.length, fp) != file->data.length)
     {
         fprintf(stderr, "Failed to write file -- %s\n", file->path);
         fclose(fp);

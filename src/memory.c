@@ -85,7 +85,7 @@ static const dmg_memory_header_t *dmg_memory_header(const uint8_t *const data)
 static dmg_mapper_e dmg_memory_type(uint8_t id)
 {
     dmg_mapper_e result = DMG_MAPPER_MAX;
-    for (uint16_t index = 0; index < sizeof(TYPE) / sizeof(*TYPE); ++index)
+    for (uint16_t index = 0; index < sizeof (TYPE) / sizeof (*TYPE); ++index)
     {
         if (TYPE[index].id == id)
         {
@@ -478,7 +478,7 @@ static void dmg_memory_setup_title(dmg_handle_t const handle, const char *title)
 {
     if (strlen(title))
     {
-        for (uint32_t index = 0; index < sizeof(handle->memory.cartridge.title) - 1; ++index)
+        for (uint32_t index = 0; index < sizeof (handle->memory.cartridge.title) - 1; ++index)
         {
             if (isprint(title[index]))
             {
@@ -488,7 +488,7 @@ static void dmg_memory_setup_title(dmg_handle_t const handle, const char *title)
     }
     else
     {
-        snprintf(handle->memory.cartridge.title, sizeof(handle->memory.cartridge.title), "%s", "UNTITLED");
+        snprintf(handle->memory.cartridge.title, sizeof (handle->memory.cartridge.title), "%s", "UNTITLED");
     }
 }
 
@@ -515,7 +515,7 @@ static dmg_error_e dmg_memory_validate(dmg_handle_t const handle, const uint8_t 
     {
         return DMG_ERROR(handle, "Invalid cartridge data -- %p", data);
     }
-    if ((length < expected) || (length > (ROM[(sizeof(ROM) / sizeof(*ROM)) - 1] * 0x4000)))
+    if ((length < expected) || (length > (ROM[(sizeof (ROM) / sizeof (*ROM)) - 1] * 0x4000)))
     {
         return DMG_ERROR(handle, "Invalid cartridge length -- %u bytes", length);
     }
@@ -532,11 +532,11 @@ static dmg_error_e dmg_memory_validate(dmg_handle_t const handle, const uint8_t 
     {
         return DMG_ERROR(handle, "Unsupported CGB cartridge -- %u", header->cgb);
     }
-    if (header->ram >= sizeof(RAM) / sizeof(*RAM))
+    if (header->ram >= sizeof (RAM) / sizeof (*RAM))
     {
         return DMG_ERROR(handle, "Unsupported cartridge RAM type -- %u", header->ram);
     }
-    if (header->rom >= sizeof(ROM) / sizeof(*ROM))
+    if (header->rom >= sizeof (ROM) / sizeof (*ROM))
     {
         return DMG_ERROR(handle, "Unsupported cartridge ROM type -- %u", header->rom);
     }

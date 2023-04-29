@@ -189,7 +189,7 @@ static void dmg_video_sort_objects(dmg_handle_t const handle)
     }
     if (handle->video.object.shown.count)
     {
-        qsort(handle->video.object.shown.entry, handle->video.object.shown.count, sizeof(*handle->video.object.shown.entry),
+        qsort(handle->video.object.shown.entry, handle->video.object.shown.count, sizeof (*handle->video.object.shown.entry),
             dmg_video_object_comparator);
     }
 }

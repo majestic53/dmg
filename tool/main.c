@@ -21,8 +21,16 @@
 
 #include <argument.h>
 #include <file.h>
+#include <socket.h>
 
-static dmg_error_e initialize(int argc, char *argv[], dmg_handle_t *handle, file_t *const file)
+typedef struct
+{
+    dmg_handle_t handle;
+    file_t cartridge;
+    socket_t sock;
+} context_t;
+
+static dmg_error_e initialize(int argc, char *argv[], context_t *const context)
 {
     dmg_error_e result;
     argument_t argument = {};
@@ -30,35 +38,35 @@ static dmg_error_e initialize(int argc, char *argv[], dmg_handle_t *handle, file
     {
         return result;
     }
-    file->path = argument.path;
-    if ((result = file_load(file)) != DMG_SUCCESS)
+    context->cartridge.path = argument.path;
+    if ((result = file_load(&context->cartridge)) != DMG_SUCCESS)
     {
         return result;
     }
-    if ((result = dmg_initialize(handle, &file->data, NULL, argument.palette)) != DMG_SUCCESS)
+    if ((result = dmg_initialize(&context->handle, &context->cartridge.data, NULL, argument.palette)) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(*handle));
+        fprintf(stderr, "%s\n", dmg_get_error(context->handle));
         return result;
     }
     return result;
 }
 
-static dmg_error_e load(dmg_handle_t const handle, const char *const path)
+static dmg_error_e load(context_t *const context)
 {
     dmg_error_e result = DMG_SUCCESS;
     file_t file = {};
-    if (!(file.path = calloc(strlen(path) + strlen(".sav") + 1, sizeof(uint8_t))))
+    if (!(file.path = calloc(strlen(context->cartridge.path) + strlen(".sav") + 1, sizeof (uint8_t))))
     {
         fprintf(stderr, "Failed to allocate load buffer\n");
         return DMG_FAILURE;
     }
-    strcpy(file.path, path);
+    strcpy(file.path, context->cartridge.path);
     strcat(file.path, ".sav");
     if ((file_load(&file) == DMG_SUCCESS) && file.data.buffer && file.data.length)
     {
-        if ((result = dmg_load(handle, &file.data)) != DMG_SUCCESS)
+        if ((result = dmg_load(context->handle, &file.data)) != DMG_SUCCESS)
         {
-            fprintf(stderr, "%s\n", dmg_get_error(handle));
+            fprintf(stderr, "%s\n", dmg_get_error(context->handle));
         }
     }
     free(file.data.buffer);
@@ -66,30 +74,30 @@ static dmg_error_e load(dmg_handle_t const handle, const char *const path)
     return result;
 }
 
-static dmg_error_e run(dmg_handle_t const handle)
+static dmg_error_e run(context_t *const context)
 {
     dmg_error_e result;
-    if ((result = dmg_run(handle)) != DMG_SUCCESS)
+    if ((result = dmg_run(context->handle)) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(handle));
+        fprintf(stderr, "%s\n", dmg_get_error(context->handle));
     }
     return result;
 }
 
-static dmg_error_e save(dmg_handle_t const handle, const char *const path)
+static dmg_error_e save(context_t *const context)
 {
     int result = DMG_SUCCESS;
     file_t file = {};
-    if (!(file.path = calloc(strlen(path) + strlen(".sav") + 1, sizeof(uint8_t))))
+    if (!(file.path = calloc(strlen(context->cartridge.path) + strlen(".sav") + 1, sizeof (uint8_t))))
     {
         fprintf(stderr, "Failed to allocate save buffer\n");
         return DMG_FAILURE;
     }
-    strcpy(file.path, path);
+    strcpy(file.path, context->cartridge.path);
     strcat(file.path, ".sav");
-    if ((result = dmg_save(handle, &file.data)) != DMG_SUCCESS)
+    if ((result = dmg_save(context->handle, &file.data)) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(handle));
+        fprintf(stderr, "%s\n", dmg_get_error(context->handle));
     }
     else if (file.data.buffer && file.data.length)
     {
@@ -99,27 +107,26 @@ static dmg_error_e save(dmg_handle_t const handle, const char *const path)
     return result;
 }
 
-static void uninitialize(dmg_handle_t *handle, file_t *const file)
+static void uninitialize(context_t *const context)
 {
-    dmg_uninitialize(handle);
-    free(file->data.buffer);
+    dmg_uninitialize(&context->handle);
+    free(context->cartridge.data.buffer);
 }
 
 int main(int argc, char *argv[])
 {
     dmg_error_e result;
-    dmg_handle_t handle = NULL;
-    file_t cartridge = {};
-    if ((result = initialize(argc, argv, &handle, &cartridge)) == DMG_SUCCESS)
+    context_t context = {};
+    if ((result = initialize(argc, argv, &context)) == DMG_SUCCESS)
     {
-        if ((result = load(handle, cartridge.path)) == DMG_SUCCESS)
+        if ((result = load(&context)) == DMG_SUCCESS)
         {
-            if ((result = run(handle)) == DMG_SUCCESS)
+            if ((result = run(&context)) == DMG_SUCCESS)
             {
-                result = save(handle, cartridge.path);
+                result = save(&context);
             }
         }
     }
-    uninitialize(&handle, &cartridge);
+    uninitialize(&context);
     return (result == DMG_SUCCESS) ? EXIT_SUCCESS : EXIT_FAILURE;
 }

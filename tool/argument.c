@@ -44,10 +44,10 @@ static void argument_usage(void)
     while (COMMAND[index].name)
     {
         char buffer[22] = {};
-        snprintf(buffer, sizeof(buffer), "   -%c, --%s", COMMAND[index].val, COMMAND[index].name);
-        for (uint32_t offset = strlen(buffer); offset < sizeof(buffer); ++offset)
+        snprintf(buffer, sizeof (buffer), "   -%c, --%s", COMMAND[index].val, COMMAND[index].name);
+        for (uint32_t offset = strlen(buffer); offset < sizeof (buffer); ++offset)
         {
-            buffer[offset] = (offset == (sizeof(buffer) - 1)) ? '\0' : ' ';
+            buffer[offset] = (offset == (sizeof (buffer) - 1)) ? '\0' : ' ';
         }
         fprintf(stdout, "%s%s\n", buffer, DESCRIPTION[index]);
         ++index;
@@ -80,7 +80,7 @@ dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
                 }
                 if ((argument->palette = strtoul(optarg, NULL, 10)) >= DMG_PALETTE_MAX)
                 {
-                    fprintf(stderr, "Unsupported color palette -- %s (must be %u-%u)\n", optarg, 0, DMG_PALETTE_MAX - 1);
+                    fprintf(stderr, "Unsupported color palette -- %s (must be %i-%i)\n", optarg, 0, DMG_PALETTE_MAX - 1);
                     return DMG_FAILURE;
                 }
                 break;

@@ -19,18 +19,22 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef COMMON_H_
-#define COMMON_H_
+#ifndef SOCKET_H_
+#define SOCKET_H_
 
-#include <errno.h>
-#include <getopt.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <sys/un.h>
-#include <dmg.h>
+#include <common.h>
 
-#endif /* COMMON_H_ */
+typedef struct
+{
+    int handle;
+    bool server;
+    struct sockaddr_un address;
+} socket_t;
+
+void dmg_socket_close(const socket_t *const sock);
+const char *dmg_socket_get_path(void);
+dmg_error_e dmg_socket_open(socket_t *const sock, bool server);
+
+/* TODO: READ/WRITE/ACCEPT/CONNECT */
+
+#endif /* SOCKET_H_ */

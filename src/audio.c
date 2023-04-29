@@ -157,7 +157,7 @@ void dmg_audio_interrupt(dmg_handle_t const handle)
 void dmg_audio_output(void *context, uint8_t *data, int length)
 {
     int16_t *buffer = (int16_t *)data;
-    uint32_t buffer_length = length / sizeof(int16_t);
+    uint32_t buffer_length = length / sizeof (int16_t);
     dmg_handle_t const handle = context;
     memset(data, dmg_get_silence(handle), length);
     if (dmg_audio_buffer_readable(handle) >= buffer_length)
@@ -362,10 +362,10 @@ void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
             handle->audio.control.raw = value & 0x80;
             if (!handle->audio.control.enabled)
             {
-                memset(&handle->audio.channel_1, 0, sizeof(handle->audio.channel_1));
-                memset(&handle->audio.channel_2, 0, sizeof(handle->audio.channel_2));
-                memset(&handle->audio.channel_3, 0, sizeof(handle->audio.channel_3));
-                memset(&handle->audio.channel_4, 0, sizeof(handle->audio.channel_4));
+                memset(&handle->audio.channel_1, 0, sizeof (handle->audio.channel_1));
+                memset(&handle->audio.channel_2, 0, sizeof (handle->audio.channel_2));
+                memset(&handle->audio.channel_3, 0, sizeof (handle->audio.channel_3));
+                memset(&handle->audio.channel_4, 0, sizeof (handle->audio.channel_4));
                 handle->audio.control.raw = 0;
                 handle->audio.mixer.raw = 0;
                 handle->audio.volume.raw = 0;
