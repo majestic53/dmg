@@ -55,7 +55,7 @@ uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-void dmg_input_update(dmg_handle_t const handle, dmg_button_e button, bool state)
+void dmg_input_set(dmg_handle_t const handle, dmg_button_e button, bool state)
 {
     if ((!handle->input.control.button || !handle->input.control.direction) && !handle->input.state[button] && state)
     {

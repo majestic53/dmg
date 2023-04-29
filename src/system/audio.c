@@ -154,6 +154,18 @@ void dmg_audio_interrupt(dmg_handle_t const handle)
     /* ---- */
 }
 
+void dmg_audio_output(void *context, uint8_t *data, int length)
+{
+    int16_t *buffer = (int16_t *)data;
+    uint32_t buffer_length = length / sizeof(int16_t);
+    dmg_handle_t const handle = context;
+    memset(data, dmg_get_silence(handle), length);
+    if (dmg_audio_buffer_readable(handle) >= buffer_length)
+    {
+        dmg_audio_buffer_read(handle, buffer, buffer_length);
+    }
+}
+
 uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -220,18 +232,6 @@ uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
             break;
     }
     return result;
-}
-
-void dmg_audio_update(void *context, uint8_t *data, int length)
-{
-    int16_t *buffer = (int16_t *)data;
-    uint32_t buffer_length = length / sizeof(int16_t);
-    dmg_handle_t const handle = context;
-    memset(data, dmg_get_silence(handle), length);
-    if (dmg_audio_buffer_readable(handle) >= buffer_length)
-    {
-        dmg_audio_buffer_read(handle, buffer, buffer_length);
-    }
 }
 
 void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)

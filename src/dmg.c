@@ -67,7 +67,7 @@ static bool dmg_service_poll(dmg_handle_t const handle)
                     {
                         if (SCANCODE[button] == event.key.keysym.scancode)
                         {
-                            dmg_input_update(handle, button, event.type == SDL_KEYDOWN);
+                            dmg_input_set(handle, button, event.type == SDL_KEYDOWN);
                             break;
                         }
                     }
@@ -87,7 +87,7 @@ static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
     SDL_AudioSpec desired =
     {
         .freq = 44100, .format = AUDIO_S16SYS, .channels = 1, .samples = 4096,
-        .callback = dmg_audio_update, .userdata = handle
+        .callback = dmg_audio_output, .userdata = handle
     };
     if (!(handle->service.audio.id = SDL_OpenAudioDevice(NULL, false, &desired, &handle->service.audio.spec, 0)))
     {
@@ -244,7 +244,7 @@ const dmg_version_t *dmg_get_version(void)
     return &VERSION;
 }
 
-dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data)
+dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output)
 {
     dmg_error_e result;
     if (!handle || (!*handle && !(*handle = calloc(1, sizeof(**handle)))))
@@ -259,12 +259,30 @@ dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data)
     {
         return result;
     }
+    if ((result = dmg_serial_initialize(*handle, output)) != DMG_SUCCESS)
+    {
+        return result;
+    }
     if ((result = dmg_service_setup(*handle)) != DMG_SUCCESS)
     {
         return result;
     }
     (*handle)->initialized = true;
     return result;
+}
+
+dmg_error_e dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
+{
+    if (!handle || !output)
+    {
+        return EXIT_FAILURE;
+    }
+    if (!handle->initialized)
+    {
+        return DMG_ERROR(handle, "System uninitialized");
+    }
+    *output = dmg_serial_input(handle, input);
+    return DMG_SUCCESS;
 }
 
 dmg_error_e dmg_load(dmg_handle_t const handle, const dmg_data_t *const data)

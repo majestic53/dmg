@@ -21,17 +21,23 @@
 
 #include <common.h>
 
+static uint8_t dmg_serial_output(uint8_t value)
+{
+    return value;
+}
+
 void dmg_serial_clock(dmg_handle_t const handle)
 {
     if (handle->serial.control.enabled && handle->serial.control.mode)
     {
         if (!handle->serial.delay)
         {
-            handle->serial.data = (handle->serial.data << 1) | 1;
+            handle->serial.data = (handle->serial.data << 1) | (handle->serial.output((handle->serial.data & 0x80) ? 1 : 0) & 1);
             if (++handle->serial.index > 7)
             {
                 dmg_processor_interrupt(handle, DMG_INTERRUPT_SERIAL);
                 handle->serial.control.enabled = false;
+                handle->serial.index = 0;
             }
             else
             {
@@ -40,6 +46,31 @@ void dmg_serial_clock(dmg_handle_t const handle)
         }
         --handle->serial.delay;
     }
+}
+
+dmg_error_e dmg_serial_initialize(dmg_handle_t const handle, const dmg_output_f output)
+{
+    handle->serial.output = ((!output) ? dmg_serial_output : output);
+    return DMG_SUCCESS;
+}
+
+uint8_t dmg_serial_input(dmg_handle_t const handle, uint8_t value)
+{
+    uint8_t result;
+    if (!handle->serial.control.enabled)
+    {
+        handle->serial.control.enabled = true;
+        handle->serial.index = 0;
+    }
+    result = (handle->serial.data & 0x80) ? 1 : 0;
+    handle->serial.data = (handle->serial.data << 1) | (value & 1);
+    if (++handle->serial.index > 7)
+    {
+        dmg_processor_interrupt(handle, DMG_INTERRUPT_SERIAL);
+        handle->serial.control.enabled = false;
+        handle->serial.index = 0;
+    }
+    return result;
 }
 
 uint8_t dmg_serial_read(dmg_handle_t const handle, uint16_t address)

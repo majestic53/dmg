@@ -166,7 +166,7 @@ static dmg_error_e initialize(int argc, char *argv[], dmg_handle_t *handle, file
     {
         return result;
     }
-    if ((result = dmg_initialize(handle, &file->data)) != DMG_SUCCESS)
+    if ((result = dmg_initialize(handle, &file->data, NULL)) != DMG_SUCCESS)
     {
         fprintf(stderr, "%s\n", dmg_get_error(*handle));
         return result;
