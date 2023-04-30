@@ -33,28 +33,16 @@ typedef union
     uint32_t raw;
 } dmg_color_t;
 
-static const dmg_color_t PALETTE[][DMG_PALETTE_MAX][DMG_COLOR_MAX] =
+static const dmg_color_t PALETTE[][DMG_COLOR_MAX] =
 {
-    { /* FOREGROUND */
-        { /* DMG */
-            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
-            { .raw = 0xFF939905 }, { .raw = 0xFF4D7D2C }, { .raw = 0xFF296341 }, { .raw = 0xFF0C3B1C },
-        },
-        { /* GBP */
-            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
-            { .raw = 0xFFE5E5E5 }, { .raw = 0xFFAEBBAA }, { .raw = 0xFF889683 }, { .raw = 0xFF5C5F5C },
-        },
+    { /* DMG */
+        /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+        { .raw = 0xFFAAB10F }, { .raw = 0xFF5C9136 }, { .raw = 0xFF33714C }, { .raw = 0xFF0F4222 },
     },
-    { /* BACKGROUND */
-        { /* DMG */
-            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
-            { .raw = 0xFFAAB10F }, { .raw = 0xFF5C9136 }, { .raw = 0xFF33714C }, { .raw = 0xFF0F4222 },
-        },
-        { /* GBP */
-            /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
-            { .raw = 0xFFFEFEFE }, { .raw = 0xFFC1CFBE }, { .raw = 0xFF97A791 }, { .raw = 0xFF656865 },
-        },
-    }
+    { /* GBP */
+        /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
+        { .raw = 0xFFFEFEFE }, { .raw = 0xFFC1CFBE }, { .raw = 0xFF97A791 }, { .raw = 0xFF656865 },
+    },
 };
 
 static const SDL_Scancode SCANCODE[] =
@@ -129,7 +117,7 @@ static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
 
 static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palette_e palette)
 {
-    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 432, SDL_WINDOW_RESIZABLE)))
+    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 960, 864, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
     }
@@ -197,7 +185,13 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
             {
                 for (uint8_t x_off = 0; x_off < 3; ++x_off)
                 {
-                    dmg_color_t value = PALETTE[((x_off > 0) && (y_off > 0))][handle->service.palette][color];
+                    dmg_color_t value = PALETTE[handle->service.palette][color];
+                    if (!x_off || !y_off)
+                    {
+                        value.red *= 0.9;
+                        value.green *= 0.9;
+                        value.blue *= 0.9;
+                    }
                     if (color_above > color)
                     {
                         value.red *= 0.75;
