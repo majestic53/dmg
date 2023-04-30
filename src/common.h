@@ -39,7 +39,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xa141519
+#define DMG_PATCH 0x9c7e15a
 
 typedef enum
 {
@@ -68,7 +68,7 @@ struct dmg_s
         dmg_color_e pixel[144][160];
         SDL_Cursor *cursor;
         SDL_Renderer *renderer;
-        SDL_Texture *texture[2];
+        SDL_Texture *texture;
         SDL_Window *window;
         struct
         {
