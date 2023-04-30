@@ -36,6 +36,34 @@ static const char *DESCRIPTION[] =
     "Show version information",
 };
 
+static const char *PALETTE[] =
+{
+    "dmg",
+    "gbp",
+};
+
+static dmg_error_e argument_palette(argument_t *const argument)
+{
+    if (argument->palette < DMG_PALETTE_MAX)
+    {
+        fprintf(stderr, "Redefined color palette -- %s\n", optarg);
+        return DMG_FAILURE;
+    }
+    for (argument->palette = 0; argument->palette < DMG_PALETTE_MAX; ++argument->palette)
+    {
+        if (!strcmp(optarg, PALETTE[argument->palette]))
+        {
+            break;
+        }
+    }
+    if (argument->palette == DMG_PALETTE_MAX)
+    {
+        fprintf(stderr, "Unsupported color palette -- %s\n", optarg);
+        return DMG_FAILURE;
+    }
+    return DMG_SUCCESS;
+}
+
 static void argument_usage(void)
 {
     uint32_t index = 0;
@@ -63,6 +91,7 @@ static void argument_version(void)
 dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
 {
     int option, index;
+    dmg_error_e result;
     opterr = 1;
     argument->palette = DMG_PALETTE_MAX;
     while ((option = getopt_long(argc, argv, "hp:v", COMMAND, &index)) != -1)
@@ -73,15 +102,9 @@ dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
                 argument_usage();
                 return DMG_FAILURE;
             case 'p': /* PALETTE */
-                if (argument->palette < DMG_PALETTE_MAX)
+                if ((result = argument_palette(argument)) != DMG_SUCCESS)
                 {
-                    fprintf(stderr, "Redefined color palette -- %s\n", optarg);
-                    return DMG_FAILURE;
-                }
-                if ((argument->palette = strtoul(optarg, NULL, 10)) >= DMG_PALETTE_MAX)
-                {
-                    fprintf(stderr, "Unsupported color palette -- %s (must be %i-%i)\n", optarg, 0, DMG_PALETTE_MAX - 1);
-                    return DMG_FAILURE;
+                    return result;
                 }
                 break;
             case 'v': /* VERSION */

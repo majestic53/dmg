@@ -53,9 +53,9 @@ Options:
 # To launch with a cartridge, run the following command
 ./dmg cartridge.gb
 # To launch with the DMG color palette, run the following command
-./dmg cartridge.gb --palette 0
+./dmg cartridge.gb --palette dmg
 # To launch with the GBP color palette, run the following command
-./dmg cartridge.gb --palette 1
+./dmg cartridge.gb --palette gbp
 ```
 
 ### Keybindings
