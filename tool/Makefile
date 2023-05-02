@@ -21,4 +21,4 @@ $(TARGET): $(OBJECTS)
 	@$(CC) $(CFLAGS) $(OBJECTS) $(shell sdl2-config --libs) -o $@
 
 %.o: %.c
-	@$(CC) $(CFLAGS) $(INCLUDES) $(shell sdl2-config --cflags) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

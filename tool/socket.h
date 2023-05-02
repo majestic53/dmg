@@ -27,14 +27,17 @@
 typedef struct
 {
     int handle;
-    bool server;
+    bool master;
     struct sockaddr_un address;
+    struct {
+        struct sockaddr_un address;
+        socklen_t length;
+    } remote;
 } socket_t;
 
 void dmg_socket_close(const socket_t *const sock);
-const char *dmg_socket_get_path(void);
-dmg_error_e dmg_socket_open(socket_t *const sock, bool server);
-
-/* TODO: READ/WRITE/ACCEPT/CONNECT */
+dmg_error_e dmg_socket_open(socket_t *const sock);
+void dmg_socket_receive(socket_t *const sock, uint8_t *value);
+void dmg_socket_send(const socket_t *const sock, uint8_t value);
 
 #endif /* SOCKET_H_ */

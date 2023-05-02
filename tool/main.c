@@ -30,6 +30,13 @@ typedef struct
     socket_t sock;
 } context_t;
 
+static uint8_t serial_output(uint8_t value)
+{
+    /* TODO */
+    return value;
+    /* ---- */
+}
+
 static dmg_error_e initialize(int argc, char *argv[], context_t *const context)
 {
     dmg_error_e result;
@@ -43,7 +50,11 @@ static dmg_error_e initialize(int argc, char *argv[], context_t *const context)
     {
         return result;
     }
-    if ((result = dmg_initialize(&context->handle, &context->cartridge.data, NULL, argument.palette)) != DMG_SUCCESS)
+    if ((result = dmg_socket_open(&context->sock)) != DMG_SUCCESS)
+    {
+        return result;
+    }
+    if ((result = dmg_initialize(&context->handle, &context->cartridge.data, serial_output, argument.palette)) != DMG_SUCCESS)
     {
         fprintf(stderr, "%s\n", dmg_get_error(context->handle));
         return result;
@@ -110,6 +121,7 @@ static dmg_error_e save(context_t *const context)
 static void uninitialize(context_t *const context)
 {
     dmg_uninitialize(&context->handle);
+    dmg_socket_close(&context->sock);
     free(context->cartridge.data.buffer);
 }
 
