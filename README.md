@@ -85,6 +85,15 @@ The following mappers are supported:
 |15-19|[MBC3](https://gbdev.io/pandocs/MBC3.html) |2MB ROM/32KB RAM  |
 |25-30|[MBC5](https://gbdev.io/pandocs/MBC5.html) |8MB ROM/128KB RAM |
 
+## Palettes
+
+The following palettes are supported:
+
+|Id |Name          |Colors                      |
+|:--|:-------------|:---------------------------|
+|dmg|DMG LCD screen|![dmg](docs/palette/dmg.png)|
+|gbp|GBP LCD screen|![gbp](docs/palette/gbp.png)|
+
 ### License
 
 Copyright (C) 2023 David Jolly. Released under the [MIT License](LICENSE).
