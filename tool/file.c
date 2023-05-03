@@ -21,14 +21,14 @@
 
 #include <file.h>
 
-dmg_error_e file_load(file_t *const file)
+int file_load(file_t *const file)
 {
     FILE *fp;
     long length;
     if (!(fp = fopen(file->path, "rb")))
     {
         fprintf(stderr, "File does not exist -- %s\n", file->path);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     fseek(fp, 0, SEEK_END);
     length = ftell(fp);
@@ -37,39 +37,39 @@ dmg_error_e file_load(file_t *const file)
     {
         fprintf(stderr, "Invalid file length -- %s\n", file->path);
         fclose(fp);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     if (!(file->data.buffer = calloc(length, sizeof (uint8_t))))
     {
         fprintf(stderr, "Failed to allocate read buffer\n");
         fclose(fp);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     file->data.length = length;
     if (fread(file->data.buffer, sizeof (uint8_t), file->data.length, fp) != file->data.length)
     {
         fprintf(stderr, "Failed to read file -- %s\n", file->path);
         fclose(fp);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     fclose(fp);
-    return DMG_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
-dmg_error_e file_save(const file_t *const file)
+int file_save(const file_t *const file)
 {
     FILE *fp;
     if (!(fp = fopen(file->path, "wb")))
     {
         fprintf(stderr, "File does not exist -- %s\n", file->path);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     if (fwrite(file->data.buffer, sizeof (uint8_t), file->data.length, fp) != file->data.length)
     {
         fprintf(stderr, "Failed to write file -- %s\n", file->path);
         fclose(fp);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     fclose(fp);
-    return DMG_SUCCESS;
+    return EXIT_SUCCESS;
 }

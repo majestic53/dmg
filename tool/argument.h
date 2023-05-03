@@ -30,6 +30,6 @@ typedef struct
     dmg_palette_e palette;
 } argument_t;
 
-dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument);
+int argument_parse(int argc, char *argv[], argument_t *const argument);
 
 #endif /* ARGUMENT_H_ */

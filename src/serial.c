@@ -21,11 +21,6 @@
 
 #include <common.h>
 
-static uint8_t dmg_serial_output(uint8_t value)
-{
-    return value;
-}
-
 void dmg_serial_clock(dmg_handle_t const handle)
 {
     if (handle->serial.control.enabled && handle->serial.control.mode)
@@ -50,7 +45,11 @@ void dmg_serial_clock(dmg_handle_t const handle)
 
 dmg_error_e dmg_serial_initialize(dmg_handle_t const handle, const dmg_output_f output)
 {
-    handle->serial.output = ((!output) ? dmg_serial_output : output);
+    if (!output)
+    {
+        return DMG_ERROR(handle, "Invalid serial output -- %p", output);
+    }
+    handle->serial.output = output;
     return DMG_SUCCESS;
 }
 
@@ -101,6 +100,7 @@ void dmg_serial_write(dmg_handle_t const handle, uint16_t address, uint8_t value
             handle->serial.control.raw = 0x7E | value;
             if (handle->serial.control.enabled)
             {
+                handle->serial.delay = 0;
                 handle->serial.index = 0;
             }
             break;

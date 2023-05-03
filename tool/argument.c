@@ -42,12 +42,12 @@ static const char *PALETTE[] =
     "gbp",
 };
 
-static dmg_error_e argument_palette(argument_t *const argument)
+static int argument_palette(argument_t *const argument)
 {
     if (argument->palette < DMG_PALETTE_MAX)
     {
         fprintf(stderr, "Redefined color palette -- %s\n", optarg);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
     for (argument->palette = 0; argument->palette < DMG_PALETTE_MAX; ++argument->palette)
     {
@@ -59,9 +59,9 @@ static dmg_error_e argument_palette(argument_t *const argument)
     if (argument->palette == DMG_PALETTE_MAX)
     {
         fprintf(stderr, "Unsupported color palette -- %s\n", optarg);
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
-    return DMG_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 static void argument_usage(void)
@@ -88,10 +88,9 @@ static void argument_version(void)
     fprintf(stdout, "%u.%u-%x\n", version->major, version->minor, version->patch);
 }
 
-dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
+int argument_parse(int argc, char *argv[], argument_t *const argument)
 {
-    int option, index;
-    dmg_error_e result;
+    int option, index, result;
     opterr = 1;
     argument->palette = DMG_PALETTE_MAX;
     while ((option = getopt_long(argc, argv, "hp:v", COMMAND, &index)) != -1)
@@ -100,19 +99,19 @@ dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
         {
             case 'h': /* HELP */
                 argument_usage();
-                return DMG_FAILURE;
+                return EXIT_FAILURE;
             case 'p': /* PALETTE */
-                if ((result = argument_palette(argument)) != DMG_SUCCESS)
+                if ((result = argument_palette(argument)) != EXIT_SUCCESS)
                 {
                     return result;
                 }
                 break;
             case 'v': /* VERSION */
                 argument_version();
-                return DMG_FAILURE;
+                return EXIT_FAILURE;
             case '?':
             default:
-                return DMG_FAILURE;
+                return EXIT_FAILURE;
         }
     }
     for (option = optind; option < argc; ++option)
@@ -120,14 +119,14 @@ dmg_error_e argument_parse(int argc, char *argv[], argument_t *const argument)
         if (argument->path)
         {
             fprintf(stderr, "Redefined file path -- %s\n", argv[option]);
-            return DMG_FAILURE;
+            return EXIT_FAILURE;
         }
         argument->path = argv[option];
     }
     if (!argument->path)
     {
         fprintf(stderr, "Undefined file path\n");
-        return DMG_FAILURE;
+        return EXIT_FAILURE;
     }
-    return DMG_SUCCESS;
+    return EXIT_SUCCESS;
 }

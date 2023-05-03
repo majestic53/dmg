@@ -30,7 +30,7 @@ typedef struct
     dmg_data_t data;
 } file_t;
 
-dmg_error_e file_load(file_t *const file);
-dmg_error_e file_save(const file_t *const file);
+int file_load(file_t *const file);
+int file_save(const file_t *const file);
 
 #endif /* FILE_H_ */

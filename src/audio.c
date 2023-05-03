@@ -67,7 +67,6 @@ static bool dmg_audio_buffer_writable(dmg_handle_t const handle)
 static float dmg_audio_sample_channel_1(dmg_handle_t const handle)
 {
     /* TODO */
-    (void)handle;
     return 0.f;
     /* ---- */
 }
@@ -75,7 +74,6 @@ static float dmg_audio_sample_channel_1(dmg_handle_t const handle)
 static float dmg_audio_sample_channel_2(dmg_handle_t const handle)
 {
     /* TODO */
-    (void)handle;
     return 0.f;
     /* ---- */
 }
@@ -83,7 +81,6 @@ static float dmg_audio_sample_channel_2(dmg_handle_t const handle)
 static float dmg_audio_sample_channel_3(dmg_handle_t const handle)
 {
     /* TODO */
-    (void)handle;
     return 0.f;
     /* ---- */
 }
@@ -91,7 +88,6 @@ static float dmg_audio_sample_channel_3(dmg_handle_t const handle)
 static float dmg_audio_sample_channel_4(dmg_handle_t const handle)
 {
     /* TODO */
-    (void)handle;
     return 0.f;
     /* ---- */
 }
@@ -150,8 +146,6 @@ void dmg_audio_clock(dmg_handle_t const handle)
 void dmg_audio_interrupt(dmg_handle_t const handle)
 {
     /* TODO: HANDLE TIMER CLOCK (APU DIV) */
-    (void)handle;
-    /* ---- */
 }
 
 void dmg_audio_output(void *context, uint8_t *data, int length)

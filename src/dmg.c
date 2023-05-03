@@ -117,7 +117,7 @@ static dmg_error_e dmg_service_setup_audio(dmg_handle_t const handle)
 
 static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palette_e palette)
 {
-    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 960, 864, SDL_WINDOW_RESIZABLE)))
+    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
     }
