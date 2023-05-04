@@ -22,7 +22,10 @@
 #ifndef SOCKET_H_
 #define SOCKET_H_
 
-#include <common.h>
+#include <stdbool.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <dmg.h>
 
 typedef struct
 {

@@ -19,6 +19,10 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <getopt.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <argument.h>
 
 static const struct option COMMAND[] =

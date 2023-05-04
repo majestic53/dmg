@@ -22,7 +22,8 @@
 #ifndef ARGUMENT_H_
 #define ARGUMENT_H_
 
-#include <common.h>
+#include <stdbool.h>
+#include <dmg.h>
 
 typedef struct
 {

@@ -22,7 +22,7 @@
 #ifndef FILE_H_
 #define FILE_H_
 
-#include <common.h>
+#include <dmg.h>
 
 typedef struct
 {

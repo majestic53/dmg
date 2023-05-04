@@ -22,12 +22,6 @@
 #ifndef DMG_COMMON_H_
 #define DMG_COMMON_H_
 
-#include <ctype.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <SDL.h>
 #include <audio.h>
 #include <input.h>
@@ -39,7 +33,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xba717ad
+#define DMG_PATCH 0x3b7b00f
 
 typedef enum
 {

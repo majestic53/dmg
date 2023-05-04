@@ -19,6 +19,9 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <argument.h>
 #include <file.h>
 #include <socket.h>
