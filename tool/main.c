@@ -26,13 +26,14 @@
 typedef struct
 {
     dmg_handle_t handle;
+    argument_t argument;
     file_t cartridge;
     socket_t sock;
 } context_t;
 
 static context_t g_context = {};
 
-static uint8_t serial_output(uint8_t value)
+static uint8_t output(uint8_t value)
 {
     return 1;
 }
@@ -40,21 +41,20 @@ static uint8_t serial_output(uint8_t value)
 static int initialize(int argc, char *argv[])
 {
     int result;
-    argument_t argument = {};
-    if ((result = argument_parse(argc, argv, &argument)) != EXIT_SUCCESS)
+    if ((result = argument_parse(argc, argv, &g_context.argument)) != EXIT_SUCCESS)
     {
         return result;
     }
-    g_context.cartridge.path = argument.path;
+    g_context.cartridge.path = g_context.argument.path;
     if ((result = file_load(&g_context.cartridge)) != EXIT_SUCCESS)
     {
         return result;
     }
-    if ((result = socket_open(&g_context.sock)) != EXIT_SUCCESS)
+    if (g_context.argument.link && (result = socket_open(&g_context.sock)) != EXIT_SUCCESS)
     {
         return result;
     }
-    if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, serial_output, argument.palette) != DMG_SUCCESS)
+    if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, output, g_context.argument.palette) != DMG_SUCCESS)
     {
         fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
         return EXIT_FAILURE;
@@ -123,7 +123,10 @@ static int save(void)
 static void uninitialize(void)
 {
     dmg_uninitialize(&g_context.handle);
-    socket_close(&g_context.sock);
+    if (g_context.argument.link)
+    {
+        socket_close(&g_context.sock);
+    }
     free(g_context.cartridge.data.buffer);
 }
 

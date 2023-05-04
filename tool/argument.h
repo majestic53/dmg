@@ -26,6 +26,7 @@
 
 typedef struct
 {
+    bool link;
     char *path;
     dmg_palette_e palette;
 } argument_t;

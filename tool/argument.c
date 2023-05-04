@@ -24,6 +24,7 @@
 static const struct option COMMAND[] =
 {
     { "help", no_argument, NULL, 'h', },
+    { "link", no_argument, NULL, 'l', },
     { "palette", required_argument, NULL, 'p', },
     { "version", no_argument, NULL, 'v', },
     { NULL, 0, NULL, 0, },
@@ -32,6 +33,7 @@ static const struct option COMMAND[] =
 static const char *DESCRIPTION[] =
 {
     "Show help information",
+    "Enable serial link",
     "Set color palette",
     "Show version information",
 };
@@ -41,6 +43,17 @@ static const char *PALETTE[] =
     "dmg",
     "gbp",
 };
+
+static int argument_link(argument_t *const argument)
+{
+    if (argument->link)
+    {
+        fprintf(stderr, "Redefined serial link\n");
+        return EXIT_FAILURE;
+    }
+    argument->link = true;
+    return EXIT_SUCCESS;
+}
 
 static int argument_palette(argument_t *const argument)
 {
@@ -93,13 +106,19 @@ int argument_parse(int argc, char *argv[], argument_t *const argument)
     int option, index, result;
     opterr = 1;
     argument->palette = DMG_PALETTE_MAX;
-    while ((option = getopt_long(argc, argv, "hp:v", COMMAND, &index)) != -1)
+    while ((option = getopt_long(argc, argv, "hlp:v", COMMAND, &index)) != -1)
     {
         switch (option)
         {
             case 'h': /* HELP */
                 argument_usage();
                 return EXIT_FAILURE;
+            case 'l': /* LINK */
+                if ((result = argument_link(argument)) != EXIT_SUCCESS)
+                {
+                    return result;
+                }
+                break;
             case 'p': /* PALETTE */
                 if ((result = argument_palette(argument)) != EXIT_SUCCESS)
                 {
