@@ -35,7 +35,7 @@ typedef union
 
 static const dmg_color_t PALETTE[][DMG_COLOR_MAX] =
 {
-    { /* DMG */
+    { /* GB */
         /* WHITE               LIGHT-GREY             DARK-GREY              BLACK */
         { .raw = 0xFFAAB10F }, { .raw = 0xFF5C9136 }, { .raw = 0xFF33714C }, { .raw = 0xFF0F4222 },
     },

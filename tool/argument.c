@@ -44,7 +44,7 @@ static const char *DESCRIPTION[] =
 
 static const char *PALETTE[] =
 {
-    "dmg",
+    "gb",
     "gbp",
 };
 

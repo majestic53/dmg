@@ -55,9 +55,9 @@ Options:
 ./dmg cartridge.gb
 # To launch with the serial link enabled, run the following command
 ./dmg cartridge.gb --link
-# To launch with the DMG color palette, run the following command
-./dmg cartridge.gb --palette dmg
-# To launch with the GBP color palette, run the following command
+# To launch with the Gameboy palette, run the following command
+./dmg cartridge.gb --palette gb
+# To launch with the Gameboy Pocket palette, run the following command
 ./dmg cartridge.gb --palette gbp
 ```
 
@@ -92,10 +92,10 @@ The following mappers are supported:
 
 The following palettes are supported:
 
-|Id |Name          |Colors                      |
-|:--|:-------------|:---------------------------|
-|dmg|DMG LCD screen|![dmg](docs/palette/dmg.png)|
-|gbp|GBP LCD screen|![gbp](docs/palette/gbp.png)|
+|Id |Name                  |Colors                      |
+|:--|:---------------------|:---------------------------|
+|gb |Gameboy palette       |![gb](docs/palette/gb.png)  |
+|gbp|Gameboy Pocket palette|![gbp](docs/palette/gbp.png)|
 
 ### License
 

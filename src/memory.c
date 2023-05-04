@@ -21,6 +21,31 @@
 
 #include <common.h>
 
+typedef struct
+{
+    uint8_t entry[4];
+    uint8_t logo[48];
+    uint8_t title[11];
+    uint8_t manufacturer[4];
+    uint8_t cgb;
+    uint8_t licensee[2];
+    uint8_t sgb;
+    uint8_t id;
+    uint8_t rom;
+    uint8_t ram;
+    uint8_t destination;
+    uint8_t licensee_old;
+    uint8_t version;
+    uint8_t checksum;
+    uint16_t checksum_global;
+} dmg_memory_header_t;
+
+typedef struct
+{
+    uint8_t id;
+    dmg_mapper_e type;
+} dmg_memory_type_t;
+
 static const uint8_t BOOTROM[] =
 {
     0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
