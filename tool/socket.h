@@ -23,9 +23,9 @@
 #define SOCKET_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include <dmg.h>
 
 typedef struct
 {
