@@ -160,10 +160,10 @@ static dmg_error_e dmg_service_sync(dmg_handle_t const handle)
         for (uint8_t x = 0; x < 160; ++x)
         {
             uint16_t x_base = x * 3, y_base = y * 3;
-            dmg_color_e color = handle->service.pixel[y][x], color_above = color;
+            dmg_color_e color = handle->service.color[y][x], color_above = color;
             if (y)
             {
-                color_above = handle->service.pixel[y - 1][x];
+                color_above = handle->service.color[y - 1][x];
             }
             for (uint8_t y_off = 0; y_off < 3; ++y_off)
             {
@@ -244,6 +244,11 @@ static void dmg_service_teardown(dmg_handle_t const handle)
     SDL_Quit();
 }
 
+dmg_color_e dmg_get_color(dmg_handle_t const handle, uint8_t x, uint8_t y)
+{
+    return handle->service.color[y][x];
+}
+
 const char *dmg_get_error(dmg_handle_t const handle)
 {
     if (!handle)
@@ -255,11 +260,6 @@ const char *dmg_get_error(dmg_handle_t const handle)
         return "No error";
     }
     return handle->error;
-}
-
-dmg_color_e dmg_get_pixel(dmg_handle_t const handle, uint8_t x, uint8_t y)
-{
-    return handle->service.pixel[y][x];
 }
 
 uint8_t dmg_get_silence(dmg_handle_t const handle)
@@ -400,6 +400,11 @@ dmg_error_e dmg_save(dmg_handle_t const handle, dmg_data_t *const data)
     return dmg_memory_save(handle, data);
 }
 
+void dmg_set_color(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y)
+{
+    handle->service.color[y][x] = color;
+}
+
 dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...)
 {
     va_list arguments;
@@ -408,11 +413,6 @@ dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t 
     va_end(arguments);
     snprintf(handle->error + strlen(handle->error), sizeof (handle->error) - strlen(handle->error), " (%s:%u)", file, line);
     return DMG_FAILURE;
-}
-
-void dmg_set_pixel(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y)
-{
-    handle->service.pixel[y][x] = color;
 }
 
 void dmg_uninitialize(dmg_handle_t *handle)

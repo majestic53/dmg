@@ -17,7 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0x22c1769
+#define DMG_PATCH 0xe502217
 
 typedef enum
 {
@@ -43,7 +43,7 @@ struct dmg_s
     {
         uint32_t tick;
         dmg_palette_e palette;
-        dmg_color_e pixel[144][160];
+        dmg_color_e color[144][160];
         SDL_Cursor *cursor;
         SDL_Renderer *renderer;
         SDL_Texture *texture;
@@ -59,11 +59,11 @@ struct dmg_s
 #define DMG_ERROR(_HANDLE_, _FORMAT_, ...) \
     dmg_set_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
 
-dmg_color_e dmg_get_pixel(dmg_handle_t const handle, uint8_t x, uint8_t y);
+dmg_color_e dmg_get_color(dmg_handle_t const handle, uint8_t x, uint8_t y);
 uint8_t dmg_get_silence(dmg_handle_t const handle);
 uint8_t dmg_read(dmg_handle_t const handle, uint16_t address);
+void dmg_set_color(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y);
 dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
-void dmg_set_pixel(dmg_handle_t const handle, dmg_color_e color, uint8_t x, uint8_t y);
 void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_COMMON_H_ */

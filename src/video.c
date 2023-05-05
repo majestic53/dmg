@@ -121,7 +121,7 @@ static void dmg_video_render_background(dmg_handle_t const handle)
             y += handle->video.scroll.y;
         }
         color = dmg_video_palette_color(&handle->video.background.palette, dmg_video_background_color(handle, map, x, y));
-        dmg_set_pixel(handle, color, pixel, handle->video.line.y);
+        dmg_set_color(handle, color, pixel, handle->video.line.y);
     }
 }
 
@@ -143,10 +143,10 @@ static void dmg_video_render_objects(dmg_handle_t const handle)
             }
             if ((color = dmg_video_object_color(handle, object, x, y)) != DMG_COLOR_WHITE)
             {
-                if (!object->attribute.priority || (dmg_get_pixel(handle, object->x + x - 8, y) == DMG_COLOR_WHITE))
+                if (!object->attribute.priority || (dmg_get_color(handle, object->x + x - 8, y) == DMG_COLOR_WHITE))
                 {
                     color = dmg_video_palette_color(&handle->video.object.palette[object->attribute.palette], color);
-                    dmg_set_pixel(handle, color, object->x + x - 8, y);
+                    dmg_set_color(handle, color, object->x + x - 8, y);
                 }
             }
         }
@@ -389,7 +389,7 @@ void dmg_video_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
                 {
                     for (uint8_t x = 0; x < 160; ++x)
                     {
-                        dmg_set_pixel(handle, DMG_COLOR_WHITE, x, y);
+                        dmg_set_color(handle, DMG_COLOR_WHITE, x, y);
                     }
                 }
             }
