@@ -56,7 +56,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR21 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr21;
@@ -65,7 +65,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR22 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr22;
@@ -74,7 +74,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR24 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr24;
@@ -83,7 +83,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR30 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr30;
@@ -92,7 +92,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR31 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr31;
@@ -101,7 +101,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR32 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr32;
@@ -110,7 +110,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR34 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr34;
@@ -119,7 +119,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR41 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr41;
@@ -128,7 +128,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR42 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr42;
@@ -137,7 +137,7 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR43 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr43;
@@ -146,13 +146,14 @@ typedef union
 {
     struct
     {
-        /* TODO */
+        /* TODO: POPULATE NR44 BITFIELD */
     };
     uint8_t raw;
 } dmg_audio_nr44;
 
 typedef struct
 {
+    uint8_t counter;
     uint8_t delay;
     uint8_t ram[16];
     struct
@@ -172,8 +173,8 @@ typedef struct
                 uint8_t low;
                 dmg_audio_nr14 high;
             };
-            uint16_t raw : 11;
-        } frequency;
+            uint16_t frequency : 11;
+        };
     } channel_1;
     struct
     {
@@ -184,8 +185,8 @@ typedef struct
                 uint8_t low;
                 dmg_audio_nr24 high;
             };
-            uint16_t raw : 11;
-        } frequency;
+            uint16_t frequency : 11;
+        };
     } channel_2;
     struct
     {
@@ -197,8 +198,8 @@ typedef struct
                 uint8_t low;
                 dmg_audio_nr34 high;
             };
-            uint16_t raw : 11;
-        } frequency;
+            uint16_t frequency : 11;
+        };
     } channel_3;
     struct
     {

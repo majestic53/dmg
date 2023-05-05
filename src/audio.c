@@ -50,28 +50,28 @@ static bool dmg_audio_buffer_writable(dmg_handle_t const handle)
 
 static float dmg_audio_sample_channel_1(dmg_handle_t const handle)
 {
-    /* TODO */
+    /* TODO: GENERATE CHANNEL 1 SAMPLE */
     return 0.f;
     /* ---- */
 }
 
 static float dmg_audio_sample_channel_2(dmg_handle_t const handle)
 {
-    /* TODO */
+    /* TODO: GENERATE CHANNEL 2 SAMPLE */
     return 0.f;
     /* ---- */
 }
 
 static float dmg_audio_sample_channel_3(dmg_handle_t const handle)
 {
-    /* TODO */
+    /* TODO: GENERATE CHANNEL 3 SAMPLE */
     return 0.f;
     /* ---- */
 }
 
 static float dmg_audio_sample_channel_4(dmg_handle_t const handle)
 {
-    /* TODO */
+    /* TODO: GENERATE CHANNEL 4 SAMPLE */
     return 0.f;
     /* ---- */
 }
@@ -114,7 +114,6 @@ static float dmg_audio_sample_volume(dmg_handle_t const handle)
 
 void dmg_audio_clock(dmg_handle_t const handle)
 {
-    /* TODO: HANDLE SYSTEM CLOCK */
     if (!handle->audio.delay)
     {
         if (handle->audio.control.enabled && dmg_audio_buffer_writable(handle))
@@ -129,7 +128,22 @@ void dmg_audio_clock(dmg_handle_t const handle)
 
 void dmg_audio_interrupt(dmg_handle_t const handle)
 {
-    /* TODO: HANDLE TIMER CLOCK (APU DIV) */
+    if (!(handle->audio.counter % 2))
+    {
+        /* TODO: STEP SOUND LENGTH */
+    }
+    if (!(handle->audio.counter % 4))
+    {
+        /* TODO: STEP CHANNEL 1 FREQUENCY SWEEP */
+    }
+    if (!(handle->audio.counter % 8))
+    {
+        /* TODO: STEP ENVELOPE SWEEP */
+    }
+    if (++handle->audio.counter > 8)
+    {
+        handle->audio.counter = 0;
+    }
 }
 
 void dmg_audio_output(void *context, uint8_t *data, int length)
@@ -159,7 +173,7 @@ uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
             result = handle->audio.channel_1.envelope.raw;
             break;
         case 0xFF14: /* NR14 */
-            result = handle->audio.channel_1.frequency.high.raw & 0x40;
+            result = handle->audio.channel_1.high.raw & 0x40;
             break;
         case 0xFF16: /* NR21 */
             result = handle->audio.channel_2.length.raw & 0xC0;
@@ -168,7 +182,7 @@ uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
             result = handle->audio.channel_2.envelope.raw;
             break;
         case 0xFF19: /* NR24 */
-            result = handle->audio.channel_2.frequency.high.raw & 0x40;
+            result = handle->audio.channel_2.high.raw & 0x40;
             break;
         case 0xFF1A: /* NR30 */
             result = handle->audio.channel_3.control.raw & 0x80;
@@ -180,7 +194,7 @@ uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
             result = handle->audio.channel_3.wave.raw & 0x60;
             break;
         case 0xFF1E: /* NR34 */
-            result = handle->audio.channel_3.frequency.high.raw & 0x40;
+            result = handle->audio.channel_3.high.raw & 0x40;
             break;
         case 0xFF20: /* NR41 */
             result = handle->audio.channel_4.length.raw;
@@ -237,13 +251,17 @@ void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
         case 0xFF13: /* NR13 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_1.frequency.low = value;
+                handle->audio.channel_1.low = value;
             }
             break;
         case 0xFF14: /* NR14 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_1.frequency.high.raw = value;
+                handle->audio.channel_1.high.raw = value;
+                if (handle->audio.channel_1.high.triggered)
+                {
+                    handle->audio.control.channel_1_enabled = true;
+                }
             }
             break;
         case 0xFF16: /* NR21 */
@@ -261,13 +279,13 @@ void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
         case 0xFF18: /* NR23 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_2.frequency.low = value;
+                handle->audio.channel_2.low = value;
             }
             break;
         case 0xFF19: /* NR24 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_2.frequency.high.raw = value;
+                handle->audio.channel_2.high.raw = value;
             }
             break;
         case 0xFF1A: /* NR30 */
@@ -291,13 +309,13 @@ void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
         case 0xFF1D: /* NR33 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_3.frequency.low = value;
+                handle->audio.channel_3.low = value;
             }
             break;
         case 0xFF1E: /* NR34 */
             if (handle->audio.control.enabled)
             {
-                handle->audio.channel_3.frequency.high.raw = value;
+                handle->audio.channel_3.high.raw = value;
             }
             break;
         case 0xFF20: /* NR41 */
