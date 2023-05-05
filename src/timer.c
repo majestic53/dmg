@@ -13,26 +13,35 @@ static const uint16_t OFFSET[] =
     8192,
 };
 
-void dmg_timer_clock(dmg_handle_t const handle)
+static void dmg_timer_increment_audio(dmg_handle_t const handle)
 {
-    bool overflow;
-    ++handle->timer.divider;
-    if (handle->timer.control.enabled)
-    {
-        overflow = handle->timer.divider & OFFSET[handle->timer.control.mode];
-        if (handle->timer.overflow[0] && !overflow && !++handle->timer.counter)
-        {
-            handle->timer.counter = handle->timer.modulo;
-            dmg_processor_interrupt(handle, DMG_INTERRUPT_TIMER);
-        }
-        handle->timer.overflow[0] = overflow;
-    }
-    overflow = handle->timer.divider & OFFSET[4];
+    bool overflow = handle->timer.divider & OFFSET[4];
     if (handle->timer.overflow[1] && !overflow)
     {
         dmg_audio_interrupt(handle);
     }
     handle->timer.overflow[1] = overflow;
+}
+
+static void dmg_timer_increment_counter(dmg_handle_t const handle)
+{
+    bool overflow = handle->timer.divider & OFFSET[handle->timer.control.mode];
+    if (handle->timer.overflow[0] && !overflow && !++handle->timer.counter)
+    {
+        handle->timer.counter = handle->timer.modulo;
+        dmg_processor_interrupt(handle, DMG_INTERRUPT_TIMER);
+    }
+    handle->timer.overflow[0] = overflow;
+}
+
+void dmg_timer_clock(dmg_handle_t const handle)
+{
+    ++handle->timer.divider;
+    dmg_timer_increment_audio(handle);
+    if (handle->timer.control.enabled)
+    {
+        dmg_timer_increment_counter(handle);
+    }
 }
 
 uint8_t dmg_timer_read(dmg_handle_t const handle, uint16_t address)
@@ -64,6 +73,11 @@ void dmg_timer_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
     {
         case 0xFF04: /* DIV */
             handle->timer.divider = 0;
+            dmg_timer_increment_audio(handle);
+            if (handle->timer.control.enabled)
+            {
+                dmg_timer_increment_counter(handle);
+            }
             break;
         case 0xFF05: /* TIMA */
             handle->timer.counter = value;

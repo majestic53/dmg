@@ -17,7 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xe502217
+#define DMG_PATCH 0x9a0217a
 
 typedef enum
 {
