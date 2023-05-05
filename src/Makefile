@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023 David Jolly <majestic53@gmail.com>
+# SPDX-License-Identifier: MIT
+
 CC?=gcc
 
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \

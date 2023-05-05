@@ -1,6 +1,11 @@
+<!--
+SPDX-FileCopyrightText: 2023 David Jolly <majestic53@gmail.com>
+SPDX-License-Identifier: MIT
+-->
+
 ## DMG (DMG Gameboy emulator)
 
-[![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSE) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
+[![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
 ![DMG](docs/dmg.png)
 
@@ -112,4 +117,4 @@ The following palettes are supported:
 
 ### License
 
-Copyright (C) 2023 David Jolly. Released under the [MIT License](LICENSE).
+Copyright (C) 2023 David Jolly. Released under the [MIT License](LICENSES/MIT.txt).
