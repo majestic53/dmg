@@ -38,7 +38,7 @@ static const char *DESCRIPTION[] =
 {
     "Show help information",
     "Enable serial link",
-    "Set color palette",
+    "Set palette type",
     "Show version information",
 };
 
