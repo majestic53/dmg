@@ -121,7 +121,7 @@ static dmg_error_e dmg_service_setup_video(dmg_handle_t const handle, dmg_palett
     {
         return DMG_ERROR(handle, "SDL_SetHint failed -- %s", SDL_GetError());
     }
-    if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1") == SDL_FALSE)
+    if (SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0") == SDL_FALSE)
     {
         return DMG_ERROR(handle, "SDL_SetHint failed -- %s", SDL_GetError());
     }
