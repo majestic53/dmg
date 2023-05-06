@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <common.h>
+#include <system.h>
 
 static const uint16_t OFFSET[] =
 {

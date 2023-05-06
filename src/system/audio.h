@@ -7,7 +7,7 @@
 #define DMG_AUDIO_H_
 
 #include <stdbool.h>
-#include <dmg.h>
+#include <common.h>
 
 typedef union
 {
@@ -155,6 +155,7 @@ typedef struct
 {
     uint8_t counter;
     uint8_t delay;
+    uint8_t silence;
     uint8_t ram[16];
     struct
     {
@@ -250,6 +251,7 @@ typedef struct
 } dmg_audio_t;
 
 void dmg_audio_clock(dmg_handle_t const handle);
+void dmg_audio_initialize(dmg_handle_t const handle);
 void dmg_audio_interrupt(dmg_handle_t const handle);
 void dmg_audio_output(void *context, uint8_t *data, int length);
 uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address);

@@ -7,7 +7,7 @@
 #define DMG_PROCESSOR_H_
 
 #include <stdbool.h>
-#include <dmg.h>
+#include <common.h>
 
 typedef enum
 {
@@ -64,6 +64,8 @@ typedef struct
         uint8_t flag;
     } interrupt;
 } dmg_processor_t;
+
+typedef dmg_error_e (*dmg_processor_f)(dmg_handle_t const handle);
 
 dmg_error_e dmg_processor_clock(dmg_handle_t const handle);
 void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_e interrupt);

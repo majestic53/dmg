@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <common.h>
+#include <system.h>
 
 static uint8_t dmg_video_background_color(dmg_handle_t const handle, bool map, uint8_t x, uint8_t y)
 {
@@ -121,7 +121,7 @@ static void dmg_video_render_background(dmg_handle_t const handle)
             y += handle->video.scroll.y;
         }
         color = dmg_video_palette_color(&handle->video.background.palette, dmg_video_background_color(handle, map, x, y));
-        dmg_set_color(handle, color, pixel, handle->video.line.y);
+        handle->video.color[handle->video.line.y][pixel] = color;
     }
 }
 
@@ -143,10 +143,10 @@ static void dmg_video_render_objects(dmg_handle_t const handle)
             }
             if ((color = dmg_video_object_color(handle, object, x, y)) != DMG_COLOR_WHITE)
             {
-                if (!object->attribute.priority || (dmg_get_color(handle, object->x + x - 8, y) == DMG_COLOR_WHITE))
+                if (!object->attribute.priority || (handle->video.color[y][object->x + x - 8] == DMG_COLOR_WHITE))
                 {
                     color = dmg_video_palette_color(&handle->video.object.palette[object->attribute.palette], color);
-                    dmg_set_color(handle, color, object->x + x - 8, y);
+                    handle->video.color[y][object->x + x - 8] = color;
                 }
             }
         }
@@ -194,7 +194,7 @@ static void dmg_video_dma(dmg_handle_t const handle)
         uint8_t index = handle->video.dma.destination++;
         if (index < 0xA0)
         {
-            ((uint8_t *)handle->video.object.ram)[index] = dmg_read(handle, handle->video.dma.source++);
+            ((uint8_t *)handle->video.object.ram)[index] = dmg_system_read(handle, handle->video.dma.source++);
             handle->video.dma.delay = 4;
         }
         else
@@ -310,6 +310,11 @@ dmg_error_e dmg_video_clock(dmg_handle_t const handle)
     return result;
 }
 
+dmg_color_e dmg_video_color(dmg_handle_t const handle, uint8_t x, uint8_t y)
+{
+    return handle->video.color[y][x];
+}
+
 uint8_t dmg_video_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -389,7 +394,7 @@ void dmg_video_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
                 {
                     for (uint8_t x = 0; x < 160; ++x)
                     {
-                        dmg_set_color(handle, DMG_COLOR_WHITE, x, y);
+                        handle->video.color[y][x] = DMG_COLOR_WHITE;
                     }
                 }
             }

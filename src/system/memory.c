@@ -3,42 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <common.h>
-
-typedef enum
-{
-    DMG_MAPPER_MBC0 = 0,
-    DMG_MAPPER_MBC1,
-    DMG_MAPPER_MBC2,
-    DMG_MAPPER_MBC3,
-    DMG_MAPPER_MBC5,
-    DMG_MAPPER_MAX,
-} dmg_mapper_e;
-
-typedef struct
-{
-    uint8_t entry[4];
-    uint8_t logo[48];
-    uint8_t title[11];
-    uint8_t manufacturer[4];
-    uint8_t cgb;
-    uint8_t licensee[2];
-    uint8_t sgb;
-    uint8_t id;
-    uint8_t rom;
-    uint8_t ram;
-    uint8_t destination;
-    uint8_t licensee_old;
-    uint8_t version;
-    uint8_t checksum;
-    uint16_t checksum_global;
-} dmg_memory_header_t;
-
-typedef struct
-{
-    uint8_t id;
-    dmg_mapper_e type;
-} dmg_memory_type_t;
+#include <system.h>
 
 static const uint8_t BOOTROM[] =
 {
@@ -85,16 +50,6 @@ static const dmg_memory_type_t TYPE[] =
     { 25, DMG_MAPPER_MBC5, }, { 26, DMG_MAPPER_MBC5, }, { 27, DMG_MAPPER_MBC5, }, { 28, DMG_MAPPER_MBC5, },
     { 29, DMG_MAPPER_MBC5, }, { 30, DMG_MAPPER_MBC5, },
 };
-
-static uint8_t dmg_memory_checksum(const uint8_t *const data, uint16_t begin, uint16_t end)
-{
-    uint8_t result = 0;
-    for (uint16_t index = begin; index <= end; ++index)
-    {
-        result = result - data[index] - 1;
-    }
-    return result;
-}
 
 static const dmg_memory_header_t *dmg_memory_header(const uint8_t *const data)
 {
@@ -478,7 +433,7 @@ static dmg_error_e dmg_memory_setup_ram(dmg_handle_t const handle, uint16_t coun
 {
     if (count)
     {
-        if (!(handle->memory.cartridge.ram.data = calloc(count, 0x2000)))
+        if (!(handle->memory.cartridge.ram.data = dmg_allocate(count * 0x2000)))
         {
             return DMG_ERROR(handle, "Failed to allocate cartridge ram -- %u banks", count);
         }
@@ -539,7 +494,7 @@ static dmg_error_e dmg_memory_validate(dmg_handle_t const handle, const uint8_t 
         return DMG_ERROR(handle, "Invalid cartridge length -- %u bytes", length);
     }
     header = dmg_memory_header(data);
-    if ((checksum = dmg_memory_checksum(data, 0x0134, 0x014C)) != header->checksum)
+    if ((checksum = dmg_get_checksum(data, 0x0134, 0x014C)) != header->checksum)
     {
         return DMG_ERROR(handle, "Invalid cartridge checksum -- %u (expecting %u)", checksum, header->checksum);
     }
@@ -653,7 +608,7 @@ void dmg_memory_uninitialize(dmg_handle_t const handle)
 {
     if (handle->memory.cartridge.ram.data)
     {
-        free(handle->memory.cartridge.ram.data);
+        dmg_free(handle->memory.cartridge.ram.data);
     }
 }
 

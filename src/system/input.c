@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <common.h>
+#include <system.h>
 
 uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
 {
