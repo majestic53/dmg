@@ -7,7 +7,7 @@ SPDX-License-Identifier: MIT
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml) [![Test Status](https://github.com/majestic53/dmg/workflows/Test/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/test.yml)
 
-<img src="https://github.com/majestic53/dmg/blob/master/docs/dmg.png" width="332" />
+![DMG](docs/dmg.png)
 
 ### A lightweight Gameboy emulator, written in C.
 
