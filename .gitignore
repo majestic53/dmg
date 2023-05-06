@@ -1,8 +1,13 @@
 # SPDX-FileCopyrightText: 2023 David Jolly <majestic53@gmail.com>
 # SPDX-License-Identifier: MIT
 
+**/.DS_Store
 *.sublime-workspace
 *.sublime-project
+*.gcda
+*.gcno
+*.gcov
 *.a
 *.o
 dmg
+test_*

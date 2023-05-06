@@ -3,6 +3,7 @@
 
 AR?=ar
 CC?=gcc
+VERBOSE?=@
 
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
 	$(subst .,-I.,$(shell find . -type d)) \
@@ -22,7 +23,7 @@ patch:
 	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" common.h
 
 $(TARGET): $(OBJECTS)
-	@$(AR) -rcs $@ $(OBJECTS)
+	$(VERBOSE)$(AR) -rcs $@ $(OBJECTS)
 
 %.o: %.c
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(VERBOSE)$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

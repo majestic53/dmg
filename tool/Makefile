@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 
 CC?=gcc
+VERBOSE?=@
 
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
 	$(subst .,-I.,$(shell find . -type d))
@@ -22,7 +23,7 @@ strip:
 	@strip --strip-all -R .note -R .comment $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(CC) $(CFLAGS) $(OBJECTS) $(LIBRARIES) -o $@
+	$(VERBOSE)$(CC) $(CFLAGS) $(OBJECTS) $(LIBRARIES) -o $@
 
 %.o: %.c
-	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(VERBOSE)$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
