@@ -3,5 +3,6 @@
 
 *.sublime-workspace
 *.sublime-project
+*.a
 *.o
 dmg

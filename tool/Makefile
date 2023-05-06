@@ -5,8 +5,9 @@ CC?=gcc
 
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
 	$(subst .,-I.,$(shell find . -type d))
-OBJECTS:=$(patsubst %.c,%.o,$(shell find . -name "*.c")) \
-	$(shell find ../src -name "*.o")
+LIBRARIES:=$(subst ..,-L..,$(shell find .. -maxdepth 0 -type d)) -ldmg \
+	$(shell sdl2-config --libs)
+OBJECTS:=$(patsubst %.c,%.o,$(shell find . -name "*.c"))
 TARGET:=../dmg
 
 .PHONY: all
@@ -21,7 +22,7 @@ strip:
 	@strip --strip-all -R .note -R .comment $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	@$(CC) $(CFLAGS) $(OBJECTS) $(shell sdl2-config --libs) -o $@
+	@$(CC) $(CFLAGS) $(OBJECTS) $(LIBRARIES) -o $@
 
 %.o: %.c
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
