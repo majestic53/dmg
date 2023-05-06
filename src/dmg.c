@@ -11,7 +11,7 @@ dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, c
     {
         return DMG_FAILURE;
     }
-    return dmg_system_setup(*handle, data, output, palette);
+    return dmg_system_initialize(*handle, data, output, palette);
 }
 
 dmg_error_e dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
@@ -54,7 +54,7 @@ void dmg_uninitialize(dmg_handle_t *handle)
 {
     if (handle && *handle)
     {
-        dmg_system_teardown(*handle);
+        dmg_system_uninitialize(*handle);
         dmg_free(*handle);
         *handle = NULL;
     }

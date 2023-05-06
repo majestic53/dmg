@@ -38,7 +38,7 @@ static dmg_error_e dmg_system_clock(dmg_handle_t const handle)
     return result;
 }
 
-static dmg_error_e dmg_system_setup_audio(dmg_handle_t const handle)
+static dmg_error_e dmg_system_initialize_audio(dmg_handle_t const handle)
 {
     SDL_AudioSpec desired =
     {
@@ -53,7 +53,7 @@ static dmg_error_e dmg_system_setup_audio(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_system_setup_video(dmg_handle_t const handle, dmg_palette_e palette)
+static dmg_error_e dmg_system_initialize_video(dmg_handle_t const handle, dmg_palette_e palette)
 {
     if (!(handle->service.window = SDL_CreateWindow(dmg_memory_get_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
     {
@@ -92,7 +92,7 @@ static dmg_error_e dmg_system_setup_video(dmg_handle_t const handle, dmg_palette
     return DMG_SUCCESS;
 }
 
-static void dmg_system_teardown_audio(dmg_handle_t const handle)
+static void dmg_system_uninitialize_audio(dmg_handle_t const handle)
 {
     if (handle->service.audio.id)
     {
@@ -101,7 +101,7 @@ static void dmg_system_teardown_audio(dmg_handle_t const handle)
     }
 }
 
-static void dmg_system_teardown_video(dmg_handle_t const handle)
+static void dmg_system_uninitialize_video(dmg_handle_t const handle)
 {
     if (handle->service.cursor)
     {
@@ -119,6 +119,34 @@ static void dmg_system_teardown_video(dmg_handle_t const handle)
     {
         SDL_DestroyWindow(handle->service.window);
     }
+}
+
+dmg_error_e dmg_system_initialize(dmg_handle_t handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
+{
+    dmg_error_e result;
+    if (handle->initialized)
+    {
+        return DMG_ERROR(handle, "System reinitialized");
+    }
+    if ((result = dmg_memory_initialize(handle, data)) != DMG_SUCCESS)
+    {
+        return result;
+    }
+    if ((result = dmg_serial_initialize(handle, output)) != DMG_SUCCESS)
+    {
+        return result;
+    }
+    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
+    {
+        return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
+    }
+    if ((result = dmg_system_initialize_video(handle, palette)) == DMG_SUCCESS)
+    {
+        result = dmg_system_initialize_audio(handle);
+    }
+    dmg_audio_initialize(handle);
+    handle->initialized = true;
+    return result;
 }
 
 dmg_error_e dmg_system_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
@@ -243,34 +271,6 @@ dmg_error_e dmg_system_save(dmg_handle_t const handle, dmg_data_t *const data)
     return dmg_memory_save(handle, data);
 }
 
-dmg_error_e dmg_system_setup(dmg_handle_t handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
-{
-    dmg_error_e result;
-    if (handle->initialized)
-    {
-        return DMG_ERROR(handle, "System reinitialized");
-    }
-    if ((result = dmg_memory_initialize(handle, data)) != DMG_SUCCESS)
-    {
-        return result;
-    }
-    if ((result = dmg_serial_initialize(handle, output)) != DMG_SUCCESS)
-    {
-        return result;
-    }
-    if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
-    {
-        return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
-    }
-    if ((result = dmg_system_setup_video(handle, palette)) == DMG_SUCCESS)
-    {
-        result = dmg_system_setup_audio(handle);
-    }
-    dmg_audio_initialize(handle);
-    handle->initialized = true;
-    return result;
-}
-
 uint8_t dmg_system_silence(dmg_handle_t const handle)
 {
     return handle->service.audio.spec.silence;
@@ -332,11 +332,11 @@ dmg_error_e dmg_system_sync(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-void dmg_system_teardown(dmg_handle_t const handle)
+void dmg_system_uninitialize(dmg_handle_t const handle)
 {
     handle->initialized = false;
-    dmg_system_teardown_audio(handle);
-    dmg_system_teardown_video(handle);
+    dmg_system_uninitialize_audio(handle);
+    dmg_system_uninitialize_video(handle);
     SDL_Quit();
     dmg_memory_uninitialize(handle);
 }
