@@ -7,8 +7,6 @@ SPDX-License-Identifier: MIT
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml) [![Test Status](https://github.com/majestic53/dmg/workflows/Test/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/test.yml)
 
-![DMG](docs/dmg.png)
-
 ### A lightweight Gameboy emulator, written in C.
 
 __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs.
@@ -110,10 +108,10 @@ The following mappers are supported:
 
 The following palettes are supported:
 
-|Id |Name                  |Colors                      |
-|:--|:---------------------|:---------------------------|
-|gb |Gameboy palette       |![gb](docs/palette/gb.png)  |
-|gbp|Gameboy Pocket palette|![gbp](docs/palette/gbp.png)|
+|Id |Name                  |Colors              |
+|:--|:---------------------|:-------------------|
+|gb |Gameboy palette       |![gb](docs/gb.png)  |
+|gbp|Gameboy Pocket palette|![gbp](docs/gbp.png)|
 
 ### License
 
