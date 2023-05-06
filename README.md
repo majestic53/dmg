@@ -13,15 +13,12 @@ __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete o
 
 ## Features
 
-* Support for all processor instructions
 * Support for input and serial peripherals (see [Keybindings](https://github.com/majestic53/dmg#keybindings))
 * Support for multiple mapper types (see [Mappers](https://github.com/majestic53/dmg#mappers))
 * Support for multiple palettes (see [Palettes](https://github.com/majestic53/dmg#palettes))
 
 ## Work-in-progress
 
-* Fix bugs and increase accuracy (oam bug, timer behavior, etc.)
-* Support for more mapper types
 * Support for audio
 
 ## Latest release
