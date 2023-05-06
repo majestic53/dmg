@@ -5,7 +5,7 @@ SPDX-License-Identifier: MIT
 
 ## DMG (DMG Gameboy emulator)
 
-[![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
+[![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml) [![Test Status](https://github.com/majestic53/dmg/workflows/Test/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/test.yml)
 
 ![DMG](docs/dmg.png)
 
