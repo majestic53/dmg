@@ -17,6 +17,14 @@ void dmg_free(void *buffer)
     /* TODO */
 }
 
+
+dmg_error_e dmg_system_initialize(dmg_handle_t handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
+{
+    /* TODO */
+    return DMG_FAILURE;
+    /* ---- */
+}
+
 dmg_error_e dmg_system_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
 {
     /* TODO */
@@ -45,14 +53,7 @@ dmg_error_e dmg_system_save(dmg_handle_t const handle, dmg_data_t *const data)
     /* ---- */
 }
 
-dmg_error_e dmg_system_setup(dmg_handle_t handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette)
-{
-    /* TODO */
-    return DMG_FAILURE;
-    /* ---- */
-}
-
-void dmg_system_teardown(dmg_handle_t const handle)
+void dmg_system_uninitialize(dmg_handle_t const handle)
 {
     /* TODO */
 }
