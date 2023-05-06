@@ -26,7 +26,6 @@ clean:
 
 .PHONY: debug
 debug: clean
-	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_DEBUG) -j$(THREADS)
 	@make --no-print-directory -C tool $(FLAGS_DEBUG) -j$(THREADS)
 
