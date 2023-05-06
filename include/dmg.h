@@ -8,6 +8,11 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 typedef enum
 {
     DMG_FAILURE = -1,
@@ -47,5 +52,9 @@ dmg_error_e dmg_load(dmg_handle_t const handle, const dmg_data_t *const data);
 dmg_error_e dmg_run(dmg_handle_t const handle);
 dmg_error_e dmg_save(dmg_handle_t const handle, dmg_data_t *const data);
 void dmg_uninitialize(dmg_handle_t *handle);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* DMG_H_ */
