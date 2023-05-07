@@ -7,8 +7,6 @@ SPDX-License-Identifier: MIT
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 
-### A lightweight Gameboy emulator, written in C.
-
 The goal of `DMG` is to emulate the original Gameboy hardware with enough accuracy to run most common games, while being performant and natively compilable across multiple platforms.
 
 __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs. Testing was done using the GCC compiler, under Linux. Modification to the makefiles might be required to build with a different operating system and/or compiler.
