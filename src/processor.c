@@ -5,7 +5,9 @@
 
 #include <system.h>
 
-static dmg_error_e dmg_processor_adc(dmg_handle_t const handle)
+typedef dmg_error_t (*dmg_instruction_t)(dmg_handle_t const handle);
+
+static dmg_error_t dmg_processor_instruction_adc(dmg_handle_t const handle)
 {
     uint16_t sum;
     uint8_t carry, operand = 0;
@@ -52,7 +54,7 @@ static dmg_error_e dmg_processor_adc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_add(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_add(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     uint16_t carry, sum;
@@ -99,7 +101,7 @@ static dmg_error_e dmg_processor_add(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_add_hl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_add_hl(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     uint16_t operand = 0;
@@ -128,7 +130,7 @@ static dmg_error_e dmg_processor_add_hl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_add_sp(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_add_sp(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     int8_t operand = dmg_read(handle, handle->processor.pc.word++);
@@ -143,7 +145,7 @@ static dmg_error_e dmg_processor_add_sp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_and(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_and(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -184,7 +186,7 @@ static dmg_error_e dmg_processor_and(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_bit(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_bit(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -228,7 +230,7 @@ static dmg_error_e dmg_processor_bit(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_call(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_call(dmg_handle_t const handle)
 {
     bool taken = false;
     dmg_register_t operand = {};
@@ -263,7 +265,7 @@ static dmg_error_e dmg_processor_call(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_ccf(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_ccf(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = !handle->processor.af.carry;
@@ -272,7 +274,7 @@ static dmg_error_e dmg_processor_ccf(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_cp(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_cp(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -315,7 +317,7 @@ static dmg_error_e dmg_processor_cp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_cpl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_cpl(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.high = ~handle->processor.af.high;
@@ -324,7 +326,7 @@ static dmg_error_e dmg_processor_cpl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_daa(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_daa(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     if (!handle->processor.af.negative)
@@ -355,7 +357,7 @@ static dmg_error_e dmg_processor_daa(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_di(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_di(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.interrupt.enable_delay = 0;
@@ -363,7 +365,7 @@ static dmg_error_e dmg_processor_di(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_ei(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_ei(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     if (!handle->processor.interrupt.enable_delay)
@@ -373,7 +375,7 @@ static dmg_error_e dmg_processor_ei(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_dec(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_dec(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -412,7 +414,7 @@ static dmg_error_e dmg_processor_dec(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_dec_word(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_dec_word(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -433,14 +435,14 @@ static dmg_error_e dmg_processor_dec_word(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_halt(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_halt(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.halted = true;
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_inc(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_inc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -479,7 +481,7 @@ static dmg_error_e dmg_processor_inc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_inc_word(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_inc_word(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -500,7 +502,7 @@ static dmg_error_e dmg_processor_inc_word(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_jp(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_jp(dmg_handle_t const handle)
 {
     bool taken = false;
     dmg_register_t operand = {};
@@ -533,14 +535,14 @@ static dmg_error_e dmg_processor_jp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_jp_hl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_jp_hl(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.pc.word = handle->processor.hl.word;
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_jr(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_jr(dmg_handle_t const handle)
 {
     bool taken = false;
     int8_t operand = dmg_read(handle, handle->processor.pc.word++);
@@ -571,7 +573,7 @@ static dmg_error_e dmg_processor_jr(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_ld(dmg_handle_t const handle)
 {
     dmg_register_t operand = {};
     handle->processor.delay = 4;
@@ -900,7 +902,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_ld_hl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_ld_hl(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     int8_t operand = dmg_read(handle, handle->processor.pc.word++);
@@ -915,13 +917,13 @@ static dmg_error_e dmg_processor_ld_hl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_nop(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_nop(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_or(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_or(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -962,7 +964,7 @@ static dmg_error_e dmg_processor_or(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_pop(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_pop(dmg_handle_t const handle)
 {
     handle->processor.delay = 12;
     switch (handle->processor.instruction.opcode)
@@ -987,7 +989,7 @@ static dmg_error_e dmg_processor_pop(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_push(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_push(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     switch (handle->processor.instruction.opcode)
@@ -1012,7 +1014,7 @@ static dmg_error_e dmg_processor_push(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_res(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_res(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -1055,7 +1057,7 @@ static dmg_error_e dmg_processor_res(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_ret(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_ret(dmg_handle_t const handle)
 {
     bool taken = false;
     handle->processor.delay = 8;
@@ -1086,7 +1088,7 @@ static dmg_error_e dmg_processor_ret(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_reti(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_reti(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     handle->processor.pc.low = dmg_read(handle, handle->processor.sp.word++);
@@ -1096,7 +1098,7 @@ static dmg_error_e dmg_processor_reti(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rl(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry, operand = 0;
     handle->processor.delay = 8;
@@ -1151,7 +1153,7 @@ static dmg_error_e dmg_processor_rl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rla(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rla(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry;
     handle->processor.delay = 4;
@@ -1163,7 +1165,7 @@ static dmg_error_e dmg_processor_rla(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rlc(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rlc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1218,7 +1220,7 @@ static dmg_error_e dmg_processor_rlc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rlca(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rlca(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = ((handle->processor.af.high & 0x80) == 0x80);
@@ -1229,7 +1231,7 @@ static dmg_error_e dmg_processor_rlca(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rr(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rr(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry, operand = 0;
     handle->processor.delay = 8;
@@ -1284,7 +1286,7 @@ static dmg_error_e dmg_processor_rr(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rra(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rra(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry;
     handle->processor.delay = 4;
@@ -1296,7 +1298,7 @@ static dmg_error_e dmg_processor_rra(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rrc(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rrc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1351,7 +1353,7 @@ static dmg_error_e dmg_processor_rrc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rrca(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rrca(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = ((handle->processor.af.high & 1) == 1);
@@ -1362,7 +1364,7 @@ static dmg_error_e dmg_processor_rrca(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_rst(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_rst(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
@@ -1371,7 +1373,7 @@ static dmg_error_e dmg_processor_rst(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_sbc(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_sbc(dmg_handle_t const handle)
 {
     uint16_t sum;
     uint8_t carry, operand = 0;
@@ -1418,7 +1420,7 @@ static dmg_error_e dmg_processor_sbc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_scf(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_scf(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = true;
@@ -1427,7 +1429,7 @@ static dmg_error_e dmg_processor_scf(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_set(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_set(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -1470,7 +1472,7 @@ static dmg_error_e dmg_processor_set(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_sla(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_sla(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1525,7 +1527,7 @@ static dmg_error_e dmg_processor_sla(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_sra(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_sra(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1580,7 +1582,7 @@ static dmg_error_e dmg_processor_sra(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_srl(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_srl(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1635,7 +1637,7 @@ static dmg_error_e dmg_processor_srl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_stop(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_stop(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.stopped = true;
@@ -1643,7 +1645,7 @@ static dmg_error_e dmg_processor_stop(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_sub(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_sub(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     uint16_t carry, sum;
@@ -1690,7 +1692,7 @@ static dmg_error_e dmg_processor_sub(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_swap(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_swap(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1738,7 +1740,7 @@ static dmg_error_e dmg_processor_swap(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_xor(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_xor(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -1780,208 +1782,208 @@ static dmg_error_e dmg_processor_xor(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_e dmg_processor_xxx(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_instruction_xxx(dmg_handle_t const handle)
 {
     return DMG_ERROR(handle, "Invalid opcode -- [%04X] %02X", handle->processor.instruction.address, handle->processor.instruction.opcode);
 }
 
-static const dmg_processor_f INSTRUCTION[] =
+static const dmg_instruction_t INSTRUCTION[] =
 {
     /* 00 */
-    dmg_processor_nop, dmg_processor_ld, dmg_processor_ld, dmg_processor_inc_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_rlca,
+    dmg_processor_instruction_nop, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_inc_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_rlca,
     /* 08 */
-    dmg_processor_ld, dmg_processor_add_hl, dmg_processor_ld, dmg_processor_dec_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_rrca,
+    dmg_processor_instruction_ld, dmg_processor_instruction_add_hl, dmg_processor_instruction_ld, dmg_processor_instruction_dec_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_rrca,
     /* 10 */
-    dmg_processor_stop, dmg_processor_ld, dmg_processor_ld, dmg_processor_inc_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_rla,
+    dmg_processor_instruction_stop, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_inc_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_rla,
     /* 18 */
-    dmg_processor_jr, dmg_processor_add_hl, dmg_processor_ld, dmg_processor_dec_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_rra,
+    dmg_processor_instruction_jr, dmg_processor_instruction_add_hl, dmg_processor_instruction_ld, dmg_processor_instruction_dec_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_rra,
     /* 20 */
-    dmg_processor_jr, dmg_processor_ld, dmg_processor_ld, dmg_processor_inc_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_daa,
+    dmg_processor_instruction_jr, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_inc_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_daa,
     /* 28 */
-    dmg_processor_jr, dmg_processor_add_hl, dmg_processor_ld, dmg_processor_dec_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_cpl,
+    dmg_processor_instruction_jr, dmg_processor_instruction_add_hl, dmg_processor_instruction_ld, dmg_processor_instruction_dec_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_cpl,
     /* 30 */
-    dmg_processor_jr, dmg_processor_ld, dmg_processor_ld, dmg_processor_inc_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_scf,
+    dmg_processor_instruction_jr, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_inc_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_scf,
     /* 38 */
-    dmg_processor_jr, dmg_processor_add_hl, dmg_processor_ld, dmg_processor_dec_word,
-    dmg_processor_inc, dmg_processor_dec, dmg_processor_ld, dmg_processor_ccf,
+    dmg_processor_instruction_jr, dmg_processor_instruction_add_hl, dmg_processor_instruction_ld, dmg_processor_instruction_dec_word,
+    dmg_processor_instruction_inc, dmg_processor_instruction_dec, dmg_processor_instruction_ld, dmg_processor_instruction_ccf,
     /* 40 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 48 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 50 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 58 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 60 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 68 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 70 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_halt, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_halt, dmg_processor_instruction_ld,
     /* 78 */
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
-    dmg_processor_ld, dmg_processor_ld, dmg_processor_ld, dmg_processor_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
+    dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ld,
     /* 80 */
-    dmg_processor_add, dmg_processor_add, dmg_processor_add, dmg_processor_add,
-    dmg_processor_add, dmg_processor_add, dmg_processor_add, dmg_processor_add,
+    dmg_processor_instruction_add, dmg_processor_instruction_add, dmg_processor_instruction_add, dmg_processor_instruction_add,
+    dmg_processor_instruction_add, dmg_processor_instruction_add, dmg_processor_instruction_add, dmg_processor_instruction_add,
     /* 88 */
-    dmg_processor_adc, dmg_processor_adc, dmg_processor_adc, dmg_processor_adc,
-    dmg_processor_adc, dmg_processor_adc, dmg_processor_adc, dmg_processor_adc,
+    dmg_processor_instruction_adc, dmg_processor_instruction_adc, dmg_processor_instruction_adc, dmg_processor_instruction_adc,
+    dmg_processor_instruction_adc, dmg_processor_instruction_adc, dmg_processor_instruction_adc, dmg_processor_instruction_adc,
     /* 90 */
-    dmg_processor_sub, dmg_processor_sub, dmg_processor_sub, dmg_processor_sub,
-    dmg_processor_sub, dmg_processor_sub, dmg_processor_sub, dmg_processor_sub,
+    dmg_processor_instruction_sub, dmg_processor_instruction_sub, dmg_processor_instruction_sub, dmg_processor_instruction_sub,
+    dmg_processor_instruction_sub, dmg_processor_instruction_sub, dmg_processor_instruction_sub, dmg_processor_instruction_sub,
     /* 98 */
-    dmg_processor_sbc, dmg_processor_sbc, dmg_processor_sbc, dmg_processor_sbc,
-    dmg_processor_sbc, dmg_processor_sbc, dmg_processor_sbc, dmg_processor_sbc,
+    dmg_processor_instruction_sbc, dmg_processor_instruction_sbc, dmg_processor_instruction_sbc, dmg_processor_instruction_sbc,
+    dmg_processor_instruction_sbc, dmg_processor_instruction_sbc, dmg_processor_instruction_sbc, dmg_processor_instruction_sbc,
     /* A0 */
-    dmg_processor_and, dmg_processor_and, dmg_processor_and, dmg_processor_and,
-    dmg_processor_and, dmg_processor_and, dmg_processor_and, dmg_processor_and,
+    dmg_processor_instruction_and, dmg_processor_instruction_and, dmg_processor_instruction_and, dmg_processor_instruction_and,
+    dmg_processor_instruction_and, dmg_processor_instruction_and, dmg_processor_instruction_and, dmg_processor_instruction_and,
     /* A8 */
-    dmg_processor_xor, dmg_processor_xor, dmg_processor_xor, dmg_processor_xor,
-    dmg_processor_xor, dmg_processor_xor, dmg_processor_xor, dmg_processor_xor,
+    dmg_processor_instruction_xor, dmg_processor_instruction_xor, dmg_processor_instruction_xor, dmg_processor_instruction_xor,
+    dmg_processor_instruction_xor, dmg_processor_instruction_xor, dmg_processor_instruction_xor, dmg_processor_instruction_xor,
     /* B0 */
-    dmg_processor_or, dmg_processor_or, dmg_processor_or, dmg_processor_or,
-    dmg_processor_or, dmg_processor_or, dmg_processor_or, dmg_processor_or,
+    dmg_processor_instruction_or, dmg_processor_instruction_or, dmg_processor_instruction_or, dmg_processor_instruction_or,
+    dmg_processor_instruction_or, dmg_processor_instruction_or, dmg_processor_instruction_or, dmg_processor_instruction_or,
     /* B8 */
-    dmg_processor_cp, dmg_processor_cp, dmg_processor_cp, dmg_processor_cp,
-    dmg_processor_cp, dmg_processor_cp, dmg_processor_cp, dmg_processor_cp,
+    dmg_processor_instruction_cp, dmg_processor_instruction_cp, dmg_processor_instruction_cp, dmg_processor_instruction_cp,
+    dmg_processor_instruction_cp, dmg_processor_instruction_cp, dmg_processor_instruction_cp, dmg_processor_instruction_cp,
     /* C0 */
-    dmg_processor_ret, dmg_processor_pop, dmg_processor_jp, dmg_processor_jp,
-    dmg_processor_call, dmg_processor_push, dmg_processor_add, dmg_processor_rst,
+    dmg_processor_instruction_ret, dmg_processor_instruction_pop, dmg_processor_instruction_jp, dmg_processor_instruction_jp,
+    dmg_processor_instruction_call, dmg_processor_instruction_push, dmg_processor_instruction_add, dmg_processor_instruction_rst,
     /* C8 */
-    dmg_processor_ret, dmg_processor_ret, dmg_processor_jp, dmg_processor_xxx,
-    dmg_processor_call, dmg_processor_call, dmg_processor_adc, dmg_processor_rst,
+    dmg_processor_instruction_ret, dmg_processor_instruction_ret, dmg_processor_instruction_jp, dmg_processor_instruction_xxx,
+    dmg_processor_instruction_call, dmg_processor_instruction_call, dmg_processor_instruction_adc, dmg_processor_instruction_rst,
     /* D0 */
-    dmg_processor_ret, dmg_processor_pop, dmg_processor_jp, dmg_processor_xxx,
-    dmg_processor_call, dmg_processor_push, dmg_processor_sub, dmg_processor_rst,
+    dmg_processor_instruction_ret, dmg_processor_instruction_pop, dmg_processor_instruction_jp, dmg_processor_instruction_xxx,
+    dmg_processor_instruction_call, dmg_processor_instruction_push, dmg_processor_instruction_sub, dmg_processor_instruction_rst,
     /* D8 */
-    dmg_processor_ret, dmg_processor_reti, dmg_processor_jp, dmg_processor_xxx,
-    dmg_processor_call, dmg_processor_xxx, dmg_processor_sbc, dmg_processor_rst,
+    dmg_processor_instruction_ret, dmg_processor_instruction_reti, dmg_processor_instruction_jp, dmg_processor_instruction_xxx,
+    dmg_processor_instruction_call, dmg_processor_instruction_xxx, dmg_processor_instruction_sbc, dmg_processor_instruction_rst,
     /* E0 */
-    dmg_processor_ld, dmg_processor_pop, dmg_processor_ld, dmg_processor_xxx,
-    dmg_processor_xxx, dmg_processor_push, dmg_processor_and, dmg_processor_rst,
+    dmg_processor_instruction_ld, dmg_processor_instruction_pop, dmg_processor_instruction_ld, dmg_processor_instruction_xxx,
+    dmg_processor_instruction_xxx, dmg_processor_instruction_push, dmg_processor_instruction_and, dmg_processor_instruction_rst,
     /* E8 */
-    dmg_processor_add_sp, dmg_processor_jp_hl, dmg_processor_ld, dmg_processor_xxx,
-    dmg_processor_xxx, dmg_processor_xxx, dmg_processor_xor, dmg_processor_rst,
+    dmg_processor_instruction_add_sp, dmg_processor_instruction_jp_hl, dmg_processor_instruction_ld, dmg_processor_instruction_xxx,
+    dmg_processor_instruction_xxx, dmg_processor_instruction_xxx, dmg_processor_instruction_xor, dmg_processor_instruction_rst,
     /* F0 */
-    dmg_processor_ld, dmg_processor_pop, dmg_processor_ld, dmg_processor_di,
-    dmg_processor_xxx, dmg_processor_push, dmg_processor_or, dmg_processor_rst,
+    dmg_processor_instruction_ld, dmg_processor_instruction_pop, dmg_processor_instruction_ld, dmg_processor_instruction_di,
+    dmg_processor_instruction_xxx, dmg_processor_instruction_push, dmg_processor_instruction_or, dmg_processor_instruction_rst,
     /* F8 */
-    dmg_processor_ld_hl, dmg_processor_ld, dmg_processor_ld, dmg_processor_ei,
-    dmg_processor_xxx, dmg_processor_xxx, dmg_processor_cp, dmg_processor_rst,
+    dmg_processor_instruction_ld_hl, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_ei,
+    dmg_processor_instruction_xxx, dmg_processor_instruction_xxx, dmg_processor_instruction_cp, dmg_processor_instruction_rst,
     /* CB 00 */
-    dmg_processor_rlc, dmg_processor_rlc, dmg_processor_rlc, dmg_processor_rlc,
-    dmg_processor_rlc, dmg_processor_rlc, dmg_processor_rlc, dmg_processor_rlc,
+    dmg_processor_instruction_rlc, dmg_processor_instruction_rlc, dmg_processor_instruction_rlc, dmg_processor_instruction_rlc,
+    dmg_processor_instruction_rlc, dmg_processor_instruction_rlc, dmg_processor_instruction_rlc, dmg_processor_instruction_rlc,
     /* CB 08 */
-    dmg_processor_rrc, dmg_processor_rrc, dmg_processor_rrc, dmg_processor_rrc,
-    dmg_processor_rrc, dmg_processor_rrc, dmg_processor_rrc, dmg_processor_rrc,
+    dmg_processor_instruction_rrc, dmg_processor_instruction_rrc, dmg_processor_instruction_rrc, dmg_processor_instruction_rrc,
+    dmg_processor_instruction_rrc, dmg_processor_instruction_rrc, dmg_processor_instruction_rrc, dmg_processor_instruction_rrc,
     /* CB 10 */
-    dmg_processor_rl, dmg_processor_rl, dmg_processor_rl, dmg_processor_rl,
-    dmg_processor_rl, dmg_processor_rl, dmg_processor_rl, dmg_processor_rl,
+    dmg_processor_instruction_rl, dmg_processor_instruction_rl, dmg_processor_instruction_rl, dmg_processor_instruction_rl,
+    dmg_processor_instruction_rl, dmg_processor_instruction_rl, dmg_processor_instruction_rl, dmg_processor_instruction_rl,
     /* CB 18 */
-    dmg_processor_rr, dmg_processor_rr, dmg_processor_rr, dmg_processor_rr,
-    dmg_processor_rr, dmg_processor_rr, dmg_processor_rr, dmg_processor_rr,
+    dmg_processor_instruction_rr, dmg_processor_instruction_rr, dmg_processor_instruction_rr, dmg_processor_instruction_rr,
+    dmg_processor_instruction_rr, dmg_processor_instruction_rr, dmg_processor_instruction_rr, dmg_processor_instruction_rr,
     /* CB 20 */
-    dmg_processor_sla, dmg_processor_sla, dmg_processor_sla, dmg_processor_sla,
-    dmg_processor_sla, dmg_processor_sla, dmg_processor_sla, dmg_processor_sla,
+    dmg_processor_instruction_sla, dmg_processor_instruction_sla, dmg_processor_instruction_sla, dmg_processor_instruction_sla,
+    dmg_processor_instruction_sla, dmg_processor_instruction_sla, dmg_processor_instruction_sla, dmg_processor_instruction_sla,
     /* CB 28 */
-    dmg_processor_sra, dmg_processor_sra, dmg_processor_sra, dmg_processor_sra,
-    dmg_processor_sra, dmg_processor_sra, dmg_processor_sra, dmg_processor_sra,
+    dmg_processor_instruction_sra, dmg_processor_instruction_sra, dmg_processor_instruction_sra, dmg_processor_instruction_sra,
+    dmg_processor_instruction_sra, dmg_processor_instruction_sra, dmg_processor_instruction_sra, dmg_processor_instruction_sra,
     /* CB 30 */
-    dmg_processor_swap, dmg_processor_swap, dmg_processor_swap, dmg_processor_swap,
-    dmg_processor_swap, dmg_processor_swap, dmg_processor_swap, dmg_processor_swap,
+    dmg_processor_instruction_swap, dmg_processor_instruction_swap, dmg_processor_instruction_swap, dmg_processor_instruction_swap,
+    dmg_processor_instruction_swap, dmg_processor_instruction_swap, dmg_processor_instruction_swap, dmg_processor_instruction_swap,
     /* CB 38 */
-    dmg_processor_srl, dmg_processor_srl, dmg_processor_srl, dmg_processor_srl,
-    dmg_processor_srl, dmg_processor_srl, dmg_processor_srl, dmg_processor_srl,
+    dmg_processor_instruction_srl, dmg_processor_instruction_srl, dmg_processor_instruction_srl, dmg_processor_instruction_srl,
+    dmg_processor_instruction_srl, dmg_processor_instruction_srl, dmg_processor_instruction_srl, dmg_processor_instruction_srl,
     /* CB 40 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 48 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 50 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 58 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 60 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 68 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 70 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 78 */
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
-    dmg_processor_bit, dmg_processor_bit, dmg_processor_bit, dmg_processor_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
+    dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit, dmg_processor_instruction_bit,
     /* CB 80 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB 88 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB 90 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB 98 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB A0 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB A8 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB B0 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB B8 */
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
-    dmg_processor_res, dmg_processor_res, dmg_processor_res, dmg_processor_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
+    dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res, dmg_processor_instruction_res,
     /* CB C0 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB C8 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB D0 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB D8 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB E0 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB E8 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB F0 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     /* CB F8 */
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
-    dmg_processor_set, dmg_processor_set, dmg_processor_set, dmg_processor_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
+    dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     };
 
-static dmg_error_e dmg_processor_execute(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_execute(dmg_handle_t const handle)
 {
     bool extended;
     handle->processor.instruction.address = handle->processor.pc.word;
@@ -1993,9 +1995,9 @@ static dmg_error_e dmg_processor_execute(dmg_handle_t const handle)
     return INSTRUCTION[extended ? handle->processor.instruction.opcode + 256 : handle->processor.instruction.opcode](handle);
 }
 
-static dmg_error_e dmg_processor_service(dmg_handle_t const handle)
+static dmg_error_t dmg_processor_service(dmg_handle_t const handle)
 {
-    dmg_interrupt_e interrupt;
+    dmg_interrupt_t interrupt;
     for (interrupt = 0; interrupt < DMG_INTERRUPT_MAX; ++interrupt)
     {
         uint8_t mask = 1 << interrupt;
@@ -2013,9 +2015,9 @@ static dmg_error_e dmg_processor_service(dmg_handle_t const handle)
     return DMG_ERROR(handle, "Invalid interrupt -- %02X", interrupt);
 }
 
-dmg_error_e dmg_processor_clock(dmg_handle_t const handle)
+dmg_error_t dmg_processor_clock(dmg_handle_t const handle)
 {
-    dmg_error_e result = DMG_SUCCESS;
+    dmg_error_t result = DMG_SUCCESS;
     if (!handle->processor.delay)
     {
         if (handle->processor.interrupt.enable_delay && !--handle->processor.interrupt.enable_delay)
@@ -2051,7 +2053,7 @@ dmg_error_e dmg_processor_clock(dmg_handle_t const handle)
     return result;
 }
 
-void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_e interrupt)
+void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_t interrupt)
 {
     dmg_processor_write(handle, 0xFF0F, handle->processor.interrupt.flag | (1 << interrupt));
 }

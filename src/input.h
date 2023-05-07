@@ -20,7 +20,7 @@ typedef enum
     DMG_BUTTON_UP,
     DMG_BUTTON_DOWN,
     DMG_BUTTON_MAX,
-} dmg_button_e;
+} dmg_button_t;
 
 typedef struct
 {
@@ -38,7 +38,7 @@ typedef struct
 } dmg_input_t;
 
 uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address);
-void dmg_input_set(dmg_handle_t const handle, dmg_button_e button, bool state);
+void dmg_input_set(dmg_handle_t const handle, dmg_button_t button, bool state);
 void dmg_input_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_INPUT_H_ */

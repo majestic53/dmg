@@ -15,7 +15,7 @@ typedef enum
     DMG_COLOR_DARK_GREY,
     DMG_COLOR_BLACK,
     DMG_COLOR_MAX,
-} dmg_color_e;
+} dmg_color_t;
 
 typedef struct
 {
@@ -56,7 +56,7 @@ typedef union
 
 typedef struct
 {
-    dmg_color_e color[144][160];
+    dmg_color_t color[144][160];
     uint8_t ram[0x2000];
     struct
     {
@@ -125,8 +125,8 @@ typedef struct
     } window;
 } dmg_video_t;
 
-dmg_error_e dmg_video_clock(dmg_handle_t const handle);
-dmg_color_e dmg_video_color(dmg_handle_t const handle, uint8_t x, uint8_t y);
+dmg_error_t dmg_video_clock(dmg_handle_t const handle);
+dmg_color_t dmg_video_color(dmg_handle_t const handle, uint8_t x, uint8_t y);
 uint8_t dmg_video_read(dmg_handle_t const handle, uint16_t address);
 void dmg_video_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 

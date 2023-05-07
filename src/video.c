@@ -79,9 +79,9 @@ static int dmg_video_object_comparator(const void *first, const void *second)
     return result;
 }
 
-static dmg_color_e dmg_video_palette_color(const dmg_palette_t *palette, dmg_color_e color)
+static dmg_color_t dmg_video_palette_color(const dmg_palette_t *palette, dmg_color_t color)
 {
-    dmg_color_e result = 0;
+    dmg_color_t result = 0;
     switch (color)
     {
         case DMG_COLOR_WHITE:
@@ -245,9 +245,9 @@ static void dmg_video_transfer(dmg_handle_t const handle)
     handle->video.status.mode = 3; /* TRANSFER */
 }
 
-static dmg_error_e dmg_video_vblank(dmg_handle_t const handle)
+static dmg_error_t dmg_video_vblank(dmg_handle_t const handle)
 {
-    dmg_error_e result = DMG_SUCCESS;
+    dmg_error_t result = DMG_SUCCESS;
     if (handle->video.line.y == 144)
     {
         if (handle->video.control.enabled)
@@ -264,9 +264,9 @@ static dmg_error_e dmg_video_vblank(dmg_handle_t const handle)
     return result;
 }
 
-dmg_error_e dmg_video_clock(dmg_handle_t const handle)
+dmg_error_t dmg_video_clock(dmg_handle_t const handle)
 {
-    dmg_error_e result = DMG_SUCCESS;
+    dmg_error_t result = DMG_SUCCESS;
     if (handle->video.dma.destination)
     {
         dmg_video_dma(handle);
@@ -310,7 +310,7 @@ dmg_error_e dmg_video_clock(dmg_handle_t const handle)
     return result;
 }
 
-dmg_color_e dmg_video_color(dmg_handle_t const handle, uint8_t x, uint8_t y)
+dmg_color_t dmg_video_color(dmg_handle_t const handle, uint8_t x, uint8_t y)
 {
     return handle->video.color[y][x];
 }

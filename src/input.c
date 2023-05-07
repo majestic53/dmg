@@ -13,7 +13,7 @@ uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
         case 0xFF00: /* P1 */
             if (!handle->input.control.direction)
             {
-                for (dmg_button_e button = DMG_BUTTON_RIGHT; button <= DMG_BUTTON_DOWN; ++button)
+                for (dmg_button_t button = DMG_BUTTON_RIGHT; button <= DMG_BUTTON_DOWN; ++button)
                 {
                     if (handle->input.state[button])
                     {
@@ -23,7 +23,7 @@ uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
             }
             if (!handle->input.control.button)
             {
-                for (dmg_button_e button = DMG_BUTTON_A; button <= DMG_BUTTON_START; ++button)
+                for (dmg_button_t button = DMG_BUTTON_A; button <= DMG_BUTTON_START; ++button)
                 {
                     if (handle->input.state[button])
                     {
@@ -39,7 +39,7 @@ uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-void dmg_input_set(dmg_handle_t const handle, dmg_button_e button, bool state)
+void dmg_input_set(dmg_handle_t const handle, dmg_button_t button, bool state)
 {
     if ((!handle->input.control.button || !handle->input.control.direction) && !handle->input.state[button] && state)
     {

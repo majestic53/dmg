@@ -17,7 +17,7 @@ typedef enum
     DMG_MAPPER_MBC3,
     DMG_MAPPER_MBC5,
     DMG_MAPPER_MAX,
-} dmg_mapper_e;
+} dmg_mapper_t;
 
 typedef struct
 {
@@ -97,31 +97,6 @@ typedef struct
 
 typedef struct
 {
-    uint8_t entry[4];
-    uint8_t logo[48];
-    uint8_t title[11];
-    uint8_t manufacturer[4];
-    uint8_t cgb;
-    uint8_t licensee[2];
-    uint8_t sgb;
-    uint8_t id;
-    uint8_t rom;
-    uint8_t ram;
-    uint8_t destination;
-    uint8_t licensee_old;
-    uint8_t version;
-    uint8_t checksum;
-    uint16_t checksum_global;
-} dmg_memory_header_t;
-
-typedef struct
-{
-    uint8_t id;
-    dmg_mapper_e type;
-} dmg_memory_type_t;
-
-typedef struct
-{
     struct
     {
         bool enabled;
@@ -160,10 +135,10 @@ typedef struct
 } dmg_memory_t;
 
 const char *dmg_memory_get_title(dmg_handle_t const handle);
-dmg_error_e dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data);
-dmg_error_e dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data);
+dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data);
+dmg_error_t dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data);
 uint8_t dmg_memory_read(dmg_handle_t const handle, uint16_t address);
-dmg_error_e dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data);
+dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data);
 void dmg_memory_uninitialize(dmg_handle_t const handle);
 void dmg_memory_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 

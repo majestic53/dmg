@@ -17,7 +17,7 @@ typedef enum
     DMG_INTERRUPT_SERIAL,
     DMG_INTERRUPT_INPUT,
     DMG_INTERRUPT_MAX,
-} dmg_interrupt_e;
+} dmg_interrupt_t;
 
 typedef union
 {
@@ -65,10 +65,8 @@ typedef struct
     } interrupt;
 } dmg_processor_t;
 
-typedef dmg_error_e (*dmg_processor_f)(dmg_handle_t const handle);
-
-dmg_error_e dmg_processor_clock(dmg_handle_t const handle);
-void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_e interrupt);
+dmg_error_t dmg_processor_clock(dmg_handle_t const handle);
+void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_t interrupt);
 uint8_t dmg_processor_read(dmg_handle_t const handle, uint16_t address);
 void dmg_processor_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 

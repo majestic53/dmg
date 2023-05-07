@@ -5,6 +5,31 @@
 
 #include <system.h>
 
+typedef struct
+{
+    uint8_t entry[4];
+    uint8_t logo[48];
+    uint8_t title[11];
+    uint8_t manufacturer[4];
+    uint8_t cgb;
+    uint8_t licensee[2];
+    uint8_t sgb;
+    uint8_t id;
+    uint8_t rom;
+    uint8_t ram;
+    uint8_t destination;
+    uint8_t licensee_old;
+    uint8_t version;
+    uint8_t checksum;
+    uint16_t checksum_global;
+} dmg_memory_header_t;
+
+typedef struct
+{
+    uint8_t id;
+    dmg_mapper_t type;
+} dmg_memory_type_t;
+
 static const uint8_t BOOTROM[] =
 {
     0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
@@ -66,9 +91,9 @@ static const dmg_memory_header_t *dmg_memory_header(const uint8_t *const data)
     return (const dmg_memory_header_t *)&data[0x0100];
 }
 
-static dmg_mapper_e dmg_memory_type(uint8_t id)
+static dmg_mapper_t dmg_memory_type(uint8_t id)
 {
-    dmg_mapper_e result = DMG_MAPPER_MAX;
+    dmg_mapper_t result = DMG_MAPPER_MAX;
     for (uint16_t index = 0; index < sizeof (TYPE) / sizeof (*TYPE); ++index)
     {
         if (TYPE[index].id == id)
@@ -439,7 +464,7 @@ static void dmg_memory_setup_mapper(dmg_handle_t const handle, uint8_t id)
     }
 }
 
-static dmg_error_e dmg_memory_setup_ram(dmg_handle_t const handle, uint16_t count)
+static dmg_error_t dmg_memory_setup_ram(dmg_handle_t const handle, uint16_t count)
 {
     if (count)
     {
@@ -476,9 +501,9 @@ static void dmg_memory_setup_title(dmg_handle_t const handle, const char *title)
     }
 }
 
-static dmg_error_e dmg_memory_setup(dmg_handle_t const handle, const uint8_t *const data)
+static dmg_error_t dmg_memory_setup(dmg_handle_t const handle, const uint8_t *const data)
 {
-    dmg_error_e result;
+    dmg_error_t result;
     const dmg_memory_header_t *header = dmg_memory_header(data);
     if ((result = dmg_memory_setup_ram(handle, RAM[header->ram])) == DMG_SUCCESS)
     {
@@ -490,7 +515,7 @@ static dmg_error_e dmg_memory_setup(dmg_handle_t const handle, const uint8_t *co
     return result;
 }
 
-static dmg_error_e dmg_memory_validate(dmg_handle_t const handle, const uint8_t *const data, uint32_t length)
+static dmg_error_t dmg_memory_validate(dmg_handle_t const handle, const uint8_t *const data, uint32_t length)
 {
     uint8_t checksum;
     uint32_t expected = 0x4000;
@@ -536,9 +561,9 @@ const char *dmg_memory_get_title(dmg_handle_t const handle)
     return handle->memory.cartridge.title;
 }
 
-dmg_error_e dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data)
+dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data)
 {
-    dmg_error_e result;
+    dmg_error_t result;
     if (!data)
     {
         return DMG_ERROR(handle, "Invalid data -- %p", data);
@@ -550,7 +575,7 @@ dmg_error_e dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *c
     return result;
 }
 
-dmg_error_e dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data)
+dmg_error_t dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data)
 {
     uint32_t expected = handle->memory.cartridge.ram.count * 0x2000;
     if (!data)
@@ -603,7 +628,7 @@ uint8_t dmg_memory_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-dmg_error_e dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data)
+dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data)
 {
     if (!data)
     {

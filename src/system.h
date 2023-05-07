@@ -17,19 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0x6b82d3d
-
-typedef union
-{
-    struct
-    {
-        uint8_t alpha;
-        uint8_t red;
-        uint8_t green;
-        uint8_t blue;
-    };
-    uint32_t raw;
-} dmg_color_t;
+#define DMG_PATCH 0xb6fc94c
 
 struct dmg_s
 {
@@ -62,7 +50,7 @@ struct dmg_s
 
 uint8_t dmg_get_silence(dmg_handle_t const handle);
 uint8_t dmg_read(dmg_handle_t const handle, uint16_t address);
-dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
+dmg_error_t dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
 void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_SYSTEM_H_ */
