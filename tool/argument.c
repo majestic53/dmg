@@ -13,7 +13,6 @@ static const struct option COMMAND[] =
 {
     { "help", no_argument, NULL, 'h', },
     { "link", no_argument, NULL, 'l', },
-    { "palette", required_argument, NULL, 'p', },
     { "version", no_argument, NULL, 'v', },
     { NULL, 0, NULL, 0, },
 };
@@ -22,14 +21,7 @@ static const char *DESCRIPTION[] =
 {
     "Show help information",
     "Enable serial link",
-    "Set palette type",
     "Show version information",
-};
-
-static const char *PALETTE[] =
-{
-    "gb",
-    "gbp",
 };
 
 static int argument_link(argument_t *const argument)
@@ -40,28 +32,6 @@ static int argument_link(argument_t *const argument)
         return EXIT_FAILURE;
     }
     argument->link = true;
-    return EXIT_SUCCESS;
-}
-
-static int argument_palette(argument_t *const argument)
-{
-    if (argument->palette < DMG_PALETTE_MAX)
-    {
-        fprintf(stderr, "Redefined color palette -- %s\n", optarg);
-        return EXIT_FAILURE;
-    }
-    for (argument->palette = 0; argument->palette < DMG_PALETTE_MAX; ++argument->palette)
-    {
-        if (!strcmp(optarg, PALETTE[argument->palette]))
-        {
-            break;
-        }
-    }
-    if (argument->palette == DMG_PALETTE_MAX)
-    {
-        fprintf(stderr, "Unsupported color palette -- %s\n", optarg);
-        return EXIT_FAILURE;
-    }
     return EXIT_SUCCESS;
 }
 
@@ -93,8 +63,7 @@ int argument_parse(int argc, char *argv[], argument_t *const argument)
 {
     int option, index, result;
     opterr = 1;
-    argument->palette = DMG_PALETTE_MAX;
-    while ((option = getopt_long(argc, argv, "hlp:v", COMMAND, &index)) != -1)
+    while ((option = getopt_long(argc, argv, "hlv", COMMAND, &index)) != -1)
     {
         switch (option)
         {
@@ -103,12 +72,6 @@ int argument_parse(int argc, char *argv[], argument_t *const argument)
                 return EXIT_FAILURE;
             case 'l': /* LINK */
                 if ((result = argument_link(argument)) != EXIT_SUCCESS)
-                {
-                    return result;
-                }
-                break;
-            case 'p': /* PALETTE */
-                if ((result = argument_palette(argument)) != EXIT_SUCCESS)
                 {
                     return result;
                 }

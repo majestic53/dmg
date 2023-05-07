@@ -13,12 +13,6 @@ The goal of `DMG` is to emulate the original Gameboy hardware with enough accura
 
 __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs. Testing was done using the GCC compiler, under Linux. Modification to the makefiles might be required to build with a different operating system and/or compiler.
 
-## Features
-
-* Support for input and serial peripherals (see [Keybindings](https://github.com/majestic53/dmg#keybindings))
-* Support for multiple mapper types (see [Mappers](https://github.com/majestic53/dmg#mappers))
-* Support for multiple palettes (see [Palettes](https://github.com/majestic53/dmg#palettes))
-
 ## Work-in-progress
 
 * Support for MBC3 RTC
@@ -60,7 +54,6 @@ Usage: dmg [options] file
 Options:
    -h, --help        Show help information
    -l, --link        Enable serial link
-   -p, --palette     Set palette type
    -v, --version     Show version information
 ```
 
@@ -69,12 +62,6 @@ Options:
 ```bash
 # To launch with a cartridge, run the following command
 ./dmg cartridge.gb
-# To launch with the serial link enabled, run the following command
-./dmg cartridge.gb --link
-# To launch with the Gameboy palette, run the following command
-./dmg cartridge.gb --palette gb
-# To launch with the Gameboy Pocket palette, run the following command
-./dmg cartridge.gb --palette gbp
 ```
 
 ### Keybindings
@@ -103,15 +90,6 @@ The following mappers are supported:
 |5-6  |[MBC2](https://gbdev.io/pandocs/MBC2.html) |256KB ROM/512B RAM|
 |15-19|[MBC3](https://gbdev.io/pandocs/MBC3.html) |2MB ROM/32KB RAM  |
 |25-30|[MBC5](https://gbdev.io/pandocs/MBC5.html) |8MB ROM/128KB RAM |
-
-## Palettes
-
-The following palettes are supported:
-
-|Id |Name                  |Colors              |
-|:--|:---------------------|:-------------------|
-|gb |Gameboy palette       |![gb](docs/gb.png)  |
-|gbp|Gameboy Pocket palette|![gbp](docs/gbp.png)|
 
 ### License
 

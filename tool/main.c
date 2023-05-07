@@ -52,7 +52,7 @@ static int initialize(int argc, char *argv[])
     {
         return result;
     }
-    if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, output, g_context.argument.palette) != DMG_SUCCESS)
+    if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, output) != DMG_SUCCESS)
     {
         fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
         return EXIT_FAILURE;

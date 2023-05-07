@@ -13,7 +13,6 @@ typedef struct
 {
     bool link;
     char *path;
-    dmg_palette_e palette;
 } argument_t;
 
 int argument_parse(int argc, char *argv[], argument_t *const argument);

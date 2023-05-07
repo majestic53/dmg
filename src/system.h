@@ -17,7 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xbd7269c
+#define DMG_PATCH 0x30d60ed
 
 typedef union
 {
@@ -45,7 +45,6 @@ struct dmg_s
     struct
     {
         uint32_t tick;
-        dmg_palette_e palette;
         SDL_Cursor *cursor;
         SDL_Renderer *renderer;
         SDL_Texture *texture;
