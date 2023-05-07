@@ -16,7 +16,8 @@ typedef struct
     int handle;
     bool master;
     struct sockaddr_un address;
-    struct {
+    struct
+    {
         struct sockaddr_un address;
         socklen_t length;
     } remote;
