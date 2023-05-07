@@ -18,7 +18,7 @@ typedef union
         uint8_t pace : 3;
     };
     uint8_t raw;
-} dmg_audio_nr10;
+} dmg_audio_nr10_t;
 
 typedef union
 {
@@ -28,7 +28,7 @@ typedef union
         uint8_t duty : 2;
     };
     uint8_t raw;
-} dmg_audio_nr11;
+} dmg_audio_nr11_t;
 
 typedef union
 {
@@ -39,7 +39,7 @@ typedef union
         uint8_t volume : 4;
     };
     uint8_t raw;
-} dmg_audio_nr12;
+} dmg_audio_nr12_t;
 
 typedef union
 {
@@ -50,7 +50,7 @@ typedef union
         uint8_t triggered : 1;
     };
     uint8_t raw;
-} dmg_audio_nr14;
+} dmg_audio_nr14_t;
 
 typedef union
 {
@@ -60,7 +60,7 @@ typedef union
         uint8_t duty : 2;
     };
     uint8_t raw;
-} dmg_audio_nr21;
+} dmg_audio_nr21_t;
 
 typedef union
 {
@@ -71,7 +71,7 @@ typedef union
         uint8_t volume : 4;
     };
     uint8_t raw;
-} dmg_audio_nr22;
+} dmg_audio_nr22_t;
 
 typedef union
 {
@@ -82,7 +82,7 @@ typedef union
         uint8_t triggered : 1;
     };
     uint8_t raw;
-} dmg_audio_nr24;
+} dmg_audio_nr24_t;
 
 typedef union
 {
@@ -91,7 +91,7 @@ typedef union
         /* TODO: POPULATE NR30 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr30;
+} dmg_audio_nr30_t;
 
 typedef union
 {
@@ -100,7 +100,7 @@ typedef union
         /* TODO: POPULATE NR31 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr31;
+} dmg_audio_nr31_t;
 
 typedef union
 {
@@ -109,7 +109,7 @@ typedef union
         /* TODO: POPULATE NR32 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr32;
+} dmg_audio_nr32_t;
 
 typedef union
 {
@@ -118,7 +118,7 @@ typedef union
         /* TODO: POPULATE NR34 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr34;
+} dmg_audio_nr34_t;
 
 typedef union
 {
@@ -127,7 +127,7 @@ typedef union
         /* TODO: POPULATE NR41 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr41;
+} dmg_audio_nr41_t;
 
 typedef union
 {
@@ -136,7 +136,7 @@ typedef union
         /* TODO: POPULATE NR42 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr42;
+} dmg_audio_nr42_t;
 
 typedef union
 {
@@ -145,7 +145,7 @@ typedef union
         /* TODO: POPULATE NR43 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr43;
+} dmg_audio_nr43_t;
 
 typedef union
 {
@@ -154,7 +154,7 @@ typedef union
         /* TODO: POPULATE NR44 BITFIELD */
     };
     uint8_t raw;
-} dmg_audio_nr44;
+} dmg_audio_nr44_t;
 
 typedef struct
 {
@@ -171,48 +171,48 @@ typedef struct
     } buffer;
     struct
     {
-        dmg_audio_nr10 sweep;
-        dmg_audio_nr11 length;
-        dmg_audio_nr12 envelope;
+        dmg_audio_nr10_t sweep;
+        dmg_audio_nr11_t length;
+        dmg_audio_nr12_t envelope;
         union {
             struct {
                 uint8_t low;
-                dmg_audio_nr14 high;
+                dmg_audio_nr14_t high;
             };
             uint16_t frequency : 11;
         };
     } channel_1;
     struct
     {
-        dmg_audio_nr21 length;
-        dmg_audio_nr22 envelope;
+        dmg_audio_nr21_t length;
+        dmg_audio_nr22_t envelope;
         union {
             struct {
                 uint8_t low;
-                dmg_audio_nr24 high;
+                dmg_audio_nr24_t high;
             };
             uint16_t frequency : 11;
         };
     } channel_2;
     struct
     {
-        dmg_audio_nr30 control;
-        dmg_audio_nr31 length;
-        dmg_audio_nr32 wave;
+        dmg_audio_nr30_t control;
+        dmg_audio_nr31_t length;
+        dmg_audio_nr32_t wave;
         union {
             struct {
                 uint8_t low;
-                dmg_audio_nr34 high;
+                dmg_audio_nr34_t high;
             };
             uint16_t frequency : 11;
         };
     } channel_3;
     struct
     {
-        dmg_audio_nr41 length;
-        dmg_audio_nr42 envelope;
-        dmg_audio_nr43 divider;
-        dmg_audio_nr44 counter;
+        dmg_audio_nr41_t length;
+        dmg_audio_nr42_t envelope;
+        dmg_audio_nr43_t divider;
+        dmg_audio_nr44_t counter;
     } channel_4;
     union
     {
