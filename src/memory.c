@@ -51,6 +51,16 @@ static const dmg_memory_type_t TYPE[] =
     { 29, DMG_MAPPER_MBC5, }, { 30, DMG_MAPPER_MBC5, },
 };
 
+static uint8_t dmg_memory_checksum(const uint8_t *const data, uint16_t begin, uint16_t end)
+{
+    uint8_t result = 0;
+    for (uint16_t index = begin; index <= end; ++index)
+    {
+        result = result - data[index] - 1;
+    }
+    return result;
+}
+
 static const dmg_memory_header_t *dmg_memory_header(const uint8_t *const data)
 {
     return (const dmg_memory_header_t *)&data[0x0100];
@@ -433,7 +443,7 @@ static dmg_error_e dmg_memory_setup_ram(dmg_handle_t const handle, uint16_t coun
 {
     if (count)
     {
-        if (!(handle->memory.cartridge.ram.data = dmg_allocate(count * 0x2000)))
+        if (!(handle->memory.cartridge.ram.data = calloc(count, 0x2000)))
         {
             return DMG_ERROR(handle, "Failed to allocate cartridge ram -- %u banks", count);
         }
@@ -494,7 +504,7 @@ static dmg_error_e dmg_memory_validate(dmg_handle_t const handle, const uint8_t 
         return DMG_ERROR(handle, "Invalid cartridge length -- %u bytes", length);
     }
     header = dmg_memory_header(data);
-    if ((checksum = dmg_get_checksum(data, 0x0134, 0x014C)) != header->checksum)
+    if ((checksum = dmg_memory_checksum(data, 0x0134, 0x014C)) != header->checksum)
     {
         return DMG_ERROR(handle, "Invalid cartridge checksum -- %u (expecting %u)", checksum, header->checksum);
     }
@@ -608,7 +618,7 @@ void dmg_memory_uninitialize(dmg_handle_t const handle)
 {
     if (handle->memory.cartridge.ram.data)
     {
-        dmg_free(handle->memory.cartridge.ram.data);
+        free(handle->memory.cartridge.ram.data);
     }
 }
 

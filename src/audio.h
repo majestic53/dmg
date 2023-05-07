@@ -7,7 +7,7 @@
 #define DMG_AUDIO_H_
 
 #include <stdbool.h>
-#include <common.h>
+#include <dmg.h>
 
 typedef union
 {

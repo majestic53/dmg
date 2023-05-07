@@ -7,7 +7,7 @@
 #define DMG_MEMORY_H_
 
 #include <stdbool.h>
-#include <common.h>
+#include <dmg.h>
 
 typedef enum
 {

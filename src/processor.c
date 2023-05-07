@@ -32,14 +32,14 @@ static dmg_error_e dmg_processor_adc(dmg_handle_t const handle)
             break;
         case 0x8E: /* (HL) */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x8F: /* A */
             operand = handle->processor.af.high;
             break;
         case 0xCE: /* # */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.pc.word++);
+            operand = dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     carry = handle->processor.af.carry;
@@ -79,14 +79,14 @@ static dmg_error_e dmg_processor_add(dmg_handle_t const handle)
             break;
         case 0x86: /* (HL) */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x87: /* A */
             operand = handle->processor.af.high;
             break;
         case 0xC6: /* # */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.pc.word++);
+            operand = dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     sum = handle->processor.af.high + operand;
@@ -131,7 +131,7 @@ static dmg_error_e dmg_processor_add_hl(dmg_handle_t const handle)
 static dmg_error_e dmg_processor_add_sp(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
-    int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
+    int8_t operand = dmg_read(handle, handle->processor.pc.word++);
     handle->processor.delay = 16;
     sum = handle->processor.sp.word + operand;
     carry = handle->processor.sp.word ^ operand ^ sum;
@@ -168,13 +168,13 @@ static dmg_error_e dmg_processor_and(dmg_handle_t const handle)
             break;
         case 0xA6: /* (HL) */
             handle->processor.delay += 4;
-            handle->processor.af.high &= dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.af.high &= dmg_read(handle, handle->processor.hl.word);
             break;
         case 0xA7: /* A */
             break;
         case 0xE6: /* # */
             handle->processor.delay += 4;
-            handle->processor.af.high &= dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.af.high &= dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     handle->processor.af.carry = false;
@@ -216,7 +216,7 @@ static dmg_error_e dmg_processor_bit(dmg_handle_t const handle)
         case 0x46: case 0x4E: case 0x56: case 0x5E:
         case 0x66: case 0x6E: case 0x76: case 0x7E: /* (HL) */
             handle->processor.delay += 4;
-            handle->processor.af.zero = !(dmg_system_read(handle, handle->processor.hl.word) & (1 << ((handle->processor.instruction.opcode - 0x46) / 8)));
+            handle->processor.af.zero = !(dmg_read(handle, handle->processor.hl.word) & (1 << ((handle->processor.instruction.opcode - 0x46) / 8)));
             break;
         case 0x47: case 0x4F: case 0x57: case 0x5F:
         case 0x67: case 0x6F: case 0x77: case 0x7F: /* A */
@@ -233,8 +233,8 @@ static dmg_error_e dmg_processor_call(dmg_handle_t const handle)
     bool taken = false;
     dmg_register_t operand = {};
     handle->processor.delay = 12;
-    operand.low = dmg_system_read(handle, handle->processor.pc.word++);
-    operand.high = dmg_system_read(handle, handle->processor.pc.word++);
+    operand.low = dmg_read(handle, handle->processor.pc.word++);
+    operand.high = dmg_read(handle, handle->processor.pc.word++);
     switch (handle->processor.instruction.opcode)
     {
         case 0xC4: /* NZ */
@@ -256,8 +256,8 @@ static dmg_error_e dmg_processor_call(dmg_handle_t const handle)
     if (taken)
     {
         handle->processor.delay += 12;
-        dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
-        dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
+        dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
+        dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
         handle->processor.pc.word = operand.word;
     }
     return DMG_SUCCESS;
@@ -298,14 +298,14 @@ static dmg_error_e dmg_processor_cp(dmg_handle_t const handle)
             break;
         case 0xBE: /* (HL) */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0xBF: /* A */
             operand = handle->processor.af.high;
             break;
         case 0xFE: /* # */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.pc.word++);
+            operand = dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     handle->processor.af.carry = (handle->processor.af.high < operand);
@@ -399,8 +399,8 @@ static dmg_error_e dmg_processor_dec(dmg_handle_t const handle)
             break;
         case 0x35: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word) - 1;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            operand = dmg_read(handle, handle->processor.hl.word) - 1;
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x3D: /* A */
             operand = --handle->processor.af.high;
@@ -466,8 +466,8 @@ static dmg_error_e dmg_processor_inc(dmg_handle_t const handle)
             break;
         case 0x34: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word) + 1;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            operand = dmg_read(handle, handle->processor.hl.word) + 1;
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x3C: /* A */
             operand = ++handle->processor.af.high;
@@ -505,8 +505,8 @@ static dmg_error_e dmg_processor_jp(dmg_handle_t const handle)
     bool taken = false;
     dmg_register_t operand = {};
     handle->processor.delay = 12;
-    operand.low = dmg_system_read(handle, handle->processor.pc.word++);
-    operand.high = dmg_system_read(handle, handle->processor.pc.word++);
+    operand.low = dmg_read(handle, handle->processor.pc.word++);
+    operand.high = dmg_read(handle, handle->processor.pc.word++);
     switch (handle->processor.instruction.opcode)
     {
         case 0xC2: /* NZ */
@@ -543,7 +543,7 @@ static dmg_error_e dmg_processor_jp_hl(dmg_handle_t const handle)
 static dmg_error_e dmg_processor_jr(dmg_handle_t const handle)
 {
     bool taken = false;
-    int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
+    int8_t operand = dmg_read(handle, handle->processor.pc.word++);
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
     {
@@ -579,94 +579,94 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
     {
         case 0x01: /* BC,## */
             handle->processor.delay += 8;
-            handle->processor.bc.low = dmg_system_read(handle, handle->processor.pc.word++);
-            handle->processor.bc.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.bc.low = dmg_read(handle, handle->processor.pc.word++);
+            handle->processor.bc.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x02: /* (BC),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.bc.word, handle->processor.af.high);
+            dmg_write(handle, handle->processor.bc.word, handle->processor.af.high);
             break;
         case 0x06: /* B,# */
             handle->processor.delay += 4;
-            handle->processor.bc.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.bc.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x08: /* (##),SP */
             handle->processor.delay += 16;
-            operand.low = dmg_system_read(handle, handle->processor.pc.word++);
-            operand.high = dmg_system_read(handle, handle->processor.pc.word++);
-            dmg_system_write(handle, operand.word, handle->processor.sp.low);
-            dmg_system_write(handle, operand.word + 1, handle->processor.sp.high);
+            operand.low = dmg_read(handle, handle->processor.pc.word++);
+            operand.high = dmg_read(handle, handle->processor.pc.word++);
+            dmg_write(handle, operand.word, handle->processor.sp.low);
+            dmg_write(handle, operand.word + 1, handle->processor.sp.high);
             break;
         case 0x0A: /* A,(BC) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.bc.word);
+            handle->processor.af.high = dmg_read(handle, handle->processor.bc.word);
             break;
         case 0x0E: /* C,# */
             handle->processor.delay += 4;
-            handle->processor.bc.low = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.bc.low = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x11: /* DE,## */
             handle->processor.delay += 8;
-            handle->processor.de.low = dmg_system_read(handle, handle->processor.pc.word++);
-            handle->processor.de.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.de.low = dmg_read(handle, handle->processor.pc.word++);
+            handle->processor.de.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x12: /* (DE),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.de.word, handle->processor.af.high);
+            dmg_write(handle, handle->processor.de.word, handle->processor.af.high);
             break;
         case 0x16: /* D,# */
             handle->processor.delay += 4;
-            handle->processor.de.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.de.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x1A: /* A,(DE) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.de.word);
+            handle->processor.af.high = dmg_read(handle, handle->processor.de.word);
             break;
         case 0x1E: /* E,# */
             handle->processor.delay += 4;
-            handle->processor.de.low = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.de.low = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x21: /* HL,## */
             handle->processor.delay += 8;
-            handle->processor.hl.low = dmg_system_read(handle, handle->processor.pc.word++);
-            handle->processor.hl.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.hl.low = dmg_read(handle, handle->processor.pc.word++);
+            handle->processor.hl.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x22: /* (HL+),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word++, handle->processor.af.high);
+            dmg_write(handle, handle->processor.hl.word++, handle->processor.af.high);
             break;
         case 0x26: /* H,# */
             handle->processor.delay += 4;
-            handle->processor.hl.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.hl.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x2A: /* A,(HL+) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.hl.word++);
+            handle->processor.af.high = dmg_read(handle, handle->processor.hl.word++);
             break;
         case 0x2E: /* L,# */
             handle->processor.delay += 4;
-            handle->processor.hl.low = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.hl.low = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x31: /* SP,## */
             handle->processor.delay += 8;
-            handle->processor.sp.low = dmg_system_read(handle, handle->processor.pc.word++);
-            handle->processor.sp.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.sp.low = dmg_read(handle, handle->processor.pc.word++);
+            handle->processor.sp.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x32: /* (HL-),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word--, handle->processor.af.high);
+            dmg_write(handle, handle->processor.hl.word--, handle->processor.af.high);
             break;
         case 0x36: /* (HL),# */
             handle->processor.delay += 8;
-            dmg_system_write(handle, handle->processor.hl.word, dmg_system_read(handle, handle->processor.pc.word++));
+            dmg_write(handle, handle->processor.hl.word, dmg_read(handle, handle->processor.pc.word++));
             break;
         case 0x3A: /* A,(HL-) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.hl.word--);
+            handle->processor.af.high = dmg_read(handle, handle->processor.hl.word--);
             break;
         case 0x3E: /* A,# */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.af.high = dmg_read(handle, handle->processor.pc.word++);
             break;
         case 0x40: /* B,B */
             break;
@@ -687,7 +687,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x46: /* B,(HL) */
             handle->processor.delay += 4;
-            handle->processor.bc.high = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.bc.high = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x47: /* B,A */
             handle->processor.bc.high = handle->processor.af.high;
@@ -711,7 +711,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x4E: /* C,(HL) */
             handle->processor.delay += 4;
-            handle->processor.bc.low = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.bc.low = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x4F: /* C,A */
             handle->processor.bc.low = handle->processor.af.high;
@@ -735,7 +735,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x56: /* D,(HL) */
             handle->processor.delay += 4;
-            handle->processor.de.high = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.de.high = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x57: /* D,A */
             handle->processor.de.high = handle->processor.af.high;
@@ -759,7 +759,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x5E: /* E,(HL) */
             handle->processor.delay += 4;
-            handle->processor.de.low = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.de.low = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x5F: /* E,A */
             handle->processor.de.low = handle->processor.af.high;
@@ -783,7 +783,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x66: /* H,(HL) */
             handle->processor.delay += 4;
-            handle->processor.hl.high = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.hl.high = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x67: /* H,A */
             handle->processor.hl.high = handle->processor.af.high;
@@ -807,38 +807,38 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x6E: /* L,(HL) */
             handle->processor.delay += 4;
-            handle->processor.hl.low = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.hl.low = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x6F: /* L,A */
             handle->processor.hl.low = handle->processor.af.high;
             break;
         case 0x70: /* (HL),B */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.bc.high);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.bc.high);
             break;
         case 0x71: /* (HL),C */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.bc.low);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.bc.low);
             break;
         case 0x72: /* (HL),D */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.de.high);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.de.high);
             break;
         case 0x73: /* (HL),E */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.de.low);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.de.low);
             break;
         case 0x74: /* (HL),H */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.hl.high);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.hl.high);
             break;
         case 0x75: /* (HL),L */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.hl.low);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.hl.low);
             break;
         case 0x77: /* (HL),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, handle->processor.hl.word, handle->processor.af.high);
+            dmg_write(handle, handle->processor.hl.word, handle->processor.af.high);
             break;
         case 0x78: /* A,B */
             handle->processor.af.high = handle->processor.bc.high;
@@ -860,31 +860,31 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0x7E: /* A,(HL) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.af.high = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x7F: /* A,A */
             break;
         case 0xE0: /* (FF00+#),A */
             handle->processor.delay += 8;
-            dmg_system_write(handle, 0xFF00 + dmg_system_read(handle, handle->processor.pc.word++), handle->processor.af.high);
+            dmg_write(handle, 0xFF00 + dmg_read(handle, handle->processor.pc.word++), handle->processor.af.high);
             break;
         case 0xE2: /* (FF00+C),A */
             handle->processor.delay += 4;
-            dmg_system_write(handle, 0xFF00 + handle->processor.bc.low, handle->processor.af.high);
+            dmg_write(handle, 0xFF00 + handle->processor.bc.low, handle->processor.af.high);
             break;
         case 0xEA: /* (##),A */
             handle->processor.delay += 12;
-            operand.low = dmg_system_read(handle, handle->processor.pc.word++);
-            operand.high = dmg_system_read(handle, handle->processor.pc.word++);
-            dmg_system_write(handle, operand.word, handle->processor.af.high);
+            operand.low = dmg_read(handle, handle->processor.pc.word++);
+            operand.high = dmg_read(handle, handle->processor.pc.word++);
+            dmg_write(handle, operand.word, handle->processor.af.high);
             break;
         case 0xF0: /* A,(FF00+#) */
             handle->processor.delay += 8;
-            handle->processor.af.high = dmg_system_read(handle, 0xFF00 + dmg_system_read(handle, handle->processor.pc.word++));
+            handle->processor.af.high = dmg_read(handle, 0xFF00 + dmg_read(handle, handle->processor.pc.word++));
             break;
         case 0xF2: /* A,(FF00+C) */
             handle->processor.delay += 4;
-            handle->processor.af.high = dmg_system_read(handle, 0xFF00 + handle->processor.bc.low);
+            handle->processor.af.high = dmg_read(handle, 0xFF00 + handle->processor.bc.low);
             break;
         case 0xF9: /* SP,HL */
             handle->processor.delay += 4;
@@ -892,9 +892,9 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
             break;
         case 0xFA: /* A,(##) */
             handle->processor.delay += 12;
-            operand.low = dmg_system_read(handle, handle->processor.pc.word++);
-            operand.high = dmg_system_read(handle, handle->processor.pc.word++);
-            handle->processor.af.high = dmg_system_read(handle, operand.word);
+            operand.low = dmg_read(handle, handle->processor.pc.word++);
+            operand.high = dmg_read(handle, handle->processor.pc.word++);
+            handle->processor.af.high = dmg_read(handle, operand.word);
             break;
     }
     return DMG_SUCCESS;
@@ -903,7 +903,7 @@ static dmg_error_e dmg_processor_ld(dmg_handle_t const handle)
 static dmg_error_e dmg_processor_ld_hl(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
-    int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
+    int8_t operand = dmg_read(handle, handle->processor.pc.word++);
     handle->processor.delay = 12;
     sum = handle->processor.sp.word + operand;
     carry = handle->processor.sp.word ^ operand ^ sum;
@@ -946,13 +946,13 @@ static dmg_error_e dmg_processor_or(dmg_handle_t const handle)
             break;
         case 0xB6: /* (HL) */
             handle->processor.delay += 4;
-            handle->processor.af.high |= dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.af.high |= dmg_read(handle, handle->processor.hl.word);
             break;
         case 0xB7: /* A */
             break;
         case 0xF6: /* # */
             handle->processor.delay += 4;
-            handle->processor.af.high |= dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.af.high |= dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     handle->processor.af.carry = false;
@@ -968,20 +968,20 @@ static dmg_error_e dmg_processor_pop(dmg_handle_t const handle)
     switch (handle->processor.instruction.opcode)
     {
         case 0xC1: /* BC */
-            handle->processor.bc.low = dmg_system_read(handle, handle->processor.sp.word++);
-            handle->processor.bc.high = dmg_system_read(handle, handle->processor.sp.word++);
+            handle->processor.bc.low = dmg_read(handle, handle->processor.sp.word++);
+            handle->processor.bc.high = dmg_read(handle, handle->processor.sp.word++);
             break;
         case 0xD1: /* DE */
-            handle->processor.de.low = dmg_system_read(handle, handle->processor.sp.word++);
-            handle->processor.de.high = dmg_system_read(handle, handle->processor.sp.word++);
+            handle->processor.de.low = dmg_read(handle, handle->processor.sp.word++);
+            handle->processor.de.high = dmg_read(handle, handle->processor.sp.word++);
             break;
         case 0xE1: /* HL */
-            handle->processor.hl.low = dmg_system_read(handle, handle->processor.sp.word++);
-            handle->processor.hl.high = dmg_system_read(handle, handle->processor.sp.word++);
+            handle->processor.hl.low = dmg_read(handle, handle->processor.sp.word++);
+            handle->processor.hl.high = dmg_read(handle, handle->processor.sp.word++);
             break;
         case 0xF1: /* AF */
-            handle->processor.af.low = dmg_system_read(handle, handle->processor.sp.word++) & 0xF0;
-            handle->processor.af.high = dmg_system_read(handle, handle->processor.sp.word++);
+            handle->processor.af.low = dmg_read(handle, handle->processor.sp.word++) & 0xF0;
+            handle->processor.af.high = dmg_read(handle, handle->processor.sp.word++);
             break;
     }
     return DMG_SUCCESS;
@@ -993,20 +993,20 @@ static dmg_error_e dmg_processor_push(dmg_handle_t const handle)
     switch (handle->processor.instruction.opcode)
     {
         case 0xC5: /* BC */
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.bc.high);
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.bc.low);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.bc.high);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.bc.low);
             break;
         case 0xD5: /* DE */
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.de.high);
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.de.low);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.de.high);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.de.low);
             break;
         case 0xE5: /* HL */
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.hl.high);
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.hl.low);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.hl.high);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.hl.low);
             break;
         case 0xF5: /* AF */
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.af.high);
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.af.low);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.af.high);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.af.low);
             break;
     }
     return DMG_SUCCESS;
@@ -1044,7 +1044,7 @@ static dmg_error_e dmg_processor_res(dmg_handle_t const handle)
         case 0x86: case 0x8E: case 0x96: case 0x9E:
         case 0xA6: case 0xAE: case 0xB6: case 0xBE: /* (HL) */
             handle->processor.delay += 8;
-            dmg_system_write(handle, handle->processor.hl.word, dmg_system_read(handle, handle->processor.hl.word)
+            dmg_write(handle, handle->processor.hl.word, dmg_read(handle, handle->processor.hl.word)
                 & ~(1 << ((handle->processor.instruction.opcode - 0x86) / 8)));
             break;
         case 0x87: case 0x8F: case 0x97: case 0x9F:
@@ -1080,8 +1080,8 @@ static dmg_error_e dmg_processor_ret(dmg_handle_t const handle)
     if (taken)
     {
         handle->processor.delay += (handle->processor.instruction.opcode == 0xC9) ? 8 : 12; /* N */
-        handle->processor.pc.low = dmg_system_read(handle, handle->processor.sp.word++);
-        handle->processor.pc.high = dmg_system_read(handle, handle->processor.sp.word++);
+        handle->processor.pc.low = dmg_read(handle, handle->processor.sp.word++);
+        handle->processor.pc.high = dmg_read(handle, handle->processor.sp.word++);
     }
     return DMG_SUCCESS;
 }
@@ -1089,8 +1089,8 @@ static dmg_error_e dmg_processor_ret(dmg_handle_t const handle)
 static dmg_error_e dmg_processor_reti(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
-    handle->processor.pc.low = dmg_system_read(handle, handle->processor.sp.word++);
-    handle->processor.pc.high = dmg_system_read(handle, handle->processor.sp.word++);
+    handle->processor.pc.low = dmg_read(handle, handle->processor.sp.word++);
+    handle->processor.pc.high = dmg_read(handle, handle->processor.sp.word++);
     handle->processor.interrupt.enable_delay = 0;
     handle->processor.interrupt.enabled = true;
     return DMG_SUCCESS;
@@ -1134,11 +1134,11 @@ static dmg_error_e dmg_processor_rl(dmg_handle_t const handle)
             break;
         case 0x16: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = ((operand & 0x80) == 0x80);
             operand = (operand << 1) | carry;
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x17: /* A */
             handle->processor.af.carry = ((handle->processor.af.high & 0x80) == 0x80);
@@ -1201,11 +1201,11 @@ static dmg_error_e dmg_processor_rlc(dmg_handle_t const handle)
             break;
         case 0x06: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = ((operand & 0x80) == 0x80);
             operand = (operand << 1) | handle->processor.af.carry;
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x07: /* A */
             handle->processor.af.carry = ((handle->processor.af.high & 0x80) == 0x80);
@@ -1267,11 +1267,11 @@ static dmg_error_e dmg_processor_rr(dmg_handle_t const handle)
             break;
         case 0x1E: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = operand & 1;
             operand = (operand >> 1) | (carry ? 0x80 : 0);
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x1F: /* A */
             handle->processor.af.carry = handle->processor.af.high & 1;
@@ -1334,11 +1334,11 @@ static dmg_error_e dmg_processor_rrc(dmg_handle_t const handle)
             break;
         case 0x0E: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = operand & 1;
             operand = (operand >> 1) | (handle->processor.af.carry ? 0x80 : 0);
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x0F: /* A */
             handle->processor.af.carry = handle->processor.af.high & 1;
@@ -1365,8 +1365,8 @@ static dmg_error_e dmg_processor_rrca(dmg_handle_t const handle)
 static dmg_error_e dmg_processor_rst(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
-    dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
-    dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
+    dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
+    dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
     handle->processor.pc.word = handle->processor.instruction.opcode - 0xC7;
     return DMG_SUCCESS;
 }
@@ -1398,14 +1398,14 @@ static dmg_error_e dmg_processor_sbc(dmg_handle_t const handle)
             break;
         case 0x9E: /* (HL) */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x9F: /* A */
             operand = handle->processor.af.high;
             break;
         case 0xDE: /* # */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.pc.word++);
+            operand = dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     carry = handle->processor.af.carry;
@@ -1459,7 +1459,7 @@ static dmg_error_e dmg_processor_set(dmg_handle_t const handle)
         case 0xC6: case 0xCE: case 0xD6: case 0xDE:
         case 0xE6: case 0xEE: case 0xF6: case 0xFE: /* (HL) */
             handle->processor.delay += 8;
-            dmg_system_write(handle, handle->processor.hl.word, dmg_system_read(handle, handle->processor.hl.word)
+            dmg_write(handle, handle->processor.hl.word, dmg_read(handle, handle->processor.hl.word)
                 | (1 << ((handle->processor.instruction.opcode - 0xC6) / 8)));
             break;
         case 0xC7: case 0xCF: case 0xD7: case 0xDF:
@@ -1508,11 +1508,11 @@ static dmg_error_e dmg_processor_sla(dmg_handle_t const handle)
             break;
         case 0x26: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = ((operand & 0x80) == 0x80);
             operand <<= 1;
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x27: /* A */
             handle->processor.af.carry = ((handle->processor.af.high & 0x80) == 0x80);
@@ -1563,11 +1563,11 @@ static dmg_error_e dmg_processor_sra(dmg_handle_t const handle)
             break;
         case 0x2E: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = operand & 1;
             operand = (operand >> 1) | (operand & 0x80);
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x2F: /* A */
             handle->processor.af.carry = handle->processor.af.high & 1;
@@ -1618,11 +1618,11 @@ static dmg_error_e dmg_processor_srl(dmg_handle_t const handle)
             break;
         case 0x3E: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             handle->processor.af.carry = operand & 1;
             operand >>= 1;
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x3F: /* A */
             handle->processor.af.carry = handle->processor.af.high & 1;
@@ -1639,7 +1639,7 @@ static dmg_error_e dmg_processor_stop(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.stopped = true;
-    dmg_system_read(handle, handle->processor.pc.word++);
+    dmg_read(handle, handle->processor.pc.word++);
     return DMG_SUCCESS;
 }
 
@@ -1670,14 +1670,14 @@ static dmg_error_e dmg_processor_sub(dmg_handle_t const handle)
             break;
         case 0x96: /* (HL) */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             break;
         case 0x97: /* A */
             operand = handle->processor.af.high;
             break;
         case 0xD6: /* # */
             handle->processor.delay += 4;
-            operand = dmg_system_read(handle, handle->processor.pc.word++);
+            operand = dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     sum = handle->processor.af.high - operand;
@@ -1722,10 +1722,10 @@ static dmg_error_e dmg_processor_swap(dmg_handle_t const handle)
             break;
         case 0x36: /* (HL) */
             handle->processor.delay += 8;
-            operand = dmg_system_read(handle, handle->processor.hl.word);
+            operand = dmg_read(handle, handle->processor.hl.word);
             operand = (operand << 4) | (operand >> 4);
             handle->processor.af.zero = !operand;
-            dmg_system_write(handle, handle->processor.hl.word, operand);
+            dmg_write(handle, handle->processor.hl.word, operand);
             break;
         case 0x37: /* A */
             handle->processor.af.high = (handle->processor.af.high << 4) | (handle->processor.af.high >> 4);
@@ -1763,14 +1763,14 @@ static dmg_error_e dmg_processor_xor(dmg_handle_t const handle)
             break;
         case 0xAE: /* (HL) */
             handle->processor.delay += 4;
-            handle->processor.af.high ^= dmg_system_read(handle, handle->processor.hl.word);
+            handle->processor.af.high ^= dmg_read(handle, handle->processor.hl.word);
             break;
         case 0xAF: /* A */
             handle->processor.af.high = 0;
             break;
         case 0xEE: /* # */
             handle->processor.delay += 4;
-            handle->processor.af.high ^= dmg_system_read(handle, handle->processor.pc.word++);
+            handle->processor.af.high ^= dmg_read(handle, handle->processor.pc.word++);
             break;
     }
     handle->processor.af.carry = false;
@@ -1985,10 +1985,10 @@ static dmg_error_e dmg_processor_execute(dmg_handle_t const handle)
 {
     bool extended;
     handle->processor.instruction.address = handle->processor.pc.word;
-    handle->processor.instruction.opcode = dmg_system_read(handle, handle->processor.pc.word++);
+    handle->processor.instruction.opcode = dmg_read(handle, handle->processor.pc.word++);
     if ((extended = (handle->processor.instruction.opcode == 0xCB)))
     {
-        handle->processor.instruction.opcode = dmg_system_read(handle, handle->processor.pc.word++);
+        handle->processor.instruction.opcode = dmg_read(handle, handle->processor.pc.word++);
     }
     return INSTRUCTION[extended ? handle->processor.instruction.opcode + 256 : handle->processor.instruction.opcode](handle);
 }
@@ -2001,8 +2001,8 @@ static dmg_error_e dmg_processor_service(dmg_handle_t const handle)
         uint8_t mask = 1 << interrupt;
         if (handle->processor.interrupt.enable & handle->processor.interrupt.flag & mask)
         {
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
-            dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
+            dmg_write(handle, --handle->processor.sp.word, handle->processor.pc.low);
             handle->processor.pc.word = (0x0008 * interrupt) + 0x0040;
             handle->processor.interrupt.enabled = false;
             handle->processor.interrupt.flag &= ~mask;

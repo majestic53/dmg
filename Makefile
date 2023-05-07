@@ -21,15 +21,9 @@ all: clean
 .PHONY: clean
 clean:
 	@make --no-print-directory -C src clean
-	@make --no-print-directory -C test clean
 	@make --no-print-directory -C tool clean
 
 .PHONY: debug
 debug: clean
 	@make --no-print-directory -C src $(FLAGS_DEBUG) -j$(THREADS)
 	@make --no-print-directory -C tool $(FLAGS_DEBUG) -j$(THREADS)
-
-.PHONY: test
-test: clean
-	@make --no-print-directory -C test $(FLAGS_DEBUG) -j$(THREADS)
-	@make --no-print-directory -C test run

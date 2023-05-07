@@ -20,7 +20,7 @@ clean:
 
 .PHONY: patch
 patch:
-	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" common.h
+	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" system.h
 
 $(TARGET): $(OBJECTS)
 	$(VERBOSE)$(AR) -rcs $@ $(OBJECTS)

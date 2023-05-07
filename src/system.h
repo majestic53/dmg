@@ -15,6 +15,10 @@
 #include <timer.h>
 #include <video.h>
 
+#define DMG_MAJOR 0
+#define DMG_MINOR 1
+#define DMG_PATCH 0x7fc9db6
+
 typedef union
 {
     struct
@@ -27,7 +31,7 @@ typedef union
     uint32_t raw;
 } dmg_color_t;
 
-typedef struct dmg_s
+struct dmg_s
 {
     char error[256];
     bool initialized;
@@ -52,18 +56,14 @@ typedef struct dmg_s
             SDL_AudioSpec spec;
         } audio;
     } service;
-} dmg_system_t;
+};
 
-dmg_error_e dmg_system_initialize(dmg_handle_t handle, const dmg_data_t *const data, const dmg_output_f output, dmg_palette_e palette);
-dmg_error_e dmg_system_input(dmg_handle_t const handle, uint8_t input, uint8_t *output);
-dmg_error_e dmg_system_load(dmg_handle_t const handle, const dmg_data_t *const data);
-bool dmg_system_poll(dmg_handle_t const handle);
-uint8_t dmg_system_read(dmg_handle_t const handle, uint16_t address);
-dmg_error_e dmg_system_run(dmg_handle_t const handle);
-dmg_error_e dmg_system_save(dmg_handle_t const handle, dmg_data_t *const data);
-uint8_t dmg_system_silence(dmg_handle_t const handle);
-dmg_error_e dmg_system_sync(dmg_handle_t const handle);
-void dmg_system_uninitialize(dmg_handle_t const handle);
-void dmg_system_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+#define DMG_ERROR(_HANDLE_, _FORMAT_, ...) \
+    dmg_set_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
+
+uint8_t dmg_get_silence(dmg_handle_t const handle);
+uint8_t dmg_read(dmg_handle_t const handle, uint16_t address);
+dmg_error_e dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
+void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_SYSTEM_H_ */
