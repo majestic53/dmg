@@ -9,6 +9,7 @@
 #include <argument.h>
 #include <file.h>
 #include <socket.h>
+#include <thread.h>
 
 typedef struct
 {
@@ -19,10 +20,20 @@ typedef struct
 } context_t;
 
 static context_t g_context = {};
+static thread_t g_thread = {};
+
+static int input(void *context)
+{
+    /* TODO: HANDLE SERIAL INPUT */
+    return EXIT_SUCCESS;
+    /* ---- */
+}
 
 static uint8_t output(uint8_t value)
 {
+    /* TODO: HANDLE SERIAL OUTPUT */
     return 1;
+    /* ---- */
 }
 
 static int initialize(int argc, char *argv[])
@@ -75,12 +86,23 @@ static int load(void)
 
 static int run(void)
 {
+    int result, thread_result = EXIT_SUCCESS;
+    if (g_context.argument.link && ((result = thread_start(&g_thread, input, &g_context, false)) != EXIT_SUCCESS))
+    {
+        fprintf(stderr, "Failed to start thread\n");
+        return result;
+    }
     if (dmg_run(g_context.handle) != DMG_SUCCESS)
     {
         fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
         return EXIT_FAILURE;
     }
-    return EXIT_SUCCESS;
+    if (g_context.argument.link && ((result = thread_wait(&g_thread, &thread_result)) != EXIT_SUCCESS))
+    {
+        fprintf(stderr, "Failed to wait for thread\n");
+        return result;
+    }
+    return thread_result;
 }
 
 static int save(void)
