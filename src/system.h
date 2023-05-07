@@ -17,7 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xf0bde09
+#define DMG_PATCH 0x0a3cb88
 
 typedef union
 {

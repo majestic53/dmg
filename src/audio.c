@@ -291,6 +291,10 @@ void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
             if (handle->audio.control.enabled)
             {
                 handle->audio.channel_2.high.raw = value;
+                if (handle->audio.channel_2.high.triggered)
+                {
+                    handle->audio.control.channel_2_enabled = true;
+                }
             }
             break;
         case 0xFF1A: /* NR30 */

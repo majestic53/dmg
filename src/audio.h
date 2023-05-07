@@ -56,7 +56,8 @@ typedef union
 {
     struct
     {
-        /* TODO: POPULATE NR21 BITFIELD */
+        uint8_t timer : 6;
+        uint8_t duty : 2;
     };
     uint8_t raw;
 } dmg_audio_nr21;
@@ -65,7 +66,9 @@ typedef union
 {
     struct
     {
-        /* TODO: POPULATE NR22 BITFIELD */
+        uint8_t pace : 3;
+        uint8_t decreasing : 1;
+        uint8_t volume : 4;
     };
     uint8_t raw;
 } dmg_audio_nr22;
@@ -74,7 +77,9 @@ typedef union
 {
     struct
     {
-        /* TODO: POPULATE NR24 BITFIELD */
+        uint8_t : 6;
+        uint8_t enabled : 1;
+        uint8_t triggered : 1;
     };
     uint8_t raw;
 } dmg_audio_nr24;
