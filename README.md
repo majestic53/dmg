@@ -21,6 +21,7 @@ __NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete o
 
 ## Work-in-progress
 
+* Support for MBC3 RTC
 * Support for audio
 
 ## Latest release
