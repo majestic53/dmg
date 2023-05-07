@@ -61,7 +61,7 @@ int socket_receive(socket_t *const sock, uint8_t *value)
     int result = EXIT_FAILURE;
     if (socket_path_exists(!sock->master))
     {
-        if (recvfrom(sock->handle, value, sizeof(*value), 0, (struct sockaddr *)&sock->remote.address, &sock->remote.length) != sizeof(*value))
+        if (recvfrom(sock->handle, value, sizeof (*value), 0, (struct sockaddr *)&sock->remote.address, &sock->remote.length) != sizeof (*value))
         {
             fprintf(stderr, "Failed to receive data from socket -- %i\n", errno);
             return EXIT_FAILURE;
@@ -76,7 +76,7 @@ int socket_send(const socket_t *const sock, uint8_t value)
     int result = EXIT_FAILURE;
     if (socket_path_exists(!sock->master))
     {
-        if (sendto(sock->handle, &value, sizeof(value), 0, (const struct sockaddr *)&sock->remote.address, sock->remote.length) != sizeof(value))
+        if (sendto(sock->handle, &value, sizeof (value), 0, (const struct sockaddr *)&sock->remote.address, sock->remote.length) != sizeof (value))
         {
             fprintf(stderr, "Failed to send data to socket -- %i\n", errno);
             return EXIT_FAILURE;
