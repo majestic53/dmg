@@ -22,6 +22,10 @@ clean:
 patch:
 	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" system.h
 
+.PHONY: strip
+strip:
+	@strip --strip-unneeded -R .note -R .comment $(TARGET)
+
 $(TARGET): $(OBJECTS)
 	$(VERBOSE)$(AR) -rcs $@ $(OBJECTS)
 

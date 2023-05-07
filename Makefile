@@ -15,6 +15,7 @@ endif
 all: clean
 	@make --no-print-directory -C src patch
 	@make --no-print-directory -C src $(FLAGS_RELEASE) -j$(THREADS)
+	@make --no-print-directory -C src strip
 	@make --no-print-directory -C tool $(FLAGS_RELEASE) -j$(THREADS)
 	@make --no-print-directory -C tool strip
 
