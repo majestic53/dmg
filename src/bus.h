@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef DMG_SYSTEM_H_
-#define DMG_SYSTEM_H_
+#ifndef DMG_BUS_H_
+#define DMG_BUS_H_
 
 #include <SDL.h>
 #include <audio.h>
@@ -15,11 +15,7 @@
 #include <timer.h>
 #include <video.h>
 
-#define DMG_MAJOR 0
-#define DMG_MINOR 1
-#define DMG_PATCH 0xb6fc94c
-
-struct dmg_s
+typedef struct dmg_s
 {
     char error[256];
     bool initialized;
@@ -43,14 +39,13 @@ struct dmg_s
             SDL_AudioSpec spec;
         } audio;
     } service;
-};
+} dmg_bus_t;
 
 #define DMG_ERROR(_HANDLE_, _FORMAT_, ...) \
-    dmg_set_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
+    dmg_bus_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
 
-uint8_t dmg_get_silence(dmg_handle_t const handle);
-uint8_t dmg_read(dmg_handle_t const handle, uint16_t address);
-dmg_error_t dmg_set_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
-void dmg_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+dmg_error_t dmg_bus_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
+uint8_t dmg_bus_read(dmg_handle_t const handle, uint16_t address);
+void dmg_bus_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
-#endif /* DMG_SYSTEM_H_ */
+#endif /* DMG_BUS_H_ */

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <system.h>
+#include <bus.h>
 
 void dmg_serial_clock(dmg_handle_t const handle)
 {

@@ -20,7 +20,7 @@ clean:
 
 .PHONY: patch
 patch:
-	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" system.h
+	@sed -i "s/PATCH .*/PATCH 0x$(shell git rev-parse --short HEAD)/g" dmg.c
 
 .PHONY: strip
 strip:
