@@ -131,26 +131,6 @@ void dmg_audio_initialize(dmg_handle_t const handle)
     handle->audio.silence = dmg_service_silence(handle);
 }
 
-void dmg_audio_interrupt(dmg_handle_t const handle)
-{
-    if (!(handle->audio.counter % 2))
-    {
-        /* TODO: STEP SOUND LENGTH */
-    }
-    if (!(handle->audio.counter % 4))
-    {
-        /* TODO: STEP CHANNEL 1 FREQUENCY SWEEP */
-    }
-    if (!(handle->audio.counter % 8))
-    {
-        /* TODO: STEP ENVELOPE SWEEP */
-    }
-    if (++handle->audio.counter > 8)
-    {
-        handle->audio.counter = 0;
-    }
-}
-
 void dmg_audio_output(void *context, uint8_t *data, int length)
 {
     int16_t *buffer = (int16_t *)data;
@@ -229,6 +209,26 @@ uint8_t dmg_audio_read(dmg_handle_t const handle, uint16_t address)
             break;
     }
     return result;
+}
+
+void dmg_audio_update(dmg_handle_t const handle)
+{
+    if (!(handle->audio.counter % 2))
+    {
+        /* TODO: STEP SOUND LENGTH */
+    }
+    if (!(handle->audio.counter % 4))
+    {
+        /* TODO: STEP CHANNEL 1 FREQUENCY SWEEP */
+    }
+    if (!(handle->audio.counter % 8))
+    {
+        /* TODO: STEP ENVELOPE SWEEP */
+    }
+    if (++handle->audio.counter > 8)
+    {
+        handle->audio.counter = 0;
+    }
 }
 
 void dmg_audio_write(dmg_handle_t const handle, uint16_t address, uint8_t value)

@@ -18,7 +18,7 @@ static void dmg_timer_increment_audio(dmg_handle_t const handle)
     bool overflow = handle->timer.divider & OFFSET[4];
     if (handle->timer.overflow[1] && !overflow)
     {
-        dmg_audio_interrupt(handle);
+        dmg_audio_update(handle);
     }
     handle->timer.overflow[1] = overflow;
 }
