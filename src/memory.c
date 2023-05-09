@@ -565,7 +565,7 @@ static dmg_error_t dmg_memory_validate_cartridge(dmg_handle_t const handle, cons
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const dmg_data_t *const data)
+static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const uint8_t *const data, uint32_t length)
 {
     uint8_t checksum;
     uint32_t expected = (handle->memory.cartridge.ram.count * 0x2000) + sizeof (dmg_memory_save_t);
@@ -574,15 +574,11 @@ static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const dmg
     {
         return DMG_ERROR(handle, "Invalid save data -- %p", data);
     }
-    if (!data->buffer)
+    if (length != expected)
     {
-        return DMG_ERROR(handle, "Invalid save data -- %p", data);
+        return DMG_ERROR(handle, "Invalid save length -- %u bytes (expecting %u bytes)", length, expected);
     }
-    if (data->length != expected)
-    {
-        return DMG_ERROR(handle, "Invalid save length -- %u bytes (expecting %u bytes)", data->length, expected);
-    }
-    save = (const dmg_memory_save_t *)data->buffer;
+    save = (const dmg_memory_save_t *)data;
     if (strncmp(save->header.magic, "dmg", strlen("dmg")))
     {
         return DMG_ERROR(handle, "Invalid save magic");
@@ -630,7 +626,11 @@ dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *c
 dmg_error_t dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data)
 {
     dmg_error_t result;
-    if ((result = dmg_memory_validate_save(handle, data)) != DMG_SUCCESS)
+    if (!data)
+    {
+        return DMG_ERROR(handle, "Invalid data -- %p", data);
+    }
+    if ((result = dmg_memory_validate_save(handle, data->buffer, data->length)) != DMG_SUCCESS)
     {
         return result;
     }
@@ -678,14 +678,14 @@ dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data)
     {
         return DMG_ERROR(handle, "Invalid data -- %p", data);
     }
-    data->length = (handle->memory.cartridge.ram.count * 0x2000) + sizeof (dmg_memory_save_t);
     if ((data->buffer = handle->memory.cartridge.ram.data))
     {
         dmg_memory_save_t *const save = (dmg_memory_save_t *const)data->buffer;
         memcpy(save->header.magic, "dmg", strlen("dmg"));
-        save->header.length = data->length - sizeof (dmg_memory_save_header_t);
+        save->header.length = handle->memory.cartridge.ram.count * 0x2000;
         save->header.attribute.checksum = dmg_memory_checksum(save, sizeof (dmg_memory_save_header_t), save->header.length);
         save->header.attribute.version = 1;
+        data->length = save->header.length + sizeof (dmg_memory_save_t);
     }
     return DMG_SUCCESS;
 }
