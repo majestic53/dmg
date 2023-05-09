@@ -5,6 +5,16 @@
 
 #include <system.h>
 
+typedef enum
+{
+    DMG_MAPPER_MBC0 = 0,
+    DMG_MAPPER_MBC1,
+    DMG_MAPPER_MBC2,
+    DMG_MAPPER_MBC3,
+    DMG_MAPPER_MBC5,
+    DMG_MAPPER_MAX,
+} dmg_mapper_t;
+
 typedef struct
 {
     uint8_t entry[4];
@@ -22,7 +32,13 @@ typedef struct
     uint8_t version;
     uint8_t checksum;
     uint16_t checksum_global;
-} dmg_memory_header_t;
+} dmg_header_t;
+
+typedef struct
+{
+    uint8_t id;
+    dmg_mapper_t type;
+} dmg_mapper_type_t;
 
 typedef struct {
     char magic[4];
@@ -38,17 +54,11 @@ typedef struct {
         };
         uint32_t raw;
     } attribute;
-} dmg_memory_save_header_t;
+} dmg_save_header_t;
 
 typedef struct {
-    dmg_memory_save_header_t header;
-} dmg_memory_save_t;
-
-typedef struct
-{
-    uint8_t id;
-    dmg_mapper_t type;
-} dmg_memory_type_t;
+    dmg_save_header_t header;
+} dmg_save_t;
 
 static const uint8_t BOOTROM[] =
 {
@@ -80,7 +90,7 @@ static const uint16_t ROM[] =
     2, 4, 8, 16, 32, 64, 128, 256, 512,
 };
 
-static const dmg_memory_type_t TYPE[] =
+static const dmg_mapper_type_t TYPE[] =
 {
     /* MBC0 */
     { 0, DMG_MAPPER_MBC0, }, { 8, DMG_MAPPER_MBC0, }, { 9, DMG_MAPPER_MBC0, },
@@ -106,9 +116,9 @@ static uint8_t dmg_memory_checksum(const void *const data, uint16_t begin, uint1
     return result;
 }
 
-static const dmg_memory_header_t *dmg_memory_header(const uint8_t *const data)
+static const dmg_header_t *dmg_memory_header(const uint8_t *const data)
 {
-    return (const dmg_memory_header_t *)&data[0x0100];
+    return (const dmg_header_t *)&data[0x0100];
 }
 
 static dmg_mapper_t dmg_memory_type(uint8_t id)
@@ -130,7 +140,7 @@ static uint8_t dmg_memory_ram_read(dmg_handle_t const handle, uint16_t bank, uin
     uint8_t result = 0xFF;
     if (handle->memory.cartridge.ram.data)
     {
-        result = handle->memory.cartridge.ram.data[(bank * 0x2000) + address + sizeof (dmg_memory_save_t)];
+        result = handle->memory.cartridge.ram.data[(bank * 0x2000) + address + sizeof (dmg_save_t)];
     }
     return result;
 }
@@ -139,7 +149,7 @@ static void dmg_memory_ram_write(dmg_handle_t const handle, uint16_t bank, uint1
 {
     if (handle->memory.cartridge.ram.data)
     {
-        handle->memory.cartridge.ram.data[(bank * 0x2000) + address + sizeof (dmg_memory_save_t)] = value;
+        handle->memory.cartridge.ram.data[(bank * 0x2000) + address + sizeof (dmg_save_t)] = value;
     }
 }
 
@@ -492,7 +502,7 @@ static void dmg_memory_setup_mapper(dmg_handle_t const handle, uint8_t id)
 
 static dmg_error_t dmg_memory_setup_ram(dmg_handle_t const handle, uint16_t count)
 {
-    if (!(handle->memory.cartridge.ram.data = calloc(1, (count * 0x2000) + sizeof (dmg_memory_save_t))))
+    if (!(handle->memory.cartridge.ram.data = calloc(1, (count * 0x2000) + sizeof (dmg_save_t))))
     {
         return DMG_ERROR(handle, "Failed to allocate cartridge ram -- %u banks", count);
     }
@@ -528,7 +538,7 @@ static dmg_error_t dmg_memory_validate_cartridge(dmg_handle_t const handle, cons
 {
     uint8_t checksum;
     uint32_t expected = 0x4000;
-    const dmg_memory_header_t *header;
+    const dmg_header_t *header;
     if (!data)
     {
         return DMG_ERROR(handle, "Invalid cartridge data -- %p", data);
@@ -568,8 +578,8 @@ static dmg_error_t dmg_memory_validate_cartridge(dmg_handle_t const handle, cons
 static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const uint8_t *const data, uint32_t length)
 {
     uint8_t checksum;
-    uint32_t expected = (handle->memory.cartridge.ram.count * 0x2000) + sizeof (dmg_memory_save_t);
-    const dmg_memory_save_t *save;
+    uint32_t expected = (handle->memory.cartridge.ram.count * 0x2000) + sizeof (dmg_save_t);
+    const dmg_save_t *save;
     if (!data)
     {
         return DMG_ERROR(handle, "Invalid save data -- %p", data);
@@ -578,12 +588,12 @@ static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const uin
     {
         return DMG_ERROR(handle, "Invalid save length -- %u bytes (expecting %u bytes)", length, expected);
     }
-    save = (const dmg_memory_save_t *)data;
+    save = (const dmg_save_t *)data;
     if (strncmp(save->header.magic, "dmg", strlen("dmg")))
     {
         return DMG_ERROR(handle, "Invalid save magic");
     }
-    expected -= sizeof (dmg_memory_save_header_t);
+    expected -= sizeof (dmg_save_header_t);
     if (save->header.length != expected)
     {
         return DMG_ERROR(handle, "Invalid save length -- %u bytes (expecting %u bytes)", save->header.length, expected);
@@ -592,7 +602,7 @@ static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const uin
     {
         return DMG_ERROR(handle, "Unsupported save version -- %u", save->header.attribute.version);
     }
-    if ((checksum = dmg_memory_checksum(save, sizeof (dmg_memory_save_header_t), save->header.length)) != save->header.attribute.checksum)
+    if ((checksum = dmg_memory_checksum(save, sizeof (dmg_save_header_t), save->header.length)) != save->header.attribute.checksum)
     {
         return DMG_ERROR(handle, "Invalid save checksum -- %u (expecting %u)", checksum, save->header.attribute.checksum);
     }
@@ -602,7 +612,7 @@ static dmg_error_t dmg_memory_validate_save(dmg_handle_t const handle, const uin
 dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data)
 {
     dmg_error_t result;
-    const dmg_memory_header_t *header;
+    const dmg_header_t *header;
     if (!data)
     {
         return DMG_ERROR(handle, "Invalid data -- %p", data);
@@ -680,12 +690,12 @@ dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data)
     }
     if ((data->buffer = handle->memory.cartridge.ram.data))
     {
-        dmg_memory_save_t *const save = (dmg_memory_save_t *const)data->buffer;
+        dmg_save_t *const save = (dmg_save_t *const)data->buffer;
         memcpy(save->header.magic, "dmg", strlen("dmg"));
         save->header.length = handle->memory.cartridge.ram.count * 0x2000;
-        save->header.attribute.checksum = dmg_memory_checksum(save, sizeof (dmg_memory_save_header_t), save->header.length);
+        save->header.attribute.checksum = dmg_memory_checksum(save, sizeof (dmg_save_header_t), save->header.length);
         save->header.attribute.version = 1;
-        data->length = save->header.length + sizeof (dmg_memory_save_t);
+        data->length = save->header.length + sizeof (dmg_save_t);
     }
     return DMG_SUCCESS;
 }

@@ -9,16 +9,6 @@
 #include <stdbool.h>
 #include <dmg.h>
 
-typedef enum
-{
-    DMG_MAPPER_MBC0 = 0,
-    DMG_MAPPER_MBC1,
-    DMG_MAPPER_MBC2,
-    DMG_MAPPER_MBC3,
-    DMG_MAPPER_MBC5,
-    DMG_MAPPER_MAX,
-} dmg_mapper_t;
-
 typedef struct
 {
     struct

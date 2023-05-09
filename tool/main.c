@@ -13,10 +13,10 @@
 
 typedef struct
 {
-    dmg_handle_t handle;
     argument_t argument;
     file_t cartridge;
     socket_t sock;
+    dmg_handle_t handle;
 } context_t;
 
 static context_t g_context = {};
