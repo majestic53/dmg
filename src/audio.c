@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <bus.h>
+#include <system.h>
 
 static void dmg_audio_buffer_read(dmg_handle_t const handle, int16_t *buffer, uint32_t length)
 {
@@ -126,9 +126,9 @@ void dmg_audio_clock(dmg_handle_t const handle)
     --handle->audio.delay;
 }
 
-void dmg_audio_initialize(dmg_handle_t const handle, uint8_t silence)
+void dmg_audio_initialize(dmg_handle_t const handle)
 {
-    handle->audio.silence = silence;
+    handle->audio.silence = dmg_service_silence(handle);
 }
 
 void dmg_audio_interrupt(dmg_handle_t const handle)

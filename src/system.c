@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <bus.h>
+#include <system.h>
 
-dmg_error_t dmg_bus_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...)
+dmg_error_t dmg_system_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);
@@ -15,7 +15,7 @@ dmg_error_t dmg_bus_error(dmg_handle_t const handle, const char *file, uint32_t 
     return DMG_FAILURE;
 }
 
-uint8_t dmg_bus_read(dmg_handle_t const handle, uint16_t address)
+uint8_t dmg_system_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
     switch (address)
@@ -52,7 +52,7 @@ uint8_t dmg_bus_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-void dmg_bus_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
+void dmg_system_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
 {
     switch (address)
     {

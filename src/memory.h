@@ -134,11 +134,11 @@ typedef struct
     } ram;
 } dmg_memory_t;
 
-const char *dmg_memory_get_title(dmg_handle_t const handle);
 dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data);
 dmg_error_t dmg_memory_load(dmg_handle_t const handle, const dmg_data_t *const data);
 uint8_t dmg_memory_read(dmg_handle_t const handle, uint16_t address);
 dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data);
+const char *dmg_memory_title(dmg_handle_t const handle);
 void dmg_memory_uninitialize(dmg_handle_t const handle);
 void dmg_memory_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 

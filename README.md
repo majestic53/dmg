@@ -3,7 +3,7 @@ SPDX-FileCopyrightText: 2023 David Jolly <majestic53@gmail.com>
 SPDX-License-Identifier: MIT
 -->
 
-## DMG (DMG Gameboy emulator)
+## DMG Gameboy emulator
 
 [![License: MIT](https://shields.io/badge/license-MIT-blue.svg?style=flat)](LICENSES/MIT.txt) [![Build Status](https://github.com/majestic53/dmg/workflows/Build/badge.svg)](https://github.com/majestic53/dmg/actions/workflows/build.yml)
 

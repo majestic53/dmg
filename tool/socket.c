@@ -10,14 +10,14 @@
 #include <unistd.h>
 #include <socket.h>
 
-static const char *socket_get_path(bool master)
+static const char *socket_path(bool master)
 {
     return (master ? "/tmp/dmg_0" : "/tmp/dmg_1");
 }
 
 static bool socket_path_exists(bool master)
 {
-    return !access(socket_get_path(master), F_OK);
+    return !access(socket_path(master), F_OK);
 }
 
 void socket_close(const socket_t *const sock)
@@ -26,7 +26,7 @@ void socket_close(const socket_t *const sock)
     {
         fprintf(stderr, "Failed to close socket -- %i\n", errno);
     }
-    unlink(socket_get_path(sock->master));
+    unlink(socket_path(sock->master));
 }
 
 int socket_open(socket_t *const sock)
@@ -42,7 +42,7 @@ int socket_open(socket_t *const sock)
         fprintf(stderr, "Failed to open socket -- %i\n", errno);
         return EXIT_FAILURE;
     }
-    strcpy(sock->address.sun_path, socket_get_path(master));
+    strcpy(sock->address.sun_path, socket_path(master));
     sock->address.sun_family = AF_UNIX;
     if (bind(sock->handle, (struct sockaddr *)&sock->address, strlen(sock->address.sun_path) + sizeof (sock->address.sun_family)) == -1)
     {
@@ -50,7 +50,7 @@ int socket_open(socket_t *const sock)
         return EXIT_FAILURE;
     }
     sock->master = master;
-    strcpy(sock->remote.address.sun_path, socket_get_path(!master));
+    strcpy(sock->remote.address.sun_path, socket_path(!master));
     sock->remote.address.sun_family = AF_UNIX;
     sock->remote.length = strlen(sock->remote.address.sun_path) + sizeof (sock->remote.address.sun_family);
     return EXIT_SUCCESS;

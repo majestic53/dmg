@@ -55,7 +55,7 @@ static void argument_usage(void)
 
 static void argument_version(void)
 {
-    const dmg_version_t *version = dmg_get_version();
+    const dmg_version_t *version = dmg_version();
     fprintf(stdout, "%u.%u-%x\n", version->major, version->minor, version->patch);
 }
 

@@ -38,7 +38,7 @@ typedef struct
 } dmg_input_t;
 
 uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address);
-void dmg_input_set(dmg_handle_t const handle, dmg_button_t button, bool state);
+void dmg_input_update(dmg_handle_t const handle, dmg_button_t button, bool state);
 void dmg_input_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 
 #endif /* DMG_INPUT_H_ */

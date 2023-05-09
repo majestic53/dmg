@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <bus.h>
+#include <system.h>
 
 typedef struct
 {
@@ -150,7 +150,8 @@ static uint8_t dmg_memory_mbc0_read(dmg_handle_t const handle, uint16_t address)
 
 static void dmg_memory_mbc0_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
 {
-    switch (address) {
+    switch (address)
+    {
         case 0xA000 ... 0xBFFF: /* RAM 0 */
             dmg_memory_ram_write(handle, 0, address - 0xA000, value);
             break;
@@ -171,7 +172,8 @@ static uint8_t dmg_memory_mbc1_read(dmg_handle_t const handle, uint16_t address)
             result = dmg_memory_rom_read(handle, handle->memory.mapper.mbc1.rom.bank[1], address - 0x4000);
             break;
         case 0xA000 ... 0xBFFF: /* RAM 0-3 */
-            if (handle->memory.mapper.mbc1.ram.enabled) {
+            if (handle->memory.mapper.mbc1.ram.enabled)
+            {
                 result = dmg_memory_ram_read(handle, handle->memory.mapper.mbc1.ram.bank, address - 0xA000);
             }
             break;
@@ -284,7 +286,8 @@ static void dmg_memory_mbc2_update(dmg_handle_t const handle)
 
 static void dmg_memory_mbc2_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
 {
-    switch (address) {
+    switch (address)
+    {
         case 0x0000 ... 0x3FFF: /* RAM ENABLE/ROM BANK */
             if (address & 0x100)
             { /* ROM BANK */
@@ -309,7 +312,8 @@ static void dmg_memory_mbc2_write(dmg_handle_t const handle, uint16_t address, u
 static uint8_t dmg_memory_mbc3_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
-    switch (address) {
+    switch (address)
+    {
         case 0x0000 ... 0x3FFF: /* ROM 0 */
             result = dmg_memory_rom_read(handle, handle->memory.mapper.mbc3.rom.bank[0], address);
             break;
@@ -342,7 +346,8 @@ static void dmg_memory_mbc3_update(dmg_handle_t const handle)
 
 static void dmg_memory_mbc3_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
 {
-    switch (address) {
+    switch (address)
+    {
         case 0x0000 ... 0x1FFF: /* RAM ENABLE */
             handle->memory.mapper.mbc3.ram.enabled = ((value & 0x0F) == 0x0A);
             break;
@@ -368,7 +373,8 @@ static void dmg_memory_mbc3_write(dmg_handle_t const handle, uint16_t address, u
 static uint8_t dmg_memory_mbc5_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
-    switch (address) {
+    switch (address)
+    {
         case 0x0000 ... 0x3FFF: /* ROM 0 */
             result = dmg_memory_rom_read(handle, handle->memory.mapper.mbc5.rom.bank[0], address);
             break;
@@ -556,11 +562,6 @@ static dmg_error_t dmg_memory_validate(dmg_handle_t const handle, const uint8_t 
     return DMG_SUCCESS;
 }
 
-const char *dmg_memory_get_title(dmg_handle_t const handle)
-{
-    return handle->memory.cartridge.title;
-}
-
 dmg_error_t dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data)
 {
     dmg_error_t result;
@@ -637,6 +638,11 @@ dmg_error_t dmg_memory_save(dmg_handle_t const handle, dmg_data_t *const data)
     data->buffer = handle->memory.cartridge.ram.data;
     data->length = handle->memory.cartridge.ram.count * 0x2000;
     return DMG_SUCCESS;
+}
+
+const char *dmg_memory_title(dmg_handle_t const handle)
+{
+    return handle->memory.cartridge.title;
 }
 
 void dmg_memory_uninitialize(dmg_handle_t const handle)

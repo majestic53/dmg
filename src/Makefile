@@ -3,7 +3,6 @@
 
 AR?=ar
 CC?=gcc
-VERBOSE?=@
 
 INCLUDES:=$(subst ../include,-I../include,$(shell find ../include -type d)) \
 	$(subst .,-I.,$(shell find . -type d)) \
@@ -27,7 +26,7 @@ strip:
 	@strip --strip-unneeded -R .note -R .comment $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(VERBOSE)$(AR) -rcs $@ $(OBJECTS)
+	@$(AR) -rcs $@ $(OBJECTS)
 
 %.o: %.c
-	$(VERBOSE)$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

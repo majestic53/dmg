@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <bus.h>
+#include <system.h>
 
 static uint8_t dmg_video_background_color(dmg_handle_t const handle, bool map, uint8_t x, uint8_t y)
 {
@@ -190,11 +190,12 @@ static void dmg_video_coincidence(dmg_handle_t const handle)
 
 static void dmg_video_dma(dmg_handle_t const handle)
 {
-    if (!handle->video.dma.delay) {
+    if (!handle->video.dma.delay)
+    {
         uint8_t index = handle->video.dma.destination++;
         if (index < 0xA0)
         {
-            ((uint8_t *)handle->video.object.ram)[index] = dmg_bus_read(handle, handle->video.dma.source++);
+            ((uint8_t *)handle->video.object.ram)[index] = dmg_system_read(handle, handle->video.dma.source++);
             handle->video.dma.delay = 4;
         }
         else
@@ -373,7 +374,8 @@ uint8_t dmg_video_read(dmg_handle_t const handle, uint16_t address)
 
 void dmg_video_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
 {
-    switch (address) {
+    switch (address)
+    {
         case 0x8000 ... 0x9FFF: /* VIDEO RAM */
             if (!handle->video.control.enabled || (handle->video.status.mode < 3))
             { /* HBLANK,VBLANK,SEARCH */

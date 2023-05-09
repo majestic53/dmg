@@ -54,7 +54,7 @@ static int initialize(int argc, char *argv[])
     }
     if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, output) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
         return EXIT_FAILURE;
     }
     return result;
@@ -75,7 +75,7 @@ static int load(void)
     {
         if (dmg_load(g_context.handle, &file.data) != DMG_SUCCESS)
         {
-            fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
+            fprintf(stderr, "%s\n", dmg_error(g_context.handle));
             result = EXIT_FAILURE;
         }
     }
@@ -94,7 +94,7 @@ static int run(void)
     }
     if (dmg_run(g_context.handle) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
         return EXIT_FAILURE;
     }
     if (g_context.argument.link && ((result = thread_wait(&g_thread, &thread_result)) != EXIT_SUCCESS))
@@ -118,7 +118,7 @@ static int save(void)
     strcat(file.path, ".sav");
     if (dmg_save(g_context.handle, &file.data) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_get_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
         result = EXIT_FAILURE;
     }
     else if (file.data.buffer && file.data.length)
