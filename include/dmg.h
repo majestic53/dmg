@@ -13,6 +13,9 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+#define DMG_API_VERSION DMG_API_VERSION_1
+#define DMG_API_VERSION_1 1
+
 typedef enum
 {
     DMG_FAILURE = -1,

@@ -11,7 +11,9 @@ dmg_error_t dmg_system_error(dmg_handle_t const handle, const char *file, uint32
     va_start(arguments, format);
     vsnprintf(handle->error, sizeof (handle->error), format, arguments);
     va_end(arguments);
+#ifndef NDEBUG
     snprintf(handle->error + strlen(handle->error), sizeof (handle->error) - strlen(handle->error), " (%s:%u)", file, line);
+#endif /* NDEBUG */
     return DMG_FAILURE;
 }
 
