@@ -6,7 +6,6 @@
 #ifndef DMG_TIMER_H_
 #define DMG_TIMER_H_
 
-#include <stdbool.h>
 #include <common.h>
 
 typedef struct

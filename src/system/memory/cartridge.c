@@ -3,10 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <system.h>
 
 typedef struct {

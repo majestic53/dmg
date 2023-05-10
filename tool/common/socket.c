@@ -3,11 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <socket.h>
 
 static const char *socket_path(bool master)

@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <argument.h>
 #include <file.h>
 #include <socket.h>

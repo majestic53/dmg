@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdarg.h>
-#include <stdio.h>
-#include <string.h>
 #include <system.h>
 
 const char *dmg_error(dmg_handle_t const handle)

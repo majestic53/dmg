@@ -6,10 +6,7 @@
 #ifndef SOCKET_H_
 #define SOCKET_H_
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/socket.h>
-#include <sys/un.h>
+#include <common.h>
 
 typedef struct
 {

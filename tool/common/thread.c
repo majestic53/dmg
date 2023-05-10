@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdlib.h>
 #include <thread.h>
 
 int thread_start(thread_t *const thread, thrd_start_t start, void *context, bool detached)

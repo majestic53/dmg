@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <file.h>
 
 int file_load(file_t *const file)

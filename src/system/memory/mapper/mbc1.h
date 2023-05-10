@@ -6,7 +6,6 @@
 #ifndef DMG_MBC1_H_
 #define DMG_MBC1_H_
 
-#include <stdbool.h>
 #include <common.h>
 
 typedef struct

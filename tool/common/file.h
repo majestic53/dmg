@@ -6,7 +6,7 @@
 #ifndef FILE_H_
 #define FILE_H_
 
-#include <dmg.h>
+#include <common.h>
 
 typedef struct
 {

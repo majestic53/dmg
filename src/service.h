@@ -6,10 +6,10 @@
 #ifndef DMG_SERVICE_H_
 #define DMG_SERVICE_H_
 
-#include <stdint.h>
 #ifdef SDL2
 #include <SDL.h>
 #endif /* SDL2 */
+#include <common.h>
 
 typedef struct
 {

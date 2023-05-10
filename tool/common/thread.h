@@ -6,8 +6,7 @@
 #ifndef THREAD_H_
 #define THREAD_H_
 
-#include <stdbool.h>
-#include <threads.h>
+#include <common.h>
 
 typedef struct
 {

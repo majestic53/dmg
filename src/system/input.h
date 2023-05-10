@@ -6,7 +6,6 @@
 #ifndef DMG_INPUT_H_
 #define DMG_INPUT_H_
 
-#include <stdbool.h>
 #include <common.h>
 
 typedef enum

@@ -6,8 +6,7 @@
 #ifndef ARGUMENT_H_
 #define ARGUMENT_H_
 
-#include <stdbool.h>
-#include <dmg.h>
+#include <common.h>
 
 typedef struct
 {
