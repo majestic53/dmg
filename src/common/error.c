@@ -18,7 +18,7 @@ const char *dmg_error(dmg_handle_t const handle)
     return handle->error;
 }
 
-dmg_error_t dmg_error_set(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...)
+dmg_error_e dmg_error_set(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...)
 {
     va_list arguments;
     va_start(arguments, format);

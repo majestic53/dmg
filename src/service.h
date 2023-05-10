@@ -23,10 +23,10 @@ typedef struct
     } audio;
 } dmg_service_t;
 
-dmg_error_t dmg_service_initialize(dmg_handle_t const handle);
+dmg_error_e dmg_service_initialize(dmg_handle_t const handle);
 bool dmg_service_poll(dmg_handle_t const handle);
 uint8_t dmg_service_silence(dmg_handle_t const handle);
-dmg_error_t dmg_service_sync(dmg_handle_t const handle);
+dmg_error_e dmg_service_sync(dmg_handle_t const handle);
 void dmg_service_uninitialize(dmg_handle_t const handle);
 
 #endif /* DMG_SERVICE_H_ */

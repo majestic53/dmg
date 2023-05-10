@@ -27,7 +27,7 @@ void dmg_serial_clock(dmg_handle_t const handle)
     }
 }
 
-dmg_error_t dmg_serial_initialize(dmg_handle_t const handle, const dmg_output_t output)
+dmg_error_e dmg_serial_initialize(dmg_handle_t const handle, const dmg_output_f output)
 {
     if (!output)
     {

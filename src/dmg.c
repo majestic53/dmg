@@ -5,9 +5,9 @@
 
 #include <system.h>
 
-static dmg_error_t dmg_clock(dmg_handle_t const handle)
+static dmg_error_e dmg_clock(dmg_handle_t const handle)
 {
-    dmg_error_t result;
+    dmg_error_e result;
     dmg_audio_clock(handle);
     dmg_serial_clock(handle);
     dmg_timer_clock(handle);
@@ -18,9 +18,9 @@ static dmg_error_t dmg_clock(dmg_handle_t const handle)
     return result;
 }
 
-dmg_error_t dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_t output)
+dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output)
 {
-    dmg_error_t result;
+    dmg_error_e result;
     if (!handle || (!*handle && !(*handle = calloc(1, sizeof (**handle)))))
     {
         return DMG_FAILURE;
@@ -46,7 +46,7 @@ dmg_error_t dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, c
     return result;
 }
 
-dmg_error_t dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
+dmg_error_e dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
 {
     if (!handle)
     {
@@ -64,7 +64,7 @@ dmg_error_t dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
     return DMG_SUCCESS;
 }
 
-dmg_error_t dmg_load(dmg_handle_t const handle, const dmg_data_t *const data)
+dmg_error_e dmg_load(dmg_handle_t const handle, const dmg_data_t *const data)
 {
     if (!handle)
     {
@@ -74,10 +74,10 @@ dmg_error_t dmg_load(dmg_handle_t const handle, const dmg_data_t *const data)
     {
         return DMG_ERROR(handle, "System uninitialized");
     }
-    return dmg_memory_load(handle, data);
+    return dmg_cartridge_load(handle, data);
 }
 
-dmg_error_t dmg_run(dmg_handle_t const handle)
+dmg_error_e dmg_run(dmg_handle_t const handle)
 {
     if (!handle)
     {
@@ -89,7 +89,7 @@ dmg_error_t dmg_run(dmg_handle_t const handle)
     }
     while (dmg_service_poll(handle))
     {
-        dmg_error_t result;
+        dmg_error_e result;
         while ((result = dmg_clock(handle)) != DMG_COMPLETE)
         {
             if (result == DMG_FAILURE)
@@ -105,7 +105,7 @@ dmg_error_t dmg_run(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-dmg_error_t dmg_save(dmg_handle_t const handle, dmg_data_t *const data)
+dmg_error_e dmg_save(dmg_handle_t const handle, dmg_data_t *const data)
 {
     if (!handle)
     {
@@ -115,7 +115,7 @@ dmg_error_t dmg_save(dmg_handle_t const handle, dmg_data_t *const data)
     {
         return DMG_ERROR(handle, "System uninitialized");
     }
-    return dmg_memory_save(handle, data);
+    return dmg_cartridge_save(handle, data);
 }
 
 void dmg_uninitialize(dmg_handle_t *handle)
@@ -124,7 +124,7 @@ void dmg_uninitialize(dmg_handle_t *handle)
     {
         (*handle)->initialized = false;
         dmg_service_uninitialize(*handle);
-        dmg_memory_uninitialize(*handle);
+        dmg_cartridge_uninitialize(*handle);
         free(*handle);
         *handle = NULL;
     }

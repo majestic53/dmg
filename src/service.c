@@ -31,7 +31,7 @@ static const SDL_Scancode SCANCODE[] =
     SDL_SCANCODE_D, SDL_SCANCODE_A, SDL_SCANCODE_W, SDL_SCANCODE_S,
 };
 
-static dmg_error_t dmg_service_initialize_audio(dmg_handle_t const handle)
+static dmg_error_e dmg_service_initialize_audio(dmg_handle_t const handle)
 {
     SDL_AudioSpec desired =
     {
@@ -46,9 +46,9 @@ static dmg_error_t dmg_service_initialize_audio(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_service_initialize_video(dmg_handle_t const handle)
+static dmg_error_e dmg_service_initialize_video(dmg_handle_t const handle)
 {
-    if (!(handle->service.window = SDL_CreateWindow(dmg_memory_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
+    if (!(handle->service.window = SDL_CreateWindow(dmg_cartridge_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
     }
@@ -113,9 +113,9 @@ static void dmg_service_uninitialize_video(dmg_handle_t const handle)
     }
 }
 
-dmg_error_t dmg_service_initialize(dmg_handle_t const handle)
+dmg_error_e dmg_service_initialize(dmg_handle_t const handle)
 {
-    dmg_error_t result;
+    dmg_error_e result;
     if (SDL_Init(SDL_INIT_AUDIO | SDL_INIT_VIDEO))
     {
         return DMG_ERROR(handle, "SDL_Init failed -- %s", SDL_GetError());
@@ -142,7 +142,7 @@ bool dmg_service_poll(dmg_handle_t const handle)
             case SDL_KEYUP:
                 if (!event.key.repeat)
                 {
-                    for (dmg_button_t button = 0; button < DMG_BUTTON_MAX; ++button)
+                    for (dmg_button_e button = 0; button < DMG_BUTTON_MAX; ++button)
                     {
                         if (SCANCODE[button] == event.key.keysym.scancode)
                         {
@@ -166,7 +166,7 @@ uint8_t dmg_service_silence(dmg_handle_t const handle)
     return handle->service.audio.spec.silence;
 }
 
-dmg_error_t dmg_service_sync(dmg_handle_t const handle)
+dmg_error_e dmg_service_sync(dmg_handle_t const handle)
 {
     uint32_t elapsed, pixel[432][480] = {};
     for (uint8_t y = 0; y < 144; ++y)
@@ -174,7 +174,7 @@ dmg_error_t dmg_service_sync(dmg_handle_t const handle)
         for (uint8_t x = 0; x < 160; ++x)
         {
             uint16_t x_base = x * 3, y_base = y * 3;
-            dmg_color_t color = dmg_video_color(handle, x, y), color_above = color;
+            dmg_color_e color = dmg_video_color(handle, x, y), color_above = color;
             if (y)
             {
                 color_above = dmg_video_color(handle, x, y - 1);

@@ -5,9 +5,9 @@
 
 #include <system.h>
 
-typedef dmg_error_t (*dmg_instruction_t)(dmg_handle_t const handle);
+typedef dmg_error_e (*dmg_instruction_f)(dmg_handle_t const handle);
 
-static dmg_error_t dmg_processor_instruction_adc(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_adc(dmg_handle_t const handle)
 {
     uint16_t sum;
     uint8_t carry, operand = 0;
@@ -54,7 +54,7 @@ static dmg_error_t dmg_processor_instruction_adc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_add(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_add(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     uint16_t carry, sum;
@@ -101,7 +101,7 @@ static dmg_error_t dmg_processor_instruction_add(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_add_hl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_add_hl(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     uint16_t operand = 0;
@@ -130,7 +130,7 @@ static dmg_error_t dmg_processor_instruction_add_hl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_add_sp(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_add_sp(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
@@ -145,7 +145,7 @@ static dmg_error_t dmg_processor_instruction_add_sp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_and(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_and(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -186,7 +186,7 @@ static dmg_error_t dmg_processor_instruction_and(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_bit(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_bit(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -230,7 +230,7 @@ static dmg_error_t dmg_processor_instruction_bit(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_call(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_call(dmg_handle_t const handle)
 {
     bool taken = false;
     dmg_register_t operand = {};
@@ -265,7 +265,7 @@ static dmg_error_t dmg_processor_instruction_call(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_ccf(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_ccf(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = !handle->processor.af.carry;
@@ -274,7 +274,7 @@ static dmg_error_t dmg_processor_instruction_ccf(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_cp(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_cp(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -317,7 +317,7 @@ static dmg_error_t dmg_processor_instruction_cp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_cpl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_cpl(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.high = ~handle->processor.af.high;
@@ -326,7 +326,7 @@ static dmg_error_t dmg_processor_instruction_cpl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_daa(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_daa(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     if (!handle->processor.af.negative)
@@ -357,7 +357,7 @@ static dmg_error_t dmg_processor_instruction_daa(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_di(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_di(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.interrupt.enable_delay = 0;
@@ -365,7 +365,7 @@ static dmg_error_t dmg_processor_instruction_di(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_ei(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_ei(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     if (!handle->processor.interrupt.enable_delay)
@@ -375,7 +375,7 @@ static dmg_error_t dmg_processor_instruction_ei(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_dec(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_dec(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -414,7 +414,7 @@ static dmg_error_t dmg_processor_instruction_dec(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_dec_word(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_dec_word(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -435,14 +435,14 @@ static dmg_error_t dmg_processor_instruction_dec_word(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_halt(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_halt(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.halted = true;
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_inc(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_inc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 4;
@@ -481,7 +481,7 @@ static dmg_error_t dmg_processor_instruction_inc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_inc_word(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_inc_word(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -502,7 +502,7 @@ static dmg_error_t dmg_processor_instruction_inc_word(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_jp(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_jp(dmg_handle_t const handle)
 {
     bool taken = false;
     dmg_register_t operand = {};
@@ -535,14 +535,14 @@ static dmg_error_t dmg_processor_instruction_jp(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_jp_hl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_jp_hl(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.pc.word = handle->processor.hl.word;
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_jr(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_jr(dmg_handle_t const handle)
 {
     bool taken = false;
     int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
@@ -573,7 +573,7 @@ static dmg_error_t dmg_processor_instruction_jr(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_ld(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_ld(dmg_handle_t const handle)
 {
     dmg_register_t operand = {};
     handle->processor.delay = 4;
@@ -902,7 +902,7 @@ static dmg_error_t dmg_processor_instruction_ld(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_ld_hl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_ld_hl(dmg_handle_t const handle)
 {
     uint32_t carry, sum;
     int8_t operand = dmg_system_read(handle, handle->processor.pc.word++);
@@ -917,13 +917,13 @@ static dmg_error_t dmg_processor_instruction_ld_hl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_nop(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_nop(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_or(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_or(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -964,7 +964,7 @@ static dmg_error_t dmg_processor_instruction_or(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_pop(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_pop(dmg_handle_t const handle)
 {
     handle->processor.delay = 12;
     switch (handle->processor.instruction.opcode)
@@ -989,7 +989,7 @@ static dmg_error_t dmg_processor_instruction_pop(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_push(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_push(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     switch (handle->processor.instruction.opcode)
@@ -1014,7 +1014,7 @@ static dmg_error_t dmg_processor_instruction_push(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_res(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_res(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -1057,7 +1057,7 @@ static dmg_error_t dmg_processor_instruction_res(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_ret(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_ret(dmg_handle_t const handle)
 {
     bool taken = false;
     handle->processor.delay = 8;
@@ -1088,7 +1088,7 @@ static dmg_error_t dmg_processor_instruction_ret(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_reti(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_reti(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     handle->processor.pc.low = dmg_system_read(handle, handle->processor.sp.word++);
@@ -1098,7 +1098,7 @@ static dmg_error_t dmg_processor_instruction_reti(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rl(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry, operand = 0;
     handle->processor.delay = 8;
@@ -1153,7 +1153,7 @@ static dmg_error_t dmg_processor_instruction_rl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rla(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rla(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry;
     handle->processor.delay = 4;
@@ -1165,7 +1165,7 @@ static dmg_error_t dmg_processor_instruction_rla(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rlc(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rlc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1220,7 +1220,7 @@ static dmg_error_t dmg_processor_instruction_rlc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rlca(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rlca(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = ((handle->processor.af.high & 0x80) == 0x80);
@@ -1231,7 +1231,7 @@ static dmg_error_t dmg_processor_instruction_rlca(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rr(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rr(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry, operand = 0;
     handle->processor.delay = 8;
@@ -1286,7 +1286,7 @@ static dmg_error_t dmg_processor_instruction_rr(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rra(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rra(dmg_handle_t const handle)
 {
     uint8_t carry = handle->processor.af.carry;
     handle->processor.delay = 4;
@@ -1298,7 +1298,7 @@ static dmg_error_t dmg_processor_instruction_rra(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rrc(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rrc(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1353,7 +1353,7 @@ static dmg_error_t dmg_processor_instruction_rrc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rrca(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rrca(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = ((handle->processor.af.high & 1) == 1);
@@ -1364,7 +1364,7 @@ static dmg_error_t dmg_processor_instruction_rrca(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_rst(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_rst(dmg_handle_t const handle)
 {
     handle->processor.delay = 16;
     dmg_system_write(handle, --handle->processor.sp.word, handle->processor.pc.high);
@@ -1373,7 +1373,7 @@ static dmg_error_t dmg_processor_instruction_rst(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_sbc(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_sbc(dmg_handle_t const handle)
 {
     uint16_t sum;
     uint8_t carry, operand = 0;
@@ -1420,7 +1420,7 @@ static dmg_error_t dmg_processor_instruction_sbc(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_scf(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_scf(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.af.carry = true;
@@ -1429,7 +1429,7 @@ static dmg_error_t dmg_processor_instruction_scf(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_set(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_set(dmg_handle_t const handle)
 {
     handle->processor.delay = 8;
     switch (handle->processor.instruction.opcode)
@@ -1472,7 +1472,7 @@ static dmg_error_t dmg_processor_instruction_set(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_sla(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_sla(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1527,7 +1527,7 @@ static dmg_error_t dmg_processor_instruction_sla(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_sra(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_sra(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1582,7 +1582,7 @@ static dmg_error_t dmg_processor_instruction_sra(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_srl(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_srl(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1637,7 +1637,7 @@ static dmg_error_t dmg_processor_instruction_srl(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_stop(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_stop(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     handle->processor.stopped = true;
@@ -1645,7 +1645,7 @@ static dmg_error_t dmg_processor_instruction_stop(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_sub(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_sub(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     uint16_t carry, sum;
@@ -1692,7 +1692,7 @@ static dmg_error_t dmg_processor_instruction_sub(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_swap(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_swap(dmg_handle_t const handle)
 {
     uint8_t operand = 0;
     handle->processor.delay = 8;
@@ -1740,7 +1740,7 @@ static dmg_error_t dmg_processor_instruction_swap(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_xor(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_xor(dmg_handle_t const handle)
 {
     handle->processor.delay = 4;
     switch (handle->processor.instruction.opcode)
@@ -1782,12 +1782,12 @@ static dmg_error_t dmg_processor_instruction_xor(dmg_handle_t const handle)
     return DMG_SUCCESS;
 }
 
-static dmg_error_t dmg_processor_instruction_xxx(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_instruction_xxx(dmg_handle_t const handle)
 {
     return DMG_ERROR(handle, "Invalid opcode -- [%04X] %02X", handle->processor.instruction.address, handle->processor.instruction.opcode);
 }
 
-static const dmg_instruction_t INSTRUCTION[] =
+static const dmg_instruction_f INSTRUCTION[] =
 {
     /* 00 */
     dmg_processor_instruction_nop, dmg_processor_instruction_ld, dmg_processor_instruction_ld, dmg_processor_instruction_inc_word,
@@ -1983,7 +1983,7 @@ static const dmg_instruction_t INSTRUCTION[] =
     dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set, dmg_processor_instruction_set,
     };
 
-static dmg_error_t dmg_processor_execute(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_execute(dmg_handle_t const handle)
 {
     bool extended;
     handle->processor.instruction.address = handle->processor.pc.word;
@@ -1995,9 +1995,9 @@ static dmg_error_t dmg_processor_execute(dmg_handle_t const handle)
     return INSTRUCTION[extended ? handle->processor.instruction.opcode + 256 : handle->processor.instruction.opcode](handle);
 }
 
-static dmg_error_t dmg_processor_service(dmg_handle_t const handle)
+static dmg_error_e dmg_processor_service(dmg_handle_t const handle)
 {
-    dmg_interrupt_t interrupt;
+    dmg_interrupt_e interrupt;
     for (interrupt = 0; interrupt < DMG_INTERRUPT_MAX; ++interrupt)
     {
         uint8_t mask = 1 << interrupt;
@@ -2015,9 +2015,9 @@ static dmg_error_t dmg_processor_service(dmg_handle_t const handle)
     return DMG_ERROR(handle, "Invalid interrupt -- %02X", interrupt);
 }
 
-dmg_error_t dmg_processor_clock(dmg_handle_t const handle)
+dmg_error_e dmg_processor_clock(dmg_handle_t const handle)
 {
-    dmg_error_t result = DMG_SUCCESS;
+    dmg_error_e result = DMG_SUCCESS;
     if (!handle->processor.delay)
     {
         if (handle->processor.interrupt.enable_delay && !--handle->processor.interrupt.enable_delay)
@@ -2053,7 +2053,7 @@ dmg_error_t dmg_processor_clock(dmg_handle_t const handle)
     return result;
 }
 
-void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_t interrupt)
+void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_e interrupt)
 {
     dmg_processor_write(handle, 0xFF0F, handle->processor.interrupt.flag | (1 << interrupt));
 }
