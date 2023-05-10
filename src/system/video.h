@@ -6,7 +6,7 @@
 #ifndef DMG_VIDEO_H_
 #define DMG_VIDEO_H_
 
-#include <dmg.h>
+#include <common.h>
 
 typedef enum
 {

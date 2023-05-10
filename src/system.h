@@ -29,10 +29,6 @@ typedef struct dmg_s
     dmg_video_t video;
 } dmg_system_t;
 
-#define DMG_ERROR(_HANDLE_, _FORMAT_, ...) \
-    dmg_system_error(_HANDLE_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)
-
-dmg_error_t dmg_system_error(dmg_handle_t const handle, const char *file, uint32_t line, const char *format, ...);
 uint8_t dmg_system_read(dmg_handle_t const handle, uint16_t address);
 void dmg_system_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
 

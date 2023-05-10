@@ -7,7 +7,7 @@
 #define DMG_TIMER_H_
 
 #include <stdbool.h>
-#include <dmg.h>
+#include <common.h>
 
 typedef struct
 {

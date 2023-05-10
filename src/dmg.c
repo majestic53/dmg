@@ -5,15 +5,6 @@
 
 #include <system.h>
 
-#define DMG_MAJOR 0
-#define DMG_MINOR 1
-#define DMG_PATCH 0xe19e673
-
-static const dmg_version_t VERSION =
-{
-    DMG_MAJOR, DMG_MINOR, DMG_PATCH
-};
-
 static dmg_error_t dmg_clock(dmg_handle_t const handle)
 {
     dmg_error_t result;
@@ -25,19 +16,6 @@ static dmg_error_t dmg_clock(dmg_handle_t const handle)
         result = dmg_video_clock(handle);
     }
     return result;
-}
-
-const char *dmg_error(dmg_handle_t const handle)
-{
-    if (!handle)
-    {
-        return "Invalid handle";
-    }
-    if (!strlen(handle->error))
-    {
-        return "No error";
-    }
-    return handle->error;
 }
 
 dmg_error_t dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_t output)
@@ -150,9 +128,4 @@ void dmg_uninitialize(dmg_handle_t *handle)
         free(*handle);
         *handle = NULL;
     }
-}
-
-const dmg_version_t *dmg_version(void)
-{
-    return &VERSION;
 }

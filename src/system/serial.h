@@ -6,7 +6,7 @@
 #ifndef DMG_SERIAL_H_
 #define DMG_SERIAL_H_
 
-#include <dmg.h>
+#include <common.h>
 
 typedef struct
 {
