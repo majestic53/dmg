@@ -7,7 +7,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0xe07f286
+#define DMG_PATCH 0xe19e673
 
 static const dmg_version_t VERSION =
 {
