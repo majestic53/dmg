@@ -9,9 +9,9 @@ SPDX-License-Identifier: MIT
 
 ![DMG](docs/dmg.png)
 
-The goal of `DMG` is to emulate the original Gameboy hardware with enough accuracy to run most common games, while being performant and natively compilable across multiple platforms.
+The goal of this project is to emulate the original Gameboy hardware with enough accuracy to run most common games, while being performant and natively compilable across multiple platforms.
 
-__NOTE__: `DMG` is a still a work-in-progress. Some features may be incomplete or may contain bugs. Testing was done using the GCC compiler, under Linux. Modification to the makefiles might be required to build with a different operating system and/or compiler.
+__NOTE__: This project is still a work-in-progress. Some features may be incomplete and buggy. Testing was done on Linux, using the GCC compiler. Modification to the makefiles may be required to build with a different platform or compiler.
 
 ## Work-in-progress
 
@@ -25,7 +25,7 @@ The latest release can be found [here](https://github.com/majestic53/dmg/release
 
 ## Build from source
 
-`DMG` is dependant on the `SDL2` library. If you are on a Debian-based systems, install this library using apt:
+This project is dependant on the SDL2 library. If you are on a Debian-based systems, install this library using apt:
 
 ```bash
 sudo apt-get install libsdl2-dev
