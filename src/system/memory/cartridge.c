@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: MIT
  */
 
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <system.h>
 
 typedef struct {
@@ -157,7 +161,7 @@ static dmg_error_e dmg_cartridge_validate_rom(dmg_handle_t const handle, const u
     }
     if (header->cgb == 0xC0)
     {
-        return DMG_ERROR(handle, "Unsupported CGB cartridge -- %u", header->cgb);
+        return DMG_ERROR(handle, "Unsupported ROM type -- CGB");
     }
     if (header->ram >= sizeof (RAM) / sizeof (*RAM))
     {

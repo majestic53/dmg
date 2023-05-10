@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2023 David Jolly <majestic53@gmail.com>
 # SPDX-License-Identifier: MIT
 
-FLAGS:=-mtune=native\ -std=c11\ -Wall\ -Werror\ -Wextra\ -Wno-unused-parameter
-FLAGS_DEBUG:=CFLAGS=$(FLAGS)\ -g3\ -fsanitize=address,undefined
-FLAGS_RELEASE:=CFLAGS=$(FLAGS)\ -O3\ -DNDEBUG
+FLAGS=-mtune=native\ -std=c11\ -Wall\ -Werror\ -Wextra\ -Wno-unused-parameter
+FLAGS_DEBUG=CFLAGS=$(FLAGS)\ -g3\ -fsanitize=address,undefined
+FLAGS_RELEASE=CFLAGS=$(FLAGS)\ -O3\ -DNDEBUG
 
 ifeq ($(shell uname -s),Linux)
 THREADS?=$(shell grep -c ^processor /proc/cpuinfo)

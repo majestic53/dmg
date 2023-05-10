@@ -15,7 +15,7 @@
 #include <timer.h>
 #include <video.h>
 
-typedef struct dmg_s
+struct dmg_s
 {
     char error[256];
     bool initialized;
@@ -27,9 +27,6 @@ typedef struct dmg_s
     dmg_service_t service;
     dmg_timer_t timer;
     dmg_video_t video;
-} dmg_system_t;
-
-uint8_t dmg_system_read(dmg_handle_t const handle, uint16_t address);
-void dmg_system_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+};
 
 #endif /* DMG_SYSTEM_H_ */

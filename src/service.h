@@ -7,10 +7,13 @@
 #define DMG_SERVICE_H_
 
 #include <stdint.h>
+#ifdef SDL2
 #include <SDL.h>
+#endif /* SDL2 */
 
 typedef struct
 {
+#ifdef SDL2
     uint32_t tick;
     SDL_Cursor *cursor;
     SDL_Renderer *renderer;
@@ -21,6 +24,7 @@ typedef struct
         SDL_AudioDeviceID id;
         SDL_AudioSpec spec;
     } audio;
+#endif /* SDL2 */
 } dmg_service_t;
 
 dmg_error_e dmg_service_initialize(dmg_handle_t const handle);

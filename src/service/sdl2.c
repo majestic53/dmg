@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
+#ifdef SDL2
+
 #include <system.h>
 
 typedef union
@@ -48,7 +50,7 @@ static dmg_error_e dmg_service_initialize_audio(dmg_handle_t const handle)
 
 static dmg_error_e dmg_service_initialize_video(dmg_handle_t const handle)
 {
-    if (!(handle->service.window = SDL_CreateWindow(dmg_cartridge_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 320, 288, SDL_WINDOW_RESIZABLE)))
+    if (!(handle->service.window = SDL_CreateWindow(dmg_cartridge_title(handle), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 480, 432, SDL_WINDOW_RESIZABLE)))
     {
         return DMG_ERROR(handle, "SDL_CreateWindow failed -- %s", SDL_GetError());
     }
@@ -228,3 +230,5 @@ void dmg_service_uninitialize(dmg_handle_t const handle)
     dmg_service_uninitialize_video(handle);
     SDL_Quit();
 }
+
+#endif /* SDL2 */

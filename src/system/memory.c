@@ -25,7 +25,7 @@ uint8_t dmg_memory_read(dmg_handle_t const handle, uint16_t address)
     uint8_t result = 0xFF;
     switch (address)
     {
-        case 0x0000 ... 0x00FF: /* BOOTROM/MAPPER */
+        case 0x0000 ... 0x00FF: /* BOOTLOADER/MAPPER */
             if (dmg_bootloader_enabled(handle))
             {
                 result = dmg_bootloader_read(handle, address);
@@ -66,7 +66,7 @@ void dmg_memory_write(dmg_handle_t const handle, uint16_t address, uint8_t value
             break;
         case 0xFEA0 ... 0xFEFF: /* UNUSED */
             break;
-        case 0xFF50: /* BOOTROM DISABLE */
+        case 0xFF50: /* BOOTLOADER */
             dmg_bootloader_write(handle, address, value);
             break;
         case 0xFF80 ... 0xFFFE: /* HIGH RAM */
