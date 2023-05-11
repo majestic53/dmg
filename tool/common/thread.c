@@ -5,7 +5,7 @@
 
 #include <thread.h>
 
-int thread_start(thread_t *const thread, thrd_start_t start, void *context, bool detached)
+int thread_create(thread_t *const thread, thrd_start_t start, void *context, bool detached)
 {
     if (thrd_create(&thread->id, start, context) != thrd_success)
     {
@@ -19,7 +19,7 @@ int thread_start(thread_t *const thread, thrd_start_t start, void *context, bool
     return EXIT_SUCCESS;
 }
 
-int thread_wait(thread_t *const thread, int *result)
+int thread_join(thread_t *const thread, int *result)
 {
     if (!thread->detached && (thrd_join(thread->id, result) != thrd_success))
     {

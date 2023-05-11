@@ -5,7 +5,8 @@
 
 #include <system.h>
 
-typedef struct {
+typedef struct
+{
     char magic[4];
     uint32_t length;
     union
@@ -21,7 +22,8 @@ typedef struct {
     } attribute;
 } dmg_ram_header_t;
 
-typedef struct {
+typedef struct
+{
     dmg_ram_header_t header;
 } dmg_ram_t;
 

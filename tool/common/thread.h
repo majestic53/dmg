@@ -15,7 +15,7 @@ typedef struct
     void *context;
 } thread_t;
 
-int thread_start(thread_t *const thread, thrd_start_t start, void *context, bool detached);
-int thread_wait(thread_t *const thread, int *result);
+int thread_create(thread_t *const thread, thrd_start_t start, void *context, bool detached);
+int thread_join(thread_t *const thread, int *result);
 
 #endif /* THREAD_H_ */

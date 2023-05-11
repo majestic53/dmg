@@ -84,7 +84,7 @@ static int load(void)
 static int run(void)
 {
     int result, thread_result = EXIT_SUCCESS;
-    if (g_context.argument.link && ((result = thread_start(&g_thread, input, &g_context, false)) != EXIT_SUCCESS))
+    if (g_context.argument.link && ((result = thread_create(&g_thread, input, &g_context, false)) != EXIT_SUCCESS))
     {
         fprintf(stderr, "Failed to start thread\n");
         return result;
@@ -94,7 +94,7 @@ static int run(void)
         fprintf(stderr, "%s\n", dmg_error(g_context.handle));
         return EXIT_FAILURE;
     }
-    if (g_context.argument.link && ((result = thread_wait(&g_thread, &thread_result)) != EXIT_SUCCESS))
+    if (g_context.argument.link && ((result = thread_join(&g_thread, &thread_result)) != EXIT_SUCCESS))
     {
         fprintf(stderr, "Failed to wait for thread\n");
         return result;
