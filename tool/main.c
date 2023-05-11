@@ -12,7 +12,7 @@ typedef struct
 {
     argument_t argument;
     file_t cartridge;
-    socket_t sock;
+    socket_t socket;
     dmg_handle_t handle;
 } context_t;
 
@@ -45,7 +45,7 @@ static int initialize(int argc, char *argv[])
     {
         return result;
     }
-    if (g_context.argument.link && (result = socket_open(&g_context.sock)) != EXIT_SUCCESS)
+    if (g_context.argument.link && (result = socket_open(&g_context.socket)) != EXIT_SUCCESS)
     {
         return result;
     }
@@ -131,7 +131,7 @@ static void uninitialize(void)
     dmg_uninitialize(&g_context.handle);
     if (g_context.argument.link)
     {
-        socket_close(&g_context.sock);
+        socket_close(&g_context.socket);
     }
     free(g_context.cartridge.data.buffer);
 }

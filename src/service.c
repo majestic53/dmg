@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifdef SDL2
-
 #include <system.h>
 
 typedef union
@@ -230,5 +228,3 @@ void dmg_service_uninitialize(dmg_handle_t const handle)
     dmg_service_uninitialize_video(handle);
     SDL_Quit();
 }
-
-#endif /* SDL2 */
