@@ -66,16 +66,6 @@ static uint8_t dmg_cartridge_checksum(const void *const data, uint16_t begin, ui
     return result;
 }
 
-static const dmg_ram_header_t *dmg_cartridge_header_ram(const uint8_t *const data)
-{
-    return (const dmg_ram_header_t *)&data[0];
-}
-
-static const dmg_rom_header_t *dmg_cartridge_header_rom(const uint8_t *const data)
-{
-    return (const dmg_rom_header_t *)&data[0x0100];
-}
-
 static dmg_error_e dmg_cartridge_initialize_ram(dmg_handle_t const handle, uint16_t count)
 {
     if (!(handle->memory.cartridge.ram.data = calloc(1, (count * 0x2000) + sizeof (dmg_ram_t))))
@@ -117,7 +107,7 @@ static void dmg_cartridge_load_ram(dmg_handle_t const handle, const dmg_data_t *
 
 static void dmg_cartridge_load_timer(dmg_handle_t const handle, const dmg_data_t *const data)
 {
-    const dmg_ram_header_t *header = dmg_cartridge_header_ram(data->buffer);
+    const dmg_ram_header_t *header = (const dmg_ram_header_t *)data->buffer;
     if (header->attribute.timer)
     {
         /* TODO: LOAD TIMER DATA INTO MAPPER */
@@ -157,7 +147,7 @@ static dmg_error_e dmg_cartridge_validate_ram(dmg_handle_t const handle, const u
     {
         return DMG_ERROR(handle, "Invalid RAM length -- %u bytes (expecting %u bytes)", length, expected);
     }
-    header = dmg_cartridge_header_ram(data);
+    header = (const dmg_ram_header_t *)data;
     if (strncmp(header->magic, "dmg", strlen("dmg")))
     {
         return DMG_ERROR(handle, "Invalid RAM magic");
@@ -191,7 +181,7 @@ static dmg_error_e dmg_cartridge_validate_rom(dmg_handle_t const handle, const u
     {
         return DMG_ERROR(handle, "Invalid ROM length -- %u bytes", length);
     }
-    header = dmg_cartridge_header_rom(data);
+    header = (const dmg_rom_header_t *)&data[0x0100];
     if ((checksum = dmg_cartridge_checksum(data, 0x0134, 0x014C)) != header->checksum)
     {
         return DMG_ERROR(handle, "Invalid ROM checksum -- %u (expecting %u)", checksum, header->checksum);
@@ -227,7 +217,7 @@ dmg_error_e dmg_cartridge_initialize(dmg_handle_t const handle, const dmg_data_t
     {
         return result;
     }
-    header = dmg_cartridge_header_rom(data->buffer);
+    header = (const dmg_rom_header_t *)&data->buffer[0x0100];
     if ((result = dmg_mapper_initialize(handle, header->id)) != DMG_SUCCESS)
     {
         return result;
