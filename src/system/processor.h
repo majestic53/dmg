@@ -64,7 +64,7 @@ typedef struct
     } interrupt;
 } dmg_processor_t;
 
-dmg_error_e dmg_processor_clock(dmg_handle_t const handle);
+void dmg_processor_clock(dmg_handle_t const handle);
 void dmg_processor_interrupt(dmg_handle_t const handle, dmg_interrupt_e interrupt);
 uint8_t dmg_processor_read(dmg_handle_t const handle, uint16_t address);
 void dmg_processor_write(dmg_handle_t const handle, uint16_t address, uint8_t value);

@@ -20,7 +20,6 @@ typedef enum
 {
     DMG_FAILURE = -1,
     DMG_SUCCESS,
-    DMG_COMPLETE,
 } dmg_error_e;
 
 typedef struct

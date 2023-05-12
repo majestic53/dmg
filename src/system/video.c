@@ -246,9 +246,9 @@ static void dmg_video_transfer(dmg_handle_t const handle)
     handle->video.status.mode = 3; /* TRANSFER */
 }
 
-static dmg_error_e dmg_video_vblank(dmg_handle_t const handle)
+static bool dmg_video_vblank(dmg_handle_t const handle)
 {
-    dmg_error_e result = DMG_SUCCESS;
+    bool result = false;
     if (handle->video.line.y == 144)
     {
         if (handle->video.control.enabled)
@@ -259,15 +259,15 @@ static dmg_error_e dmg_video_vblank(dmg_handle_t const handle)
             }
             dmg_processor_interrupt(handle, DMG_INTERRUPT_VBLANK);
         }
-        result = DMG_COMPLETE;
+        result = true;
     }
     handle->video.status.mode = 1; /* VBLANK */
     return result;
 }
 
-dmg_error_e dmg_video_clock(dmg_handle_t const handle)
+bool dmg_video_clock(dmg_handle_t const handle)
 {
-    dmg_error_e result = DMG_SUCCESS;
+    bool result = false;
     if (handle->video.dma.destination)
     {
         dmg_video_dma(handle);

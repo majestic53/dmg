@@ -5,19 +5,6 @@
 
 #include <system.h>
 
-static dmg_error_e dmg_clock(dmg_handle_t const handle)
-{
-    dmg_error_e result;
-    dmg_audio_clock(handle);
-    dmg_serial_clock(handle);
-    dmg_timer_clock(handle);
-    if ((result = dmg_processor_clock(handle)) == DMG_SUCCESS)
-    {
-        result = dmg_video_clock(handle);
-    }
-    return result;
-}
-
 dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output)
 {
     dmg_error_e result;
@@ -90,13 +77,13 @@ dmg_error_e dmg_run(dmg_handle_t const handle)
     while (dmg_service_poll(handle))
     {
         dmg_error_e result;
-        while ((result = dmg_clock(handle)) != DMG_COMPLETE)
+        do
         {
-            if (result == DMG_FAILURE)
-            {
-                return result;
-            }
-        }
+            dmg_audio_clock(handle);
+            dmg_serial_clock(handle);
+            dmg_timer_clock(handle);
+            dmg_processor_clock(handle);
+        } while (!dmg_video_clock(handle));
         if ((result = dmg_service_sync(handle)) != DMG_SUCCESS)
         {
             return result;
