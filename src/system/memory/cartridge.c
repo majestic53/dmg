@@ -15,7 +15,7 @@ typedef struct
         {
             uint32_t version : 8;
             uint32_t checksum : 8;
-            uint32_t rtc : 1;
+            uint32_t timer : 1;
             uint32_t : 15;
         };
         uint32_t raw;
@@ -66,7 +66,12 @@ static uint8_t dmg_cartridge_checksum(const void *const data, uint16_t begin, ui
     return result;
 }
 
-static const dmg_rom_header_t *dmg_cartridge_header(const uint8_t *const data)
+static const dmg_ram_header_t *dmg_cartridge_header_ram(const uint8_t *const data)
+{
+    return (const dmg_ram_header_t *)&data[0];
+}
+
+static const dmg_rom_header_t *dmg_cartridge_header_rom(const uint8_t *const data)
 {
     return (const dmg_rom_header_t *)&data[0x0100];
 }
@@ -105,11 +110,45 @@ static void dmg_cartridge_initialize_title(dmg_handle_t const handle, const char
     }
 }
 
+static void dmg_cartridge_load_ram(dmg_handle_t const handle, const dmg_data_t *const data)
+{
+    memcpy(handle->memory.cartridge.ram.data, data->buffer, data->length);
+}
+
+static void dmg_cartridge_load_timer(dmg_handle_t const handle, const dmg_data_t *const data)
+{
+    const dmg_ram_header_t *header = dmg_cartridge_header_ram(data->buffer);
+    if (header->attribute.timer)
+    {
+        /* TODO: LOAD TIMER DATA INTO MAPPER */
+    }
+}
+
+static void dmg_cartridge_save_ram(dmg_handle_t const handle, dmg_data_t *const data)
+{
+    dmg_ram_t *const ram = (dmg_ram_t *const)data->buffer;
+    memcpy(ram->header.magic, "dmg", strlen("dmg"));
+    ram->header.length = handle->memory.cartridge.ram.count * 0x2000;
+    ram->header.attribute.checksum = dmg_cartridge_checksum(ram, sizeof (dmg_ram_header_t), ram->header.length);
+    ram->header.attribute.version = 1;
+    data->length = ram->header.length + sizeof (dmg_ram_t);
+}
+
+static void dmg_cartridge_save_timer(dmg_handle_t const handle, dmg_data_t *const data)
+{
+    dmg_ram_t *const ram = (dmg_ram_t *const)data->buffer;
+    ram->header.attribute.timer = dmg_mapper_attribute(handle)->timer;
+    if (ram->header.attribute.timer)
+    {
+        /* TODO: SAVE TIMER DATA FROM MAPPER */
+    }
+}
+
 static dmg_error_e dmg_cartridge_validate_ram(dmg_handle_t const handle, const uint8_t *const data, uint32_t length)
 {
     uint8_t checksum;
     uint32_t expected = (handle->memory.cartridge.ram.count * 0x2000) + sizeof (dmg_ram_t);
-    const dmg_ram_t *ram;
+    const dmg_ram_header_t *header;
     if (!data)
     {
         return DMG_ERROR(handle, "Invalid RAM data -- %p", data);
@@ -118,23 +157,23 @@ static dmg_error_e dmg_cartridge_validate_ram(dmg_handle_t const handle, const u
     {
         return DMG_ERROR(handle, "Invalid RAM length -- %u bytes (expecting %u bytes)", length, expected);
     }
-    ram = (const dmg_ram_t *)data;
-    if (strncmp(ram->header.magic, "dmg", strlen("dmg")))
+    header = dmg_cartridge_header_ram(data);
+    if (strncmp(header->magic, "dmg", strlen("dmg")))
     {
         return DMG_ERROR(handle, "Invalid RAM magic");
     }
     expected -= sizeof (dmg_ram_header_t);
-    if (ram->header.length != expected)
+    if (header->length != expected)
     {
-        return DMG_ERROR(handle, "Invalid RAM length -- %u bytes (expecting %u bytes)", ram->header.length, expected);
+        return DMG_ERROR(handle, "Invalid RAM length -- %u bytes (expecting %u bytes)", header->length, expected);
     }
-    if (ram->header.attribute.version != 1)
+    if (header->attribute.version != 1)
     {
-        return DMG_ERROR(handle, "Unsupported RAM version -- %u", ram->header.attribute.version);
+        return DMG_ERROR(handle, "Unsupported RAM version -- %u", header->attribute.version);
     }
-    if ((checksum = dmg_cartridge_checksum(ram, sizeof (dmg_ram_header_t), ram->header.length)) != ram->header.attribute.checksum)
+    if ((checksum = dmg_cartridge_checksum(header, sizeof (dmg_ram_header_t), header->length)) != header->attribute.checksum)
     {
-        return DMG_ERROR(handle, "Invalid RAM checksum -- %u (expecting %u)", checksum, ram->header.attribute.checksum);
+        return DMG_ERROR(handle, "Invalid RAM checksum -- %u (expecting %u)", checksum, header->attribute.checksum);
     }
     return DMG_SUCCESS;
 }
@@ -152,7 +191,7 @@ static dmg_error_e dmg_cartridge_validate_rom(dmg_handle_t const handle, const u
     {
         return DMG_ERROR(handle, "Invalid ROM length -- %u bytes", length);
     }
-    header = dmg_cartridge_header(data);
+    header = dmg_cartridge_header_rom(data);
     if ((checksum = dmg_cartridge_checksum(data, 0x0134, 0x014C)) != header->checksum)
     {
         return DMG_ERROR(handle, "Invalid ROM checksum -- %u (expecting %u)", checksum, header->checksum);
@@ -188,7 +227,7 @@ dmg_error_e dmg_cartridge_initialize(dmg_handle_t const handle, const dmg_data_t
     {
         return result;
     }
-    header = dmg_cartridge_header(data->buffer);
+    header = dmg_cartridge_header_rom(data->buffer);
     if ((result = dmg_mapper_initialize(handle, header->id)) != DMG_SUCCESS)
     {
         return result;
@@ -213,7 +252,8 @@ dmg_error_e dmg_cartridge_load(dmg_handle_t const handle, const dmg_data_t *cons
     {
         return result;
     }
-    memcpy(handle->memory.cartridge.ram.data, data->buffer, data->length);
+    dmg_cartridge_load_ram(handle, data);
+    dmg_cartridge_load_timer(handle, data);
     return result;
 }
 
@@ -240,12 +280,8 @@ dmg_error_e dmg_cartridge_save(dmg_handle_t const handle, dmg_data_t *const data
     }
     if ((data->buffer = handle->memory.cartridge.ram.data))
     {
-        dmg_ram_t *const ram = (dmg_ram_t *const)data->buffer;
-        memcpy(ram->header.magic, "dmg", strlen("dmg"));
-        ram->header.length = handle->memory.cartridge.ram.count * 0x2000;
-        ram->header.attribute.checksum = dmg_cartridge_checksum(ram, sizeof (dmg_ram_header_t), ram->header.length);
-        ram->header.attribute.version = 1;
-        data->length = ram->header.length + sizeof (dmg_ram_t);
+        dmg_cartridge_save_timer(handle, data);
+        dmg_cartridge_save_ram(handle, data);
     }
     return DMG_SUCCESS;
 }
