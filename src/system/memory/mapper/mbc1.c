@@ -5,30 +5,7 @@
 
 #include <system.h>
 
-uint8_t dmg_mbc1_read(dmg_handle_t const handle, uint16_t address)
-{
-    uint8_t result = 0xFF;
-    switch (address)
-    {
-        case 0x0000 ... 0x3FFF: /* ROM 0,32,64,96 */
-            result = dmg_cartridge_read_rom(handle, handle->memory.mapper.mbc1.rom.bank[0], address);
-            break;
-        case 0x4000 ... 0x7FFF: /* ROM 1-31,33-63,65-95,97-127 */
-            result = dmg_cartridge_read_rom(handle, handle->memory.mapper.mbc1.rom.bank[1], address - 0x4000);
-            break;
-        case 0xA000 ... 0xBFFF: /* RAM 0-3 */
-            if (handle->memory.mapper.mbc1.ram.enabled)
-            {
-                result = dmg_cartridge_read_ram(handle, handle->memory.mapper.mbc1.ram.bank, address - 0xA000);
-            }
-            break;
-        default:
-            break;
-    }
-    return result;
-}
-
-void dmg_mbc1_update(dmg_handle_t const handle)
+static void dmg_mbc1_update(dmg_handle_t const handle)
 {
     if (handle->memory.cartridge.rom.count >= 64)
     { /* >=1MB */
@@ -63,6 +40,34 @@ void dmg_mbc1_update(dmg_handle_t const handle)
     handle->memory.mapper.mbc1.ram.bank &= handle->memory.cartridge.ram.count - 1;
     handle->memory.mapper.mbc1.rom.bank[0] &= handle->memory.cartridge.rom.count - 1;
     handle->memory.mapper.mbc1.rom.bank[1] &= handle->memory.cartridge.rom.count - 1;
+}
+
+void dmg_mbc1_initialize(dmg_handle_t const handle)
+{
+    dmg_mbc1_update(handle);
+}
+
+uint8_t dmg_mbc1_read(dmg_handle_t const handle, uint16_t address)
+{
+    uint8_t result = 0xFF;
+    switch (address)
+    {
+        case 0x0000 ... 0x3FFF: /* ROM 0,32,64,96 */
+            result = dmg_cartridge_read_rom(handle, handle->memory.mapper.mbc1.rom.bank[0], address);
+            break;
+        case 0x4000 ... 0x7FFF: /* ROM 1-31,33-63,65-95,97-127 */
+            result = dmg_cartridge_read_rom(handle, handle->memory.mapper.mbc1.rom.bank[1], address - 0x4000);
+            break;
+        case 0xA000 ... 0xBFFF: /* RAM 0-3 */
+            if (handle->memory.mapper.mbc1.ram.enabled)
+            {
+                result = dmg_cartridge_read_ram(handle, handle->memory.mapper.mbc1.ram.bank, address - 0xA000);
+            }
+            break;
+        default:
+            break;
+    }
+    return result;
 }
 
 void dmg_mbc1_write(dmg_handle_t const handle, uint16_t address, uint8_t value)

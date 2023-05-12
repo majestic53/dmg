@@ -5,6 +5,23 @@
 
 #include <system.h>
 
+static void dmg_mbc3_update(dmg_handle_t const handle)
+{
+    handle->memory.mapper.mbc3.ram.bank = (handle->memory.mapper.mbc3.bank.ram & 3) & (handle->memory.cartridge.ram.count - 1);
+    handle->memory.mapper.mbc3.rom.bank[0] = 0;
+    handle->memory.mapper.mbc3.rom.bank[1] = handle->memory.mapper.mbc3.bank.rom & 127;
+    if (!handle->memory.mapper.mbc3.rom.bank[1])
+    { /* BANK 0->1 */
+        ++handle->memory.mapper.mbc3.rom.bank[1];
+    }
+    handle->memory.mapper.mbc3.rom.bank[1] &= handle->memory.cartridge.rom.count - 1;
+}
+
+void dmg_mbc3_initialize(dmg_handle_t const handle)
+{
+    dmg_mbc3_update(handle);
+}
+
 uint8_t dmg_mbc3_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -26,18 +43,6 @@ uint8_t dmg_mbc3_read(dmg_handle_t const handle, uint16_t address)
             break;
     }
     return result;
-}
-
-void dmg_mbc3_update(dmg_handle_t const handle)
-{
-    handle->memory.mapper.mbc3.ram.bank = (handle->memory.mapper.mbc3.bank.ram & 3) & (handle->memory.cartridge.ram.count - 1);
-    handle->memory.mapper.mbc3.rom.bank[0] = 0;
-    handle->memory.mapper.mbc3.rom.bank[1] = handle->memory.mapper.mbc3.bank.rom & 127;
-    if (!handle->memory.mapper.mbc3.rom.bank[1])
-    { /* BANK 0->1 */
-        ++handle->memory.mapper.mbc3.rom.bank[1];
-    }
-    handle->memory.mapper.mbc3.rom.bank[1] &= handle->memory.cartridge.rom.count - 1;
 }
 
 void dmg_mbc3_write(dmg_handle_t const handle, uint16_t address, uint8_t value)

@@ -5,6 +5,22 @@
 
 #include <system.h>
 
+static void dmg_mbc2_update(dmg_handle_t const handle)
+{
+    handle->memory.mapper.mbc2.rom.bank[0] = 0;
+    handle->memory.mapper.mbc2.rom.bank[1] = handle->memory.mapper.mbc2.bank.rom & 15;
+    if (!handle->memory.mapper.mbc2.rom.bank[1])
+    { /* BANK 0->1 */
+        ++handle->memory.mapper.mbc2.rom.bank[1];
+    }
+    handle->memory.mapper.mbc2.rom.bank[1] &= handle->memory.cartridge.rom.count - 1;
+}
+
+void dmg_mbc2_initialize(dmg_handle_t const handle)
+{
+    dmg_mbc2_update(handle);
+}
+
 uint8_t dmg_mbc2_read(dmg_handle_t const handle, uint16_t address)
 {
     uint8_t result = 0xFF;
@@ -26,17 +42,6 @@ uint8_t dmg_mbc2_read(dmg_handle_t const handle, uint16_t address)
             break;
     }
     return result;
-}
-
-void dmg_mbc2_update(dmg_handle_t const handle)
-{
-    handle->memory.mapper.mbc2.rom.bank[0] = 0;
-    handle->memory.mapper.mbc2.rom.bank[1] = handle->memory.mapper.mbc2.bank.rom & 15;
-    if (!handle->memory.mapper.mbc2.rom.bank[1])
-    { /* BANK 0->1 */
-        ++handle->memory.mapper.mbc2.rom.bank[1];
-    }
-    handle->memory.mapper.mbc2.rom.bank[1] &= handle->memory.cartridge.rom.count - 1;
 }
 
 void dmg_mbc2_write(dmg_handle_t const handle, uint16_t address, uint8_t value)

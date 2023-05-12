@@ -61,23 +61,22 @@ dmg_error_e dmg_mapper_initialize(dmg_handle_t const handle, uint8_t id)
             handle->memory.mapper.write = dmg_mbc0_write;
             break;
         case DMG_MAPPER_MBC1:
-            dmg_mbc1_update(handle);
+            dmg_mbc1_initialize(handle);
             handle->memory.mapper.read = dmg_mbc1_read;
             handle->memory.mapper.write = dmg_mbc1_write;
             break;
         case DMG_MAPPER_MBC2:
-            dmg_mbc2_update(handle);
+            dmg_mbc2_initialize(handle);
             handle->memory.mapper.read = dmg_mbc2_read;
             handle->memory.mapper.write = dmg_mbc2_write;
             break;
         case DMG_MAPPER_MBC3:
-            dmg_mbc3_update(handle);
+            dmg_mbc3_initialize(handle);
             handle->memory.mapper.read = dmg_mbc3_read;
             handle->memory.mapper.write = dmg_mbc3_write;
             break;
         case DMG_MAPPER_MBC5:
-            handle->memory.mapper.mbc5.bank.rom.low = 1;
-            dmg_mbc5_update(handle);
+            dmg_mbc5_initialize(handle);
             handle->memory.mapper.read = dmg_mbc5_read;
             handle->memory.mapper.write = dmg_mbc5_write;
             break;
