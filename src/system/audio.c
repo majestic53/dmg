@@ -128,7 +128,7 @@ void dmg_audio_clock(dmg_handle_t const handle)
 
 void dmg_audio_initialize(dmg_handle_t const handle)
 {
-    handle->audio.silence = dmg_service_silence(handle);
+    handle->audio.silence = dmg_system_silence(handle);
 }
 
 void dmg_audio_output(void *context, uint8_t *data, int length)
