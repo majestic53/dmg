@@ -113,6 +113,42 @@ static void dmg_service_uninitialize_video(dmg_handle_t const handle)
     }
 }
 
+static void dmg_service_update(dmg_handle_t const handle)
+{
+    for (uint8_t y = 0; y < 144; ++y)
+    {
+        for (uint8_t x = 0; x < 160; ++x)
+        {
+            uint16_t x_base = x * 3, y_base = y * 3;
+            dmg_color_e color = dmg_video_color(handle, x, y), color_above = color;
+            if (y)
+            {
+                color_above = dmg_video_color(handle, x, y - 1);
+            }
+            for (uint8_t y_off = 0; y_off < 3; ++y_off)
+            {
+                for (uint8_t x_off = 0; x_off < 3; ++x_off)
+                {
+                    dmg_pixel_t value = PALETTE[color];
+                    if (!x_off || !y_off)
+                    {
+                        value.red *= 0.95;
+                        value.green *= 0.95;
+                        value.blue *= 0.95;
+                    }
+                    if (color_above > color)
+                    {
+                        value.red *= 0.75;
+                        value.green *= 0.75;
+                        value.blue *= 0.75;
+                    }
+                    handle->service.pixel[y_base + y_off][x_base + x_off] = value.raw;
+                }
+            }
+        }
+    }
+}
+
 dmg_error_e dmg_service_initialize(dmg_handle_t const handle)
 {
     dmg_error_e result;
@@ -168,40 +204,9 @@ uint8_t dmg_service_silence(dmg_handle_t const handle)
 
 dmg_error_e dmg_service_sync(dmg_handle_t const handle)
 {
-    uint32_t elapsed, pixel[432][480] = {};
-    for (uint8_t y = 0; y < 144; ++y)
-    {
-        for (uint8_t x = 0; x < 160; ++x)
-        {
-            uint16_t x_base = x * 3, y_base = y * 3;
-            dmg_color_e color = dmg_video_color(handle, x, y), color_above = color;
-            if (y)
-            {
-                color_above = dmg_video_color(handle, x, y - 1);
-            }
-            for (uint8_t y_off = 0; y_off < 3; ++y_off)
-            {
-                for (uint8_t x_off = 0; x_off < 3; ++x_off)
-                {
-                    dmg_pixel_t value = PALETTE[color];
-                    if (!x_off || !y_off)
-                    {
-                        value.red *= 0.9;
-                        value.green *= 0.9;
-                        value.blue *= 0.9;
-                    }
-                    if (color_above > color)
-                    {
-                        value.red *= 0.75;
-                        value.green *= 0.75;
-                        value.blue *= 0.75;
-                    }
-                    pixel[y_base + y_off][x_base + x_off] = value.raw;
-                }
-            }
-        }
-    }
-    if (SDL_UpdateTexture(handle->service.texture, NULL, pixel, 480 * sizeof (uint32_t)))
+    uint32_t elapsed;
+    dmg_service_update(handle);
+    if (SDL_UpdateTexture(handle->service.texture, NULL, handle->service.pixel, 480 * sizeof (uint32_t)))
     {
         return DMG_ERROR(handle, "SDL_UpdateTexture failed -- %s", SDL_GetError());
     }

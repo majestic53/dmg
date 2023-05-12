@@ -11,6 +11,7 @@
 typedef struct
 {
     uint32_t tick;
+    uint32_t pixel[432][480];
     SDL_Cursor *cursor;
     SDL_Renderer *renderer;
     SDL_Texture *texture;
