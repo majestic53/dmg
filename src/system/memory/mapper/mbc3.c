@@ -65,9 +65,6 @@ void dmg_mbc3_load(dmg_handle_t const handle, const void *const data, uint32_t l
     if (length == sizeof (*handle->memory.mapper.mbc3.rtc.counter))
     {
         memcpy(&handle->memory.mapper.mbc3.rtc.counter[0], data, length);
-
-fprintf(stdout, "LOAD:%u\n", handle->memory.mapper.mbc3.rtc.counter[0].second.counter);
-
     }
 }
 
@@ -99,9 +96,6 @@ void dmg_mbc3_save(dmg_handle_t const handle, void *const data, uint32_t length)
     if (length == sizeof (*handle->memory.mapper.mbc3.rtc.counter))
     {
         memcpy(data, &handle->memory.mapper.mbc3.rtc.counter[0], length);
-
-fprintf(stdout, "SAVE:%u\n", handle->memory.mapper.mbc3.rtc.counter[0].second.counter);
-
     }
 }
 
