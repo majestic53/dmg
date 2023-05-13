@@ -25,17 +25,17 @@ static const uint8_t BOOTROM[] =
     0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50,
 };
 
-bool dmg_bootloader_enabled(dmg_handle_t const handle)
+bool dmg_bootloader_enabled(dmg_t const dmg)
 {
-    return handle->memory.bootloader.enabled;
+    return dmg->memory.bootloader.enabled;
 }
 
-void dmg_bootloader_initialize(dmg_handle_t const handle)
+void dmg_bootloader_initialize(dmg_t const dmg)
 {
-    handle->memory.bootloader.enabled = true;
+    dmg->memory.bootloader.enabled = true;
 }
 
-uint8_t dmg_bootloader_read(dmg_handle_t const handle, uint16_t address)
+uint8_t dmg_bootloader_read(dmg_t const dmg, uint16_t address)
 {
     uint8_t result = 0xFF;
     switch (address)
@@ -49,14 +49,14 @@ uint8_t dmg_bootloader_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-void dmg_bootloader_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
+void dmg_bootloader_write(dmg_t const dmg, uint16_t address, uint8_t value)
 {
     switch (address)
     {
         case 0xFF50: /* BOOTROM DISABLE */
             if (value)
             {
-                handle->memory.bootloader.enabled = false;
+                dmg->memory.bootloader.enabled = false;
             }
             break;
         default:

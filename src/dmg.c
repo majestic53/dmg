@@ -5,57 +5,57 @@
 
 #include <system.h>
 
-dmg_error_e dmg_initialize(dmg_handle_t *handle, const dmg_data_t *const data, const dmg_output_f output)
+dmg_error_e dmg_initialize(dmg_t *dmg, const dmg_data_t *const data, const dmg_output_f output)
 {
-    if (!handle || (!*handle && !(*handle = calloc(1, sizeof (**handle)))))
+    if (!dmg || (!*dmg && !(*dmg = calloc(1, sizeof (**dmg)))))
     {
         return DMG_FAILURE;
     }
-    return dmg_system_initialize(*handle, data, output);
+    return dmg_system_initialize(*dmg, data, output);
 }
 
-dmg_error_e dmg_input(dmg_handle_t const handle, uint8_t input, uint8_t *output)
+dmg_error_e dmg_input(dmg_t const dmg, uint8_t input, uint8_t *output)
 {
-    if (!handle)
+    if (!dmg)
     {
         return DMG_FAILURE;
     }
-    return dmg_system_input(handle, input, output);
+    return dmg_system_input(dmg, input, output);
 }
 
-dmg_error_e dmg_load(dmg_handle_t const handle, const dmg_data_t *const data)
+dmg_error_e dmg_load(dmg_t const dmg, const dmg_data_t *const data)
 {
-    if (!handle)
+    if (!dmg)
     {
         return DMG_FAILURE;
     }
-    return dmg_system_load(handle, data);
+    return dmg_system_load(dmg, data);
 }
 
-dmg_error_e dmg_run(dmg_handle_t const handle)
+dmg_error_e dmg_run(dmg_t const dmg)
 {
-    if (!handle)
+    if (!dmg)
     {
         return DMG_FAILURE;
     }
-    return dmg_system_run(handle);
+    return dmg_system_run(dmg);
 }
 
-dmg_error_e dmg_save(dmg_handle_t const handle, dmg_data_t *const data)
+dmg_error_e dmg_save(dmg_t const dmg, dmg_data_t *const data)
 {
-    if (!handle)
+    if (!dmg)
     {
         return DMG_FAILURE;
     }
-    return dmg_system_save(handle, data);
+    return dmg_system_save(dmg, data);
 }
 
-void dmg_uninitialize(dmg_handle_t *handle)
+void dmg_uninitialize(dmg_t *dmg)
 {
-    if (handle && *handle)
+    if (dmg && *dmg)
     {
-        dmg_system_uninitialize(*handle);
-        free(*handle);
-        *handle = NULL;
+        dmg_system_uninitialize(*dmg);
+        free(*dmg);
+        *dmg = NULL;
     }
 }

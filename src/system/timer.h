@@ -25,8 +25,8 @@ typedef struct
     } control;
 } dmg_timer_t;
 
-void dmg_timer_clock(dmg_handle_t const handle);
-uint8_t dmg_timer_read(dmg_handle_t const handle, uint16_t address);
-void dmg_timer_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+void dmg_timer_clock(dmg_t const dmg);
+uint8_t dmg_timer_read(dmg_t const dmg, uint16_t address);
+void dmg_timer_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_TIMER_H_ */

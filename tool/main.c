@@ -13,7 +13,7 @@ typedef struct
     argument_t argument;
     file_t cartridge;
     socket_t socket;
-    dmg_handle_t handle;
+    dmg_t dmg;
 } context_t;
 
 static context_t g_context = {};
@@ -49,9 +49,9 @@ static int initialize(int argc, char *argv[])
     {
         return result;
     }
-    if (dmg_initialize(&g_context.handle, &g_context.cartridge.data, output) != DMG_SUCCESS)
+    if (dmg_initialize(&g_context.dmg, &g_context.cartridge.data, output) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.dmg));
         return EXIT_FAILURE;
     }
     return result;
@@ -70,9 +70,9 @@ static int load(void)
     strcat(file.path, ".sav");
     if ((file_load(&file) == EXIT_SUCCESS) && file.data.buffer && file.data.length)
     {
-        if (dmg_load(g_context.handle, &file.data) != DMG_SUCCESS)
+        if (dmg_load(g_context.dmg, &file.data) != DMG_SUCCESS)
         {
-            fprintf(stderr, "%s\n", dmg_error(g_context.handle));
+            fprintf(stderr, "%s\n", dmg_error(g_context.dmg));
             result = EXIT_FAILURE;
         }
     }
@@ -89,9 +89,9 @@ static int run(void)
         fprintf(stderr, "Failed to start thread\n");
         return result;
     }
-    if (dmg_run(g_context.handle) != DMG_SUCCESS)
+    if (dmg_run(g_context.dmg) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.dmg));
         return EXIT_FAILURE;
     }
     if (g_context.argument.link && ((result = thread_join(&g_thread, &thread_result)) != EXIT_SUCCESS))
@@ -113,9 +113,9 @@ static int save(void)
     }
     strcpy(file.path, g_context.cartridge.path);
     strcat(file.path, ".sav");
-    if (dmg_save(g_context.handle, &file.data) != DMG_SUCCESS)
+    if (dmg_save(g_context.dmg, &file.data) != DMG_SUCCESS)
     {
-        fprintf(stderr, "%s\n", dmg_error(g_context.handle));
+        fprintf(stderr, "%s\n", dmg_error(g_context.dmg));
         result = EXIT_FAILURE;
     }
     else if (file.data.buffer && file.data.length)
@@ -128,7 +128,7 @@ static int save(void)
 
 static void uninitialize(void)
 {
-    dmg_uninitialize(&g_context.handle);
+    dmg_uninitialize(&g_context.dmg);
     if (g_context.argument.link)
     {
         socket_close(&g_context.socket);

@@ -86,11 +86,11 @@ typedef struct
     } rtc;
 } dmg_mbc3_t;
 
-void dmg_mbc3_clock(dmg_handle_t const handle);
-void dmg_mbc3_initialize(dmg_handle_t const handle, bool enabled);
-void dmg_mbc3_load(dmg_handle_t const handle, const void *const data, uint32_t length);
-uint8_t dmg_mbc3_read(dmg_handle_t const handle, uint16_t address);
-void dmg_mbc3_save(dmg_handle_t const handle, void *const data, uint32_t length);
-void dmg_mbc3_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+void dmg_mbc3_clock(dmg_t const dmg);
+void dmg_mbc3_initialize(dmg_t const dmg, bool enabled);
+void dmg_mbc3_load(dmg_t const dmg, const void *const data, uint32_t length);
+uint8_t dmg_mbc3_read(dmg_t const dmg, uint16_t address);
+void dmg_mbc3_save(dmg_t const dmg, void *const data, uint32_t length);
+void dmg_mbc3_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_MBC3_H_ */

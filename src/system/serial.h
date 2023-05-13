@@ -26,10 +26,10 @@ typedef struct
     } control;
 } dmg_serial_t;
 
-void dmg_serial_clock(dmg_handle_t const handle);
-dmg_error_e dmg_serial_initialize(dmg_handle_t const handle, const dmg_output_f output);
-uint8_t dmg_serial_input(dmg_handle_t const handle, uint8_t value);
-uint8_t dmg_serial_read(dmg_handle_t const handle, uint16_t address);
-void dmg_serial_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+void dmg_serial_clock(dmg_t const dmg);
+dmg_error_e dmg_serial_initialize(dmg_t const dmg, const dmg_output_f output);
+uint8_t dmg_serial_input(dmg_t const dmg, uint8_t value);
+uint8_t dmg_serial_read(dmg_t const dmg, uint16_t address);
+void dmg_serial_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_SERIAL_H_ */

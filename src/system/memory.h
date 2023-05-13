@@ -22,8 +22,8 @@ typedef struct
     } ram;
 } dmg_memory_t;
 
-dmg_error_e dmg_memory_initialize(dmg_handle_t const handle, const dmg_data_t *const data);
-uint8_t dmg_memory_read(dmg_handle_t const handle, uint16_t address);
-void dmg_memory_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+dmg_error_e dmg_memory_initialize(dmg_t const dmg, const dmg_data_t *const data);
+uint8_t dmg_memory_read(dmg_t const dmg, uint16_t address);
+void dmg_memory_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_MEMORY_H_ */

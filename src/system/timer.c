@@ -13,53 +13,53 @@ static const uint16_t OFFSET[] =
     8192,
 };
 
-static void dmg_timer_increment_audio(dmg_handle_t const handle)
+static void dmg_timer_increment_audio(dmg_t const dmg)
 {
-    bool overflow = handle->timer.divider & OFFSET[4];
-    if (handle->timer.overflow[1] && !overflow)
+    bool overflow = dmg->timer.divider & OFFSET[4];
+    if (dmg->timer.overflow[1] && !overflow)
     {
-        dmg_audio_update(handle);
+        dmg_audio_update(dmg);
     }
-    handle->timer.overflow[1] = overflow;
+    dmg->timer.overflow[1] = overflow;
 }
 
-static void dmg_timer_increment_counter(dmg_handle_t const handle)
+static void dmg_timer_increment_counter(dmg_t const dmg)
 {
-    bool overflow = handle->timer.divider & OFFSET[handle->timer.control.mode];
-    if (handle->timer.overflow[0] && !overflow && !++handle->timer.counter)
+    bool overflow = dmg->timer.divider & OFFSET[dmg->timer.control.mode];
+    if (dmg->timer.overflow[0] && !overflow && !++dmg->timer.counter)
     {
-        handle->timer.counter = handle->timer.modulo;
-        dmg_processor_interrupt(handle, DMG_INTERRUPT_TIMER);
+        dmg->timer.counter = dmg->timer.modulo;
+        dmg_processor_interrupt(dmg, DMG_INTERRUPT_TIMER);
     }
-    handle->timer.overflow[0] = overflow;
+    dmg->timer.overflow[0] = overflow;
 }
 
-void dmg_timer_clock(dmg_handle_t const handle)
+void dmg_timer_clock(dmg_t const dmg)
 {
-    ++handle->timer.divider;
-    dmg_timer_increment_audio(handle);
-    if (handle->timer.control.enabled)
+    ++dmg->timer.divider;
+    dmg_timer_increment_audio(dmg);
+    if (dmg->timer.control.enabled)
     {
-        dmg_timer_increment_counter(handle);
+        dmg_timer_increment_counter(dmg);
     }
 }
 
-uint8_t dmg_timer_read(dmg_handle_t const handle, uint16_t address)
+uint8_t dmg_timer_read(dmg_t const dmg, uint16_t address)
 {
     uint8_t result = 0xFF;
     switch (address)
     {
         case 0xFF04: /* DIV */
-            result = handle->timer.divider >> 8;
+            result = dmg->timer.divider >> 8;
             break;
         case 0xFF05: /* TIMA */
-            result = handle->timer.counter;
+            result = dmg->timer.counter;
             break;
         case 0xFF06: /* TMA */
-            result = handle->timer.modulo;
+            result = dmg->timer.modulo;
             break;
         case 0xFF07: /* TAC */
-            result = handle->timer.control.raw;
+            result = dmg->timer.control.raw;
             break;
         default:
             break;
@@ -67,26 +67,26 @@ uint8_t dmg_timer_read(dmg_handle_t const handle, uint16_t address)
     return result;
 }
 
-void dmg_timer_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
+void dmg_timer_write(dmg_t const dmg, uint16_t address, uint8_t value)
 {
     switch (address)
     {
         case 0xFF04: /* DIV */
-            handle->timer.divider = 0;
-            dmg_timer_increment_audio(handle);
-            if (handle->timer.control.enabled)
+            dmg->timer.divider = 0;
+            dmg_timer_increment_audio(dmg);
+            if (dmg->timer.control.enabled)
             {
-                dmg_timer_increment_counter(handle);
+                dmg_timer_increment_counter(dmg);
             }
             break;
         case 0xFF05: /* TIMA */
-            handle->timer.counter = value;
+            dmg->timer.counter = value;
             break;
         case 0xFF06: /* TMA */
-            handle->timer.modulo = value;
+            dmg->timer.modulo = value;
             break;
         case 0xFF07: /* TAC */
-            handle->timer.control.raw = value & 7;
+            dmg->timer.control.raw = value & 7;
             break;
         default:
             break;

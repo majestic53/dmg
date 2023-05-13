@@ -30,8 +30,8 @@ typedef struct
     } rom;
 } dmg_mbc5_t;
 
-void dmg_mbc5_initialize(dmg_handle_t const handle);
-uint8_t dmg_mbc5_read(dmg_handle_t const handle, uint16_t address);
-void dmg_mbc5_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+void dmg_mbc5_initialize(dmg_t const dmg);
+uint8_t dmg_mbc5_read(dmg_t const dmg, uint16_t address);
+void dmg_mbc5_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_MBC1_H_ */

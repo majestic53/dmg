@@ -66,83 +66,83 @@ static dmg_mapper_e dmg_mapper_type(uint8_t id, const dmg_attribute_t **attribut
     return result;
 }
 
-const dmg_attribute_t *dmg_mapper_attribute(dmg_handle_t const handle)
+const dmg_attribute_t *dmg_mapper_attribute(dmg_t const dmg)
 {
-    return handle->memory.mapper.attribute;
+    return dmg->memory.mapper.attribute;
 }
 
-void dmg_mapper_clock(dmg_handle_t const handle)
+void dmg_mapper_clock(dmg_t const dmg)
 {
-    if (handle->memory.mapper.clock)
+    if (dmg->memory.mapper.clock)
     {
-        handle->memory.mapper.clock(handle);
+        dmg->memory.mapper.clock(dmg);
     }
 }
 
-dmg_error_e dmg_mapper_initialize(dmg_handle_t const handle, uint8_t id)
+dmg_error_e dmg_mapper_initialize(dmg_t const dmg, uint8_t id)
 {
     dmg_error_e result = DMG_SUCCESS;
-    switch (dmg_mapper_type(id, &handle->memory.mapper.attribute))
+    switch (dmg_mapper_type(id, &dmg->memory.mapper.attribute))
     {
         case DMG_MAPPER_MBC0:
-            handle->memory.mapper.read = dmg_mbc0_read;
-            handle->memory.mapper.write = dmg_mbc0_write;
+            dmg->memory.mapper.read = dmg_mbc0_read;
+            dmg->memory.mapper.write = dmg_mbc0_write;
             break;
         case DMG_MAPPER_MBC1:
-            dmg_mbc1_initialize(handle);
-            handle->memory.mapper.read = dmg_mbc1_read;
-            handle->memory.mapper.write = dmg_mbc1_write;
+            dmg_mbc1_initialize(dmg);
+            dmg->memory.mapper.read = dmg_mbc1_read;
+            dmg->memory.mapper.write = dmg_mbc1_write;
             break;
         case DMG_MAPPER_MBC2:
-            dmg_mbc2_initialize(handle);
-            handle->memory.mapper.read = dmg_mbc2_read;
-            handle->memory.mapper.write = dmg_mbc2_write;
+            dmg_mbc2_initialize(dmg);
+            dmg->memory.mapper.read = dmg_mbc2_read;
+            dmg->memory.mapper.write = dmg_mbc2_write;
             break;
         case DMG_MAPPER_MBC3:
-            dmg_mbc3_initialize(handle, handle->memory.mapper.attribute->rtc);
-            if (handle->memory.mapper.attribute->rtc)
+            dmg_mbc3_initialize(dmg, dmg->memory.mapper.attribute->rtc);
+            if (dmg->memory.mapper.attribute->rtc)
             {
-                handle->memory.mapper.clock = dmg_mbc3_clock;
-                handle->memory.mapper.load = dmg_mbc3_load;
-                handle->memory.mapper.save = dmg_mbc3_save;
+                dmg->memory.mapper.clock = dmg_mbc3_clock;
+                dmg->memory.mapper.load = dmg_mbc3_load;
+                dmg->memory.mapper.save = dmg_mbc3_save;
             }
-            handle->memory.mapper.read = dmg_mbc3_read;
-            handle->memory.mapper.write = dmg_mbc3_write;
+            dmg->memory.mapper.read = dmg_mbc3_read;
+            dmg->memory.mapper.write = dmg_mbc3_write;
             break;
         case DMG_MAPPER_MBC5:
-            dmg_mbc5_initialize(handle);
-            handle->memory.mapper.read = dmg_mbc5_read;
-            handle->memory.mapper.write = dmg_mbc5_write;
+            dmg_mbc5_initialize(dmg);
+            dmg->memory.mapper.read = dmg_mbc5_read;
+            dmg->memory.mapper.write = dmg_mbc5_write;
             break;
         default:
-            result = DMG_ERROR(handle, "Unsupported mapper type -- %u", id);
+            result = DMG_ERROR(dmg, "Unsupported mapper type -- %u", id);
             break;
     }
     return result;
 }
 
-void dmg_mapper_load(dmg_handle_t const handle, const void *const data, uint32_t length)
+void dmg_mapper_load(dmg_t const dmg, const void *const data, uint32_t length)
 {
-    if (handle->memory.mapper.load)
+    if (dmg->memory.mapper.load)
     {
-        handle->memory.mapper.load(handle, data, length);
+        dmg->memory.mapper.load(dmg, data, length);
     }
 }
 
-uint8_t dmg_mapper_read(dmg_handle_t const handle, uint16_t address)
+uint8_t dmg_mapper_read(dmg_t const dmg, uint16_t address)
 {
-    return handle->memory.mapper.read(handle, address);
+    return dmg->memory.mapper.read(dmg, address);
 }
 
-void dmg_mapper_save(dmg_handle_t const handle, void *const data, uint32_t length)
+void dmg_mapper_save(dmg_t const dmg, void *const data, uint32_t length)
 {
-    if (handle->memory.mapper.save)
+    if (dmg->memory.mapper.save)
     {
-        handle->memory.mapper.save(handle, data, length);
+        dmg->memory.mapper.save(dmg, data, length);
     }
 }
 
-void dmg_mapper_write(dmg_handle_t const handle, uint16_t address, uint8_t value)
+void dmg_mapper_write(dmg_t const dmg, uint16_t address, uint8_t value)
 {
-    handle->memory.mapper.write(handle, address, value);
+    dmg->memory.mapper.write(dmg, address, value);
 }

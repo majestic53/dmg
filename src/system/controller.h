@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: MIT
  */
 
-#ifndef DMG_INPUT_H_
-#define DMG_INPUT_H_
+#ifndef DMG_CONTROLLER_H_
+#define DMG_CONTROLLER_H_
 
 #include <common.h>
 
@@ -34,10 +34,10 @@ typedef struct
         };
         uint8_t raw;
     } control;
-} dmg_input_t;
+} dmg_controller_t;
 
-uint8_t dmg_input_read(dmg_handle_t const handle, uint16_t address);
-void dmg_input_update(dmg_handle_t const handle, dmg_button_e button, bool state);
-void dmg_input_write(dmg_handle_t const handle, uint16_t address, uint8_t value);
+uint8_t dmg_controller_read(dmg_t const dmg, uint16_t address);
+void dmg_controller_update(dmg_t const dmg, dmg_button_e button, bool state);
+void dmg_controller_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
-#endif /* DMG_INPUT_H_ */
+#endif /* DMG_CONTROLLER_H_ */
