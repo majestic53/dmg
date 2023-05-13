@@ -25,7 +25,7 @@ typedef struct
 typedef struct
 {
     dmg_ram_header_t header;
-    dmg_rtc_t rtc[2];
+    dmg_rtc_t rtc;
 } dmg_ram_t;
 
 typedef struct
@@ -112,7 +112,7 @@ static void dmg_cartridge_load_rtc(dmg_handle_t const handle, const dmg_data_t *
     if (header->attribute.rtc)
     {
         dmg_ram_t *const ram = (dmg_ram_t *const)data->buffer;
-        dmg_mapper_load(handle, ram->rtc, sizeof (ram->rtc));
+        dmg_mapper_load(handle, &ram->rtc, sizeof (ram->rtc));
     }
 }
 
@@ -133,7 +133,7 @@ static void dmg_cartridge_save_rtc(dmg_handle_t const handle, dmg_data_t *const 
     if (ram->header.attribute.rtc)
     {
         dmg_ram_t *const ram = (dmg_ram_t *const)data->buffer;
-        dmg_mapper_save(handle, ram->rtc, sizeof (ram->rtc));
+        dmg_mapper_save(handle, &ram->rtc, sizeof (ram->rtc));
     }
 }
 
