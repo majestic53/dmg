@@ -19,10 +19,9 @@ typedef union
     };
     struct
     {
-        uint16_t low : 8;
-        uint16_t high : 8;
+        uint8_t low;
+        uint8_t high;
     };
-    uint8_t raw;
 } dmg_rtc_day_t;
 
 typedef union
@@ -62,15 +61,16 @@ typedef struct
 
 typedef struct
 {
+    bool enabled;
     struct
     {
         uint8_t ram;
         uint8_t rom;
+        uint8_t rtc;
     } bank;
     struct
     {
         uint16_t bank;
-        bool enabled;
     } ram;
     struct
     {
@@ -79,15 +79,14 @@ typedef struct
     struct
     {
         int16_t delay;
-        uint8_t bank;
         bool enabled;
         bool latched;
         dmg_rtc_t counter[2];
     } rtc;
 } dmg_mbc3_t;
 
-void dmg_mbc3_clock(dmg_t const dmg);
 void dmg_mbc3_initialize(dmg_t const dmg, bool enabled);
+void dmg_mbc3_interrupt(dmg_t const dmg);
 void dmg_mbc3_load(dmg_t const dmg, const void *const data, uint32_t length);
 uint8_t dmg_mbc3_read(dmg_t const dmg, uint16_t address);
 void dmg_mbc3_save(dmg_t const dmg, void *const data, uint32_t length);

@@ -24,7 +24,7 @@ typedef union
 typedef struct
 {
     const dmg_attribute_t *attribute;
-    void (*clock)(dmg_t const dmg);
+    void (*interrupt)(dmg_t const dmg);
     void (*load)(dmg_t const dmg, const void *const data, uint32_t length);
     uint8_t (*read)(dmg_t const dmg, uint16_t address);
     void (*save)(dmg_t const dmg, void *const data, uint32_t length);
@@ -39,8 +39,8 @@ typedef struct
 } dmg_mapper_t;
 
 const dmg_attribute_t *dmg_mapper_attribute(dmg_t const dmg);
-void dmg_mapper_clock(dmg_t const dmg);
 dmg_error_e dmg_mapper_initialize(dmg_t const dmg, uint8_t id);
+void dmg_mapper_interrupt(dmg_t const dmg);
 void dmg_mapper_load(dmg_t const dmg, const void *const data, uint32_t length);
 uint8_t dmg_mapper_read(dmg_t const dmg, uint16_t address);
 void dmg_mapper_save(dmg_t const dmg, void *const data, uint32_t length);

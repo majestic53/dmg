@@ -11,6 +11,8 @@ static const uint16_t OFFSET[] =
     512, 8, 32, 128,
     /* AUDIO (256Hz) */
     8192,
+    /* MAPPER (1KHz) */
+    2048,
 };
 
 static void dmg_timer_increment_audio(dmg_t const dmg)
@@ -18,9 +20,19 @@ static void dmg_timer_increment_audio(dmg_t const dmg)
     bool overflow = dmg->timer.divider & OFFSET[4];
     if (dmg->timer.overflow[1] && !overflow)
     {
-        dmg_audio_update(dmg);
+        dmg_audio_interrupt(dmg);
     }
     dmg->timer.overflow[1] = overflow;
+}
+
+static void dmg_timer_increment_mapper(dmg_t const dmg)
+{
+    bool overflow = dmg->timer.divider & OFFSET[5];
+    if (dmg->timer.overflow[2] && !overflow)
+    {
+        dmg_mapper_interrupt(dmg);
+    }
+    dmg->timer.overflow[2] = overflow;
 }
 
 static void dmg_timer_increment_counter(dmg_t const dmg)
@@ -38,6 +50,7 @@ void dmg_timer_clock(dmg_t const dmg)
 {
     ++dmg->timer.divider;
     dmg_timer_increment_audio(dmg);
+    dmg_timer_increment_mapper(dmg);
     if (dmg->timer.control.enabled)
     {
         dmg_timer_increment_counter(dmg);

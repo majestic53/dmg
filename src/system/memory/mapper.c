@@ -71,11 +71,11 @@ const dmg_attribute_t *dmg_mapper_attribute(dmg_t const dmg)
     return dmg->memory.mapper.attribute;
 }
 
-void dmg_mapper_clock(dmg_t const dmg)
+void dmg_mapper_interrupt(dmg_t const dmg)
 {
-    if (dmg->memory.mapper.clock)
+    if (dmg->memory.mapper.interrupt)
     {
-        dmg->memory.mapper.clock(dmg);
+        dmg->memory.mapper.interrupt(dmg);
     }
 }
 
@@ -102,7 +102,7 @@ dmg_error_e dmg_mapper_initialize(dmg_t const dmg, uint8_t id)
             dmg_mbc3_initialize(dmg, dmg->memory.mapper.attribute->rtc);
             if (dmg->memory.mapper.attribute->rtc)
             {
-                dmg->memory.mapper.clock = dmg_mbc3_clock;
+                dmg->memory.mapper.interrupt = dmg_mbc3_interrupt;
                 dmg->memory.mapper.load = dmg_mbc3_load;
                 dmg->memory.mapper.save = dmg_mbc3_save;
             }

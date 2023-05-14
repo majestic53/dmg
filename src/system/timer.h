@@ -13,7 +13,7 @@ typedef struct
     uint8_t counter;
     uint16_t divider;
     uint8_t modulo;
-    bool overflow[2];
+    bool overflow[3];
     union
     {
         struct

@@ -17,7 +17,7 @@
 
 #define DMG_MAJOR 0
 #define DMG_MINOR 1
-#define DMG_PATCH 0x4163b16
+#define DMG_PATCH 0xd963d00
 
 #define DMG_ERROR(_DMG_, _FORMAT_, ...) \
     dmg_error_set(_DMG_, __FILE__, __LINE__, _FORMAT_, ##__VA_ARGS__)

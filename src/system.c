@@ -287,7 +287,6 @@ dmg_error_e dmg_system_run(dmg_t const dmg)
             dmg_timer_clock(dmg);
             dmg_processor_clock(dmg);
         } while (!dmg_video_clock(dmg));
-        dmg_mapper_clock(dmg);
         if ((result = dmg_system_sync(dmg)) != DMG_SUCCESS)
         {
             return result;

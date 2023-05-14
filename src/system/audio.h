@@ -256,9 +256,9 @@ typedef struct
 
 void dmg_audio_clock(dmg_t const dmg);
 void dmg_audio_initialize(dmg_t const dmg);
+void dmg_audio_interrupt(dmg_t const dmg);
 void dmg_audio_output(void *context, uint8_t *data, int length);
 uint8_t dmg_audio_read(dmg_t const dmg, uint16_t address);
-void dmg_audio_update(dmg_t const dmg);
 void dmg_audio_write(dmg_t const dmg, uint16_t address, uint8_t value);
 
 #endif /* DMG_AUDIO_H_ */

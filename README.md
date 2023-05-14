@@ -15,7 +15,6 @@ __NOTE__: This project is still a work-in-progress. Some features may be incompl
 
 ## Work-in-progress
 
-* MBC3 RTC support
 * Serial link support
 * Audio support
 
